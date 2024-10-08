@@ -1,0 +1,1 @@
+Copyright ®2024 Palisis AG, all rights reserved
