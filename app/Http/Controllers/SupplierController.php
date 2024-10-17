@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\TourCMSService;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,7 +18,6 @@ class SupplierController extends Controller
 
     public function index(Request $request): Response
     {
-        Log::info(print_r($this->tourCMSService, 1));
-        return new Response(status: Response::HTTP_OK);
+        return new JsonResponse([], Response::HTTP_OK);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -13,11 +14,6 @@ class OctoResponse {
     const ERROR_CODE_FORBIDDEN = 'FORBIDDEN';
     const ERROR_MESSAGE_UNAUTHORIZED = 'Authorization Header not present';
     const ERROR_MESSAGE_FORBIDDEN = 'Unable to authenticate';
-    const HEADER_CONTENT_TYPE = 'Content-Type';
-    const APPLICATION_JSON = 'application/json';
-    const RESPONSE_HEADERS = [
-        self::HEADER_CONTENT_TYPE => self::APPLICATION_JSON
-    ];
 
     public static function UNAUTHORIZED(string $errorMessage = self::ERROR_MESSAGE_UNAUTHORIZED): Response
     {
@@ -26,7 +22,7 @@ class OctoResponse {
             self::FIELD_ERROR_MESSAGE => $errorMessage
         ];
 
-        return new Response(json_encode($data), Response::HTTP_UNAUTHORIZED, self::RESPONSE_HEADERS);
+        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
 
     public static function FORBIDDEN(string $errorMessage = self::ERROR_MESSAGE_FORBIDDEN): Response
@@ -36,6 +32,6 @@ class OctoResponse {
             self::FIELD_ERROR_MESSAGE => $errorMessage
         ];
 
-        return new Response(json_encode($data), Response::HTTP_FORBIDDEN, self::RESPONSE_HEADERS);
+        return new JsonResponse($data, Response::HTTP_FORBIDDEN);
     }
 }
