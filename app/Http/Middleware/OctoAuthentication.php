@@ -12,6 +12,10 @@ class OctoAuthentication
     // MAID|CHANNEL_ID|API_KEY
     const AUTH_PATTERN_REGEX = '/^\d+\|\d+\|.+/';
     const AUTH_SEPARATOR = '|';
+    const FIELD_API_KEY = 'APIKey';
+    const FIELD_CHANNEL_ID = 'channel';
+    const FIELD_MAID = 'maid';
+
 
     /**
      * Handle an incoming request.
@@ -31,9 +35,9 @@ class OctoAuthentication
         }
 
         $request->merge([
-            'maid' => $this->getMaidFromAuthHeader($auth),
-            'channel' => $this->getChannelFromAuthHeader($auth),
-            'APIKey' => $this->getAPIKeyFromAuthHeader($auth)
+            self::FIELD_MAID => $this->getMaidFromAuthHeader($auth),
+            self::FIELD_CHANNEL_ID => $this->getChannelFromAuthHeader($auth),
+            self::FIELD_API_KEY => $this->getAPIKeyFromAuthHeader($auth)
         ]);
          
         return $next($request);
