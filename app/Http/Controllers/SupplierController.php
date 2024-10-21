@@ -21,7 +21,7 @@ class SupplierController extends Controller
         $this->logger = $this->loadLogger($request);
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         return new JsonResponse([], Response::HTTP_OK);
     }
@@ -29,6 +29,12 @@ class SupplierController extends Controller
     protected function loadLogger(Request $request)
     {
         
-        return new JSONLogService($request->get(OctoAuthentication::FIELD_CHANNEL_ID), $request->get(OctoAuthentication::FIELD_MAID), self::ENDPOINT_NAME);
+        return new JSONLogService(
+            $request->get(OctoAuthentication::FIELD_CHANNEL_ID),
+            $request->get(OctoAuthentication::FIELD_MAID),
+            self::ENDPOINT_NAME,
+            $request->get(OctoAuthentication::FIELD_X_CORRELATION_ID),
+            $request->get(OctoAuthentication::FIELD_X_REQUEST_ID)
+        );
     }
 }
