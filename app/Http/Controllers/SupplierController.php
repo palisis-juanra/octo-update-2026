@@ -11,6 +11,7 @@ use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class SupplierController extends Controller
 {
@@ -35,7 +36,7 @@ class SupplierController extends Controller
             return OctoResponse::FORBIDDEN();
         } catch (APICallNotOkException) {
             return OctoResponse::INTERNAL_SERVER_ERROR();
-        } catch (Exception) {
+        } catch (Throwable) {
             return OctoResponse::INTERNAL_SERVER_ERROR();
         }
         

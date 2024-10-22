@@ -30,17 +30,7 @@ class SupplierService
      */
     public function getSupplierData(string $channelId): array
     {
-        $showChannelResponse = $this->tourCMSService->tourCMS->show_channel($channelId);
-        
-        if ((string) $showChannelResponse->error == TourCMSService::ERROR_FAIL_SIG) {
-            throw new FailSignatureException();
-        }
-        
-        if ((string) $showChannelResponse->error !== TourCMSService::ERROR_OK) {
-            throw new APICallNotOKException();
-        }
-
-        
+        $showChannelResponse = $this->tourCMSService->showChannel($channelId);
         $channelData = $showChannelResponse->channel;
         $supplier = $this->createSupplierFromChannelData($channelData);
 
