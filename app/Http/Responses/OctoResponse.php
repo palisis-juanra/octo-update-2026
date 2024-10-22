@@ -45,4 +45,9 @@ class OctoResponse {
 
         return new JsonResponse($data, Response::HTTP_INTERNAL_SERVER_ERROR); 
     }
+
+    public static function OK(array | string $data): JsonResponse
+    {
+        return new JsonResponse($data, Response::HTTP_OK);
+    }
 }
