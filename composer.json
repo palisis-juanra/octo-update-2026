@@ -8,6 +8,7 @@
         "php": "^8.2",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
+        "spatie/laravel-fractal": "^6.2",
         "tourcms/tourcms-php": "^4.9"
     },
     "require-dev": {
