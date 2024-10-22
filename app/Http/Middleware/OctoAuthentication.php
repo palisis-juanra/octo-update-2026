@@ -78,7 +78,7 @@ class OctoAuthentication
         return null;
     }
 
-    public static function getRequestIdFromHeaders(Request $request): string | null
+    public static function getRequestIdFromHeaders(Request $request): string
     {
         $headers = $request->header();
 
@@ -90,7 +90,7 @@ class OctoAuthentication
             return (string) $headers['x-request-id'];
         }
 
-        return null;
+        return '';
     }
 
 }

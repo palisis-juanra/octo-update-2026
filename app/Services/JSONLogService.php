@@ -11,9 +11,9 @@ class JSONLogService
     public string $channelId;
     public string $endpoint;
     public string $marketplaceId;
-    public string | null $xRequestId;
+    public string $xRequestId;
 
-    public function __construct(string $channelId, string $marketplaceId, string $endpoint, string $correlationId = null, string $xRequestId = null)
+    public function __construct(string $channelId, string $marketplaceId, string $endpoint, string $correlationId = null, string $xRequestId = '')
     {
         if (empty($correlationId)) {
             $correlationId = $correlationId = Str::uuid();
@@ -82,15 +82,12 @@ class JSONLogService
     private function getBaseLogArray(): array
     {
         $baseLogArray = [
+            'x_request_id' => $this->xRequestId,
             'correlation_id' => $this->correlationId,
             'endpoint' => $this->endpoint,
             'channel_id' => $this->channelId,
             'marketplace_id' => $this->marketplaceId
         ];
-
-        if (isset($this->xRequestId)) {
-            $baseLogArray['x_request_id'] = $this->xRequestId;
-        }
 
         return $baseLogArray;
     }
