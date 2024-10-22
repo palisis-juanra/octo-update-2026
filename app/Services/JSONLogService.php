@@ -87,6 +87,11 @@ class JSONLogService
             'channel_id' => $this->channelId,
             'marketplace_id' => $this->marketplaceId
         ];
+
+        if (isset($this->xRequestId)) {
+            $baseLogArray['x_request_id'] = $this->xRequestId;
+        }
+
         return $baseLogArray;
     }
 
