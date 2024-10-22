@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Http\Responses\OctoResponse;
 use Closure;
+use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -94,3 +95,5 @@ class OctoAuthentication
     }
 
 }
+
+class FailSignatureException extends Exception {};
