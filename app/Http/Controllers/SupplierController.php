@@ -30,7 +30,7 @@ class SupplierController extends Controller
         try {
             $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
             $supplierData = $this->supplierService->getSupplierData($channelId);
-
+            
             return new JsonResponse($supplierData, Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();

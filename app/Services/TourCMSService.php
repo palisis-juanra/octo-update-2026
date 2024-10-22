@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
 use App\Http\Middleware\OctoAuthentication;
+use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 use Symfony\Component\HttpFoundation\Request;
 use TourCMS\Utils\TourCMS;

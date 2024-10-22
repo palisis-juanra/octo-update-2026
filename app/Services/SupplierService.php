@@ -8,6 +8,7 @@ use App\Models\Supplier;
 use App\Services\TourCMSService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\SupplierTransformer;
+use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 
 class SupplierService
@@ -37,7 +38,7 @@ class SupplierService
         return $this->supplierTransformer->transform($supplier);
     }
 
-    protected function createSupplierFromChannelData(SimpleXMLElement $channelData): Supplier
+    public function createSupplierFromChannelData(SimpleXMLElement $channelData): Supplier
     {
         return new Supplier(
             (string) $channelData->channel_id,
