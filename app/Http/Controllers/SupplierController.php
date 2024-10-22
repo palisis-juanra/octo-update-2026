@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Middleware\FailSignatureException;
+use App\Exceptions\APICallNotOkException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Responses\OctoResponse;
 use App\Services\JSONLogService;
@@ -31,8 +31,10 @@ class SupplierController extends Controller
             $supplierData = $this->supplierService->getSupplierData($channelId);
 
             return new JsonResponse($supplierData, Response::HTTP_OK);
-        } catch (FailSignatureException $e) {
+        } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();
+        } catch (APICallNotOkException) {
+            return OctoResponse::INTERNAL_SERVER_ERROR();
         } catch (Exception) {
             return OctoResponse::INTERNAL_SERVER_ERROR();
         }

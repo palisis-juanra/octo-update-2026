@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\Http\Middleware\FailSignatureException;
+use App\Exceptions\APICallNotOKException;
+use App\Exceptions\FailSignatureException;
 use App\Models\Supplier;
 use App\Services\TourCMSService;
 use App\Transformers\BaseTransformer;
@@ -23,7 +24,8 @@ class SupplierService
     /**
      * Get the supplier data for a certain channel ID
      * @param string $channelId
-     * @throws \App\Http\Middleware\FailSignatureException
+     * @throws FailSignatureException
+     * @throws APICallNotOKException
      * @return array
      */
     public function getSupplierData(string $channelId): array
@@ -35,7 +37,7 @@ class SupplierService
         }
         
         if ((string) $showChannelResponse->error !== TourCMSService::ERROR_OK) {
-            
+            throw new APICallNotOKException();
         }
 
         
@@ -50,12 +52,17 @@ class SupplierService
         return new Supplier(
             (string) $channelData->channel_id,
             (string) $channelData->channel_name,
-            env('OCTO_BASE_URL', 'https://octo.tourcms.com/'),
+            $this->getOctoBaseUrl(),
             (string) $channelData->home_url,
             (string) $channelData->commercial_email_private,
             (string) $channelData->phone_customer,
             (string) $channelData-> address_1
         );
+    }
+
+    protected function getOctoBaseUrl(): string
+    {
+        return env('OCTO_BASE_URL', 'https://octo.tourcms.com/');
     }
 
 }

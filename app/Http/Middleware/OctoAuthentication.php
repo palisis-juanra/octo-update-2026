@@ -42,7 +42,7 @@ class OctoAuthentication
             self::FIELD_CHANNEL_ID => $this->getChannelFromAuthHeader($auth),
             self::FIELD_API_KEY => $this->getAPIKeyFromAuthHeader($auth),
             self::FIELD_X_CORRELATION_ID => $this->getCorrelationIdFromHeaders($request),
-            self::FIELD_X_REQUEST_ID => $this->getCorrelationIdFromHeaders($request),
+            self::FIELD_X_REQUEST_ID => $this->getRequestIdFromHeaders($request),
         ]);
          
         return $next($request);
@@ -95,5 +95,3 @@ class OctoAuthentication
     }
 
 }
-
-class FailSignatureException extends Exception {};
