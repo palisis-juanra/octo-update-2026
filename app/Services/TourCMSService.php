@@ -29,6 +29,14 @@ class TourCMSService
         return $response;
     }
 
+    public function searchTours(string $channelId): SimpleXMLElement
+    {
+        $response = $this->tourCMS->search_tours("", $channelId);
+        $response = $this->handleResponse($response);
+
+        return $response;
+    }
+
     protected function getAPIBaseUrl()
     {
         return env('API_BASE_URL', self::DEFAULT_API_BASE_URL);
