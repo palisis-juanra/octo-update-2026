@@ -26,10 +26,11 @@ class ProductController extends Controller
         $this->logger = $this->loadLogger($request);
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $data = $this->productService->getProductList();
+            $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+            $data = $this->productService->getProductList($channelId);
             return new JsonResponse($data, Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();

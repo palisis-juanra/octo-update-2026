@@ -47,25 +47,17 @@ class ProductService
     const TIME_TYPE_STRICT_START = 'strict_start';
     const TIME_TYPE_OPENING_HOURS = 'opening_hours';
 
-    public TourCMS $tourCMS;
+    public TourCMSService $tourCMSService;
     public ProductTransformer $productTransformer;
-    protected $channel;
-    public function __construct(Request $request)
+    public function __construct(TourCMSService $tourCMSService)
     {
-        $maid = $request->get(OctoAuthentication::FIELD_MAID);
-        $APIKey = $request->get(OctoAuthentication::FIELD_API_KEY);
-        $this->channel = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
-        
-        $this->tourCMS = new TourCMS($maid, $APIKey, TourCMSService::RESPONSE_FORMAT_SIMPLEXML);
-        // TODO: Change url back.
-        // $this->tourCMS->set_base_url(env('API_BASE_URL'));
-        $this->tourCMS->set_base_url('http://api.tourcms.local');
+        $this->tourCMSService = $tourCMSService;
         $this->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
-    public function getProductList(): array
+    public function getProductList($channelId): array
     {
-        $apiResponse = $this->tourCMS->search_tours("", $this->channel);
+        $apiResponse = $this->tourCMSService->searchTours($channelId);
         if ($apiResponse->error == "OK") {
             $shouldSkip = false;
             $productList = [];
