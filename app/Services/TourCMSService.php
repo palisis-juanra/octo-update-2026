@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
-use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 use TourCMS\Utils\TourCMS;
 
@@ -12,6 +11,7 @@ class TourCMSService
 {
     const ERROR_FAIL_SIG = 'FAIL_SIG';
     const ERROR_OK = 'OK';
+    const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
     private TourCMS $tourCMS;
 
@@ -31,7 +31,7 @@ class TourCMSService
 
     protected function getAPIBaseUrl()
     {
-        return env('API_BASE_URL', 'https://api.tourcms.com');
+        return env('API_BASE_URL', self::DEFAULT_API_BASE_URL);
     }
 
     /**
