@@ -5,8 +5,6 @@ namespace Tests\Unit;
 use App\Models\Supplier;
 use App\Services\SupplierService;
 use App\Services\TourCMSService;
-use Mockery;
-use Mockery\Mock;
 use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
 

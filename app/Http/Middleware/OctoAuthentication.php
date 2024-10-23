@@ -3,9 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Http\Responses\OctoResponse;
+use App\Providers\TourCMSServiceProvider;
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class OctoAuthentication
@@ -44,7 +46,11 @@ class OctoAuthentication
             self::FIELD_X_CORRELATION_ID => $this->getCorrelationIdFromHeaders($request),
             self::FIELD_X_REQUEST_ID => $this->getRequestIdFromHeaders($request),
         ]);
-         
+
+        /* At this point we have the credentials for TourCMS, then
+        we can register the service provider */
+        app()->register(TourCMSServiceProvider::class);
+
         return $next($request);
     }
 

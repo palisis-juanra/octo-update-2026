@@ -4,10 +4,8 @@ namespace App\Services;
 
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
-use App\Http\Middleware\OctoAuthentication;
 use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
-use Symfony\Component\HttpFoundation\Request;
 use TourCMS\Utils\TourCMS;
 
 class TourCMSService
@@ -17,11 +15,8 @@ class TourCMSService
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
     private TourCMS $tourCMS;
 
-    public function __construct(Request $request)
+    public function __construct(string $maid, string $APIKey)
     {
-        $maid = $request->get(OctoAuthentication::FIELD_MAID);
-        $APIKey = $request->get(OctoAuthentication::FIELD_API_KEY);
-
         $this->tourCMS = new TourCMS($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMS->set_base_url($this->getAPIBaseUrl());
     }

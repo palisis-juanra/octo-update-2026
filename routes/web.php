@@ -9,7 +9,3 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 Route::get('/', function () {
     return view('welcome');
 });
-
-Route::get('/auth', function(): JsonResponse { return OctoResponse::OK('OK'); })->middleware([OctoAuthentication::class]);
-
-Route::get('supplier', [SupplierController::class, 'index'])->middleware([OctoAuthentication::class]);
