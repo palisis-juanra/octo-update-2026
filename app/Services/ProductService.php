@@ -46,6 +46,18 @@ class ProductService
     const TIME_TYPE_STRICT = 'strict';
     const TIME_TYPE_STRICT_START = 'strict_start';
     const TIME_TYPE_OPENING_HOURS = 'opening_hours';
+    const UNIT_TYPE_ADULT = 'ADULT';
+    const UNIT_TYPE_YOUTH = 'YOUTH';
+    const UNIT_TYPE_CHILD = 'CHILD';
+    const UNIT_TYPE_INFANT = 'INFANT';
+    const UNIT_TYPE_SENIOR = 'SENIOR';
+    const UNIT_TYPES = [
+        'a' => self::UNIT_TYPE_ADULT,
+        'y' => self::UNIT_TYPE_YOUTH,
+        'c' => self::UNIT_TYPE_CHILD,
+        'i' => self::UNIT_TYPE_INFANT,
+        's' => self::UNIT_TYPE_SENIOR
+    ];
 
     public TourCMSService $tourCMSService;
     public ProductTransformer $productTransformer;
@@ -57,23 +69,17 @@ class ProductService
 
     public function getProductList($channelId): array
     {
+        $errors = [];
         $apiResponse = $this->tourCMSService->searchTours($channelId);
         if ($apiResponse->error == "OK") {
-            $shouldSkip = false;
             $productList = [];
             foreach ($apiResponse->tour as $tour) {
-                $id = $this->generateId();
+                $id = "{$tour->account_id}_{$tour->tour_id}";
                 $internalName = (string) $tour->tour_name;
                 //TODO: Set $reference to supplier_note when available.
                 $reference = null;
-                //TODO: Finish locale mapping method
+                //TODO: Finish locale mapping method, should get channel language and map it
                 $locale = "";
-                if (isset($tour->languages_spoken) && !empty($tour->languages_spoken)) {
-                    $languages = explode(',', $tour->languages_spoken);
-                    $locale = $this->parseLanguageCodeToLocale($languages[0]);
-                } else if (isset($tour->country)) {
-                    $locale = $this->parseLanguageCodeToLocale($tour->country);
-                }
                 $timeZone = "";
                 if (isset($tour->start_timezone)) {
                     $timeZone = (string) $tour->start_timezone;
@@ -120,22 +126,45 @@ class ProductService
                 $optionDefault = false;
                 $optionInternalName = "Internal name";
                 $optionReference = "Reference";
-                $optionAvailabilityLocalStartTimes = ['00:00'];
+                $optionAvailabilityLocalStartTimes = [self::AVAILABILITY_LOCAL_START_TIMES_DEFAULT];
                 $optionCancellationCutoff = self::CANCELLATION_CUTOFF_DEFAULT;
                 $optionCancellationCutoffAmount = 1;
                 $optionCancellationCutoffUnit = "hour";
                 $optionRequiredContactFields = ['firstname'];
                 $optionRestrictions = new stdClass();
+                // TODO: Currently unsupported, will work when search tours includes min_booking_size
                 $optionRestrictions->minUnits = 0;
+                if (isset($tour->min_booking_size)) {
+                    $optionRestrictions->minUnits = (int) $tour->min_booking_size;
+                }
+                // TODO: Currently unsupported, will work when search tours includes max_booking_size
                 $optionRestrictions->maxUnits = 10;
+                if (isset($tour->max_booking_size)) {
+                    $optionRestrictions->maxUnits = (int) $tour->max_booking_size;
+                }
 
+                // TODO: Option units are hard-coded right now, we should generate an unit with the proper data when we define how to generate the options.
                 $optionUnits = [];
+                // TODO: Delete this later, when we have proper rates iteration.
+                $rate = (object) ['rate_id' => '230', 'label_1' => 'label', 'rate_code' => '2bf34583', 'agecat' => 'c'];
 
-                $unitId = "adult_38f3820-1243-12";
-                $unitInternalName = "Adult(s)";
-                $unitReference = "LR1-01-new";
-                $unitType = "YOUTH";
-                $unitRequiredContactFields = ['firstname'];
+                // TODO: Currently unsupported, will work when search tours includes rates and we can iterate through rates
+                $unitId = "{$tour->account_id}_{$tour->tour_id}_{$rate->rate_id}";
+                $unitInternalName = "";
+                if (isset($rate->label_1)) {
+                    $unitInternalName = (string) $rate->label_1;
+                }
+                $unitReference = "";
+                if (isset($rate->rate_code)) {
+                    $unitReference = (string) $rate->rate_code;
+                }
+                $unitType = "";
+                if (isset($rate->agecat)) {
+                    if (array_key_exists($rate->agecat, self::UNIT_TYPES)) {
+                        $unitType = self::UNIT_TYPES[$rate->agecat];
+                    }
+                }
+                $unitRequiredContactFields = [];
                 $unitRestrictions = new stdClass();
                 $unitRestrictions->minAge = 3;
                 $unitRestrictions->maxAge = 17;
@@ -196,11 +225,6 @@ class ProductService
             return $productList;
         }
         return [];
-    }
-
-    protected function generateId(): string
-    {
-        return \Ramsey\Uuid\Uuid::uuid4();
     }
 
     //TODO
