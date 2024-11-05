@@ -2,9 +2,9 @@ name: Laravel
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", 'release/**']
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", 'release/**' ]
 
 jobs:
   laravel-tests:
@@ -12,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ../
-      
+        working-directory: .
 
     steps:
     - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
