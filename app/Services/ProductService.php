@@ -6,6 +6,7 @@ use App\Http\Middleware\OctoAuthentication;
 use App\Models\Product;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
+use SimpleXMLObject;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
 use Throwable;
@@ -81,6 +82,9 @@ class ProductService
     const HOUR_IN_SECONDS = 3600;
     const MINUTE_IN_SECONDS = 60;
     const DATE_TIME_TOMORROW = 'tomorrow';
+    const REQUIRED_FIELD_SCOPE_ALLPAX = 'allpax';
+    const REQUIRED_FIELD_SCOPE_LEADPAX = 'leadpax';
+    const REQUIRED_FIELD_SCOPE_OTHERPAX = 'otherpax';
 
     public TourCMSService $tourCMSService;
     public ProductTransformer $productTransformer;
@@ -90,34 +94,37 @@ class ProductService
         $this->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
-    public function getProductList($channelId): array
+    public function getProductList(string $channelId): array
     {
         $errors = [];
-        $apiResponse = $this->tourCMSService->searchTours($channelId);
-        if ($apiResponse->error == "OK") {
+
+        $apiResponse = $this->tourCMSService->listTours($channelId);
+        if ($apiResponse->error == self::API_RESPONSE_OK) {
             $productList = [];
             foreach ($apiResponse->tour as $tour) {
-                $id = "{$tour->account_id}_{$tour->tour_id}";
+                $id = "{$tour->distribution_identifier}|{$tour->channel_id}";
                 $internalName = (string) $tour->tour_name;
-                //TODO: Set $reference to supplier_note when available.
                 $reference = null;
+                if (isset($tour->supplier_tour_code)) {
+                    $reference = $tour->supplier_tour_code;
+                }
                 //TODO: Finish locale mapping method, should get channel language and map it
                 $locale = "";
                 $timeZone = "";
                 if (isset($tour->start_timezone)) {
                     $timeZone = (string) $tour->start_timezone;
                 } else {
-                    $timeZone = (string) $tour->account_timezone;
+                    $timeZone = isset($tour->end_timezone) ? (string) $tour->end_timezone : (string) $tour->account_timezone;
                 }
-                // TODO: Currently unsupported - false by default
+                // Currently unsupported - false by default
                 $allowFreesale = false;
-                // TODO: Currently unsupported - true by default
+                // Currently unsupported - true by default
                 $instantConfirmation = true;
-                // TODO: Currently unsupported - true by default
+                // Currently unsupported - true by default
                 $availabilityRequired = true;
-                // TODO: Currently unsupported - true by default
+                // Currently unsupported - true by default
                 $instantDelivery = true;
-                // TODO: Currently unsupported, will work when search tours includes time_type
+                // Currently unsupported, will work when search tours includes time_type
                 $availabilityType = "";
                 if (isset($tour->time_type)) {
                     if ($tour->time_type == self::TIME_TYPE_STRICT || $tour->time_type == self::TIME_TYPE_STRICT_START) {
@@ -128,99 +135,38 @@ class ProductService
                 }
                 $deliveryFormats = [];
                 if (isset($tour->delivery_formats)) {
-                    foreach ($tour->delivery_formats as $deliveryFormat) {
-                        array_push($deliveryFormats, (string) $deliveryFormat);
+                    $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
+                    foreach ($deliveryFormatsFromXML as $deliveryFormat) {
+                        if (in_array($deliveryFormat, self::DELIVERY_FORMATS)) {
+                            array_push($deliveryFormats, (string) $deliveryFormat);
+                        } else {
+                            // Discard tour
+                        }
                     }
                 }
                 $deliveryMethods = [];
                 if (isset($tour->delivery_methods)) {
-                    foreach ($tour->delivery_methods as $deliveryMethod) {
-                        array_push($deliveryMethods, (string) $deliveryMethod);
+                    $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
+                    foreach ($deliveryMethodsFromXML as $deliveryMethod) {
+                        if(in_array($deliveryMethod, self::DELIVERY_METHODS)) {
+                            array_push($deliveryMethods, (string) $deliveryMethod);
+                        } else {
+                            // Discard tour
+                        }
                     }
                 }
                 $redemptionMethod = "";
                 if (isset($tour->redemption_method)) {
-                    $redemptionMethod = (string) $tour->redemption_method;
-                }
-                // TODO: options are hard-coded right now, we should generate an option with the proper data when we define how to generate them.
-                $options = [];
-
-                $optionId = "DEFAULT";
-                $optionDefault = false;
-                $optionInternalName = "Internal name";
-                $optionReference = "Reference";
-                $optionAvailabilityLocalStartTimes = [self::AVAILABILITY_LOCAL_START_TIMES_DEFAULT];
-                $optionCancellationCutoff = self::CANCELLATION_CUTOFF_DEFAULT;
-                $optionCancellationCutoffAmount = 1;
-                $optionCancellationCutoffUnit = "hour";
-                $optionRequiredContactFields = ['firstname'];
-                $optionRestrictions = new stdClass();
-                // TODO: Currently unsupported, will work when search tours includes min_booking_size
-                $optionRestrictions->minUnits = 0;
-                if (isset($tour->min_booking_size)) {
-                    $optionRestrictions->minUnits = (int) $tour->min_booking_size;
-                }
-                // TODO: Currently unsupported, will work when search tours includes max_booking_size
-                $optionRestrictions->maxUnits = 10;
-                if (isset($tour->max_booking_size)) {
-                    $optionRestrictions->maxUnits = (int) $tour->max_booking_size;
-                }
-
-                // TODO: Option units are hard-coded right now, we should generate an unit with the proper data when we define how to generate the options.
-                $optionUnits = [];
-                // TODO: Delete this later, when we have proper rates iteration.
-                $rate = (object) ['rate_id' => '230', 'label_1' => 'label', 'rate_code' => '2bf34583', 'agecat' => 'c'];
-
-                // TODO: Currently unsupported, will work when search tours includes rates and we can iterate through rates
-                $unitId = "{$tour->account_id}_{$tour->tour_id}_{$rate->rate_id}";
-                $unitInternalName = "";
-                if (isset($rate->label_1)) {
-                    $unitInternalName = (string) $rate->label_1;
-                }
-                $unitReference = "";
-                if (isset($rate->rate_code)) {
-                    $unitReference = (string) $rate->rate_code;
-                }
-                $unitType = "";
-                if (isset($rate->agecat)) {
-                    if (array_key_exists($rate->agecat, self::UNIT_TYPES)) {
-                        $unitType = self::UNIT_TYPES[$rate->agecat];
+                    if (in_array($tour->redemption_method, self::REDEMPTION_METHODS)) {
+                        $redemptionMethod = (string) $tour->redemption_method;
+                    } else {
+                        // Discard tour
                     }
                 }
-                $unitRequiredContactFields = [];
-                $unitRestrictions = new stdClass();
-                $unitRestrictions->minAge = 3;
-                $unitRestrictions->maxAge = 17;
-                $unitRestrictions->idRequired = false;
-                $unitRestrictions->minQuantity = 2;
-                $unitRestrictions->maxQuantity = 7;
-                $unitRestrictions->paxCount = 1;
-                $unitRestrictions->accompaniedBy = ['adult_38f3820-1243-12'];
-
-                $unit = (object) [
-                    'id' => $unitId,
-                    'internalName' => $unitInternalName,
-                    'reference' => $unitReference,
-                    'type' => $unitType,
-                    'requiredContactFields' => $unitRequiredContactFields,
-                    'restrictions' => $unitRestrictions
-                ];
-                array_push($optionUnits, $unit);
-
-                $option = (object) [
-                    'id' => $optionId,
-                    'default' => $optionDefault,
-                    'internalName' => $optionInternalName,
-                    'reference' => $optionReference,
-                    'availabilityLocalStartTimes' => $optionAvailabilityLocalStartTimes,
-                    'cancellationCutoff' => $optionCancellationCutoff,
-                    'cancellationCutoffAmount' => $optionCancellationCutoffAmount,
-                    'cancellationCutoffUnit' => $optionCancellationCutoffUnit,
-                    'requiredContactFields' => $optionRequiredContactFields,
-                    'restrictions' => $optionRestrictions,
-                    'units' => $optionUnits
-                ];
-                array_push($options, $option);
+                $options = [];
+                if (isset($tour->tour_departure_structure->type)) {
+                    $options = $this->getProductObjects($tour, $tour->tour_departure_structure->type);
+                }
 
                 $product = new Product(
                     $id,
@@ -238,10 +184,8 @@ class ProductService
                     $redemptionMethod,
                     $options
                 );
-                error_log(print_r($product, true));
-
+                
                 $transformedProduct = $this->productTransformer->transform($product);
-                error_log(print_r($transformedProduct, true));
 
                 array_push($productList, $transformedProduct);
             }
@@ -390,7 +334,8 @@ class ProductService
                     }
                 } else if ($structureType == self::MAPPING_STRUCTURE_TYPE_START_TIME) {
                     if (isset($tour->tour_departure_structure->departure_types->type)) {
-                        foreach ($tour->tour_departure_structure->departure_types->type as $type) {
+                        $departureTypesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->tour_departure_structure->departure_types, 'type');
+                        foreach ($departureTypesFromXML as $type) {
                             if (isset($type->active) && $type->active == 1) {
                                 if (isset($type->fields->field->value)) {
                                     array_push($optionAvailabilityLocalStartTimes, (string) $type->fields->field->value);
@@ -431,12 +376,7 @@ class ProductService
                         }
                     }
                 }
-                $optionRequiredContactFields = [];
-                if (isset($tour->new_booking->required_fields) && !empty($tour->new_booking->required_fields)) {
-                    foreach ($tour->new_booking->required_fields as $requiredField) {
-                        array_push($optionRequiredContactFields, $requiredField->name);
-                    }
-                }
+                $optionRequiredContactFields = $this->getOptionRequiredFields($tour);
                 $optionRestrictions = new stdClass();
                 $optionRestrictions->minUnits = null;
                 if (isset($tour->min_booking_size)) {
@@ -447,65 +387,7 @@ class ProductService
                     $optionRestrictions->maxUnits = (int) $tour->max_booking_size;
                 }
         
-                // Option Units
-                if (isset($tour->new_booking->people_selection->rate)) {
-                    $optionUnits = [];
-                    foreach ($tour->new_booking->people_selection->rate as $rate) {
-                        $unitId = "{$tour->distribution_identifier}|{$tour->channel_id}|{$rate->rate_id}";
-                        $unitInternalName = "";
-                        if (isset($rate->label_1)) {
-                            $unitInternalName = (string) $rate->label_1;
-                        }
-                        $unitReference = null;
-                        if (isset($rate->rate_code)) {
-                            $unitReference = (string) $rate->rate_code;
-                        }
-                        $unitType = "";
-                        if (isset($rate->agecat)) {
-                            $agecat = (string) $rate->agecat;
-                            if (array_key_exists($agecat, self::UNIT_TYPES)) {
-                                $unitType = self::UNIT_TYPES[$agecat];
-                            }
-                        }
-                        $unitRequiredContactFields = [];
-                        if (isset($tour->new_booking->required_fields) && !empty($tour->new_booking->required_fields)) {
-                            foreach ($tour->new_booking->required_fields as $requiredField) {
-                                array_push($unitRequiredContactFields, $requiredField->name);
-                            }
-                        }
-                        $unitRestrictions = new stdClass();
-                        $unitRestrictions->minAge = 3;
-                        if (isset($rate->agerange_min)) {
-                            $unitRestrictions->minAge = (int) $rate->agerange_min;
-                        }
-                        $unitRestrictions->maxAge = 17;
-                        if (isset($rate->agerange_max)) {
-                            $unitRestrictions->maxAge = (int) $rate->agerange_max;
-                        }
-                        $unitRestrictions->idRequired = false;
-                        $unitRestrictions->minQuantity = null;
-                        if (isset($rate->minimum)) {
-                            $unitRestrictions->minQuantity = (int) $rate->minimum;
-                        }
-                        $unitRestrictions->maxQuantity = null;
-                        if (isset($rate->maximum)) {
-                            $unitRestrictions->maxQuantity = (int) $rate->maximum;
-                        }
-                        $unitRestrictions->paxCount = 1;
-                        // Currently unsupported, empty by default.
-                        $unitRestrictions->accompaniedBy = [];
-
-                        $unit = (object) [
-                            'id' => $unitId,
-                            'internalName' => $unitInternalName,
-                            'reference' => $unitReference,
-                            'type' => $unitType,
-                            'requiredContactFields' => $unitRequiredContactFields,
-                            'restrictions' => $unitRestrictions
-                        ];
-                        array_push($optionUnits, $unit);
-                    }
-                }
+                $optionUnits = $this->getOptionUnits($tour);
           
                 $option = (object) [
                     'id' => $optionId,
@@ -526,6 +408,74 @@ class ProductService
         return $options;
     }
 
+    public function getOptionUnits(\SimpleXMLElement $tour): array
+    {
+        $optionUnits = [];
+        $parent = null;
+        if (isset($tour->new_booking->people_selection)) {
+            $parent = $tour->new_booking->people_selection;
+        } else if (isset($tour->people_selection)) {
+            $parent = $tour->people_selection;
+        } else if (is_null($parent)) {
+            return $optionUnits;
+        }
+        $ratesFromXML = $this->tourCMSService->getArrayFromXmlNode($parent, 'rate');
+
+        if (count($ratesFromXML) != 0) {
+            foreach ($ratesFromXML as $rate) {
+                $unitId = "{$tour->distribution_identifier}|{$tour->channel_id}|{$rate->rate_id}";
+                $unitInternalName = "";
+                if (isset($rate->label_1)) {
+                    $unitInternalName = (string) $rate->label_1;
+                }
+                $unitReference = null;
+                if (isset($rate->rate_code)) {
+                    $unitReference = (string) $rate->rate_code;
+                }
+                $unitType = "";
+                if (isset($rate->agecat)) {
+                    $agecat = (string) $rate->agecat;
+                    if (array_key_exists($agecat, self::UNIT_TYPES)) {
+                        $unitType = self::UNIT_TYPES[$agecat];
+                    }
+                }
+                $unitRequiredContactFields = $this->getUnitRequiredFields($tour);
+                $unitRestrictions = new stdClass();
+                $unitRestrictions->minAge = 3;
+                if (isset($rate->agerange_min)) {
+                    $unitRestrictions->minAge = (int) $rate->agerange_min;
+                }
+                $unitRestrictions->maxAge = 17;
+                if (isset($rate->agerange_max)) {
+                    $unitRestrictions->maxAge = (int) $rate->agerange_max;
+                }
+                $unitRestrictions->idRequired = false;
+                $unitRestrictions->minQuantity = null;
+                if (isset($rate->minimum)) {
+                    $unitRestrictions->minQuantity = (int) $rate->minimum;
+                }
+                $unitRestrictions->maxQuantity = null;
+                if (isset($rate->maximum)) {
+                    $unitRestrictions->maxQuantity = (int) $rate->maximum;
+                }
+                $unitRestrictions->paxCount = 1;
+                // Currently unsupported, empty by default.
+                $unitRestrictions->accompaniedBy = [];
+
+                $unit = (object) [
+                    'id' => $unitId,
+                    'internalName' => $unitInternalName,
+                    'reference' => $unitReference,
+                    'type' => $unitType,
+                    'requiredContactFields' => $unitRequiredContactFields,
+                    'restrictions' => $unitRestrictions
+                ];
+                array_push($optionUnits, $unit);
+            }
+        }
+        return $optionUnits;
+    }
+
     public function validateProductId(string $productId, string $authChannel): bool
     {
         if (!preg_match(self::PRODUCT_ID_REGEX, $productId)) {
@@ -542,6 +492,52 @@ class ProductService
         $apiCallParameters->tourId = $splitProductId[2];
         $apiCallParameters->channelId = $splitProductId[3];
         return $apiCallParameters;
+    }
+
+    protected function getOptionRequiredFields(\SimpleXMLElement $tour): array
+    {
+        $requiredFields = [];
+        $parent = null;
+        if (isset($tour->new_booking->required_fields) && !empty($tour->new_booking->required_fields)) {
+            $parent = $tour->new_booking->required_fields;
+        }
+        if (is_null($parent) && isset($tour->required_fields) && !empty($tour->required_fields)) {
+            $parent = $tour->required_fields;
+        }
+        if (is_null($parent)) {
+            return $requiredFields;
+        }
+        $requiredFieldsFromXML = $this->tourCMSService->getArrayFromXmlNode($parent, 'field');
+        foreach ($requiredFieldsFromXML as $requiredField) {
+            $requiredFieldScope = (string) $requiredField->scope;
+            if ($requiredFieldScope == self::REQUIRED_FIELD_SCOPE_LEADPAX || $requiredFieldScope == self::REQUIRED_FIELD_SCOPE_ALLPAX) {
+                $requiredFields[] = (string) $requiredField->name;
+            }
+        }
+        return $requiredFields;
+    }
+
+    protected function getUnitRequiredFields(\SimpleXMLElement $tour): array
+    {
+        $requiredFields = [];
+        $parent = null;
+        if (isset($tour->new_booking->required_fields) && !empty($tour->new_booking->required_fields)) {
+            $parent = $tour->new_booking->required_fields;
+        }
+        if (is_null($parent) && isset($tour->required_fields) && !empty($tour->required_fields)) {
+            $parent = $tour->required_fields;
+        }
+        if (is_null($parent)) {
+            return $requiredFields;
+        }
+        $requiredFieldsFromXML = $this->tourCMSService->getArrayFromXmlNode($parent, 'field');
+        foreach ($requiredFieldsFromXML as $requiredField) {
+            $requiredFieldScope = (string) $requiredField->scope;
+            if ($requiredFieldScope == self::REQUIRED_FIELD_SCOPE_OTHERPAX || $requiredFieldScope == self::REQUIRED_FIELD_SCOPE_ALLPAX) {
+                $requiredFields[] = (string) $requiredField->name;
+            }
+        }
+        return $requiredFields;
     }
 
     //TODO
