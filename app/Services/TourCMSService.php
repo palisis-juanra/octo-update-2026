@@ -29,9 +29,9 @@ class TourCMSService
         return $response;
     }
 
-    public function searchTours(string $channelId): SimpleXMLElement
+    public function listTours(string $channelId): SimpleXMLElement
     {
-        $response = $this->tourCMS->search_tours("", $channelId);
+        $response = $this->tourCMS->list_tours($channelId, "?extended_tour_info=1");
         $response = $this->handleResponse($response);
 
         return $response;
@@ -43,6 +43,17 @@ class TourCMSService
         $response = $this->handleResponse($response);
 
         return $response;
+    }
+
+    public function getArrayFromXmlNode($parent, $childName = ''):array
+    {
+        $children = [];
+        foreach ($parent->children() as $child) {
+            if (empty($childName) || $child->getName() == $childName) {
+                $children[] = $child;
+            }
+        }
+        return $children;
     }
 
     protected function getAPIBaseUrl()
