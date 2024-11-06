@@ -41,6 +41,24 @@ class ProductController extends Controller
         }
     }
 
+    public function show(Request $request, $id): JsonResponse
+    {
+        try {
+            $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+            if (!$this->productService->validateProductId($id, $channelId)) {
+                return OctoResponse::FORBIDDEN();
+            }
+            $data = $this->productService->getProductById($id);
+            return new JsonResponse($data, Response::HTTP_OK);
+        } catch (\App\Exceptions\FailSignatureException) {
+            return OctoResponse::FORBIDDEN();
+        } catch (APICallNotOKException) {
+            return OctoResponse::INTERNAL_SERVER_ERROR();
+        } catch (Throwable) {
+            return OctoResponse::INTERNAL_SERVER_ERROR();
+        }
+    }
+
     protected function loadLogger(Request $request)
     { 
         return new JSONLogService(
