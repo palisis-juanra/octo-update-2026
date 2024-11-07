@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\APICallNotOKException;
+use App\Exceptions\InvalidProductContentException;
+use App\Exceptions\NoMatchingDataException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Responses\OctoResponse;
 use App\Services\JSONLogService;
@@ -46,12 +48,16 @@ class ProductController extends Controller
         try {
             $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
             if (!$this->productService->validateProductId($id, $channelId)) {
-                return OctoResponse::FORBIDDEN();
+                return OctoResponse::INVALID_PRODUCT_ID();
             }
             $data = $this->productService->getProductById($id);
             return new JsonResponse($data, Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();
+        } catch (InvalidProductContentException $e) {
+            return OctoResponse::INVALID_PRODUCT_ID($e->getMessage());
+        } catch (NoMatchingDataException) {
+            return OctoResponse::INVALID_PRODUCT_ID();
         } catch (APICallNotOKException) {
             return OctoResponse::INTERNAL_SERVER_ERROR();
         } catch (Throwable) {
