@@ -103,8 +103,6 @@ class ProductService
 
     public function getProductList(string $channelId): array
     {
-        $errors = [];
-
         $apiResponse = $this->tourCMSService->listTours($channelId);
         if ($apiResponse->error == self::API_RESPONSE_OK) {
             $productList = [];
@@ -120,8 +118,11 @@ class ProductService
                 $timeZone = "";
                 if (isset($tour->start_timezone)) {
                     $timeZone = (string) $tour->start_timezone;
-                } else {
+                } else if (isset($tour->end_timezone) || isset($tour->account_timezone)) {
                     $timeZone = isset($tour->end_timezone) ? (string) $tour->end_timezone : (string) $tour->account_timezone;
+                } else {
+                    $this->logger->info("skipped product {$id}: missing timeZone field.");
+                    continue;
                 }
                 // Currently unsupported - false by default
                 $allowFreesale = false;
@@ -143,36 +144,61 @@ class ProductService
                 $deliveryFormats = [];
                 if (isset($tour->delivery_formats)) {
                     $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
-                    foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-                        if (in_array($deliveryFormat, self::DELIVERY_FORMATS)) {
-                            array_push($deliveryFormats, (string) $deliveryFormat);
-                        } else {
-                            // Discard tour
+                    if (count($deliveryFormatsFromXML) != 0) {
+                        foreach ($deliveryFormatsFromXML as $deliveryFormat) {
+                            if (in_array($deliveryFormat, self::DELIVERY_FORMATS)) {
+                                array_push($deliveryFormats, (string) $deliveryFormat);
+                            } else {
+                                $this->logger->info("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
+                                continue 2;
+                            }
                         }
+                    } else {
+                        $this->logger->info("skipped product {$id}: delivery formats field is empty.");
+                        continue;
                     }
+                } else {
+                    $this->logger->info("skipped product {$id}: delivery formats field is missing.");
+                    continue;
                 }
                 $deliveryMethods = [];
                 if (isset($tour->delivery_methods)) {
                     $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
-                    foreach ($deliveryMethodsFromXML as $deliveryMethod) {
-                        if(in_array($deliveryMethod, self::DELIVERY_METHODS)) {
-                            array_push($deliveryMethods, (string) $deliveryMethod);
-                        } else {
-                            // Discard tour
+                    if (count($deliveryMethodsFromXML) != 0) {
+                        foreach ($deliveryMethodsFromXML as $deliveryMethod) {
+                            if(in_array($deliveryMethod, self::DELIVERY_METHODS)) {
+                                array_push($deliveryMethods, (string) $deliveryMethod);
+                            } else {
+                                $this->logger->info("skipped product {$id}: invalid delivery method: {$deliveryMethod}.");
+                                continue 2;
+                            }
                         }
+                    } else {
+                        $this->logger->info("skipped product {$id}: delivery methods field is empty.");
+                        continue;
                     }
+                } else {
+                    $this->logger->info("skipped product {$id}: delivery methods field is missing.");
+                    continue;
                 }
                 $redemptionMethod = "";
-                if (isset($tour->redemption_method)) {
+                if (isset($tour->redemption_method) && !empty($tour->redemption_method)) {
                     if (in_array($tour->redemption_method, self::REDEMPTION_METHODS)) {
                         $redemptionMethod = (string) $tour->redemption_method;
                     } else {
-                        // Discard tour
+                        $this->logger->info("skipped product {$id}: invalid redemption method: {$redemptionMethod}.");
+                        continue;
                     }
+                } else {
+                    $this->logger->info("skipped product {$id}: redemption method field is missing or empty.");
+                    continue;
                 }
                 $options = [];
-                if (isset($tour->tour_departure_structure->type)) {
+                if (isset($tour->tour_departure_structure->type) && $tour->tour_departure_structure->type != self::MAPPING_STRUCTURE_TYPE_NOTSET) {
                     $options = $this->getProductObjects($tour, $tour->tour_departure_structure->type);
+                } else {
+                    $this->logger->info("skipped product {$id}: the tour mapping is missing or is not set.");
+                    continue;
                 }
 
                 $product = new Product(
@@ -454,6 +480,8 @@ class ProductService
                 ];
                 array_push($options, $option);
             }
+        } else {
+            $this->manageError("the tour departure structure is not set");
         }
         return $options;
     }
