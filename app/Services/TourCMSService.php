@@ -15,6 +15,7 @@ class TourCMSService
     const ERROR_OK = 'OK';
     const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
+    const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = '?extended_tour_info=1';
     private TourCMS $tourCMS;
 
     public function __construct(string $maid, string $APIKey)
@@ -31,11 +32,10 @@ class TourCMSService
         return $response;
     }
 
-    public function listTours(string $channelId): SimpleXMLElement
+    public function listTours(string $channelId, string $params = ""): SimpleXMLElement
     {
-        $response = $this->tourCMS->list_tours($channelId, "?extended_tour_info=1");
+        $response = $this->tourCMS->list_tours($channelId, $params);
         $response = $this->handleResponse($response);
-
         return $response;
     }
 
@@ -43,7 +43,6 @@ class TourCMSService
     {
         $response = $this->tourCMS->show_tour($tourId, $channelId);
         $response = $this->handleResponse($response);
-
         return $response;
     }
 
