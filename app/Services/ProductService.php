@@ -153,7 +153,6 @@ class ProductService
         $availabilityRequired = true;
         // Currently unsupported - true by default
         $instantDelivery = true;
-        // Currently unsupported, will work when search tours includes time_type
         $availabilityType = "";
         if (isset($tour->time_type)) {
             if ($tour->time_type == self::TIME_TYPE_STRICT || $tour->time_type == self::TIME_TYPE_STRICT_START) {
