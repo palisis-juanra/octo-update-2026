@@ -15,7 +15,7 @@ class TourCMSService
     const ERROR_OK = 'OK';
     const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
-    const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = '?extended_tour_info=1';
+    const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = 'extended_tour_info=1';
     private TourCMS $tourCMS;
 
     public function __construct(string $maid, string $APIKey)
