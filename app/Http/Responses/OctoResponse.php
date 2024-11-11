@@ -16,7 +16,7 @@ class OctoResponse {
     const ERROR_MESSAGE_UNAUTHORIZED = 'Authorization Header not present';
     const ERROR_MESSAGE_FORBIDDEN = 'Unable to authenticate';
     const ERROR_MESSAGE_SERVER = 'There have been an error while processing the request, please try again later';
-    const ERROR_MESSAGE_INVALID_PRODUCT_ID = 'The Product ID was invalid or missing';
+    const ERROR_MESSAGE_INVALID_PRODUCT_ID = 'The Product ID was invalid';
 
     public static function UNAUTHORIZED(string $errorMessage = self::ERROR_MESSAGE_UNAUTHORIZED): JsonResponse
     {
