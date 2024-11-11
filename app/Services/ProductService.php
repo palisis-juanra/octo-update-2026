@@ -420,7 +420,7 @@ class ProductService
                 } else {
                     $this->logger->info("unit {$unitId} restrictions minAge field is missing");
                 }
-                $unitRestrictions->maxAge = 17;
+                $unitRestrictions->maxAge = 99;
                 if (isset($rate->agerange_max)) {
                     $unitRestrictions->maxAge = (int) $rate->agerange_max;
                 } else {
