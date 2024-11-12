@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response>
+	<request>GET /c/tour/show.xml?id=184</request>
+	<error>OK</error>
+	<tour>
+		<channel_id>143</channel_id>
+		<account_id>1</account_id>
+		<tour_id>184</tour_id>
+		<tour_name>Mulhacen Trip</tour_name>
+		<tour_name_long>Trip to Mulhacen - Sierra Nevada</tour_name_long>
+		<tour_code>F23CD5</tour_code>
+		<time_type>strict</time_type>
+		<start_time>MULTI</start_time>
+		<end_time>MULTI</end_time>
+		<account_timezone>NOTSET</account_timezone>
+		<start_timezone>Europe/Madrid</start_timezone>
+		<end_timezone>Europe/Madrid</end_timezone>
+		<quantity_rule>Q</quantity_rule>
+		<from_price>12.00</from_price>
+		<from_price_display>&amp;#8364;12</from_price_display>
+		<from_price_unit>0</from_price_unit>
+		<sale_currency>EUR</sale_currency>
+		<has_sale>1</has_sale>
+		<has_d>1</has_d>
+		<has_f>0</has_f>
+		<has_h>0</has_h>
+		<created_date>2024-04-11</created_date>
+		<descriptions_last_updated>2024-08-05</descriptions_last_updated>
+		<volume_pricing>0</volume_pricing>
+		<default_departure_size>30</default_departure_size>
+		<supplier_id>1</supplier_id>
+		<supplier_tour_code/>
+		<cost_currency>EUR</cost_currency>
+		<staff_note/>
+		<operational_note/>
+		<markup_type_id>0</markup_type_id>
+		<tour_permit_child_only>1</tour_permit_child_only>
+		<cutoff>
+			<type>before_start_sec</type>
+			<value>3240</value>
+		</cutoff>
+		<cancellation_policy>
+			<policy>
+				<id>41</id>
+				<name>6 HOURS BEFORE</name>
+				<type>h</type>
+				<value>6</value>
+			</policy>
+		</cancellation_policy>
+		<min_booking_size>1</min_booking_size>
+		<max_booking_size>10</max_booking_size>
+		<next_bookable_date>2024-08-23</next_bookable_date>
+		<last_bookable_date>2024-08-14</last_bookable_date>
+		<has_sale_jan>0</has_sale_jan>
+		<has_sale_feb>0</has_sale_feb>
+		<has_sale_mar>0</has_sale_mar>
+		<has_sale_apr>0</has_sale_apr>
+		<has_sale_may>0</has_sale_may>
+		<has_sale_jun>0</has_sale_jun>
+		<has_sale_jul>0</has_sale_jul>
+		<has_sale_aug>1</has_sale_aug>
+		<has_sale_sep>0</has_sale_sep>
+		<has_sale_oct>0</has_sale_oct>
+		<has_sale_nov>0</has_sale_nov>
+		<has_sale_dec>0</has_sale_dec>
+		<from_price_jan>0.00</from_price_jan>
+		<from_price_jan_display>&amp;#8364;0</from_price_jan_display>
+		<from_price_feb>0.00</from_price_feb>
+		<from_price_feb_display>&amp;#8364;0</from_price_feb_display>
+		<from_price_mar>0.00</from_price_mar>
+		<from_price_mar_display>&amp;#8364;0</from_price_mar_display>
+		<from_price_apr>0.00</from_price_apr>
+		<from_price_apr_display>&amp;#8364;0</from_price_apr_display>
+		<from_price_may>0.00</from_price_may>
+		<from_price_may_display>&amp;#8364;0</from_price_may_display>
+		<from_price_jun>0.00</from_price_jun>
+		<from_price_jun_display>&amp;#8364;0</from_price_jun_display>
+		<from_price_jul>0.00</from_price_jul>
+		<from_price_jul_display>&amp;#8364;0</from_price_jul_display>
+		<from_price_aug>12.00</from_price_aug>
+		<from_price_aug_display>&amp;#8364;12</from_price_aug_display>
+		<from_price_sep>0.00</from_price_sep>
+		<from_price_sep_display>&amp;#8364;0</from_price_sep_display>
+		<from_price_oct>0.00</from_price_oct>
+		<from_price_oct_display>&amp;#8364;0</from_price_oct_display>
+		<from_price_nov>0.00</from_price_nov>
+		<from_price_nov_display>&amp;#8364;0</from_price_nov_display>
+		<from_price_dec>0.00</from_price_dec>
+		<from_price_dec_display>&amp;#8364;0</from_price_dec_display>
+		<priority>MEDIUM</priority>
+		<country>ES</country>
+		<languages_spoken>en,es</languages_spoken>
+		<ratings>
+			<average/>
+			<count/>
+			<max>5</max>
+			<platform>feefo</platform>
+		</ratings>
+		<subsystem>
+			<update>1</update>
+			<notify>0</notify>
+		</subsystem>
+		<geocode_start>36.962137,-3.358828</geocode_start>
+		<geocode_end>37.053517,-3.310999</geocode_end>
+		<geocode_start_point>
+			<geocode>36.962137,-3.358828</geocode>
+			<label>Capileira</label>
+			<google_place_id>ChIJacOC5BfBcQ0RUo1YjH55E2Q</google_place_id>
+			<loc_relation/>
+		</geocode_start_point>
+		<geocode_end_point>
+			<geocode>37.053517,-3.310999</geocode>
+			<label>Mulhacén</label>
+			<google_place_id>ChIJ5XzzqO7EcQ0RZQs8zzRx3eo</google_place_id>
+			<loc_relation/>
+		</geocode_end_point>
+		<product_type>4</product_type>
+		<tourleader_type>1</tourleader_type>
+		<grade>4</grade>
+		<accomrating>5</accomrating>
+		<location>Granada</location>
+		<summary>Trip to Mulhacen, the highest mountain on the Iberian Peninsula</summary>
+		<shortdesc>Tour description</shortdesc>
+		<duration_desc>1 day</duration_desc>
+		<duration>1</duration>
+		<available>Sundays, June - July</available>
+		<tour_url>http://tourcms.com/tours/184_trip_to_mulhacen___sierra_nevada_439.php</tour_url>
+		<tour_url_tracked>http://tourcms.com/tours/184_trip_to_mulhacen___sierra_nevada_439.php</tour_url_tracked>
+		<book_url>https://live.tourcms.com/reserve/r1.php?t=184&amp;a=1&amp;w=143&amp;people=1&amp;ty=t&amp;k=cf3ba133fa08</book_url>
+		<documents>
+			<document>
+				<document_description/>
+				<document_url>https://cdntest.tourcms.com/a/1/184/143.pdf</document_url>
+			</document>
+		</documents>
+		<tour_tags>
+			<tag>
+				<token>adults-only</token>
+				<text>Activity is suitable for adults only</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>animals</token>
+				<text>Activity is largely centered around animals</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>audio-guide</token>
+				<text>Tour is guided by pre-recorded commentary</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>beaches</token>
+				<text>Activity visits or happens at a beach</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>bike-tours</token>
+				<text>Tour involves sightseeing by bicycle</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>boat-tours</token>
+				<text>Tour involves sightseeing by boat</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>city-cards</token>
+				<text>Card or pass that offers admission to multiple top attractions</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>classes</token>
+				<text>Activity is conducted in a class or workshop setting</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>day-trips</token>
+				<text>Activity is a full-day or multi-day trip</text>
+				<value>1</value>
+			</tag>
+			<tag>
+				<token>family-friendly</token>
+				<text>Activity is suitable for adults and children of all ages</text>
+				<value>1</value>
+			</tag>
+			<tag>
+				<token>fast-track</token>
+				<text>Activity includes skip-the-line admission</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>food</token>
+				<text>Activity is largely centered around food</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>history</token>
+				<text>Activity is history-related or happens in a historical location</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>hop-on-hop-off</token>
+				<text>Hop-on hop-off tour by bus, boat, etc</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>literature</token>
+				<text>Activity is largely centered around a literature theme</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>live-music</token>
+				<text>Activity includes a live music performance</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>museums</token>
+				<text>Activity visits or happens at a museum</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>nightlife</token>
+				<text>Activity includes social activities or entertainment at night</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>outdoors</token>
+				<text>Activity happens outside or in nature</text>
+				<value>1</value>
+			</tag>
+			<tag>
+				<token>private-tours</token>
+				<text>Tour is conducted with a private group of participants</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>romantic</token>
+				<text>Activity is recommended for couples</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>small-group-tours</token>
+				<text>Tour is conducted with a small group of participants</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>sports</token>
+				<text>Activity is largely centered around a sport or fitness theme</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>suitable-for-solo</token>
+				<text>Tour is suitable for solo travellers </text>
+				<value>1</value>
+			</tag>
+			<tag>
+				<token>suitable-for-couples</token>
+				<text>Tour is suitable for couples</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>suitable-for-children</token>
+				<text>Tour is suitable for children </text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>suitable-for-groups</token>
+				<text>Tour is suitable for groups</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>suitable-for-students</token>
+				<text>Tour is suitable for students</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>suitable-for-business</token>
+				<text>Tour is suitable as a business trip extension for business travellers</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>suitable-for-wheelchairs</token>
+				<text>Tour is suitable for wheelchair users. The seven suitable_for_ fields are new to TourCMS and may not be fully populated by all Channels (Tour Operators) yet. They will be made mandatory shortly.</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>theme-parks</token>
+				<text>Activity visits or happens at an amusement park</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>walking-tours</token>
+				<text>Tour involves sightseeing on foot</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>official-ticket</token>
+				<text>Official attraction ticket (customer books direct)</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>operator-direct-product</token>
+				<text>Tour Operator direct booking</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>transfer</token>
+				<text>Activity includes a transfer / transport to a location</text>
+				<value>0</value>
+			</tag>
+			<tag>
+				<token>entrance-ticket</token>
+				<text>Activity includes an entrance ticket to some or all of the locations visited</text>
+				<value>0</value>
+			</tag>
+		</tour_tags>
+		<suitable_for_solo>1</suitable_for_solo>
+		<suitable_for_couples>0</suitable_for_couples>
+		<suitable_for_children>0</suitable_for_children>
+		<suitable_for_groups>0</suitable_for_groups>
+		<suitable_for_students>0</suitable_for_students>
+		<suitable_for_business>0</suitable_for_business>
+		<suitable_for_wheelchairs>0</suitable_for_wheelchairs>
+		<pickup_on_request>0</pickup_on_request>
+		<images>
+			<image thumbnail="true">
+				<image_id>1</image_id>
+				<url_thumbnail>https://cdntest.tourcms.com/a/1/184/1/thumbnail.jpg</url_thumbnail>
+				<url>https://cdntest.tourcms.com/a/1/184/1/default.jpg</url>
+				<url_large>https://cdntest.tourcms.com/a/1/184/1/large.jpg</url_large>
+				<url_xlarge>https://cdntest.tourcms.com/a/1/184/1/xlarge.jpg</url_xlarge>
+			</image>
+			<image>
+				<image_id>2</image_id>
+				<url_thumbnail>https://cdntest.tourcms.com/a/1/184/2/thumbnail.jpg</url_thumbnail>
+				<url>https://cdntest.tourcms.com/a/1/184/2/default.jpg</url>
+				<url_large>https://cdntest.tourcms.com/a/1/184/2/large.jpg</url_large>
+				<url_xlarge>https://cdntest.tourcms.com/a/1/184/2/xlarge.jpg</url_xlarge>
+			</image>
+			<image>
+				<image_id>4</image_id>
+				<url_thumbnail>https://cdntest.tourcms.com/a/1/184/4/thumbnail.jpg</url_thumbnail>
+				<url>https://cdntest.tourcms.com/a/1/184/4/default.jpg</url>
+				<url_large>https://cdntest.tourcms.com/a/1/184/4/large.jpg</url_large>
+				<url_xlarge>https://cdntest.tourcms.com/a/1/184/4/xlarge.jpg</url_xlarge>
+			</image>
+			<image>
+				<image_id>5</image_id>
+				<url_thumbnail>https://cdntest.tourcms.com/a/1/184/5/thumbnail.jpg</url_thumbnail>
+				<url>https://cdntest.tourcms.com/a/1/184/5/default.jpg</url>
+				<url_large>https://cdntest.tourcms.com/a/1/184/5/large.jpg</url_large>
+				<url_xlarge>https://cdntest.tourcms.com/a/1/184/5/xlarge.jpg</url_xlarge>
+			</image>
+			<image>
+				<image_id>7</image_id>
+				<url_thumbnail>https://cdntest.tourcms.com/a/1/184/7/thumbnail.jpg</url_thumbnail>
+				<url>https://cdntest.tourcms.com/a/1/184/7/default.jpg</url>
+				<url_large>https://cdntest.tourcms.com/a/1/184/7/large.jpg</url_large>
+				<url_xlarge>https://cdntest.tourcms.com/a/1/184/7/xlarge.jpg</url_xlarge>
+			</image>
+		</images>
+		<new_booking>
+			<people_selection>
+				<rate>
+					<label_1>Number of adults</label_1>
+					<label_2>18</label_2>
+					<minimum>1</minimum>
+					<maximum>10</maximum>
+					<rate_id>r1</rate_id>
+					<agecat>a</agecat>
+					<agerange_min>18</agerange_min>
+					<agerange_max>99</agerange_max>
+					<from_price>12.00</from_price>
+					<from_price_display>&amp;#8364;12</from_price_display>
+					<rate_code/>
+				</rate>
+				<rate>
+					<label_1>Number of children</label_1>
+					<label_2>3-13</label_2>
+					<minimum>1</minimum>
+					<maximum>10</maximum>
+					<rate_id>r2</rate_id>
+					<agecat>c</agecat>
+					<agerange_min>1</agerange_min>
+					<agerange_max>17</agerange_max>
+					<from_price>12.00</from_price>
+					<from_price_display>&amp;#8364;12</from_price_display>
+					<rate_code/>
+				</rate>
+			</people_selection>
+			<date_selection>
+				<date_type>DATE</date_type>
+			</date_selection>
+			<required_fields>
+				<field>
+					<name>firstname</name>
+					<scope>leadpax</scope>
+					<require>required</require>
+				</field>
+				<field>
+					<name>surname</name>
+					<scope>allpax</scope>
+					<require>required</require>
+				</field>
+				<field>
+					<name>tel_mobile</name>
+					<scope>otherpax</scope>
+					<require>required</require>
+				</field>
+			</required_fields>
+		</new_booking>
+		<tour_departure_structure>
+			<type>START_TIME</type>
+			<add_new_auto>0</add_new_auto>
+			<departure_types>
+				<type>
+					<active>1</active>
+					<partial>0</partial>
+					<label>""{"en":"note","es":"nota","zh":"xuehuapiaopiaobeifengxiaoxiao"}""</label>
+					<fields>
+						<field>
+							<name>start_time</name>
+							<value>14:56</value>
+						</field>
+					</fields>
+				</type>
+				<type>
+					<active>1</active>
+					<partial>0</partial>
+					<label>""{"en":"note","es":"nota","zh":"xuehuapiaopiaobeifengxiaoxiao"}""</label>
+					<fields>
+						<field>
+							<name>start_time</name>
+							<value>15:56</value>
+						</field>
+					</fields>
+				</type>
+			</departure_types>
+		</tour_departure_structure>
+		<validity>
+			<validity_type>NOT SET</validity_type>
+			<validity_value>0</validity_value>
+			<validity_minutes>0</validity_minutes>
+		</validity>
+		<categories>
+			<group>
+				<name>Discount tours</name>
+				<values>
+					<value>JR_cat1</value>
+				</values>
+			</group>
+			<group>
+				<name>JR</name>
+				<values>
+					<value>JR</value>
+				</values>
+			</group>
+		</categories>
+		<health_and_safety>
+			<item>
+				<name>face_masks_requied_for_travelers</name>
+				<display_name>Face masks required for travelers</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>face_masks_requied_for_guides</name>
+				<display_name>Face masks required for guides</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>face_masks_provided_for_travelers</name>
+				<display_name>Face masks provided for travelers</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>hand_sanitizer_available</name>
+				<display_name>Hand sanitizer available to travelers and staff</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>social_distancing_enforced</name>
+				<display_name>Social distancing enforced throughout experience</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>regularly_sanitized</name>
+				<display_name>Regularly sanitized high-traffic areas</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>equipment_sanitized</name>
+				<display_name>Gear/equipment sanitized between use</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>transportation_vehicles_sanitized</name>
+				<display_name>Transportation vehicles regularly sanitized</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>guides_required_to_wash_hands</name>
+				<display_name>Guides required to wash hands</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>temperature_checks_for_staff</name>
+				<display_name>Regular temperature checks for staff</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>temperature_checks_for_travelers</name>
+				<display_name>Temperature checks for travelers upon arrival</display_name>
+				<value>NOTSET</value>
+			</item>
+			<item>
+				<name>contactless_payments_for_extras</name>
+				<display_name>Contactless payments for gratuities and add-ons</display_name>
+				<value>NOTSET</value>
+			</item>
+		</health_and_safety>
+		<distribution_identifier>TE_1_184</distribution_identifier>
+	</tour>
+</response>
