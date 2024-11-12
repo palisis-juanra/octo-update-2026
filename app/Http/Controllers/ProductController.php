@@ -32,8 +32,8 @@ class ProductController extends Controller
     {
         try {
             $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
-            $data = $this->productService->getProductList($channelId);
-            return new JsonResponse($data, Response::HTTP_OK);
+            $productList = $this->productService->getProductList($channelId);
+            return new JsonResponse($this->productService->transformList($productList), Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();
         } catch (APICallNotOKException) {
@@ -50,8 +50,8 @@ class ProductController extends Controller
             if (!$this->productService->validateProductId($id, $channelId)) {
                 return OctoResponse::INVALID_PRODUCT_ID();
             }
-            $data = $this->productService->getProductById($id);
-            return new JsonResponse($data, Response::HTTP_OK);
+            $product = $this->productService->find($id);
+            return new JsonResponse($this->productService->transform($product), Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();
         } catch (InvalidProductContentException $e) {
