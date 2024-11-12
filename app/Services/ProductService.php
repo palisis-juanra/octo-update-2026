@@ -90,16 +90,19 @@ class ProductService
     const REQUIRED_FIELD_SCOPE_ALLPAX = 'allpax';
     const REQUIRED_FIELD_SCOPE_LEADPAX = 'leadpax';
     const REQUIRED_FIELD_SCOPE_OTHERPAX = 'otherpax';
+    const LOCALE_CODE_DEFAULT = 'en-GB';
     private $errors = [];
 
     public TourCMSService $tourCMSService;
     public ProductTransformer $productTransformer;
     public JSONLogService $logger;
+    public LocaleService $localeService;
     public function __construct(Request $request, TourCMSService $tourCMSService)
     {
         $this->tourCMSService = $tourCMSService;
         $this->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->logger = $this->loadLogger($request);
+        $this->localeService = new LocaleService();
     }
 
     public function getProductList(string $channelId): array
@@ -108,24 +111,22 @@ class ProductService
         $productList = [];
             foreach ($tourList as $tour) {
                 if ($this->isTourValidForProductList($tour)) {
-                    $product = $this->createProductFromTourData($tour);
-                    $transformedProduct = $this->productTransformer->transform($product);
-                    $productList[] = $transformedProduct;
+                    $product = $this->createProductFromTourXML($tour);
+                    $productList[] = $product;
                 }                
             }
         return $productList;
     }
 
-    public function getProductById($productId): array
+    public function find(string $productId): Product
     {
-        $tour = $this->getTourData($productId);
-        $product = $this->createProductFromTourData($tour);
-        $transformedProduct = $this->productTransformer->transform($product);
+        $tour = $this->findTourDataFromAPI($productId);
+        $product = $this->createProductFromTourXML($tour);
 
-        return $transformedProduct;
+        return $product;
     }
 
-    public function createProductFromTourData(\SimpleXMLElement $tour): Product
+    public function createProductFromTourXML(\SimpleXMLElement $tour): Product
     {
         $id = "{$tour->distribution_identifier}|{$tour->channel_id}";
         $internalName = (string) $tour->tour_name;
@@ -135,8 +136,7 @@ class ProductService
         } else {
             $this->logger->info("reference field is missing");
         }
-        //TODO: Finish locale mapping method, should get channel language and map it
-        $locale = "";
+        $locale = $this->getProductLocale($tour);
         $timeZone = $this->getProductTimeZone($tour);
         // Currently unsupported - false by default
         $allowFreesale = false;
@@ -395,7 +395,22 @@ class ProductService
         return $optionUnits;
     }
 
-    public function getTourData(string $productId): \SimpleXMLElement
+    public function transform(Product $product): array
+    {
+        return $this->productTransformer->transform($product);
+    }
+
+    public function transformList(array $productList): array
+    {
+        $transformedProductList = [];
+        foreach ($productList as $product) {
+            $transformedProduct = $this->productTransformer->transform($product);
+            $transformedProductList[] = $transformedProduct;
+        }
+        return $transformedProductList;
+    }
+
+    public function findTourDataFromAPI(string $productId): \SimpleXMLElement
     {
         $apiCallParameters = $this->parseProductId($productId);
         $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId, $apiCallParameters->channelId);
@@ -500,6 +515,33 @@ class ProductService
         return true;
     }
 
+    protected function getProductLocale(\SimpleXMLElement $tour): string
+    {
+        $defaultLocale = self::LOCALE_CODE_DEFAULT;
+        $countries = [];
+        $languages = [];
+        if (isset($tour->languages_spoken) && !empty($tour->languages_spoken)) {
+            $languages = explode(',', $tour->languages_spoken);
+        }
+        if (isset($tour->country) && !empty($tour->country)) {
+            $generatedLocale = "";
+            $countries = explode(',', $tour->country);
+            foreach ($countries as $country) {
+                foreach ($languages as $language) {
+                    $generatedLocale = $this->localeService->country_code_to_locale($country, $language);
+                    if (is_string($generatedLocale) && !empty($generatedLocale)) {
+                        return $generatedLocale;
+                    }
+                }
+                $generatedLocale = $this->localeService->country_code_to_locale($country);
+                if (is_string($generatedLocale) && !empty($generatedLocale)) {
+                    return $generatedLocale;
+                }
+            }
+        }
+        return $defaultLocale;
+    }
+
     protected function getProductTimeZone(\SimpleXMLElement $tour): string
     {
         $timeZone = "";
@@ -579,7 +621,7 @@ class ProductService
             if (in_array($tour->redemption_method, self::REDEMPTION_METHODS)) {
                 $redemptionMethod = (string) $tour->redemption_method;
             } else {
-                $this->manageError("invalid redemption method: {$redemptionMethod}");
+                $this->manageError("invalid redemption method: {$tour->redemption_method}");
             }
         } else {
             $this->manageError("redemption method field is missing or empty");
@@ -631,12 +673,6 @@ class ProductService
             }
         }
         return $requiredFields;
-    }
-
-    //TODO
-    protected function parseLanguageCodeToLocale(string $code): string
-    {
-        return $code;
     }
 
     protected function manageError(string $errorMessage): void
