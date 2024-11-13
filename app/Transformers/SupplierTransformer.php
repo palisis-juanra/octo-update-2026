@@ -2,11 +2,9 @@
 
 namespace App\Transformers;
 
-use App\Models\Supplier;
-
 class SupplierTransformer extends BaseTransformer
 {
-    public function __construct(string $mode)
+    public function __construct(string $mode = BaseTransformer::BASIC)
     {
         parent::__construct($mode);
     }
