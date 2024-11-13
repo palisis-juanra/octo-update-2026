@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
+use App\Http\Middleware\OctoAuthentication;
+use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
 use SimpleXMLElement;
 use TourCMS\Utils\TourCMS;
@@ -17,11 +19,13 @@ class TourCMSService
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
     const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = 'extended_tour_info=1';
     private TourCMS $tourCMS;
+    protected string $channelId;
 
     public function __construct(string $maid, string $APIKey)
     {
         $this->tourCMS = new TourCMS($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMS->set_base_url($this->getAPIBaseUrl());
+        $this->channelId = Request::get(OctoAuthentication::FIELD_CHANNEL_ID);
     }
 
     public function showChannel(string $channelId): SimpleXMLElement
@@ -39,14 +43,33 @@ class TourCMSService
         return $response;
     }
 
-    public function showTour(string $tourId, string $channelId): SimpleXMLElement
+    public function showTour(string $tourId): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_tour($tourId, $channelId);
+        $response = $this->tourCMS->show_tour($tourId, $this->channelId);
         $response = $this->handleResponse($response);
+
+        return $response; 
+    }
+
+    public function checkAvailability(string $params, string $tourId): SimpleXMLElement
+    {
+        $response = $this->tourCMS->check_tour_availability($params, $tourId, $this->channelId);
+        $response = $this->handleResponse($response);
+
         return $response;
     }
 
-    public function getArrayFromXmlNode($parent, $childName = ''):array
+    public function showTourDepartures(string $tourId, string $startDate, string $endDate): SimpleXMLElement
+    {
+        $queryString = "start_date_start={$startDate}&start_date_end={$endDate}";
+
+        $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
+        $response = $this->handleResponse($response); 
+
+        return $response;
+    }
+
+    public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
     {
         $children = [];
         foreach ($parent->children() as $child) {
