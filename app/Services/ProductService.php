@@ -31,12 +31,11 @@ class ProductService
         self::AVAILABILITY_TYPE_OPENING_HOURS
     ];
     const DELIVERY_FORMAT_QRCODE = 'QRCODE';
-    const DELIVERY_FORMAT_CODE128 = 'CODE128';
+    const DELIVERY_FORMAT_CODE128A = 'CODE128A';
     const DELIVERY_FORMAT_PDF_URL = 'PDF_URL';
     const DELIVERY_FORMATS = [
-        self::DELIVERY_FORMAT_QRCODE,
-        self::DELIVERY_FORMAT_CODE128,
-        self::DELIVERY_FORMAT_PDF_URL
+        'QR_CODE' => self::DELIVERY_FORMAT_QRCODE,
+        'PDF_URL' => self::DELIVERY_FORMAT_PDF_URL
     ];
     const DELIVERY_METHOD_VOUCHER = 'VOUCHER';
     const DELIVERY_METHOD_TICKET = 'TICKET';
@@ -58,6 +57,11 @@ class ProductService
     const CANCELLATION_CUTOFF_UNIT_MINUTE = 'minute';
     const CANCELLATION_CUTOFF_UNIT_HOUR = 'hour';
     const CANCELLATION_CUTOFF_UNIT_DAY = 'day';
+    const CANCELLATION_CUTOFF_UNITS = [
+        'm' => self::CANCELLATION_CUTOFF_UNIT_MINUTE,
+        'h' => self::CANCELLATION_CUTOFF_UNIT_HOUR,
+        'd' => self::CANCELLATION_CUTOFF_UNIT_DAY
+    ];
     const CANCELLATION_CUTOFF_UNIT_DEFAULT = self::CANCELLATION_CUTOFF_UNIT_MINUTE;
     const CANCELLATION_CUTOFF_AMOUNT_DEFAULT = 45;
     const AVAILABILITY_LOCAL_START_TIMES_DEFAULT = '00:00';
@@ -245,32 +249,15 @@ class ProductService
                 } else {
                     $this->logger->info("option {$optionId} availabilityLocalStartTimes fields are not present because of invalid mapping structure");
                 }
-                if (isset($tour->cutoff)) {
-                    if ((isset($tour->cutoff->type) && !empty($tour->cutoff->type)) && (isset($tour->cutoff->value) && !empty($tour->cutoff->value))) {
-                        if ($tour->cutoff->type == self::CUTOFF_TYPE_BEFORE_START_SEC) {
-                            if ($tour->cutoff->value > self::DAY_IN_SECONDS) {
-                                $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DAY;
-                                $optionCancellationCutoffAmount = round((int) $tour->cutoff->value / self::DAY_IN_SECONDS);
-                            } else if ($tour->cutoff->value > self::HOUR_IN_SECONDS) {
-                                $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_HOUR;
-                                $optionCancellationCutoffAmount = round((int) $tour->cutoff->value / self::HOUR_IN_SECONDS);
-                            } else if ($tour->cutoff->value > self::MINUTE_IN_SECONDS) {
-                                $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_MINUTE;
-                                $optionCancellationCutoffAmount = round((int) $tour->cutoff->value / self::MINUTE_IN_SECONDS);
-                            } else {
-                                $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
-                                $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_DEFAULT;
-                            }
-                        } else {
-                            $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_HOUR;
-                            $cutoffHour = strtotime((string) $tour->cutoff->value);
-                            $endOfDayHour = strtotime(self::DATE_TIME_TOMORROW);
-                            $cutoffSecondsResult = $endOfDayHour - $cutoffHour;
-                            if ($tour->cutoff->type == self::CUTOFF_TYPE_DAY_BEFORE_TIME) {
-                                $cutoffSecondsResult += self::DAY_IN_SECONDS;
-                            }
-                            $optionCancellationCutoffAmount = round((int) $cutoffSecondsResult / self::HOUR_IN_SECONDS);
-                        }
+                $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
+                $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_DEFAULT;
+                $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
+                if (isset($tour->cancellation_policy)) {
+                    $cancellationPoliciesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->cancellation_policy, 'policy');
+                    $policy = $cancellationPoliciesFromXML[0];
+                    if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
+                        $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNITS[(string) $policy->type];
+                        $optionCancellationCutoffAmount = (int) $policy->value;
                         $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}";
                         if ($optionCancellationCutoffAmount != 1) {
                             $optionCancellationCutoff .= "s";
@@ -528,12 +515,12 @@ class ProductService
             $countries = explode(',', $tour->country);
             foreach ($countries as $country) {
                 foreach ($languages as $language) {
-                    $generatedLocale = $this->localeService->country_code_to_locale($country, $language);
+                    $generatedLocale = $this->localeService->countryCodeToLocale($country, $language);
                     if (is_string($generatedLocale) && !empty($generatedLocale)) {
                         return $generatedLocale;
                     }
                 }
-                $generatedLocale = $this->localeService->country_code_to_locale($country);
+                $generatedLocale = $this->localeService->countryCodeToLocale($country);
                 if (is_string($generatedLocale) && !empty($generatedLocale)) {
                     return $generatedLocale;
                 }
@@ -577,8 +564,8 @@ class ProductService
             $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
             if (count($deliveryFormatsFromXML) != 0) {
                 foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-                    if (in_array($deliveryFormat, self::DELIVERY_FORMATS)) {
-                        $deliveryFormats[] = (string) $deliveryFormat;
+                    if (array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
+                        $deliveryFormats[] = self::DELIVERY_FORMATS[(string) $deliveryFormat];
                     } else {
                         $this->manageError("invalid delivery format: {$deliveryFormat}");
                     }
