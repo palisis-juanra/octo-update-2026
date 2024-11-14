@@ -65,7 +65,7 @@ class ProductServiceTest extends TestCase
         $this->assertNotEmpty($productData);
     }
 
-    public function test_whenCallFindAndTransformWithInvalidProductData_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindAndTransformWithMultipleInvalidFields_thenShouldThrowInvalidProductContentException()
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
