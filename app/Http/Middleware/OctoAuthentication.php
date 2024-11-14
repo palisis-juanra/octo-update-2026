@@ -3,12 +3,13 @@
 namespace App\Http\Middleware;
 
 use App\Http\Responses\OctoResponse;
+use App\Providers\JSONLogServiceProvider;
 use App\Providers\TourCMSServiceProvider;
 use Closure;
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Str;
+
 
 class OctoAuthentication
 {
@@ -20,7 +21,6 @@ class OctoAuthentication
     const FIELD_X_CORRELATION_ID = 'X-Correlation-Id';
     const FIELD_X_REQUEST_ID = 'X-Request-Id';
     const FIELD_MAID = 'maid';
-
 
     /**
      * Handle an incoming request.
@@ -43,13 +43,14 @@ class OctoAuthentication
             self::FIELD_MAID => $this->getMaidFromAuthHeader($auth),
             self::FIELD_CHANNEL_ID => $this->getChannelFromAuthHeader($auth),
             self::FIELD_API_KEY => $this->getAPIKeyFromAuthHeader($auth),
-            self::FIELD_X_CORRELATION_ID => $this->getCorrelationIdFromHeaders($request),
+            self::FIELD_X_CORRELATION_ID => $this->getCorrelationIdFromHeaders($request) ?? Str::uuid(),
             self::FIELD_X_REQUEST_ID => $this->getRequestIdFromHeaders($request),
         ]);
 
         /* At this point we have the credentials for TourCMS, then
-        we can register the service provider */
+        we can register the service providers */
         app()->register(TourCMSServiceProvider::class);
+        app()->register(JSONLogServiceProvider::class);
 
         return $next($request);
     }

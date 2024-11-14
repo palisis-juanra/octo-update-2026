@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class JSONLogService
 {
@@ -12,6 +13,18 @@ class JSONLogService
     public string $endpoint;
     public string $marketplaceId;
     public string $xRequestId;
+    public const LOG_TYPE_INFO = 'info';
+    public const LOG_TYPE_ERROR = 'error';
+    public const LOG_TYPE_WARNING = 'warning';
+    public const LOG_TYPE_DEBUG = 'debug';
+    public const LOG_TYPE_LOG = 'log';
+    public const LOG_TYPES = [
+        self::LOG_TYPE_INFO,
+        self::LOG_TYPE_ERROR,
+        self::LOG_TYPE_WARNING,
+        self::LOG_TYPE_DEBUG,
+        self::LOG_TYPE_LOG  
+    ];
 
     public function __construct(string $channelId, string $marketplaceId, string $endpoint, string $correlationId = null, string $xRequestId = '')
     {
@@ -26,86 +39,101 @@ class JSONLogService
         $this->xRequestId = $xRequestId;
     }
 
-    public function info(string $message, string $logChannel = null, array $extraParams = []): void
+    public function getLogId(): string
     {
-        $logJSON = $this->getLogAsJSON($message, $extraParams);
-
-        if (isset($logChannel)) {
-            Log::channel($logChannel)->info($logJSON);
-        } else {
-            Log::info($logJSON);
-        }
-
+        return $this->correlationId;
     }
 
-    public function error(string $message, string $logChannel = null, array $extraParams = []): void
+    public function info(array $logArray): void
     {
-        $logJSON = $this->getLogAsJSON($message, $extraParams);
-
-        if (isset($logChannel)) {
-            Log::channel($logChannel)->error($logJSON);
-        } else {
-            Log::error($logJSON);
-        }
-
+        $this->write(self::LOG_TYPE_INFO, $logArray);
     }
 
-    public function debug(string $message, string $logChannel = null, array $extraParams = []): void
+    public function error(array $logArray): void
+    {
+        if ($this->isAnExceptionLog($logArray)) {
+            $exception = $logArray['exception'];
+            $exceptionInfo = $this->getExceptionInfoAsArray($exception);
+            unset($logArray['exception']);
+            $logArray = $this->addEntriesToLogArray($logArray, $exceptionInfo);
+        }
+
+        $this->write(self::LOG_TYPE_ERROR, $logArray);
+    }
+
+    public function warning(array $logArray): void
+    {
+        $this->write(self::LOG_TYPE_WARNING, $logArray);
+    }
+
+    public function debug(array $logArray): void
     {
         if (env('APP_DEBUG', false) === false) {
             return;
         }
 
-        $logJSON = $this->getLogAsJSON($message, $extraParams);
-
-        if (isset($logChannel)) {
-            Log::channel($logChannel)->debug($logJSON);
-        } else {
-            Log::debug($logJSON);
-        }
-
+        $this->write(self::LOG_TYPE_DEBUG, $logArray);
     }
 
-    private function getLogAsJSON(string $message, array $extraParams = []): string
+    protected function write(string $logType, array $logArray)
     {
-        $logArray = $this->getBaseLogArray();
-        $logArray['message'] = $message;
 
-        if (!empty($extraParams)) {
-            $this->addExtraParamsToLogArray($logArray, $extraParams);
+        if (empty($logArray) || !in_array($logType, self::LOG_TYPES)) {
+            return;
         }
 
-        return json_encode($logArray);
+        $baseLogArray = $this->getBaseLogArray();
+        $logArray = $this->addEntriesToLogArray($baseLogArray, $logArray);
+
+        $log = json_encode($logArray);
+        $this->removeWhiteSpacesFromLog($log);
         
+
+        Log::$logType($log);
+
+        return;
     }
 
-    private function getBaseLogArray(): array
+    protected function getBaseLogArray(): array
     {
-        $baseLogArray = [
-            'x_request_id' => $this->xRequestId,
-            'correlation_id' => $this->correlationId,
-            'endpoint' => $this->endpoint,
-            'channel_id' => $this->channelId,
-            'marketplace_id' => $this->marketplaceId
-        ];
 
+        if (!empty($this->xRequestId)) {
+            $baseLogArray['xRequestId'] = $this->xRequestId;
+        }
+        $baseLogArray['correlationId'] = $this->correlationId;
+        $baseLogArray['endpoint'] = $this->endpoint;
+        $baseLogArray['channelId'] = $this->channelId;
+        $baseLogArray['marketplaceId'] = $this->marketplaceId;
+    
         return $baseLogArray;
     }
 
-    private function addExtraParamsToLogArray(array &$logArray, array $extraParams): void
+    // Exception logging
+    protected function isAnExceptionLog(array $logArray): bool
     {
-        foreach ($extraParams as $key => $value) {
+        return isset($logArray['exception']) && $logArray['exception'] instanceof Throwable;
+    }
 
-            if (empty($value)) {
-                continue;
-            }
+    protected function getExceptionInfoAsArray(Throwable $e): array
+    {
+        return [
+            "exceptionMessage" => $e->getMessage(),
+            "exceptionCode" => $e->getCode(),
+            "exceptionTrace" => $e->getTrace()
+        ];
+    }
+    protected function addEntriesToLogArray(array $logArray, array $entriesToAdd): array
+    {
+        return array_merge($logArray, $entriesToAdd);
+    }
 
-            if (array_key_exists($key, $logArray)) {
-                $key = "extra_{$key}";
-            }
-            $logArray[$key] = $value;
-        }
+    protected function removeWhiteSpacesFromLog(string $log): string
+    {
+        $log = str_replace('\n', '', $log);
+        $log = str_replace('\r', '', $log);
+        $log = str_replace(PHP_EOL, '', $log);
 
+        return $log;
     }
 
 }
