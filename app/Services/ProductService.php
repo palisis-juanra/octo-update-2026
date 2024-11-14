@@ -78,6 +78,14 @@ class ProductService
         'i' => self::UNIT_TYPE_INFANT,
         's' => self::UNIT_TYPE_SENIOR
     ];
+    const CONTACT_FIELD_FIRST_NAME = 'firstName';
+    const CONTACT_FIELD_LAST_NAME = 'lastName';
+    const CONTACT_FIELD_PHONE_NUMBER = 'phoneNumber';
+    const CONTACT_FIELDS = [
+        'firstname' => self::CONTACT_FIELD_FIRST_NAME,
+        'surname' => self::CONTACT_FIELD_LAST_NAME,
+        'tel_mobile' => self::CONTACT_FIELD_PHONE_NUMBER,
+    ];
     const MAPPING_STRUCTURE_TYPE_NOTSET = 'NOTSET';
     const MAPPING_STRUCTURE_TYPE_SINGLE = 'SINGLE';
     const MAPPING_STRUCTURE_TYPE_START_TIME = 'START_TIME';
@@ -276,7 +284,7 @@ class ProductService
                 } else {
                     $this->logger->info("option {$optionId} cutoff field is missing");
                 }
-                $optionRequiredContactFields = $this->getOptionRequiredFields($tour);
+                $optionRequiredContactFields = $this->getOptionRequiredContactFields($tour);
                 $optionRestrictions = new stdClass();
                 $optionRestrictions->minUnits = null;
                 if (isset($tour->min_booking_size)) {
@@ -349,7 +357,7 @@ class ProductService
                 } else {
                     $this->logger->info("unit {$unitId} type field is missing");
                 }
-                $unitRequiredContactFields = $this->getUnitRequiredFields($tour);
+                $unitRequiredContactFields = $this->getUnitRequiredContactFields($tour);
                 $unitRestrictions = new stdClass();
                 $unitRestrictions->minAge = 1;
                 if (isset($rate->agerange_min)) {
@@ -586,7 +594,7 @@ class ProductService
         return $redemptionMethod;
     }
 
-    protected function getOptionRequiredFields(\SimpleXMLElement $tour): array
+    protected function getOptionRequiredContactFields(\SimpleXMLElement $tour): array
     {
         $requiredFields = [];
         $parent = null;
@@ -603,13 +611,15 @@ class ProductService
         foreach ($requiredFieldsFromXML as $requiredField) {
             $requiredFieldScope = (string) $requiredField->scope;
             if ($requiredFieldScope == self::REQUIRED_FIELD_SCOPE_LEADPAX || $requiredFieldScope == self::REQUIRED_FIELD_SCOPE_ALLPAX) {
-                $requiredFields[] = (string) $requiredField->name;
+                if (array_key_exists((string) $requiredField->name, self::CONTACT_FIELDS)) {
+                    $requiredFields[] = self::CONTACT_FIELDS[(string) $requiredField->name];
+                }
             }
         }
         return $requiredFields;
     }
 
-    protected function getUnitRequiredFields(\SimpleXMLElement $tour): array
+    protected function getUnitRequiredContactFields(\SimpleXMLElement $tour): array
     {
         $requiredFields = [];
         $parent = null;
@@ -626,7 +636,9 @@ class ProductService
         foreach ($requiredFieldsFromXML as $requiredField) {
             $requiredFieldScope = (string) $requiredField->scope;
             if ($requiredFieldScope == self::REQUIRED_FIELD_SCOPE_OTHERPAX || $requiredFieldScope == self::REQUIRED_FIELD_SCOPE_ALLPAX) {
-                $requiredFields[] = (string) $requiredField->name;
+                if (array_key_exists((string) $requiredField->name, self::CONTACT_FIELDS)) {
+                    $requiredFields[] = self::CONTACT_FIELDS[(string) $requiredField->name];
+                }
             }
         }
         return $requiredFields;
