@@ -7,7 +7,6 @@
 		<account_id>1</account_id>
 		<tour_id>2</tour_id>
 		<delivery_formats>
-			<delivery_format>CODE128</delivery_format>
 			<delivery_format>PDF_URL</delivery_format>
 		</delivery_formats>
 		<delivery_methods>
