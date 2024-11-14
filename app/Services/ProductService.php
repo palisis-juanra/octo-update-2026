@@ -194,7 +194,7 @@ class ProductService
         return $product;
     }
 
-    protected function getProductOptions($tour, $structureType): array
+    public function getProductOptions($tour, $structureType): array
     {
         $options = [];
 
