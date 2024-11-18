@@ -538,7 +538,7 @@ class ProductService
     protected function getProductDeliveryFormats(\SimpleXMLElement $tour): array
     {
         $deliveryFormats = [];
-        if (isset($tour->delivery_formats)) {
+        if (isset($tour->delivery_formats) && !empty($tour->delivery_formats)) {
             $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
             if (count($deliveryFormatsFromXML) != 0) {
                 foreach ($deliveryFormatsFromXML as $deliveryFormat) {
@@ -560,7 +560,7 @@ class ProductService
     protected function getProductDeliveryMethods(\SimpleXMLElement $tour): array
     {
         $deliveryMethods = [];
-        if (isset($tour->delivery_methods)) {
+        if (isset($tour->delivery_methods) && !empty($tour->delivery_methods)) {
             $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
             if (count($deliveryMethodsFromXML) != 0) {
                 foreach ($deliveryMethodsFromXML as $deliveryMethod) {

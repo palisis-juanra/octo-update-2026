@@ -230,7 +230,7 @@ class ProductServiceTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindAndTransformWithInvalidDeliveryMethod_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindWithInvalidDeliveryMethod_thenShouldThrowInvalidProductContentException()
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -265,7 +265,7 @@ class ProductServiceTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindAndTransformWithoutRedemptionMethod_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindWithoutRedemptionMethod_thenShouldThrowInvalidProductContentException()
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -298,7 +298,7 @@ class ProductServiceTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindAndTransformWithInvalidRedemptionMethod_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindWithInvalidRedemptionMethod_thenShouldThrowInvalidProductContentException()
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -332,7 +332,7 @@ class ProductServiceTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindAndTransformWithoutMapping_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindWithoutMapping_thenShouldThrowInvalidProductContentException()
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -365,7 +365,7 @@ class ProductServiceTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindAndTransformWithUnsetMapping_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindWithUnsetMapping_thenShouldThrowInvalidProductContentException()
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
