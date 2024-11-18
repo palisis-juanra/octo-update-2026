@@ -2,8 +2,6 @@
 
 namespace App\Transformers;
 
-use App\Models\Product;
-
 class ProductTransformer extends BaseTransformer
 {
     public function __construct(string $mode)

@@ -7,6 +7,7 @@ use App\Exceptions\FailSignatureException;
 use App\Http\Middleware\OctoAuthentication;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
+use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 use TourCMS\Utils\TourCMS;
 
@@ -59,10 +60,16 @@ class TourCMSService
         return $response;
     }
 
-    public function showTourDepartures(string $tourId, string $startDate, string $endDate): SimpleXMLElement
+    public function showTourDepartures(string $tourId, string $startDate, string $endDate = ''): SimpleXMLElement
     {
-        $queryString = "start_date_start={$startDate}&start_date_end={$endDate}";
-
+        $queryString = "show_closed_departures=true";
+        
+        if (!empty($endDate)) {
+            $queryString .= "&start_date_start={$startDate}&start_date_end={$endDate}";
+        } else {
+            $queryString .= "&start_date_start={$startDate}&start_date_end={$startDate}";
+        }
+        
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response); 
 

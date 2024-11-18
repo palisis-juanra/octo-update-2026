@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Availability;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Departure extends Model
+class Availability extends Model
 {
     use HasFactory;
     protected string $id;
@@ -14,8 +14,8 @@ class Departure extends Model
     protected bool $allDay;
     protected bool $available;
     protected string $status;
-    protected int $vacancies;
-    protected int $capacity;
+    protected ?int $vacancies;
+    protected ?int $capacity;
     protected int $maxUnits;
     protected string $utcCutoffAt;
     protected string $openingHoursFrom;
@@ -28,8 +28,8 @@ class Departure extends Model
         bool $allDay, 
         bool $available, 
         string $status, 
-        int $vacancies, 
-        int $capacity, 
+        ?int $vacancies, 
+        ?int $capacity, 
         int $maxUnits, 
         string $utcCutoffAt, 
         string $openingHoursFrom, 
@@ -173,7 +173,7 @@ class Departure extends Model
     /**
      * Get the value of vacancies
      */ 
-    public function getVacancies(): int
+    public function getVacancies(): ?int
     {
         return $this->vacancies;
     }
@@ -193,7 +193,7 @@ class Departure extends Model
     /**
      * Get the value of capacity
      */ 
-    public function getCapacity(): int
+    public function getCapacity(): ?int
     {
         return $this->capacity;
     }
