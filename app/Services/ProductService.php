@@ -117,12 +117,12 @@ class ProductService
     public ProductTransformer $productTransformer;
     public JSONLogService $logger;
     public LocaleService $localeService;
-    public function __construct(Request $request, TourCMSService $tourCMSService)
+    public function __construct(TourCMSService $tourCMSService, JSONLogService $logger, LocaleService $localeService)
     {
         $this->tourCMSService = $tourCMSService;
         $this->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
-        $this->logger = $this->loadLogger($request);
-        $this->localeService = new LocaleService();
+        $this->logger = $logger;
+        $this->localeService = $localeService;
     }
 
     public function getProductList(string $channelId): array
@@ -141,6 +141,7 @@ class ProductService
     public function find(string $productId): Product
     {
         $tour = $this->findTourDataFromAPI($productId);
+        $this->logger->info(["message" => "Show tour response", "APIResponse" => $tour->asXML()]);
         $product = $this->createProductFromTourXML($tour);
 
         return $product;
@@ -179,7 +180,7 @@ class ProductService
 
         if (count($this->errors) != 0) {
             $errorString = implode(', ', $this->errors);
-            throw new InvalidProductContentException("The content of the product is invalid: {$errorString}");
+            throw new InvalidProductContentException($id, "The content of the product is invalid: {$errorString}");
         }
 
         $product = new Product(
@@ -701,5 +702,18 @@ class ProductService
             $request->get(OctoAuthentication::FIELD_X_CORRELATION_ID),
             $request->get(OctoAuthentication::FIELD_X_REQUEST_ID)
         );
+    }
+
+    /**
+     * Summary of getTourIdFromProductId
+     * @param string $productId in format (ACCOUNT TWO FIRST LETTERS)_(ACCOUNT_ID)_(TOUR_ID). e.g: TE_1_67|142
+     * @return string
+     */
+    public static function getTourIdFromProductId(string $productId): string
+    {
+        $distributionIdentifier = explode('|', $productId)[0];
+        $distributionIdentifierSplitted = explode('_', $distributionIdentifier);
+        
+        return $distributionIdentifierSplitted[2];
     }
 }

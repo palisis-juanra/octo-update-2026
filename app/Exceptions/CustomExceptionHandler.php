@@ -2,13 +2,15 @@
 
 namespace App\Exceptions;
 
+use App\Facades\JSONLog;
 use App\Http\Responses\OctoResponse;
 use App\Services\JSONLogService;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Throwable;
 
 class CustomExceptionHandler extends Handler
@@ -16,31 +18,29 @@ class CustomExceptionHandler extends Handler
     public Request $request;
     public JSONLogService $logger;
 
-    public function __construct(Container $container, Request $request, JSONLogService $logger)
+    public function __construct(Container $container)
     {
         parent::__construct($container);
-
-        $this->request = $request;
-        $this->logger = $logger;
     }
 
     public function report(Throwable $exception)
     {
-        // When Laravel works in debug mode we will be reporting exceptions 
-        // using Laravel custom exception handler too
+        // If you realize an exception doesnt being captured
+        // just uncomment line below to let default exception
+        // handler report the exception
 
-        if (env('APP_DEBUG', true) === true) {
-            parent::report($exception);
-        }
+        // parent::report($exception);
     }
 
     public function render($request, Throwable $exception): JsonResponse
     {
-
+ 
         $exceptionClass = get_class($exception);
 
         switch ($exceptionClass) {
 
+            case (MethodNotAllowedHttpException::class):
+                return OctoResponse::BAD_REQUEST('Invalid http request method');
             case (FailSignatureException::class): 
                 return OctoResponse::FORBIDDEN();
 
@@ -50,17 +50,32 @@ class CustomExceptionHandler extends Handler
             case (InvalidProductContentException::class):
                 return OctoResponse::INVALID_PRODUCT_ID($exception->getProductId(), $exception->getMessage());
 
+            case (InvalidOptionIdException::class):
+                return OctoResponse::INVALID_OPTION_ID($exception->getOptionId());
+
             case (NoMatchingDataException::class):
                 return OctoResponse::INVALID_PRODUCT_ID($exception->getProductId());
+            
+            case (BadRequestException::class):
+                return OctoResponse::BAD_REQUEST($exception->getMessage());
 
             case (APICallNotOKException::class):
-                $this->logger->error(["message" => "TourCMS API Call error"]);
+
+                try {
+                    JSONLog::error(["message" => "TourCMS API Call error"]);
+                } catch (BindingResolutionException) {
+                    parent::report($exception);
+                }
+                
                 return OctoResponse::INTERNAL_SERVER_ERROR();
 
             default:
-                $this->logger->error(["message" => "Exception captured by custom error handler", "exception" => $exception]);
+                try  {
+                    JSONLog::error(["message" => "Exception captured by custom error handler", "exception" => $exception]);
+                } catch (BindingResolutionException) {
+                    parent::report($exception);
+                }
                 return OctoResponse::INTERNAL_SERVER_ERROR();
-
         }
         
     }

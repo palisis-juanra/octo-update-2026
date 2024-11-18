@@ -13,4 +13,9 @@ class InvalidOptionIdException extends Exception
         parent::__construct($message, $code, $previous);
         $this->optionId = $optionId;
     }
+
+    public function getOptionId()
+    {
+        return $this->optionId;
+    }
 };

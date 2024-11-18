@@ -44,13 +44,17 @@ class JSONLogService
         return $this->correlationId;
     }
 
-    public function info(array $logArray): void
+    public function info(array|string $log): void
     {
+        $logArray = is_string($log) ? ["message" => $log] : $log;
+    
         $this->write(self::LOG_TYPE_INFO, $logArray);
     }
 
-    public function error(array $logArray): void
+    public function error(array|string $log): void
     {
+        $logArray = is_string($log) ? ["message" => $log] : $log;
+
         if ($this->isAnExceptionLog($logArray)) {
             $exception = $logArray['exception'];
             $exceptionInfo = $this->getExceptionInfoAsArray($exception);
@@ -61,18 +65,29 @@ class JSONLogService
         $this->write(self::LOG_TYPE_ERROR, $logArray);
     }
 
-    public function warning(array $logArray): void
+    public function warning(array|string $log): void
     {
+        $logArray = is_string($log) ? ["message" => $log] : $log;
+
         $this->write(self::LOG_TYPE_WARNING, $logArray);
     }
 
-    public function debug(array $logArray): void
+    public function debug(array|string $log): void
     {
         if (env('APP_DEBUG', false) === false) {
             return;
         }
 
+        $logArray = is_string($log) ? ["message" => $log] : $log;
+
         $this->write(self::LOG_TYPE_DEBUG, $logArray);
+    }
+
+    public function log(array|string $log): void
+    {
+        $logArray = is_string($log) ? ["message" => $log] : $log;
+
+        $this->write(self::LOG_TYPE_LOG, $logArray);
     }
 
     protected function write(string $logType, array $logArray)
@@ -86,6 +101,7 @@ class JSONLogService
         $logArray = $this->addEntriesToLogArray($baseLogArray, $logArray);
 
         $log = json_encode($logArray);
+        Log::info($log);
         $this->removeWhiteSpacesFromLog($log);
         
 

@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Exceptions\AvailabilityRequestInvalidParamException;
-use App\Interfaces\AvailabilityRequestInterface;
-use App\Models\MultiDayAvailabilityRequest;
-use App\Models\SingleDayAvailabilityRequest;
-use App\Transformers\DepartureTransformer;
+use App\Http\Middleware\OctoAuthentication;
+use App\Models\Availability\AvailabilityRequest;
+use App\Interfaces\BaseAvailabilityRequest;
+use App\Models\Availability\Pricing\MultiDayPricingAvailabilityRequest;
+use App\Models\Availability\Pricing\SingleDayPricingAvailabilityRequest;
+use App\Transformers\AvailabilityTransformer;
 use App\Transformers\BaseTransformer;
 use DateTime;
 
@@ -16,12 +18,13 @@ class AvailabilityService
     public TourCMSService $tourCMSService;
     public ProductService $productService;
     public OptionService $optionService;
-    public DepartureTransformer $transformer;
+    public AvailabilityTransformer $transformer;
 
     const PARAM_PRODUCT_ID = 'productId';
     const PARAM_OPTION_ID = 'optionId';
     const PARAM_LOCAL_DATE_START = 'localDateStart';
     const PARAM_LOCAL_DATE_END = 'localDateEnd';
+    const PARAM_CURRENCY = 'currency';
     const REQUIRED_PARAMS = [
         self::PARAM_PRODUCT_ID,
         self::PARAM_OPTION_ID,
@@ -36,37 +39,56 @@ class AvailabilityService
         $this->tourCMSService = $tourCMSService;
         $this->productService = $productService;
         $this->optionService = $optionService;
-        $this->transformer = new DepartureTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->transformer = new AvailabilityTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
-    public function getDepartures(AvailabilityRequestInterface $availabilityRequest): array
+    public function getAvailabilities(BaseAvailabilityRequest $availabilityRequest): array
     {
-        $departures = $availabilityRequest->getDepartures($this->tourCMSService);
+        $departures = $availabilityRequest->getAvailabilities($this->tourCMSService);
 
         return $departures;
     }
 
-    public function getDeparturesData(array $departures): array
+
+    public function getAvailabilitiesTransformed(array $availabilities): array
     {
-        $departuresData = [];
-        foreach ($departures as $departure) {
-            $departuresData[] = $this->transformer->transform($departure);
+        $availabilitiesData = [];
+        foreach ($availabilities as $availability) {
+            $availabilitiesData[] = $this->transformer->transform($availability);
         }
 
-        return $departuresData;
+        return $availabilitiesData;
     }
 
-    public function getAvailabilityRequest(array $requestParams): AvailabilityRequestInterface
+    public function getAvailabilityRequest(array $requestParams, string $octoCapabilities): BaseAvailabilityRequest
     {
-        $localDateEnd = $requestParams[self::PARAM_LOCAL_DATE_END];
 
-        if (!empty($localDateEnd)) {
-            return new MultiDayAvailabilityRequest($requestParams);
+        $productId = $requestParams[self::PARAM_PRODUCT_ID] ?? '';
+        $tourId = $this->productService->getTourIdFromProductId($productId) ?? '';
+        $optionId = $requestParams[self::PARAM_OPTION_ID] ?? '';
+        $localDateStart = $requestParams[self::PARAM_LOCAL_DATE_START] ?? '';
+        $localDateEnd = $requestParams[self::PARAM_LOCAL_DATE_END] ?? '';
+        $currency = $requestParams[self::PARAM_CURRENCY] ?? '';
+
+        if (!empty($pricingHeader) && strtolower($octoCapabilities) === 'pricing') {
+            
+            if (!empty($localDateEnd)) {
+                return new MultiDayPricingAvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, $currency);
+            }
+
+            return new SingleDayPricingAvailabilityRequest($tourId, $optionId, $localDateStart, $currency);
         }
         
-        return new SingleDayAvailabilityRequest($requestParams);
+        return new AvailabilityRequest($tourId, $optionId, $localDateStart);
     }
 
+    /**
+     * Summary of validateRequestParams
+     * @param array $requestParams
+     * @throws \App\Exceptions\AvailabilityRequestMissingParamException
+     * @throws \App\Exceptions\AvailabilityRequestInvalidParamException
+     * @return void
+     */
     public function validateRequestParams(array $requestParams): void
     {
         $missingParams = array_diff(self::REQUIRED_PARAMS, array_keys($requestParams));
@@ -81,7 +103,7 @@ class AvailabilityService
             }
         }
 
-        $this->productService->validateProductId($requestParams[AvailabilityService::PARAM_PRODUCT_ID]);
+        $this->productService->validateProductId($requestParams[AvailabilityService::PARAM_PRODUCT_ID], $requestParams[OctoAuthentication::FIELD_CHANNEL_ID]);
         
         
         $optionId = $requestParams[self::PARAM_OPTION_ID];
@@ -90,12 +112,12 @@ class AvailabilityService
         }
 
         $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START];
-        $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END];
 
         if ($this->validateDate($localDateStart) === false) {
             throw new AvailabilityRequestInvalidParamException('localeDateStart must be a valid date in format YYYY-MM-DD');
         }
 
+        $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
         if (!empty($localeDateEnd) && $this->validateDate($localDateEnd) === false) {
             throw new AvailabilityRequestInvalidParamException('localeDateEnd must be a valid date in format YYYY-MM-DD');
         }

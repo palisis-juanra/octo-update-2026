@@ -21,11 +21,11 @@ class ProductController extends Controller
     public TourCMSService $tourCMSService;
     public ProductService $productService;
     public JSONLogService $logger;
-    public function __construct(Request $request, TourCMSService $tourCMSService, ProductService $productService)
+    public function __construct(TourCMSService $tourCMSService, ProductService $productService, JSONLogService $logger)
     {
         $this->tourCMSService = $tourCMSService;
         $this->productService = $productService;
-        $this->logger = $this->loadLogger($request);
+        $this->logger = $logger;
     }
 
     public function index(Request $request): JsonResponse
@@ -43,36 +43,26 @@ class ProductController extends Controller
         }
     }
 
-    public function show(Request $request, $id): JsonResponse
+    public function show(Request $request, string $productId): JsonResponse
     {
         try {
             $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
-            if (!$this->productService->validateProductId($id, $channelId)) {
-                return OctoResponse::INVALID_PRODUCT_ID();
+            if (!$this->productService->validateProductId($productId, $channelId)) {
+                return OctoResponse::INVALID_PRODUCT_ID($productId);
             }
-            $product = $this->productService->find($id);
+            $product = $this->productService->find($productId);
             return new JsonResponse($this->productService->transform($product), Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();
         } catch (InvalidProductContentException $e) {
-            return OctoResponse::INVALID_PRODUCT_ID($e->getMessage());
+            return OctoResponse::INVALID_PRODUCT_ID($productId, $e->getMessage());
         } catch (NoMatchingDataException) {
-            return OctoResponse::INVALID_PRODUCT_ID();
+            return OctoResponse::INVALID_PRODUCT_ID($productId);
         } catch (APICallNotOKException) {
             return OctoResponse::INTERNAL_SERVER_ERROR();
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            $this->logger->info($e->getMessage() . '\n' . $e->getTraceAsString());
             return OctoResponse::INTERNAL_SERVER_ERROR();
         }
-    }
-
-    protected function loadLogger(Request $request)
-    { 
-        return new JSONLogService(
-            $request->get(OctoAuthentication::FIELD_CHANNEL_ID),
-            $request->get(OctoAuthentication::FIELD_MAID),
-            self::ENDPOINT_NAME,
-            $request->get(OctoAuthentication::FIELD_X_CORRELATION_ID),
-            $request->get(OctoAuthentication::FIELD_X_REQUEST_ID)
-        );
     }
 }
