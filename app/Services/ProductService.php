@@ -268,7 +268,7 @@ class ProductService
                 $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
                 $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_DEFAULT;
                 $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
-                if (isset($tour->cancellation_policy)) {
+                if (isset($tour->cancellation_policy) && !empty($tour->cancellation_policy)) {
                     $cancellationPoliciesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->cancellation_policy, 'policy');
                     $policy = $cancellationPoliciesFromXML[0];
                     if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
@@ -279,10 +279,10 @@ class ProductService
                             $optionCancellationCutoff .= "s";
                         }
                     } else {
-                        $this->logger->info("option {$optionId} cutoff info is empty or missing");
+                        $this->logger->info("option {$optionId} cancellationCutoff info is empty or missing");
                     }
                 } else {
-                    $this->logger->info("option {$optionId} cutoff field is missing");
+                    $this->logger->info("option {$optionId} cancellationCutoff field is missing");
                 }
                 $optionRequiredContactFields = $this->getOptionRequiredContactFields($tour);
                 $optionRestrictions = new stdClass();
