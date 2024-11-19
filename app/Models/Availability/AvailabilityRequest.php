@@ -3,10 +3,12 @@
 namespace App\Models\Availability;
 
 use App\Interfaces\BaseAvailabilityRequest;
+use App\Services\DateTimeService;
+use App\Services\OptionService;
 use App\Services\TourCMSService;
 use DateTime;
 
-class AvailabilityRequest implements BaseAvailabilityRequest
+class AvailabilityRequest extends BaseAvailabilityRequest
 {
     public string $tourId;
     public string $optionId;
@@ -38,7 +40,9 @@ class AvailabilityRequest implements BaseAvailabilityRequest
 
     protected function fetchDeparturesFromAPI(TourCMSService $tourCMSService): array
     {
-        $response = $tourCMSService->showTourDepartures($this->tourId,$this->localDateStart, $this->localDateEnd);
+        $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
+
+        $response = $tourCMSService->showTourDepartures($this->tourId,$this->localDateStart, $this->localDateEnd, $mappingQueryString);
 
         if (!isset($response->tour->dates_and_prices)) {
             return [];
@@ -56,15 +60,15 @@ class AvailabilityRequest implements BaseAvailabilityRequest
             
             $availability = new Availability(
                 (string) $departure->departure_id,
-                $this->getISODateTimeString((string) $departure->start_date, '00', '00'),
-                $this->getISODateTimeString((string) $departure->end_date, '23', '59'),
+                DateTimeService::getISODateTimeString((string) $departure->start_date, '00', '00'),
+                DateTimeService::getISODateTimeString((string) $departure->end_date, '23', '59'),
                 false,
                 $departure->spaces_remaining > 0,
                 $this->getOctoStatusFromTourCMSStatus((string) $departure->status),
                 null,
                 null,
-                999 /* tour max_booking_size */,
-                'CUTOFF',
+                $this->maxUnits,
+                $this->cutoff,
                 $departure->start_time ?? '00:00',
                 $departure->end_time ?? '23:59'                
             );
@@ -90,26 +94,6 @@ class AvailabilityRequest implements BaseAvailabilityRequest
         return $this->localDateEnd;
     }
 
-    public function setMaxUnits(int $maxUnits): void
-    {
-        $this->maxUnits = $maxUnits;
-    }
-
-    public function getMaxUnits(): int
-    {
-        return $this->maxUnits;
-    }
-
-    public function setCutoff(string $cutoff): void
-    {
-        $this->cutoff = $cutoff;
-    }
-
-    public function getCutoff(): string
-    {
-        return $this->cutoff;
-    }
-
     public function getOctoStatusFromTourCMSStatus(string $status): string
     {
         if ($status == self::TCMS_STATUS_OPEN || $status == self::TCMS_STATUS_ASKFIRST) {
@@ -119,11 +103,4 @@ class AvailabilityRequest implements BaseAvailabilityRequest
         return self::OCTO_STATUS_CLOSED;
     }
 
-    public function getISODateTimeString(string $day = 'now', string $hour = '00', string $minutes = '00'): string
-    {
-        $dateTime = new DateTime($day);
-        $dateTime->setTime($hour, $minutes);
-        
-        return $dateTime->format(DateTime::ATOM);
-    }
 }

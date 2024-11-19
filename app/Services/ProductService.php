@@ -7,6 +7,7 @@ use App\Http\Middleware\OctoAuthentication;
 use App\Models\Product;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
+use SimpleXMLElement;
 use SimpleXMLObject;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
@@ -141,7 +142,7 @@ class ProductService
     public function find(string $productId): Product
     {
         $tour = $this->findTourDataFromAPI($productId);
-        $this->logger->info(["message" => "Show tour response", "APIResponse" => $tour->asXML()]);
+        $this->logger->info(["message" => "Show tour response", "APIResponse" => $tour]);
         $product = $this->createProductFromTourXML($tour);
 
         return $product;
@@ -171,6 +172,8 @@ class ProductService
         $deliveryFormats = $this->getProductDeliveryFormats($tour);
         $deliveryMethods = $this->getProductDeliveryMethods($tour);
         $redemptionMethod = $this->getProductRedemptionMethod($tour);
+        //TODO: Uncomment when ready
+        //$utcCutoff = $this->getCutoff($tour);
         $options = [];
         if (isset($tour->tour_departure_structure->type)) {
             $options = $this->getProductOptions($tour, $tour->tour_departure_structure->type);
@@ -197,7 +200,9 @@ class ProductService
             $deliveryFormats,
             $deliveryMethods,
             $redemptionMethod,
-            $options
+            $options,
+            //TODO: mocked until have cutoff available
+            '2022-05-22T23:00:00Z'
         );
 
         return $product;
@@ -271,7 +276,7 @@ class ProductService
                 $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
                 if (isset($tour->cancellation_policy)) {
                     $cancellationPoliciesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->cancellation_policy, 'policy');
-                    $policy = $cancellationPoliciesFromXML[0];
+                    $policy = $cancellationPoliciesFromXML[0] ?? null;
                     if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
                         $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNITS[(string) $policy->type];
                         $optionCancellationCutoffAmount = (int) $policy->value;
@@ -473,7 +478,7 @@ class ProductService
         return true;
     }
 
-    protected function findTourDataFromAPI(string $productId): \SimpleXMLElement
+    protected function findTourDataFromAPI(string $productId): SimpleXMLElement
     {
         $apiCallParameters = $this->parseProductId($productId);
         $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId, $apiCallParameters->channelId);
@@ -481,7 +486,7 @@ class ProductService
         return $tour;
     }
 
-    protected function getProductLocale(\SimpleXMLElement $tour): string
+    protected function getProductLocale(SimpleXMLElement $tour): string
     {
         $defaultLocale = self::LOCALE_CODE_DEFAULT;
         $countries = [];
@@ -703,6 +708,11 @@ class ProductService
             $request->get(OctoAuthentication::FIELD_X_REQUEST_ID)
         );
     }
+
+    /*
+    //TODO: To be implemented when we have added cutoff to be accesible by agents in show tour endpoint
+    protected function getCutoff(SimpleXMLElement $tour): string {}
+    */
 
     /**
      * Summary of getTourIdFromProductId

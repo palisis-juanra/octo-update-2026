@@ -41,22 +41,23 @@ class AvailabilityController extends Controller
 
             $this->availabilityService->validateRequestParams($requestParams);
 
-            $octoCapabilities = $request->header('OctoCapabilities') ?? '';
+            $octoCapabilities = $request->header('Octo-Capabilities') ?? '';
             $availabilyRequest = $this->availabilityService->getAvailabilityRequest($requestParams, $octoCapabilities);
 
             $productId = $request->post('productId');
             $product = $this->productService->find($productId);
             
-            //$this->logger->info($product);
+            $optionId = $request->get(AvailabilityService::PARAM_OPTION_ID);
+            $option = $product->getOptionById($optionId);
 
-            $availabilyRequest->setMaxUnits(999);
-            $availabilyRequest->setCutoff('CUTOFF');
+            $availabilyRequest->setMaxUnits($option->restrictions->maxUnits ?? 10);
+            $availabilyRequest->setCutoff($product->getUtcCutoff());
 
-            $departures = $this->availabilityService->getAvailabilities($availabilyRequest);
+            $availabilities = $this->availabilityService->getAvailabilities($availabilyRequest);
 
-            $departuresData = $this->availabilityService->getAvailabilitiesTransformed($departures);
+            $availabilitiesData = $this->availabilityService->getAvailabilitiesTransformed($availabilities);
 
-            return new JsonResponse($departuresData, Response::HTTP_OK);
+            return new JsonResponse($availabilitiesData, Response::HTTP_OK);
 
         } catch (AvailabilityRequestMissingParamException $e) {
             return OctoResponse::BAD_REQUEST($e->getMessage());

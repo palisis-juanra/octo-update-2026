@@ -23,8 +23,9 @@ class Product extends Model
     protected array $deliveryMethods;
     protected string $redemptionMethod;
     protected array $options;
+    protected string $utcCutoff;
 
-    public function __construct(string $id, string $internalName, ?string $reference, string $locale, string $timeZone, bool $allowFreesale, bool $instantConfirmation, bool $instantDelivery, bool $availabilityRequired, string $availabilityType, array $deliveryFormats, array $deliveryMethods, string $redemptionMethod, array $options)
+    public function __construct(string $id, string $internalName, ?string $reference, string $locale, string $timeZone, bool $allowFreesale, bool $instantConfirmation, bool $instantDelivery, bool $availabilityRequired, string $availabilityType, array $deliveryFormats, array $deliveryMethods, string $redemptionMethod, array $options, string $utcCutoff)
     {
         $this->id = $id;
         $this->internalName = $internalName;
@@ -40,6 +41,7 @@ class Product extends Model
         $this->deliveryMethods = $deliveryMethods;
         $this->redemptionMethod = $redemptionMethod;
         $this->options = $options;
+        $this->utcCutoff = $utcCutoff;
     }
 
 
@@ -319,6 +321,37 @@ class Product extends Model
     public function setAvailabilityType($availabilityType)
     {
         $this->availabilityType = $availabilityType;
+
+        return $this;
+    }
+
+    public function getOptionById(string $id): object | null
+    {
+        foreach ($this->options as $option) {
+            if ((string) $option->id === $id) {
+                return $option;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the value of utcCutoff
+     */ 
+    public function getUtcCutoff()
+    {
+        return $this->utcCutoff;
+    }
+
+    /**
+     * Set the value of utcCutoff
+     *
+     * @return  self
+     */ 
+    public function setUtcCutoff($utcCutoff)
+    {
+        $this->utcCutoff = $utcCutoff;
 
         return $this;
     }

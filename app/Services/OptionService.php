@@ -35,4 +35,21 @@ class OptionService
 
         throw new InvalidOptionIdException($optionId);
     }
+
+    public static function getMappingQueryString(string $optionId): string
+    {
+        $optionSplitted = explode("|", $optionId);
+        $mappingType = $optionSplitted[0];
+        $mappingValue = $optionSplitted[1];
+
+        $mappingField = match($mappingType) {
+            "START_TIME" => 'start_time',
+            "DEPARTURE_CODE" => 'code',
+            "SUPPLIER_NOTE", "SUPPLIER_NOTE_PLUS_START_TIME" => 'supplier_note',
+        };
+
+        $queryString = "{$mappingField}={$mappingValue}";
+
+        return $queryString;
+    }
 }

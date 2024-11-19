@@ -22,13 +22,14 @@ class AvailabilityService
 
     const PARAM_PRODUCT_ID = 'productId';
     const PARAM_OPTION_ID = 'optionId';
+    const PARAM_LOCAL_DATE = 'localDate';
     const PARAM_LOCAL_DATE_START = 'localDateStart';
     const PARAM_LOCAL_DATE_END = 'localDateEnd';
+    const PARAM_UNITS = 'units';
     const PARAM_CURRENCY = 'currency';
     const REQUIRED_PARAMS = [
         self::PARAM_PRODUCT_ID,
-        self::PARAM_OPTION_ID,
-        self::PARAM_LOCAL_DATE_START
+        self::PARAM_OPTION_ID
     ];
 
     public function __construct(
@@ -66,20 +67,27 @@ class AvailabilityService
         $productId = $requestParams[self::PARAM_PRODUCT_ID] ?? '';
         $tourId = $this->productService->getTourIdFromProductId($productId) ?? '';
         $optionId = $requestParams[self::PARAM_OPTION_ID] ?? '';
+        $localDate = $requestParams[self::PARAM_LOCAL_DATE] ?? '';
         $localDateStart = $requestParams[self::PARAM_LOCAL_DATE_START] ?? '';
         $localDateEnd = $requestParams[self::PARAM_LOCAL_DATE_END] ?? '';
         $currency = $requestParams[self::PARAM_CURRENCY] ?? '';
+        $units = $requestParams[self::PARAM_UNITS] ?? [];
 
-        if (!empty($pricingHeader) && strtolower($octoCapabilities) === 'pricing') {
+        if (!empty($octoCapabilities) && strtolower($octoCapabilities) === 'pricing') {
             
-            if (!empty($localDateEnd)) {
+            if (!empty($localDateStart) && !empty($localDateEnd)) {
                 return new MultiDayPricingAvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, $currency);
             }
 
-            return new SingleDayPricingAvailabilityRequest($tourId, $optionId, $localDateStart, $currency);
+            return new SingleDayPricingAvailabilityRequest($tourId, $optionId, $localDateStart, $units, $currency);
         }
         
-        return new AvailabilityRequest($tourId, $optionId, $localDateStart);
+        if (!empty($localDateStart) && !empty($localDateEnd)) {
+            return new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd);
+        }
+
+        return new AvailabilityRequest($tourId, $optionId, $localDate);
+
     }
 
     /**
@@ -91,6 +99,7 @@ class AvailabilityService
      */
     public function validateRequestParams(array $requestParams): void
     {
+
         $missingParams = array_diff(self::REQUIRED_PARAMS, array_keys($requestParams));
 
         if (!empty($missingParams)) {
@@ -111,15 +120,25 @@ class AvailabilityService
             $this->optionService->validateOptionId($optionId);
         }
 
+        $localDate = $requestParams[AvailabilityService::PARAM_LOCAL_DATE] ?? '';
+
+        if (!empty($localDate)) {
+            if ($this->validateDate($localDate) === false) {
+                throw new AvailabilityRequestInvalidParamException('localDate must be a valid date in format YYYY-MM-DD');
+            }
+
+            return;
+        }
+        
         $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START];
 
         if ($this->validateDate($localDateStart) === false) {
-            throw new AvailabilityRequestInvalidParamException('localeDateStart must be a valid date in format YYYY-MM-DD');
+            throw new AvailabilityRequestInvalidParamException('localDateStart must be a valid date in format YYYY-MM-DD');
         }
 
         $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
         if (!empty($localeDateEnd) && $this->validateDate($localDateEnd) === false) {
-            throw new AvailabilityRequestInvalidParamException('localeDateEnd must be a valid date in format YYYY-MM-DD');
+            throw new AvailabilityRequestInvalidParamException('localDateEnd must be a valid date in format YYYY-MM-DD');
         }
 
     }
@@ -131,8 +150,4 @@ class AvailabilityService
         return $dateTime && strtolower($dateTime->format($format)) === strtolower($date);
     }
 
-    public function validateProductId(): void
-    {
-
-    }
 }
