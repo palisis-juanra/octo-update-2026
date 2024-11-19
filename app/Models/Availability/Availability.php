@@ -2,6 +2,7 @@
 
 namespace App\Models\Availability;
 
+use App\Models\Availability\Pricing\AvailabilityPricing;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +21,8 @@ class Availability extends Model
     protected string $utcCutoffAt;
     protected string $openingHoursFrom;
     protected string $openingHoursTo;
+    protected string $currency;
+    protected ?AvailabilityPricing $pricing;
 
     public function __construct(
         string $id, 
@@ -33,7 +36,9 @@ class Availability extends Model
         int $maxUnits, 
         string $utcCutoffAt, 
         string $openingHoursFrom, 
-        string $openingHoursTo
+        string $openingHoursTo,
+        string $currency = '',
+        AvailabilityPricing $pricing = null
     )
     {
         $this->id = $id;
@@ -48,6 +53,8 @@ class Availability extends Model
         $this->utcCutoffAt = $utcCutoffAt;
         $this->openingHoursFrom = $openingHoursFrom; 
         $this->openingHoursTo = $openingHoursTo;
+        $this->currency = $currency;
+        $this->pricing = $pricing;
     }
 
     /**
@@ -286,6 +293,46 @@ class Availability extends Model
     public function setOpeningHoursTo($openingHoursTo): self
     {
         $this->openingHoursTo = $openingHoursTo;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of currency
+     */ 
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
+    /**
+     * Set the value of currency
+     *
+     * @return  self
+     */ 
+    public function setCurrency($currency): static
+    {
+        $this->currency = $currency;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of pricing
+     */ 
+    public function getPricing(): ?AvailabilityPricing
+    {
+        return $this->pricing;
+    }
+
+    /**
+     * Set the value of pricing
+     *
+     * @return  self
+     */ 
+    public function setPricing(?AvailabilityPricing $pricing)
+    {
+        $this->pricing = $pricing;
 
         return $this;
     }

@@ -147,7 +147,7 @@ class ProductService
     public function find(string $productId): Product
     {
         $tour = $this->findTourDataFromAPI($productId);
-        $this->logger->info(["message" => "Show tour response", "APIResponse" => $tour->asXML()]);
+        $this->logger->info(["message" => "Show tour response", "APIResponse" => $tour]);
         $product = $this->createProductFromTourXML($tour);
 
         return $product;
@@ -177,6 +177,8 @@ class ProductService
         $deliveryFormats = $this->getProductDeliveryFormats($tour);
         $deliveryMethods = $this->getProductDeliveryMethods($tour);
         $redemptionMethod = $this->getProductRedemptionMethod($tour);
+        //TODO: Uncomment when ready
+        //$utcCutoff = $this->getCutoff($tour);
         $options = [];
         if (isset($tour->tour_departure_structure->type)) {
             $options = $this->getProductOptions($tour);
@@ -284,7 +286,7 @@ class ProductService
                 $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
                 if (isset($tour->cancellation_policy) && isset($tour->cancellation_policy->policy)) {
                     $cancellationPoliciesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->cancellation_policy, 'policy');
-                    $policy = $cancellationPoliciesFromXML[0];
+                    $policy = $cancellationPoliciesFromXML[0] ?? null;
                     if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
                         $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNITS[(string) $policy->type];
                         $optionCancellationCutoffAmount = (int) $policy->value;
@@ -504,7 +506,7 @@ class ProductService
         return $tour;
     }
 
-    protected function getProductLocale(\SimpleXMLElement $tour): string
+    protected function getProductLocale(SimpleXMLElement $tour): string
     {
         $defaultLocale = self::LOCALE_CODE_DEFAULT;
         $countries = [];
@@ -730,6 +732,11 @@ class ProductService
             $request->get(OctoAuthentication::FIELD_X_REQUEST_ID)
         );
     }
+
+    /*
+    //TODO: To be implemented when we have added cutoff to be accesible by agents in show tour endpoint
+    protected function getCutoff(SimpleXMLElement $tour): string {}
+    */
 
     /**
      * Summary of getTourIdFromProductId

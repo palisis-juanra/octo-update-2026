@@ -303,4 +303,35 @@ class Product extends Model
 
         return $this;
     }
+
+    public function getOptionById(string $id): object | null
+    {
+        foreach ($this->options as $option) {
+            if ((string) $option->id === $id) {
+                return $option;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the value of utcCutoff
+     */ 
+    public function getUtcCutoff()
+    {
+        return $this->utcCutoff;
+    }
+
+    /**
+     * Set the value of utcCutoff
+     *
+     * @return  self
+     */ 
+    public function setUtcCutoff($utcCutoff)
+    {
+        $this->utcCutoff = $utcCutoff;
+
+        return $this;
+    }
 }

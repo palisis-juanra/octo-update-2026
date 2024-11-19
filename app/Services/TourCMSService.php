@@ -7,8 +7,12 @@ use App\Exceptions\FailSignatureException;
 use App\Http\Middleware\OctoAuthentication;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
+use DateInterval;
+use DatePeriod;
+use DateTime;
 use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
+use stdClass;
 use TourCMS\Utils\TourCMS;
 
 class TourCMSService
@@ -19,13 +23,21 @@ class TourCMSService
     const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
     const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = 'extended_tour_info=1';
+    const SHOW_TOUR_DEPARTURES_CLOSED_PARAM = 'show_closed_departures=true';
+    const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
+
     private TourCMS $tourCMS;
+    private TourCMSMulti $tourCMSMulti;
     protected string $channelId;
 
     public function __construct(string $maid, string $APIKey)
     {
         $this->tourCMS = new TourCMS($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMS->set_base_url($this->getAPIBaseUrl());
+
+        $this->tourCMSMulti = new TourCMSMulti($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
+        $this->tourCMSMulti->set_base_url($this->getAPIBaseUrl());
+
         $this->channelId = Request::get(OctoAuthentication::FIELD_CHANNEL_ID);
     }
 
@@ -60,20 +72,55 @@ class TourCMSService
         return $response;
     }
 
-    public function showTourDepartures(string $tourId, string $startDate, string $endDate = ''): SimpleXMLElement
+    public function showTourDepartures(string $tourId, string $startDate, string $endDate = '', string $extraParams = null): SimpleXMLElement
     {
-        $queryString = "show_closed_departures=true";
+        $queryString = self::SHOW_TOUR_DEPARTURES_CLOSED_PARAM;
         
         if (!empty($endDate)) {
             $queryString .= "&start_date_start={$startDate}&start_date_end={$endDate}";
         } else {
             $queryString .= "&start_date_start={$startDate}&start_date_end={$startDate}";
         }
+
+        if (!empty($extraParams)) {
+            if (substr($extraParams, 0, 1) != '&') {
+                $queryString .= '&';
+            }
+
+            $queryString .= $extraParams;
+        }
+
+        error_log($queryString);
         
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response); 
 
         return $response;
+    }
+
+    public function multiCheckAvail(string $tourId, string $startDate, string $endDate, string $ratesQueryString): array
+    {
+        $requestHandler = new stdClass;
+        $requestHandler->requestArray = [];
+        
+        $startDateTime = new DateTime($startDate);
+        $endDateTime = new DateTime($endDate);
+        $endDateTime->setTime(0,0,1);
+
+        $interval = DateInterval::createFromDateString('1 day');
+        $period = new DatePeriod($startDateTime, $interval, $endDateTime);
+
+
+        foreach ($period as $dateTime) {
+            $date = $dateTime->format("Y-m-d");
+            $params = "date={$date}&{$ratesQueryString}";
+            $requestHandler->requestArray[$date] = $this->tourCMSMulti->check_tour_availability($params, $tourId, $this->channelId);
+        }
+
+        $responses = $this->tourCMSMulti->proccessRequests($requestHandler);
+
+        return (array) $responses->requestArray ?? [];
+        
     }
 
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
