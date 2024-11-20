@@ -24,6 +24,7 @@ class TourCMSService
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
     const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = 'extended_tour_info=1';
     const SHOW_TOUR_DEPARTURES_CLOSED_PARAM = 'show_closed_departures=true';
+    const SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM = 'distinct_start_dates=1';
     const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
 
     private TourCMS $tourCMS;
@@ -94,6 +95,30 @@ class TourCMSService
         
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response); 
+
+        return $response;
+    }
+
+    public function showTourDatesAndDeals(string $tourId, string $startDate, string $endDate = '', string $extraParams = null): SimpleXMLElement
+    {
+        $queryString = self::SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM;
+
+        if (!empty($endDate)) {
+            $queryString .= "&startdate_start={$startDate}&startdate_end={$endDate}";
+        } else {
+            $queryString .= "&startdate_start={$startDate}&startdate_end={$startDate}";
+        }
+
+        if (!empty($extraParams)) {
+            if (substr($extraParams, 0, 1) != '&') {
+                $queryString .= '&';
+            }
+
+            $queryString .= $extraParams;
+        }
+
+        $response = $this->tourCMS->show_tour_datesanddeals($tourId, $this->channelId, $queryString);
+        $response = $this->handleResponse($response);
 
         return $response;
     }

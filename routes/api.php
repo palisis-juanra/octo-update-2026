@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AvailabilityCalendarController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Middleware\OctoAuthentication;
@@ -17,3 +18,5 @@ Route::get('products', [ProductController::class, 'index'])->middleware([OctoAut
 Route::get('products/{id}', [ProductController::class, 'show'])->middleware([OctoAuthentication::class]);
 
 Route::post('/availability', [AvailabilityController::class, 'index'])->middleware([OctoAuthentication::class]);
+
+Route::post('/availability/calendar', [AvailabilityCalendarController::class, 'index'])->middleware([OctoAuthentication::class]);

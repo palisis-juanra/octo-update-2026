@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Transformers\BaseTransformer;
+use stdClass;
 
 class AvailabilityTransformer extends BaseTransformer
 {
@@ -48,5 +49,20 @@ class AvailabilityTransformer extends BaseTransformer
         }
 
         return $data;
+    }
+
+    public function calendarTransform($availability): array
+    {
+        return [
+            'localDate' => (string) explode('T', $availability->getLocalDateTimeStart())[0], 
+            'available' => $availability->getAvailable(),
+            'status' => $availability->getStatus(),
+            'vacancies' => $availability->getVacancies(),
+            'capacity' => $availability->getCapacity(),
+            'openingHours' => (object) [
+                'from' => $availability->getOpeningHoursFrom(),
+                'to' => $availability->getOpeningHoursTo() 
+            ]
+        ];
     }
 }
