@@ -59,9 +59,11 @@ class AvailabilityTransformer extends BaseTransformer
             'status' => $availability->getStatus(),
             'vacancies' => $availability->getVacancies(),
             'capacity' => $availability->getCapacity(),
-            'openingHours' => (object) [
+            'openingHours' => [
+                 (object) [
                 'from' => $availability->getOpeningHoursFrom(),
                 'to' => $availability->getOpeningHoursTo() 
+                ]
             ]
         ];
     }
