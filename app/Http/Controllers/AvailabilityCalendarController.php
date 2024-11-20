@@ -60,7 +60,7 @@ class AvailabilityCalendarController extends Controller
                                 new OA\Property(property: 'localDate', type: 'string', pattern: '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', description: 'A single date to query.', example: '2022-05-12'),
                                 new OA\Property(property: 'available', type: 'boolean', description: 'Whether there is availability for this date / slot.'),
                                 new OA\Property(property: 'status', type: 'string', description: 'The status of that date.', example: 'AVAILABLE'),
-                                new OA\Property(property: 'vacancies', type: ['null', 'integer'], description: 'Shared pool for all unit types in the option. Null by default or if not specified.'),
+                                new OA\Property(property: 'vacancies', type: ['null', 'integer'], description: 'Total number of remaining vacancies in the option. Null if unlimited or not specified.'),
                                 new OA\Property(property: 'capacity', type: ['null', 'integer'], description: 'The total capacity on this day. Null by default or if not specified.'),
                                 new OA\Property(
                                     property: 'openingHours',

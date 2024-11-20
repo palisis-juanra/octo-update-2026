@@ -114,7 +114,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
                 false,
                 $date->spaces_remaining > 0,
                 $this->getOctoStatusFromTourCMSStatus((string) $date->status),
-                null,
+                $date->spaces_remaining != "UNLIMITED" ? (int) $date->spaces_remaining : null,
                 null,
                 999 /* tour max_booking_size */,
                 'CUTOFF',
