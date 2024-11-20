@@ -26,12 +26,6 @@ abstract class BaseAvailabilityRequest
     abstract public function getAvailabilities(TourCMSService $tourCMSService): array;
 
     /**
-     * Get availabilities for a calendar
-     * @return array of App\Models\Availability
-     */
-    abstract public function getCalendarAvailabilities(TourCMSService $tourCMSService): array;
-
-    /**
      * Map between TourCMS departure status and Octo availability status
      * @return string
      */
