@@ -38,14 +38,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $availabilities;
     }
 
-    public function getCalendarAvailabilities(TourCMSService $tourCMSService): array
-    {
-        $datesAndDeals = $this->fetchDatesAndDealsFromAPI($tourCMSService);
-        $availabilities = $this->getAvailabilitiesFromDatesAndDeals($datesAndDeals);
-
-        return $availabilities;
-    }
-
     protected function fetchDeparturesFromAPI(TourCMSService $tourCMSService): array
     {
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
@@ -59,21 +51,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
 
         return $departures;
-    }
-
-    protected function fetchDatesAndDealsFromAPI(TourCMSService $tourCMSService): array
-    {
-        $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
-
-        $response = $tourCMSService->showTourDatesAndDeals($this->tourId, $this->localDateStart, $this->localDateEnd, $mappingQueryString);
-
-        if (!isset($response->dates_and_prices)) {
-            return [];
-        }
-
-        $datesAndDeals = $tourCMSService->getArrayFromXmlNode($response->dates_and_prices, 'date');
-
-        return $datesAndDeals;
     }
 
     protected function getAvailabilitiesFromDepartures(array $departures)
@@ -98,32 +75,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availabilities[] = $availability;
             
         } 
-
-        return $availabilities;
-    }
-
-    protected function getAvailabilitiesFromDatesAndDeals(array $datesAndDeals): array
-    {
-        $availabilities = [];
-
-        foreach ($datesAndDeals as $date) {
-            $availability = new Availability(
-                "",
-                DateTimeService::getISODateTimeString((string) $date->start_date, '00', '00'),
-                DateTimeService::getISODateTimeString((string) $date->end_date, '23', '59'),
-                false,
-                $date->spaces_remaining > 0,
-                $this->getOctoStatusFromTourCMSStatus((string) $date->status),
-                $date->spaces_remaining != "UNLIMITED" ? (int) $date->spaces_remaining : null,
-                null,
-                999 /* tour max_booking_size */,
-                'CUTOFF',
-                $date->start_time ?? '00:00',
-                $date->end_time ?? '23:59'                
-            );
-            $availabilities[] = $availability;
-            
-        }
 
         return $availabilities;
     }

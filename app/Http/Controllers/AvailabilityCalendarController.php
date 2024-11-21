@@ -18,13 +18,11 @@ use OpenApi\Attributes as OA;
 class AvailabilityCalendarController extends Controller
 {
     public AvailabilityCalendarService $availabilityCalendarService;
-    public AvailabilityService $availabilityService;
     public JSONLogService $logger;
 
-    public function __construct(AvailabilityCalendarService $availabilityCalendarService, AvailabilityService $availabilityService, JSONLogService $logger)
+    public function __construct(AvailabilityCalendarService $availabilityCalendarService, JSONLogService $logger)
     {
         $this->availabilityCalendarService = $availabilityCalendarService;
-        $this->availabilityService = $availabilityService;
         $this->logger = $logger;
     }
 
@@ -90,10 +88,10 @@ class AvailabilityCalendarController extends Controller
             $requestParams = $request->post();
             $requestParams['channelId'] = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
 
-            $this->availabilityService->validateRequestParams($requestParams);
+            $this->availabilityCalendarService->validateRequestParams($requestParams);
             
             $octoCapabilities = $request->header('OctoCapabilities') ?? '';
-            $availabilityRequest = $this->availabilityService->getAvailabilityRequest($requestParams, $octoCapabilities);
+            $availabilityRequest = $this->availabilityCalendarService->getAvailabilityRequest($requestParams, $octoCapabilities);
 
             $calendar = $this->availabilityCalendarService->getCalendar($availabilityRequest);
 
