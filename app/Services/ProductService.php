@@ -7,6 +7,7 @@ use App\Http\Middleware\OctoAuthentication;
 use App\Models\Product;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
+use SimpleXMLElement;
 use SimpleXMLObject;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
@@ -101,6 +102,9 @@ class ProductService
     const REQUIRED_FIELD_SCOPE_LEADPAX = 'leadpax';
     const REQUIRED_FIELD_SCOPE_OTHERPAX = 'otherpax';
     const LOCALE_CODE_DEFAULT = 'en-GB';
+    const PAX_COUNT_DEFAULT = 1;
+    const MAX_AGE_DEFAULT = 99;
+    const MIN_AGE_DEFAULT = 1;
     const ERROR_AVAILABILITY_TYPE_MISSING = 'availabilityType field is missing';
     const ERROR_DELIVERY_FORMATS_MISSING = 'delivery formats field is missing';
     const ERROR_DELIVERY_FORMATS_EMPTY = 'delivery formats field is empty';
@@ -110,13 +114,15 @@ class ProductService
     const ERROR_REDEMPTION_METHOD_MISSING_OR_EMPTY = 'redemption method field is missing or empty';
     const ERROR_REFERENCE_MISSING = 'reference field is missing';
     const ERROR_TIMEZONE_MISSING = 'timeZone field is missing';
-    const ERROR_TOUR_MAPPING_MISSING = 'the tour mapping is missing';
-    private $errors = [];
-
+    const ERROR_TOUR_MAPPING_MISSING = 'the tour mapping is missing';    
     public TourCMSService $tourCMSService;
     public ProductTransformer $productTransformer;
     public JSONLogService $logger;
     public LocaleService $localeService;
+
+    private $errors = [];
+    private $info = [];
+
     public function __construct(Request $request, TourCMSService $tourCMSService)
     {
         $this->tourCMSService = $tourCMSService;
@@ -148,13 +154,13 @@ class ProductService
 
     public function createProductFromTourXML(\SimpleXMLElement $tour): Product
     {
-        $id = "{$tour->distribution_identifier}|{$tour->channel_id}";
+        $id = $this->buildProductId($tour);
         $internalName = (string) $tour->tour_name;
         $reference = null;
         if (isset($tour->supplier_tour_code)) {
             $reference = $tour->supplier_tour_code;
         } else {
-            $this->logger->info(self::ERROR_REFERENCE_MISSING);
+            $this->info[] = self::ERROR_REFERENCE_MISSING;
         }
         $locale = $this->getProductLocale($tour);
         $timeZone = $this->getProductTimeZone($tour);
@@ -172,39 +178,47 @@ class ProductService
         $redemptionMethod = $this->getProductRedemptionMethod($tour);
         $options = [];
         if (isset($tour->tour_departure_structure->type)) {
-            $options = $this->getProductOptions($tour, $tour->tour_departure_structure->type);
+            $options = $this->getProductOptions($tour);
         } else {
-            $this->manageError(self::ERROR_TOUR_MAPPING_MISSING);
+            $this->errors[] = self::ERROR_TOUR_MAPPING_MISSING;
         }
 
         if (count($this->errors) != 0) {
             $errorString = implode(', ', $this->errors);
+            $this->logError("The content of the product is invalid: {$errorString}", null, ['productId' => $id]);
             throw new InvalidProductContentException("The content of the product is invalid: {$errorString}");
         }
 
-        $product = new Product(
-            $id,
-            $internalName,
-            $reference,
-            $locale,
-            $timeZone,
-            $allowFreesale,
-            $instantConfirmation,
-            $instantDelivery,
-            $availabilityRequired,
-            $availabilityType,
-            $deliveryFormats,
-            $deliveryMethods,
-            $redemptionMethod,
-            $options
-        );
+        if (count($this->info) != 0) {
+            $infoString = implode(', ', $this->info);
+            $this->logInfo("The product is missing some non-critical information: {$infoString}", null, ['productId' => $id]);
+        }
+
+        $product = new Product();
+
+        $product->setId($id)
+                ->setInternalName($internalName)
+                ->setReference($reference)
+                ->setLocale($locale)
+                ->setTimeZone($timeZone)
+                ->setAllowFreesale($allowFreesale)
+                ->setInstantConfirmation($instantConfirmation)
+                ->setInstantDelivery($instantDelivery)
+                ->setAvailabilityRequired($availabilityRequired)
+                ->setAvailabilityType($availabilityType)
+                ->setDeliveryFormats($deliveryFormats)
+                ->setDeliveryMethods($deliveryMethods)
+                ->setRedemptionMethod($redemptionMethod)
+                ->setOptions($options);
 
         return $product;
     }
 
-    public function getProductOptions($tour, $structureType): array
+    public function getProductOptions(\SimpleXMLElement $tour): array
     {
         $options = [];
+
+        $structureType = $tour->tour_departure_structure->type;
 
         if ($structureType != self::MAPPING_STRUCTURE_TYPE_NOTSET) {
             $numOptions = 1;
@@ -231,17 +245,16 @@ class ProductService
                     if (isset($tour->supplier_tour_code)) {
                         $optionInternalName .= (string) $tour->supplier_tour_code;
                     } else {
-                        $this->logger->info("option {$optionId} internalName field is missing");
+                        $this->info[] = "option {$optionId} internalName field is missing";
                     }
                 } else {
-                    $this->logger->info("option {$optionId} internalName field is missing");
+                    $this->info[] = "option {$optionId} internalName field is missing";
                 }
-                // As of now, always null since supplier_tour_code is operators only.
                 $optionReference = null;
                 if (isset($tour->supplier_tour_code)) {
                     $optionReference = (string) $tour->supplier_tour_code;
                 } else {
-                    $this->logger->info("option {$optionId} reference field is missing");
+                    $this->info[] = "option {$optionId} reference field is missing";
                 }
                 // TODO add self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME case when fixed
                 $optionAvailabilityLocalStartTimes = [];
@@ -263,12 +276,12 @@ class ProductService
                         }
                     }
                 } else {
-                    $this->logger->info("option {$optionId} availabilityLocalStartTimes fields are not present because of invalid mapping structure");
+                    $this->info[] = "option {$optionId} availabilityLocalStartTimes fields are not present because of invalid mapping structure";
                 }
                 $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
                 $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_DEFAULT;
                 $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
-                if (isset($tour->cancellation_policy) && !empty($tour->cancellation_policy)) {
+                if (isset($tour->cancellation_policy) && isset($tour->cancellation_policy->policy)) {
                     $cancellationPoliciesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->cancellation_policy, 'policy');
                     $policy = $cancellationPoliciesFromXML[0];
                     if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
@@ -279,10 +292,10 @@ class ProductService
                             $optionCancellationCutoff .= "s";
                         }
                     } else {
-                        $this->logger->info("option {$optionId} cancellationCutoff info is empty or missing");
+                        $this->info[] = "option {$optionId} cancellationCutoff info is empty or missing";
                     }
                 } else {
-                    $this->logger->info("option {$optionId} cancellationCutoff field is missing");
+                    $this->info[] = "option {$optionId} cancellationCutoff field is missing";
                 }
                 $optionRequiredContactFields = $this->getOptionRequiredContactFields($tour);
                 $optionRestrictions = new stdClass();
@@ -313,7 +326,7 @@ class ProductService
                 $options[] = $option;
             }
         } else {
-            $this->manageError(self::ERROR_DEPARTURE_STRUCTURE_NOT_SET);
+            $this->errors[] = self::ERROR_DEPARTURE_STRUCTURE_NOT_SET;
         }
         return $options;
     }
@@ -331,20 +344,20 @@ class ProductService
         }
         $ratesFromXML = $this->tourCMSService->getArrayFromXmlNode($parent, 'rate');
 
-        if (count($ratesFromXML) != 0) {
+        if (count($ratesFromXML) > 0) {
             foreach ($ratesFromXML as $rate) {
-                $unitId = "{$tour->distribution_identifier}|{$tour->channel_id}|{$rate->rate_id}";
+                $unitId = $this->buildUnitId($tour, $rate);
                 $unitInternalName = "";
                 if (isset($rate->label_1)) {
                     $unitInternalName = (string) $rate->label_1;
                 } else {
-                    $this->logger->info("unit {$unitId} internalName field is missing");
+                    $this->info[] = "unit {$unitId} internalName field is missing";
                 }
                 $unitReference = null;
                 if (isset($rate->rate_code)) {
                     $unitReference = (string) $rate->rate_code;
                 } else {
-                    $this->logger->info("unit {$unitId} reference field is missing");
+                    $this->info[] = "unit {$unitId} reference field is missing";
                 }
                 $unitType = "";
                 if (isset($rate->agecat)) {
@@ -352,24 +365,24 @@ class ProductService
                     if (array_key_exists($agecat, self::UNIT_TYPES)) {
                         $unitType = self::UNIT_TYPES[$agecat];
                     } else {
-                        $this->logger->info("unit {$unitId} invalid type: {$agecat}");
+                        $this->info[] = "unit {$unitId} invalid type: {$agecat}";
                     }
                 } else {
-                    $this->logger->info("unit {$unitId} type field is missing");
+                    $this->info[] = "unit {$unitId} type field is missing";
                 }
                 $unitRequiredContactFields = $this->getUnitRequiredContactFields($tour);
                 $unitRestrictions = new stdClass();
-                $unitRestrictions->minAge = 1;
+                $unitRestrictions->minAge = self::MIN_AGE_DEFAULT;
                 if (isset($rate->agerange_min)) {
                     $unitRestrictions->minAge = (int) $rate->agerange_min;
                 } else {
-                    $this->logger->info("unit {$unitId} restrictions minAge field is missing");
+                    $this->info[] = "unit {$unitId} restrictions minAge field is missing";
                 }
-                $unitRestrictions->maxAge = 99;
+                $unitRestrictions->maxAge = self::MAX_AGE_DEFAULT;
                 if (isset($rate->agerange_max)) {
                     $unitRestrictions->maxAge = (int) $rate->agerange_max;
                 } else {
-                    $this->logger->info("unit {$unitId} restrictions maxAge field is missing");
+                    $this->info[] = "unit {$unitId} restrictions maxAge field is missing";
                 }
                 $unitRestrictions->idRequired = false;
                 $unitRestrictions->minQuantity = null;
@@ -380,7 +393,7 @@ class ProductService
                 if (isset($rate->maximum)) {
                     $unitRestrictions->maxQuantity = (int) $rate->maximum;
                 }
-                $unitRestrictions->paxCount = 1;
+                $unitRestrictions->paxCount = self::PAX_COUNT_DEFAULT;
                 // Currently unsupported, empty by default.
                 $unitRestrictions->accompaniedBy = [];
 
@@ -440,10 +453,10 @@ class ProductService
 
     public function isTourValidForProductList(\SimpleXMLElement $tour): bool
     {
-        $id = "{$tour->distribution_identifier}|{$tour->channel_id}";
+        $id = $this->buildProductId($tour);
         // Invalid timezone
         if (!isset($tour->start_timezone) && !isset($tour->end_timezone) && !isset($tour->account_timezone)) {
-            $this->logger->info("skipped product {$id}: missing timeZone field.");
+            $this->logInfo("skipped product {$id}: missing timeZone field.");
             return false;
         }
         // Invalid delivery formats
@@ -456,20 +469,30 @@ class ProductService
         }
         // Invalid redemption method
         if (!isset($tour->redemption_method) || empty($tour->redemption_method)) {
-            $this->logger->info("skipped product {$id}: redemption method field is missing or empty.");
+            $this->logInfo("skipped product {$id}: redemption method field is missing or empty.");
             return false;
         }
         if (!in_array($tour->redemption_method, self::REDEMPTION_METHODS)) {
             $redemptionMethod = (string) $tour->redemption_method;
-            $this->logger->info("skipped product {$id}: invalid redemption method: {$redemptionMethod}.");
+            $this->logInfo("skipped product {$id}: invalid redemption method: {$redemptionMethod}.");
             return false;
         }
         // Invalid tour mapping
         if (!isset($tour->tour_departure_structure->type) || $tour->tour_departure_structure->type == self::MAPPING_STRUCTURE_TYPE_NOTSET) {
-            $this->logger->info("skipped product {$id}: the tour mapping is missing or is not set.");
+            $this->logInfo("skipped product {$id}: the tour mapping is missing or is not set.");
             return false;
         }
         return true;
+    }
+
+    public function buildProductId(\SimpleXMLElement $tour): string
+    {
+        return "{$tour->distribution_identifier}|{$tour->channel_id}";
+    }
+    
+    public function buildUnitId(\SimpleXMLElement $tour, \SimpleXMLElement $rate): string
+    {
+        return "{$tour->distribution_identifier}|{$rate->rate_id}";
     }
 
     protected function findTourDataFromAPI(string $productId): \SimpleXMLElement
@@ -515,7 +538,7 @@ class ProductService
         } else if (isset($tour->end_timezone) || isset($tour->account_timezone)) {
             $timeZone = isset($tour->end_timezone) ? (string) $tour->end_timezone : (string) $tour->account_timezone;
         } else {
-            $this->manageError(self::ERROR_TIMEZONE_MISSING);
+            $this->errors[] = self::ERROR_TIMEZONE_MISSING;
         }
         return $timeZone;
     }
@@ -530,7 +553,7 @@ class ProductService
                 $availabilityType = self::AVAILABILITY_TYPE_OPENING_HOURS;
             }
         } else {
-            $this->logger->info(self::ERROR_AVAILABILITY_TYPE_MISSING);
+            $this->info[] = self::ERROR_AVAILABILITY_TYPE_MISSING;
         }
         return $availabilityType;
     }
@@ -545,14 +568,14 @@ class ProductService
                     if (array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
                         $deliveryFormats[] = self::DELIVERY_FORMATS[(string) $deliveryFormat];
                     } else {
-                        $this->manageError("invalid delivery format: {$deliveryFormat}");
+                        $this->errors[] = "invalid delivery format: {$deliveryFormat}";
                     }
                 }
             } else {
-                $this->manageError(self::ERROR_DELIVERY_FORMATS_EMPTY);
+                $this->errors[] = self::ERROR_DELIVERY_FORMATS_EMPTY;
             }
         } else {
-            $this->manageError(self::ERROR_DELIVERY_FORMATS_MISSING);
+            $this->errors[] = self::ERROR_DELIVERY_FORMATS_MISSING;
         }
         return $deliveryFormats;
     }
@@ -567,14 +590,14 @@ class ProductService
                     if (in_array($deliveryMethod, self::DELIVERY_METHODS)) {
                         $deliveryMethods[] = (string) $deliveryMethod;
                     } else {
-                        $this->manageError("invalid delivery method: {$deliveryMethod}");
+                        $this->errors[] = "invalid delivery method: {$deliveryMethod}";
                     }
                 }
             } else {
-                $this->manageError(self::ERROR_DELIVERY_METHODS_EMPTY);
+                $this->errors[] = self::ERROR_DELIVERY_METHODS_EMPTY;
             }
         } else {
-            $this->manageError(self::ERROR_DELIVERY_METHODS_MISSING);
+            $this->errors[] = self::ERROR_DELIVERY_METHODS_MISSING;
         }
         return $deliveryMethods;
     }
@@ -586,10 +609,10 @@ class ProductService
             if (in_array($tour->redemption_method, self::REDEMPTION_METHODS)) {
                 $redemptionMethod = (string) $tour->redemption_method;
             } else {
-                $this->manageError("invalid redemption method: {$tour->redemption_method}");
+                $this->errors[] = "invalid redemption method: {$tour->redemption_method}";
             }
         } else {
-            $this->manageError(self::ERROR_REDEMPTION_METHOD_MISSING_OR_EMPTY);
+            $this->errors[] = self::ERROR_REDEMPTION_METHOD_MISSING_OR_EMPTY;
         }
         return $redemptionMethod;
     }
@@ -644,27 +667,31 @@ class ProductService
         return $requiredFields;
     }
 
-    protected function manageError(string $errorMessage): void
+    protected function logError(string $errorMessage, ?string $logChannel = null, array $extraParams = []): void
     {
-        $this->logger->error($errorMessage);
-        $this->errors[] = $errorMessage;
+        $this->logger->error($errorMessage, $logChannel, $extraParams);
+    }
+
+    protected function logInfo(string $infoMessage, ?string $logChannel = null, array $extraParams = []): void
+    {
+        $this->logger->info($infoMessage, $logChannel, $extraParams);
     }
 
     protected function areTourDeliveryFormatsValidForProductList(\SimpleXMLElement $tour): bool
     {
-        $id = "{$tour->distribution_identifier}|{$tour->channel_id}";
+        $id = $this->buildProductId($tour);
         if (!isset($tour->delivery_formats)) {
-            $this->logger->info("skipped product {$id}: delivery formats field is missing.");
+            $this->logInfo("skipped product {$id}: delivery formats field is missing.");
             return false;
         }
         $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
         if (empty($deliveryFormatsFromXML)) {
-            $this->logger->info("skipped product {$id}: delivery formats field is empty.");
+            $this->logInfo("skipped product {$id}: delivery formats field is empty.");
             return false;
         }
         foreach ($deliveryFormatsFromXML as $deliveryFormat) {
             if (!in_array($deliveryFormat, self::DELIVERY_FORMATS)) {
-                $this->logger->info("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
+                $this->logInfo("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
                 return false;
             }
         }
@@ -673,19 +700,19 @@ class ProductService
 
     protected function areTourDeliveryMethodsValidForProductList(\SimpleXMLElement $tour): bool
     {
-        $id = "{$tour->distribution_identifier}|{$tour->channel_id}";
+        $id = $this->buildProductId($tour);
         if (!isset($tour->delivery_methods)) {
-            $this->logger->info("skipped product {$id}: delivery methods field is missing.");
+            $this->logInfo("skipped product {$id}: delivery methods field is missing.");
             return false;
         }
         $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
         if (empty($deliveryMethodsFromXML)) {
-            $this->logger->info("skipped product {$id}: delivery methods field is empty.");
+            $this->logInfo("skipped product {$id}: delivery methods field is empty.");
             return false;
         }
         foreach ($deliveryMethodsFromXML as $deliveryMethod) {
             if (!in_array($deliveryMethod, self::DELIVERY_METHODS)) {
-                $this->logger->info("skipped product {$id}: invalid delivery method: {$deliveryMethod}.");
+                $this->logInfo("skipped product {$id}: invalid delivery method: {$deliveryMethod}.");
                 return false;
             }
         }

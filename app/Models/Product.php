@@ -24,25 +24,6 @@ class Product extends Model
     protected string $redemptionMethod;
     protected array $options;
 
-    public function __construct(string $id, string $internalName, ?string $reference, string $locale, string $timeZone, bool $allowFreesale, bool $instantConfirmation, bool $instantDelivery, bool $availabilityRequired, string $availabilityType, array $deliveryFormats, array $deliveryMethods, string $redemptionMethod, array $options)
-    {
-        $this->id = $id;
-        $this->internalName = $internalName;
-        $this->reference = $reference;
-        $this->locale = $locale;
-        $this->timeZone = $timeZone;
-        $this->allowFreesale = $allowFreesale;
-        $this->instantConfirmation = $instantConfirmation;
-        $this->instantDelivery = $instantDelivery;
-        $this->availabilityRequired = $availabilityRequired;
-        $this->availabilityType = $availabilityType;
-        $this->deliveryFormats = $deliveryFormats;
-        $this->deliveryMethods = $deliveryMethods;
-        $this->redemptionMethod = $redemptionMethod;
-        $this->options = $options;
-    }
-
-
     /**
      * Get the value of id
      */ 
