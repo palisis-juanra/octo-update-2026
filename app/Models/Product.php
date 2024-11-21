@@ -318,7 +318,7 @@ class Product extends Model
     /**
      * Get the value of utcCutoff
      */ 
-    public function getUtcCutoff()
+    public function getUtcCutoff(): string
     {
         return $this->utcCutoff;
     }
@@ -328,10 +328,23 @@ class Product extends Model
      *
      * @return  self
      */ 
-    public function setUtcCutoff($utcCutoff)
+    public function setUtcCutoff($utcCutoff): static
     {
         $this->utcCutoff = $utcCutoff;
 
         return $this;
     }
+
+    public function getMinBookingSize(): int
+    {
+        return $this->minBookingSize;
+    }
+
+    public function setMinBookingSize(int $minBookingSize): self
+    {
+        $this->minBookingSize = $minBookingSize;
+
+        return $this;
+    }
+
 }

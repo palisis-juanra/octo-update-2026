@@ -10,7 +10,6 @@ use App\Exceptions\NoMatchingDataException;
 use DateInterval;
 use DatePeriod;
 use DateTime;
-use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 use stdClass;
 use TourCMS\Utils\TourCMS;

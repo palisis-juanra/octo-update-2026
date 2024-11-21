@@ -22,5 +22,12 @@ class DateTimeService
         return $dateTime->format(DateTime::ATOM);
     }
 
+    public static function validateDate(string $date, $format = 'Y-m-d'): bool
+    {
+        $dateTime = DateTime::createFromFormat($format, $date);
+
+        return $dateTime && strtolower($dateTime->format($format)) === strtolower($date);
+    }
+
 
 }

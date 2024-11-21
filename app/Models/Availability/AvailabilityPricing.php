@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Availability\Pricing;
+namespace App\Models\Availability;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;

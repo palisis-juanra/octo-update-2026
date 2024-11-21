@@ -1,14 +1,11 @@
 <?php
 
-namespace App\Models\Availability\Pricing;
+namespace App\Features\Availability\Pricing;
 
 use App\Facades\JSONLog;
-use App\Models\Availability\Availability;
-use App\Interfaces\BaseAvailabilityRequest;
-use App\Services\DateTimeService;
+use App\Services\OptionService;
 use App\Services\TourCMSService;
 use SimpleXMLElement;
-use stdClass;
 
 class MultiDayPricingAvailabilityRequest extends PricingAvailabilityRequest
 {
@@ -16,15 +13,20 @@ class MultiDayPricingAvailabilityRequest extends PricingAvailabilityRequest
     protected string $optionId;
     protected string $localDateStart;
     protected string $localDateEnd;
+    protected array $units;
     protected string $currency;
+    protected int $minBookingSize;
+    
 
-    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd, string $currency)
+    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd, array $units, string $currency, int $minBookingSize = 1)
     {
         $this->tourId = $tourId;
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
+        $this->units = $units;
         $this->currency = $currency;
+        $this->minBookingSize = $minBookingSize;
     }
 
     public function getAvailabilities(TourCMSService $tourCMSService): array
@@ -37,8 +39,11 @@ class MultiDayPricingAvailabilityRequest extends PricingAvailabilityRequest
     {
         $components = [];
 
-        $ratesQueryString = "r1=1";
-        $responses = $tourCMSService->multiCheckAvail($this->tourId, $this->localDateStart, $this->localDateEnd, $ratesQueryString);
+        $ratesParams = $this->generateRatesParamsFromUnits($this->units);
+        $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
+        $queryString = "{$ratesParams}&{$mappingQueryString}";
+
+        $responses = $tourCMSService->multiCheckAvail($this->tourId, $this->localDateStart, $this->localDateEnd, $queryString);
         
         foreach ($responses as $date => $responseObject) {
 

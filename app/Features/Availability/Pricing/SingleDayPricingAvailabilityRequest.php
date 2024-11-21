@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Availability\Pricing;
+namespace App\Features\Availability\Pricing;
 
 use App\Facades\JSONLog;
 use App\Services\OptionService;
@@ -11,22 +11,23 @@ class SingleDayPricingAvailabilityRequest extends PricingAvailabilityRequest
     protected string $tourId;
     protected string $optionId;
     protected string $date;
-    protected string $currency;
     protected array $units;
+    protected string $currency;
+    
 
-    public function __construct(string $tourId, string $optionId, string $date, array $units, string $currency)
+    public function __construct(string $tourId, string $optionId, string $date, array $units, string $currency, int $minBookingSize)
     {
         $this->tourId = $tourId;
         $this->optionId = $optionId;
         $this->date = $date;
-        $this->currency = $currency;
         $this->units = $units;
+        $this->currency = $currency;
+        $this->minBookingSize = $minBookingSize;
     }
 
     protected function fetchComponentsFromTourCMS(TourCMSService $tourCMSService): array
     {
-        $ratesParams = $this->generateRatesParams($this->units);
-
+        $ratesParams = $this->generateRatesParamsFromUnits($this->units);
         $params = "date={$this->date}&{$ratesParams}";
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
         $params .= "&{$mappingQueryString}";

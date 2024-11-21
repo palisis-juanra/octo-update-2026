@@ -3,16 +3,15 @@
 namespace App\Services;
 
 use App\Exceptions\InvalidProductContentException;
+use App\Exceptions\InvalidProductIdException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Models\Product;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
+use DateTime;
 use SimpleXMLElement;
-use SimpleXMLObject;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
-use Throwable;
-use TourCMS\Utils\TourCMS;
 
 class ProductService
 {
@@ -213,6 +212,8 @@ class ProductService
                 ->setDeliveryMethods($deliveryMethods)
                 ->setRedemptionMethod($redemptionMethod)
                 ->setOptions($options);
+
+        $product->setMinBookingSize((int) $tour->min_booking_size ?? 1);
 
         return $product;
     }
@@ -436,13 +437,25 @@ class ProductService
         return $toursFromXML;
     }
 
+    /**
+     * Validate product Id format aswell channel id from prodcut id is the same as channel being used throught Octo authentication
+     * @param string $productId
+     * @param string $authChannel
+     * @throws \App\Exceptions\InvalidProductIdException
+     * @return bool
+     */
     public function validateProductId(string $productId, string $authChannel): bool
     {
         if (!preg_match(self::PRODUCT_ID_REGEX, $productId)) {
-            return false;
+            throw new InvalidProductIdException($productId);
         }
+
         $productIdChannel = explode(self::PRODUCT_ID_PIPE_SEPARATOR, $productId)[1];
-        return $productIdChannel === $authChannel;
+        if ($productIdChannel !== $authChannel) {
+            throw new InvalidProductIdException($productId);
+        }
+
+        return true;
     }
 
     public function parseProductId(string $productId): object
@@ -749,5 +762,32 @@ class ProductService
         $distributionIdentifierSplitted = explode('_', $distributionIdentifier);
         
         return $distributionIdentifierSplitted[2];
+    }
+
+    public function getCutoffFromTourCMSCutoff(stdClass $cutoffData, string $startDay): string
+    {
+        $type = (string) $cutoffData->type;
+        $value = (string) $cutoffData->value;
+
+        if ($type == 'before_start_sec') {
+            return (int) $value;
+        }
+
+        $startDate = new DateTime($startDay);
+
+        $valueSplitted = explode(':', $value);
+        $hour = $valueSplitted[0] ?? '00';
+        $minutes = $valueSplitted[1] ?? '00';
+
+        if ('day_before_time') {
+            $startDate->modify('-1 day');
+            $startDate->setTime($hour, $minutes);
+        }
+        
+        if ($type == 'same_day_time') {
+            $startDate->setTime($hour, $minutes);
+        }
+
+        return $startDate->format(DateTime::ATOM);
     }
 }

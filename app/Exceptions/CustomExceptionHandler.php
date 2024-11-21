@@ -45,16 +45,19 @@ class CustomExceptionHandler extends Handler
                 return OctoResponse::FORBIDDEN();
 
             case (InvalidProductIdException::class):
-                return OctoResponse::INVALID_PRODUCT_ID($exception->getProductId(), $exception->getMessage());
+                return OctoResponse::INVALID_PRODUCT_ID($exception->productId);
             
             case (InvalidProductContentException::class):
-                return OctoResponse::INVALID_PRODUCT_ID($exception->getProductId(), $exception->getMessage());
+                return OctoResponse::INVALID_PRODUCT_ID($exception->productId, $exception->getMessage());
 
             case (InvalidOptionIdException::class):
-                return OctoResponse::INVALID_OPTION_ID($exception->getOptionId());
+                return OctoResponse::INVALID_OPTION_ID($exception->optionId);
+            
+            case (InvalidUnitIdException::class):
+                return OctoResponse::INVALID_UNIT_ID($exception->unitId);
 
             case (NoMatchingDataException::class):
-                return OctoResponse::INVALID_PRODUCT_ID($exception->getProductId());
+                return OctoResponse::INVALID_PRODUCT_ID($exception->productId);
             
             case (BadRequestException::class):
                 return OctoResponse::BAD_REQUEST($exception->getMessage());

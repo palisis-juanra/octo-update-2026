@@ -2,60 +2,71 @@
 
 namespace App\Models\Availability;
 
-use App\Models\Availability\Pricing\AvailabilityPricing;
+use App\Models\Availability\AvailabilityPricing;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class Availability extends Model
+class Availability extends BaseModel
 {
-    use HasFactory;
-    protected string $id;
-    protected string $localDateTimeStart;
-    protected string $localDateTimeEnd;
-    protected bool $allDay;
-    protected bool $available;
-    protected string $status;
-    protected ?int $vacancies;
-    protected ?int $capacity;
-    protected int $maxUnits;
-    protected string $utcCutoffAt;
-    protected string $openingHoursFrom;
-    protected string $openingHoursTo;
-    protected string $currency;
-    protected ?AvailabilityPricing $pricing;
+    use HasFactory, HasUuids;
 
-    public function __construct(
-        string $id, 
-        string $localDateTimeStart, 
-        string $localDateTimeEnd, 
-        bool $allDay, 
-        bool $available, 
-        string $status, 
-        ?int $vacancies, 
-        ?int $capacity, 
-        int $maxUnits, 
-        string $utcCutoffAt, 
-        string $openingHoursFrom, 
-        string $openingHoursTo,
-        string $currency = '',
-        AvailabilityPricing $pricing = null
-    )
-    {
-        $this->id = $id;
-        $this->localDateTimeStart = $localDateTimeStart;
-        $this->localDateTimeEnd = $localDateTimeEnd;
-        $this->allDay = $allDay;
-        $this->available = $available;
-        $this->status = $status; 
-        $this->vacancies = $vacancies;
-        $this->capacity = $capacity;
-        $this->maxUnits = $maxUnits;
-        $this->utcCutoffAt = $utcCutoffAt;
-        $this->openingHoursFrom = $openingHoursFrom; 
-        $this->openingHoursTo = $openingHoursTo;
-        $this->currency = $currency;
-        $this->pricing = $pricing;
-    }
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'availability';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * The data type of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
+     * Indicates if the model's ID is auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'departure_id', 
+        'local_date_time_start', 
+        'local_date_time_end', 
+        'all_day', 
+        'available',
+        'status', 
+        'vacancies',
+        'capacity',
+        'max_units',
+        'utc_cutoff_at',
+        'opening_hours_from',
+        'opening_hours_to'
+    ];
+    
+    protected $guarded = ['currency', 'pricing'];
+
+    public static $snakeAttributes = true;
+
+    public string $currency;
+    public ?AvailabilityPricing $pricing = null;
+    
+    public $timestamps = true;
 
     /**
      * Get the value of id
@@ -77,12 +88,32 @@ class Availability extends Model
         return $this;
     }
 
+     /**
+     * Get the value of departure_id
+     */ 
+    public function getDepartureId(): string
+    {
+        return $this->departureId;
+    }
+
+    /**
+     * Set the value of departure_id
+     *
+     * @return  self
+     */ 
+    public function setDepartureId($departureId): self
+    {
+        $this->departureId = $departureId;
+
+        return $this;
+    }
+
     /**
      * Get the value of localDateTimeStart
      */ 
     public function getLocalDateTimeStart(): string
     {
-        return $this->localDateTimeStart;
+        return $this->local_date_time_start;
     }
 
     /**
@@ -92,7 +123,7 @@ class Availability extends Model
      */ 
     public function setLocalDateTimeStart($localDateTimeStart): self
     {
-        $this->localDateTimeStart = $localDateTimeStart;
+        $this->local_date_time_start = $localDateTimeStart;
 
         return $this;
     }
@@ -102,7 +133,7 @@ class Availability extends Model
      */ 
     public function getLocalDateTimeEnd(): string
     {
-        return $this->localDateTimeEnd;
+        return $this->local_date_time_end;
     }
 
     /**
@@ -112,7 +143,7 @@ class Availability extends Model
      */ 
     public function setLocalDateTimeEnd($localDateTimeEnd): self
     {
-        $this->localDateTimeEnd = $localDateTimeEnd;
+        $this->local_date_time_end = $localDateTimeEnd;
 
         return $this;
     }
@@ -122,7 +153,7 @@ class Availability extends Model
      */ 
     public function getAllDay(): bool
     {
-        return $this->allDay;
+        return $this->all_day;
     }
 
     /**
@@ -132,7 +163,7 @@ class Availability extends Model
      */ 
     public function setAllDay($allDay): self
     {
-        $this->allDay = $allDay;
+        $this->all_day = $allDay;
 
         return $this;
     }
@@ -222,7 +253,7 @@ class Availability extends Model
      */ 
     public function getMaxUnits(): int
     {
-        return $this->maxUnits;
+        return $this->max_units;
     }
 
     /**
@@ -232,7 +263,7 @@ class Availability extends Model
      */ 
     public function setMaxUnits($maxUnits): self
     {
-        $this->maxUnits = $maxUnits;
+        $this->max_units = $maxUnits;
 
         return $this;
     }
@@ -242,7 +273,7 @@ class Availability extends Model
      */ 
     public function getUtcCutoffAt(): string
     {
-        return $this->utcCutoffAt;
+        return $this->utc_cutoff_at;
     }
 
     /**
@@ -252,7 +283,7 @@ class Availability extends Model
      */ 
     public function setUtcCutoffAt($utcCutoffAt): self
     {
-        $this->utcCutoffAt = $utcCutoffAt;
+        $this->utc_cutoff_at = $utcCutoffAt;
 
         return $this;
     }
@@ -262,7 +293,7 @@ class Availability extends Model
      */ 
     public function getOpeningHoursFrom(): string
     {
-        return $this->openingHoursFrom;
+        return $this->opening_hours_from;
     }
 
     /**
@@ -272,7 +303,7 @@ class Availability extends Model
      */ 
     public function setOpeningHoursFrom($openingHoursFrom): self
     {
-        $this->openingHoursFrom = $openingHoursFrom;
+        $this->opening_hours_from = $openingHoursFrom;
 
         return $this;
     }
@@ -282,7 +313,7 @@ class Availability extends Model
      */ 
     public function getOpeningHoursTo(): string
     {
-        return $this->openingHoursTo;
+        return $this->opening_hours_to;
     }
 
     /**
@@ -292,7 +323,7 @@ class Availability extends Model
      */ 
     public function setOpeningHoursTo($openingHoursTo): self
     {
-        $this->openingHoursTo = $openingHoursTo;
+        $this->opening_hours_to = $openingHoursTo;
 
         return $this;
     }

@@ -7,12 +7,12 @@ use Illuminate\Support\Facades\Facade;
 class JSONLog extends Facade
 {
     /**
-    * @method static void info(array $infoArray)
-    * @method static void error(array $errorArray)
-    * @method static void notice(array $noticeArray)
-    * @method static void info(array $infoArray)
-    * @method static void debug(array $debugArray)
-    * @method static void log(array $logArray)    
+    * @method static void info(array|string $infoArray)
+    * @method static void error(array|string $errorArray)
+    * @method static void notice(array|string $noticeArray)
+    * @method static void info(array|string $infoArray)
+    * @method static void debug(array|string $debugArray)
+    * @method static void log(array|string $logArray)    
     */
 
     protected static function getFacadeAccessor()

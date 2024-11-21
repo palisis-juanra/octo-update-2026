@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Models\Availability;
+namespace App\Features\Availability;
 
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
-use DateTime;
+use App\Models\Availability\Availability;
 
 class AvailabilityRequest extends BaseAvailabilityRequest
 {
@@ -58,22 +58,24 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         $availabilities = [];
         foreach ($departures as $departure) {
             
-            $availability = new Availability(
-                (string) $departure->departure_id,
-                DateTimeService::getISODateTimeString((string) $departure->start_date, '00', '00'),
-                DateTimeService::getISODateTimeString((string) $departure->end_date, '23', '59'),
-                false,
-                $departure->spaces_remaining > 0,
-                $this->getOctoStatusFromTourCMSStatus((string) $departure->status),
-                null,
-                null,
-                $this->maxUnits,
-                $this->cutoff,
-                $departure->start_time ?? '00:00',
-                $departure->end_time ?? '23:59'                
-            );
-            $availabilities[] = $availability;
+            $availability = new Availability;
             
+            $availability->setDepartureId((int) $departure->departure_id);
+            $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, '00', '00'));
+            $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, '23', '59'));
+            $availability->setAllDay(false);
+            //TODO: check if spaces > rates count
+            $availability->setAvailable($departure->spaces_remaining > 0);
+            $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
+            $availability->setMaxUnits($this->maxUnits);
+            $availability->setUtcCutoffAt($this->cutoff);
+            $availability->setOpeningHoursFrom($component->start_time ?? '00:00');
+            $availability->setOpeningHoursTo($component->end_time ?? '23:59');
+
+            $availability->save();
+            
+            $availabilities[] = $availability;
+
         } 
 
         return $availabilities;
