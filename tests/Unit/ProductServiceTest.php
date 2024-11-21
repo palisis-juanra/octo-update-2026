@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Exceptions\InvalidProductContentException;
 use App\Models\Product;
-use App\Services\JsonLogService;
+use App\Services\JSONLogService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -376,7 +376,7 @@ class ProductServiceTest extends TestCase
         $this->assertCount(1, $productList);
     }
 
-    protected function mockLogger(): JsonLogService|MockObject
+    protected function mockLogger(): JSONLogService|MockObject
     {
         $logger = $this->getMockBuilder(JsonLogService::class)
         ->onlyMethods(['info', 'error'])
