@@ -90,8 +90,7 @@ class AvailabilityCalendarController extends Controller
 
             $this->availabilityCalendarService->validateRequestParams($requestParams);
             
-            $octoCapabilities = $request->header('OctoCapabilities') ?? '';
-            $availabilityRequest = $this->availabilityCalendarService->getAvailabilityRequest($requestParams, $octoCapabilities);
+            $availabilityRequest = $this->availabilityCalendarService->getAvailabilityRequest($requestParams);
 
             $calendar = $this->availabilityCalendarService->getCalendar($availabilityRequest);
 

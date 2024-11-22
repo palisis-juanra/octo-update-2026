@@ -7,6 +7,7 @@ use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
 use DateTime;
+use stdClass;
 
 class AvailabilityCalendarRequest extends BaseAvailabilityRequest
 {
@@ -58,22 +59,21 @@ class AvailabilityCalendarRequest extends BaseAvailabilityRequest
         $availabilities = [];
 
         foreach ($datesAndDeals as $date) {
-            $availability = new Availability(
-                "",
-                DateTimeService::getISODateTimeString((string) $date->start_date, '00', '00'),
-                DateTimeService::getISODateTimeString((string) $date->end_date, '23', '59'),
-                false,
-                $date->spaces_remaining > 0,
-                $this->getOctoStatusFromTourCMSStatus((string) $date->status),
-                $date->spaces_remaining != "UNLIMITED" ? (int) $date->spaces_remaining : null,
-                null,
-                999 /* tour max_booking_size */,
-                'CUTOFF',
-                $date->start_time ?? '00:00',
-                $date->end_time ?? '23:59'                
-            );
-            $availabilities[] = $availability;
+            $availability = new CalendarAvailability();
+
+            $openingHours = (object) [
+                'from' => (string) $date->start_time ?? '00:00',
+                'to' => (string) $date->end_time ?? '23:59'
+            ];
+
+            $availability->setLocalDate($date->start_date)
+                ->setAvailable($date->spaces_remaining > 0)
+                ->setStatus($this->getOctoStatusFromTourCMSStatus((string) $date->status))
+                ->setVacancies($date->spaces_remaining != "UNLIMITED" ? (int) $date->spaces_remaining : null)
+                ->setCapacity(null)
+                ->setOpeningHours([$openingHours]);
             
+            $availabilities[] = $availability;
         }
 
         return $availabilities;

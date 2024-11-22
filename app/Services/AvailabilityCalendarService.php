@@ -7,9 +7,8 @@ use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\AvailabilityCalendarRequest;
-use App\Models\Availability\AvailabilityRequest;
-use App\Transformers\AvailabilityTransformer;
 use App\Transformers\BaseTransformer;
+use App\Transformers\CalendarAvailabilityTransformer;
 use DateTime;
 
 class AvailabilityCalendarService
@@ -29,14 +28,14 @@ class AvailabilityCalendarService
     public TourCMSService $tourCMSService;
     public ProductService $productService;
     public OptionService $optionService;
-    public AvailabilityTransformer $transformer;
+    public CalendarAvailabilityTransformer $transformer;
 
     public function __construct(TourCMSService $tourCMSService, ProductService $productService, OptionService $optionService)
     {
         $this->tourCMSService = $tourCMSService;
         $this->productService = $productService;
         $this->optionService = $optionService;
-        $this->transformer = new AvailabilityTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->transformer = new CalendarAvailabilityTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     public function getCalendar(BaseAvailabilityRequest $availabilityRequest): array
@@ -49,13 +48,13 @@ class AvailabilityCalendarService
     {
         $availabilitiesData = [];
         foreach ($availabilities as $availability) {
-            $availabilitiesData[] = $this->transformer->calendarTransform($availability);
+            $availabilitiesData[] = $this->transformer->transform($availability);
         }
 
         return $availabilitiesData;
     }
 
-    public function getAvailabilityRequest(array $requestParams, string $octoCapabilities): BaseAvailabilityRequest
+    public function getAvailabilityRequest(array $requestParams): BaseAvailabilityRequest
     {
 
         $productId = $requestParams[self::PARAM_PRODUCT_ID] ?? '';
@@ -64,11 +63,6 @@ class AvailabilityCalendarService
         $localDateStart = $requestParams[self::PARAM_LOCAL_DATE_START] ?? '';
         $localDateEnd = $requestParams[self::PARAM_LOCAL_DATE_END] ?? '';
         $units = $requestParams[self::PARAM_UNITS] ?? [];
-
-        if (!empty($octoCapabilities) && strtolower($octoCapabilities) === 'pricing') {
-
-            return new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd);
-        }
 
         return new AvailabilityCalendarRequest($tourId, $optionId, $localDateStart, $localDateEnd, $units);
     }
