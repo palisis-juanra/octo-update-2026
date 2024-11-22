@@ -2,15 +2,15 @@
 
 namespace App\Models\Availability;
 
-use App\Interfaces\BaseAvailabilityRequest;
-use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
-use DateTime;
-use stdClass;
 
-class AvailabilityCalendarRequest extends BaseAvailabilityRequest
+class AvailabilityCalendarRequest
 {
+    const OCTO_STATUS_AVAILABLE = 'AVAILABLE';
+    const OCTO_STATUS_CLOSED = 'CLOSED';
+    const TCMS_STATUS_OPEN = 'OPEN';
+    const TCMS_STATUS_ASKFIRST = 'ASKFIRST';
     public string $tourId;
     public string $optionId;
     public string $localDateStart;
@@ -35,7 +35,7 @@ class AvailabilityCalendarRequest extends BaseAvailabilityRequest
     {
         $datesAndDeals = $this->fetchDatesAndDealsFromAPI($tourCMSService);
         $availabilities = $this->getAvailabilitiesFromDatesAndDeals($datesAndDeals);
-
+        error_log(print_r($availabilities, true));
         return $availabilities;
     }
 

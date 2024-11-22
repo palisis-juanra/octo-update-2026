@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Http\Middleware\OctoAuthentication;
-use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\AvailabilityCalendarRequest;
 use App\Transformers\BaseTransformer;
 use App\Transformers\CalendarAvailabilityTransformer;
@@ -38,7 +37,7 @@ class AvailabilityCalendarService
         $this->transformer = new CalendarAvailabilityTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
-    public function getCalendar(BaseAvailabilityRequest $availabilityRequest): array
+    public function getCalendar(AvailabilityCalendarRequest $availabilityRequest): array
     {
         $calendar = $availabilityRequest->getAvailabilities($this->tourCMSService);
         return $calendar;
@@ -54,7 +53,7 @@ class AvailabilityCalendarService
         return $availabilitiesData;
     }
 
-    public function getAvailabilityRequest(array $requestParams): BaseAvailabilityRequest
+    public function getAvailabilityRequest(array $requestParams): AvailabilityCalendarRequest
     {
 
         $productId = $requestParams[self::PARAM_PRODUCT_ID] ?? '';
