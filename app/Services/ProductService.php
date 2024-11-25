@@ -122,7 +122,7 @@ class ProductService
     private $errors = [];
     private $info = [];
 
-    public function __construct(Request $request, TourCMSService $tourCMSService)
+    public function __construct(TourCMSService $tourCMSService, JSONLogService $logger, LocaleService $localeService)
     {
         $this->tourCMSService = $tourCMSService;
         $this->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
@@ -188,7 +188,7 @@ class ProductService
         if (count($this->errors) != 0) {
             $errorString = implode(', ', $this->errors);
             $this->logError("The content of the product is invalid: {$errorString}", null, ['productId' => $id]);
-            throw new InvalidProductContentException("The content of the product is invalid: {$errorString}");
+            throw new InvalidProductContentException($id, "The content of the product is invalid: {$errorString}");
         }
 
         if (count($this->info) != 0) {
@@ -685,12 +685,12 @@ class ProductService
 
     protected function logError(string $errorMessage, ?string $logChannel = null, array $extraParams = []): void
     {
-        $this->logger->error($errorMessage, $logChannel, $extraParams);
+        $this->logger->error(["message" => $errorMessage, ...$extraParams]);
     }
 
     protected function logInfo(string $infoMessage, ?string $logChannel = null, array $extraParams = []): void
     {
-        $this->logger->info($infoMessage, $logChannel, $extraParams);
+        $this->logger->info(["message" => $infoMessage, ...$extraParams]);
     }
 
     protected function areTourDeliveryFormatsValidForProductList(\SimpleXMLElement $tour): bool

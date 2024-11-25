@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Exceptions\InvalidProductContentException;
+use App\Exceptions\InvalidProductIdException;
 use App\Models\Product;
 use App\Services\JSONLogService;
 use App\Services\ProductService;
@@ -19,6 +20,7 @@ class ProductServiceTest extends TestCase
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $listToursXML;
     public SimpleXMLElement $showTourInvalidXML;
+    public $loggerMock;
 
     public function setUp(): void
     {
@@ -29,6 +31,10 @@ class ProductServiceTest extends TestCase
         $this->showTourXML = simplexml_load_string($this->showTourString);
         $this->listToursXML = simplexml_load_string($this->listToursString);
         $this->showTourInvalidXML = simplexml_load_string($this->showTourInvalidString);
+        $this->loggerMock = $this->getMockBuilder(JSONLogService::class)
+            ->onlyMethods(['info', 'error'])
+            ->disableOriginalConstructor()
+            ->getMock();
     }
 
     public function test_whenCallFind_thenWeGetValidStructure()
@@ -38,6 +44,7 @@ class ProductServiceTest extends TestCase
             ->onlyMethods(['findTourDataFromAPI', 'getProductLocale'])
             ->disableOriginalConstructor()
             ->getMock();
+        $productServiceMock->logger = $this->loggerMock;
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->method('findTourDataFromAPI')->willReturn($this->showTourXML->tour);
@@ -309,11 +316,10 @@ class ProductServiceTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        $this->expectException(InvalidProductIdException::class);
         // Then
         foreach ($invalidProductIdList as $invalidProductId) {
             $isProductValid = $productServiceMock->validateProductId($invalidProductId, $authChannel);
-            $this->assertIsBool($isProductValid);
-            $this->assertEquals(false, $isProductValid);
         }
     }
 
