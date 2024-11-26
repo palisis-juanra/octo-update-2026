@@ -38,8 +38,6 @@ class ProductController extends Controller
             return OctoResponse::FORBIDDEN();
         } catch (APICallNotOKException) {
             return OctoResponse::INTERNAL_SERVER_ERROR();
-        } catch (Throwable) {
-            return OctoResponse::INTERNAL_SERVER_ERROR();
         }
     }
 
@@ -59,9 +57,6 @@ class ProductController extends Controller
         } catch (NoMatchingDataException) {
             return OctoResponse::INVALID_PRODUCT_ID($productId);
         } catch (APICallNotOKException) {
-            return OctoResponse::INTERNAL_SERVER_ERROR();
-        } catch (Throwable $e) {
-            $this->logger->info($e->getMessage() . '\n' . $e->getTraceAsString());
             return OctoResponse::INTERNAL_SERVER_ERROR();
         }
     }
