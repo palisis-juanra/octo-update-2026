@@ -756,7 +756,7 @@ class ProductService
      * @param string $productId in format (ACCOUNT TWO FIRST LETTERS)_(ACCOUNT_ID)_(TOUR_ID). e.g: TE_1_67|142
      * @return string
      */
-    public static function getTourIdFromProductId(string $productId): string
+    public function getTourIdFromProductId(string $productId): string
     {
         $distributionIdentifier = explode('|', $productId)[0];
         $distributionIdentifierSplitted = explode('_', $distributionIdentifier);

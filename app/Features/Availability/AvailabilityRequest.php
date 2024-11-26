@@ -10,12 +10,12 @@ use App\Models\Availability\Availability;
 
 class AvailabilityRequest extends BaseAvailabilityRequest
 {
-    public string $tourId;
-    public string $optionId;
-    public string $localDateStart;
-    public string $localDateEnd;
-    public int $maxUnits;
-    public string $cutoff;
+    protected string $tourId;
+    protected string $optionId;
+    protected string $localDateStart;
+    protected string $localDateEnd;
+    protected int $maxUnits;
+    protected string $cutoff;
 
     public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '')
     {
@@ -81,11 +81,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $availabilities;
     }
 
-    public function getOptionId(): string
-    {
-        return $this->optionId;
-    }
-
     public function getLocalDateStart(): string
     {
         return $this->localDateStart;
@@ -105,4 +100,44 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return self::OCTO_STATUS_CLOSED;
     }
 
+
+    /**
+     * Get the value of tourId
+     */ 
+    public function getTourId()
+    {
+        return $this->tourId;
+    }
+
+    /**
+     * Set the value of tourId
+     *
+     * @return  self
+     */ 
+    public function setTourId($tourId)
+    {
+        $this->tourId = $tourId;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of optionId
+     */ 
+    public function getOptionId()
+    {
+        return $this->optionId;
+    }
+
+    /**
+     * Set the value of optionId
+     *
+     * @return  self
+     */ 
+    public function setOptionId($optionId)
+    {
+        $this->optionId = $optionId;
+
+        return $this;
+    }
 }

@@ -10,16 +10,16 @@ class SingleDayPricingAvailabilityRequest extends PricingAvailabilityRequest
 {
     protected string $tourId;
     protected string $optionId;
-    protected string $date;
+    protected string $localDateStart;
     protected array $units;
     protected string $currency;
     
 
-    public function __construct(string $tourId, string $optionId, string $date, array $units, string $currency, int $minBookingSize)
+    public function __construct(string $tourId, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize)
     {
         $this->tourId = $tourId;
         $this->optionId = $optionId;
-        $this->date = $date;
+        $this->localDateStart = $localDateStart;
         $this->units = $units;
         $this->currency = $currency;
         $this->minBookingSize = $minBookingSize;
@@ -28,22 +28,42 @@ class SingleDayPricingAvailabilityRequest extends PricingAvailabilityRequest
     protected function fetchComponentsFromTourCMS(TourCMSService $tourCMSService): array
     {
         $ratesParams = $this->generateRatesParamsFromUnits($this->units);
-        $params = "date={$this->date}&{$ratesParams}";
+        $params = "date={$this->localDateStart}&{$ratesParams}";
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
         $params .= "&{$mappingQueryString}";
 
         $response = $tourCMSService->checkAvailability($params, $this->tourId);
-        JSONLog::info(["message" => "Check tour availability response for {$this->date}", "response" => $response]);
+        JSONLog::info(["message" => "Check tour availability response for {$this->localDateStart}", "response" => $response]);
 
         if (empty($response->available_components)) {
-            JSONLog::info("No available components for {$this->date}");
+            JSONLog::info("No available components for {$this->localDateStart}");
             return [];
         }
 
         $availableComponents = $tourCMSService->getArrayFromXmlNode($response->available_components, 'component');
-        JSONLog::info(["message" => "Available components for {$this->date}", "components" => $availableComponents]);
+        JSONLog::info(["message" => "Available components for {$this->localDateStart}", "components" => $availableComponents]);
 
         return $availableComponents;
     }
     
+
+    /**
+     * Get the value of localDateStart
+     */ 
+    public function getLocalDateStart(): string
+    {
+        return $this->localDateStart;
+    }
+
+    /**
+     * Set the value of localDateStart
+     *
+     * @return  self
+     */ 
+    public function setLocalDateStart($localDateStart)
+    {
+        $this->localDateStart = $localDateStart;
+
+        return $this;
+    }
 }

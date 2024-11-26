@@ -16,8 +16,8 @@ abstract class BaseAvailabilityRequest
     const TCMS_STATUS_ASKFIRST = 'ASKFIRST';
     const TCMS_STATUS_CLOSED = 'CLOSED';
 
-    public int $maxUnits;
-    public string $cutoff;
+    protected int $maxUnits;
+    protected string $cutoff;
 
     /**
      * Get all the availabilities

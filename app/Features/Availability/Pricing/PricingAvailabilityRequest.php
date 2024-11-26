@@ -2,13 +2,14 @@
 
 namespace App\Features\Availability\Pricing;
 
+use App\Features\Availability\AvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\Availability;
 use App\Models\Availability\AvailabilityPricing;
 use App\Services\DateTimeService;
 use App\Services\TourCMSService;
 
-abstract class PricingAvailabilityRequest extends BaseAvailabilityRequest
+abstract class PricingAvailabilityRequest extends AvailabilityRequest
 {
     protected string $currency;
     protected array $units;

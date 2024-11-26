@@ -35,7 +35,7 @@ class AvailabilityRequestFactory
                 return new MultiDayPricingAvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, $units, $currency, $minBookingSize);
             }
 
-            return new SingleDayPricingAvailabilityRequest($tourId, $optionId, $localDateStart, $units, $currency, $minBookingSize);
+            return new SingleDayPricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize);
         }
         
         if (!empty($localDateStart) && !empty($localDateEnd)) {
