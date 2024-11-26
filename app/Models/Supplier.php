@@ -164,7 +164,12 @@ class Supplier extends Model
      */
     public function getFullAddress(): string
     {
-        return $this->getAddress1() . $this->getAddress2() . $this->getPostCode() . $this->getCity() . $this->getCountry();
+        $address = $this->address_1;
+        $address .= empty($this->address_2)? '' : ' '.$this->address_2;
+        $address .= empty($this->address_postcode)? '' : ', '.$this->address_postcode;
+        $address .= empty($this->address_city)? '' : ', '.$this->address_city; 
+        $address .= empty($this->address_country)? '' : ' ('.$this->address_country.')';
+        return $address;
     }
 
     /**
@@ -175,30 +180,26 @@ class Supplier extends Model
     public function setAddress($address): self
     {
         $this->address_1 = $address;
-
         return $this;
     }
-
     protected function getAddress1(): string 
     {
-        return empty($this->address_1)? '' : $this->address_1;
+        return $this->address_1;
     }
-
     protected function getAddress2(): string 
     {
-        return empty($this->address_2)? '' :  ' ' . $this->address_2;
+        return $this->address_2;
     }
-
     protected function getPostCode(): string 
     {
-        return empty($this->address_postcode)? '' :  ', ' . $this->address_postcode;
+        return $this->address_postcode;
     }
     protected function getCity(): string 
     {
-        return empty($this->address_city)? '' :  ', ' . $this->address_city;
+        return $this->address_city;
     }
     protected function getCountry(): string 
     {
-        return empty($this->address_country)? '' :  ' (' . $this->address_country . ')';
+        return $this->address_country ;
     }
 }
