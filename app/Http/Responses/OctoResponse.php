@@ -10,7 +10,7 @@ class OctoResponse {
 
     const FIELD_PRODUCT_ID = 'productId';
     const FIELD_OPTION_ID = 'optionId';
-    const FIELD_ERROR_CODE = 'errorCode';
+    const FIELD_ERROR_CODE = 'error';
     const FIELD_ERROR_MESSAGE = 'errorMessage';
     const FIELD_ERROR_LOG_ID = 'errorLogId';
     const ERROR_CODE_UNAUTHORIZED = 'UNAUTHORIZED';
