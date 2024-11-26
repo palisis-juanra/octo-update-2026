@@ -27,7 +27,7 @@ class SupplierTransformer extends BaseTransformer
                 "website" => $supplier->getWebsite(),
                 "email" => $supplier->getEmail(),
                 "telephone" => $supplier->getTelephone(),
-                "address" => $supplier->getAddress()
+                "address" => $supplier->getFullAddress()
             ]
         ];
     }

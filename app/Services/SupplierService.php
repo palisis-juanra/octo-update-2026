@@ -47,7 +47,12 @@ class SupplierService
             (string) $channelData->home_url,
             (string) $channelData->commercial_email_private,
             (string) $channelData->phone_customer,
-            (string) $channelData-> address_1
+            (string) $channelData-> address_1,
+            (string) $channelData-> address_2,
+            (string) $channelData-> address_city,
+            (string) $channelData-> address_state,
+            (string) $channelData-> address_postcode,
+            (string) $channelData-> address_country
         );
     }
 

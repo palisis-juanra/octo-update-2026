@@ -15,9 +15,14 @@ class Supplier extends Model
     protected string $website;
     protected string $email;
     protected string $telephone;
-    protected string $address;
+    protected string $address_1;
+    protected string $address_2;
+    protected string $address_city;
+    protected string $address_state;
+    protected string $address_postcode;
+    protected string $address_country;
 
-    public function __construct(string $id, string $name, string $endpoint, string $website, string $email, string $telephone, string $address)
+    public function __construct(string $id, string $name, string $endpoint, string $website, string $email, string $telephone, string $address_1, string $address_2, string $address_city, string $address_state, string $address_postcode, string $address_country)
     {
         $this->id = $id;
         $this->name = $name;
@@ -25,7 +30,13 @@ class Supplier extends Model
         $this->website = $website;
         $this->email = $email;
         $this->telephone = $telephone;
-        $this->address = $address;
+        $this->address_1 = $address_1;
+        $this->address_2 = $address_2;
+        $this->address_city = $address_city;
+        $this->address_state = $address_state;
+        $this->address_postcode = $address_postcode;
+        $this->address_country = $address_country;
+
     }
 
     /**
@@ -151,9 +162,9 @@ class Supplier extends Model
     /**
      * Get the value of address
      */
-    public function getAddress(): string
+    public function getFullAddress(): string
     {
-        return $this->address;
+        return $this->getAddress1() . $this->getAddress2() . $this->getPostCode() . $this->getCity() . $this->getCountry();
     }
 
     /**
@@ -163,8 +174,31 @@ class Supplier extends Model
      */
     public function setAddress($address): self
     {
-        $this->address = $address;
+        $this->address_1 = $address;
 
         return $this;
+    }
+
+    protected function getAddress1(): string 
+    {
+        return empty($this->address_1)? '' : $this->address_1;
+    }
+
+    protected function getAddress2(): string 
+    {
+        return empty($this->address_2)? '' :  ' ' . $this->address_2;
+    }
+
+    protected function getPostCode(): string 
+    {
+        return empty($this->address_postcode)? '' :  ', ' . $this->address_postcode;
+    }
+    protected function getCity(): string 
+    {
+        return empty($this->address_city)? '' :  ', ' . $this->address_city;
+    }
+    protected function getCountry(): string 
+    {
+        return empty($this->address_country)? '' :  ' (' . $this->address_country . ')';
     }
 }
