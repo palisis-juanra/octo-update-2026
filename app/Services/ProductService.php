@@ -176,8 +176,7 @@ class ProductService
         $deliveryFormats = $this->getProductDeliveryFormats($tour);
         $deliveryMethods = $this->getProductDeliveryMethods($tour);
         $redemptionMethod = $this->getProductRedemptionMethod($tour);
-        //TODO: Uncomment when ready
-        //$utcCutoff = $this->getCutoff($tour);
+
         $options = [];
         if (isset($tour->tour_departure_structure->type)) {
             $options = $this->getProductOptions($tour);
@@ -211,9 +210,9 @@ class ProductService
                 ->setDeliveryFormats($deliveryFormats)
                 ->setDeliveryMethods($deliveryMethods)
                 ->setRedemptionMethod($redemptionMethod)
-                ->setOptions($options);
-
-        $product->setMinBookingSize((int) $tour->min_booking_size ?? 1);
+                ->setOptions($options)
+                ->setCutoff((array) $tour->cutoff)
+                ->setMinBookingSize((int) $tour->min_booking_size ?? 1);
 
         return $product;
     }
@@ -764,30 +763,4 @@ class ProductService
         return $distributionIdentifierSplitted[2];
     }
 
-    public function getCutoffFromTourCMSCutoff(stdClass $cutoffData, string $startDay): string
-    {
-        $type = (string) $cutoffData->type;
-        $value = (string) $cutoffData->value;
-
-        if ($type == 'before_start_sec') {
-            return (int) $value;
-        }
-
-        $startDate = new DateTime($startDay);
-
-        $valueSplitted = explode(':', $value);
-        $hour = $valueSplitted[0] ?? '00';
-        $minutes = $valueSplitted[1] ?? '00';
-
-        if ('day_before_time') {
-            $startDate->modify('-1 day');
-            $startDate->setTime($hour, $minutes);
-        }
-        
-        if ($type == 'same_day_time') {
-            $startDate->setTime($hour, $minutes);
-        }
-
-        return $startDate->format(DateTime::ATOM);
-    }
 }

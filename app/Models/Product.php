@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use stdClass;
 
 class Product extends Model
 {
@@ -23,6 +24,7 @@ class Product extends Model
     protected array $deliveryMethods;
     protected string $redemptionMethod;
     protected array $options;
+    protected array $cutoff;
 
     /**
      * Get the value of id
@@ -347,4 +349,24 @@ class Product extends Model
         return $this;
     }
 
+
+    /**
+     * Get the value of cutoff
+     */ 
+    public function getCutoff()
+    {
+        return $this->cutoff;
+    }
+
+    /**
+     * Set the value of cutoff
+     *
+     * @return  self
+     */ 
+    public function setCutoff(array $cutoff)
+    {
+        $this->cutoff = $cutoff;
+
+        return $this;
+    }
 }

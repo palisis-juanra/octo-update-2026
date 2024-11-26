@@ -11,6 +11,9 @@ use App\Features\Availability\Pricing\MultiDayPricingAvailabilityRequest;
 use App\Features\Availability\Pricing\SingleDayPricingAvailabilityRequest;
 use App\Transformers\AvailabilityTransformer;
 use App\Transformers\BaseTransformer;
+use DateInterval;
+use DateTime;
+use stdClass;
 
 class AvailabilityService
 {
@@ -115,5 +118,40 @@ class AvailabilityService
             $this->unitService->validateUnits($units);
         }
 
+    }
+
+    public function getCutoffFromTourCMSCutoff(array $cutoffData, string $startDay): string
+    {
+        $type = (string) $cutoffData['type'];
+        $value = (string) $cutoffData['value'];
+
+        $startDate = new DateTime($startDay);
+
+        if ($value == '0') {
+            return $startDate->format(DateTime::ATOM);
+        }
+
+        if ($type == 'before_start_sec') {
+            $interval = new DateInterval(-$value);
+            $startDate->sub($interval);
+            return $startDate->format(DateTime::ATOM);
+        }
+
+        $startDate = new DateTime($startDay);
+
+        $valueSplitted = explode(':', $value);
+        $hour = $valueSplitted[0] ?? '00';
+        $minutes = $valueSplitted[1] ?? '00';
+
+        if ('day_before_time') {
+            $startDate->modify('-1 day');
+            $startDate->setTime($hour, $minutes);
+        }
+        
+        if ($type == 'same_day_time') {
+            $startDate->setTime($hour, $minutes);
+        }
+
+        return $startDate->format(DateTime::ATOM);
     }
 }
