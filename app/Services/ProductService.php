@@ -8,7 +8,6 @@ use App\Http\Middleware\OctoAuthentication;
 use App\Models\Product;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
-use DateTime;
 use SimpleXMLElement;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +27,7 @@ class ProductService
         self::AVAILABILITY_TYPE_START_TIME,
         self::AVAILABILITY_TYPE_OPENING_HOURS
     ];
+
     const DELIVERY_FORMAT_QRCODE = 'QRCODE';
     const DELIVERY_FORMAT_CODE128A = 'CODE128A';
     const DELIVERY_FORMAT_PDF_URL = 'PDF_URL';
@@ -576,22 +576,26 @@ class ProductService
     protected function getProductDeliveryFormats(\SimpleXMLElement $tour): array
     {
         $deliveryFormats = [];
-        if (isset($tour->delivery_formats) && !empty($tour->delivery_formats)) {
-            $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
-            if (count($deliveryFormatsFromXML) != 0) {
-                foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-                    if (array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
-                        $deliveryFormats[] = self::DELIVERY_FORMATS[(string) $deliveryFormat];
-                    } else {
-                        $this->errors[] = "invalid delivery format: {$deliveryFormat}";
-                    }
-                }
-            } else {
-                $this->errors[] = self::ERROR_DELIVERY_FORMATS_EMPTY;
-            }
-        } else {
+        if (!isset($tour->delivery_formats) || empty($tour->delivery_formats)) {
             $this->errors[] = self::ERROR_DELIVERY_FORMATS_MISSING;
+            return $deliveryFormats;
         }
+
+        $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
+        if (count($deliveryFormatsFromXML) == 0) {
+            $this->errors[] = self::ERROR_DELIVERY_FORMATS_EMPTY;
+            return $deliveryFormats;
+        }
+        
+        foreach ($deliveryFormatsFromXML as $deliveryFormat) {
+            if (array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
+                $deliveryFormats[] = self::DELIVERY_FORMATS[(string) $deliveryFormat];
+            } else {
+                $this->errors[] = "invalid delivery format: {$deliveryFormat}";
+            }
+        }
+        
+        
         return $deliveryFormats;
     }
 
@@ -705,7 +709,7 @@ class ProductService
             return false;
         }
         foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-            if (!in_array($deliveryFormat, self::DELIVERY_FORMATS)) {
+            if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
                 $this->logInfo("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
                 return false;
             }
@@ -733,22 +737,6 @@ class ProductService
         }
         return true;
     }
-
-    protected function loadLogger(Request $request)
-    { 
-        return new JSONLogService(
-            $request->get(OctoAuthentication::FIELD_CHANNEL_ID),
-            $request->get(OctoAuthentication::FIELD_MAID),
-            self::ENDPOINT_NAME,
-            $request->get(OctoAuthentication::FIELD_X_CORRELATION_ID),
-            $request->get(OctoAuthentication::FIELD_X_REQUEST_ID)
-        );
-    }
-
-    /*
-    //TODO: To be implemented when we have added cutoff to be accesible by agents in show tour endpoint
-    protected function getCutoff(SimpleXMLElement $tour): string {}
-    */
 
     /**
      * Summary of getTourIdFromProductId
