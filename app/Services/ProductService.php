@@ -219,118 +219,116 @@ class ProductService
 
     public function getProductOptions(\SimpleXMLElement $tour): array
     {
-        $options = [];
+
+        $numOptions = $this->getMappingsCount($tour->tour_departure_structure);
+
+        if ($numOptions === 0) {
+            $this->errors[] = self::ERROR_DEPARTURE_STRUCTURE_NOT_SET;
+            return [];
+        }
 
         $structureType = $tour->tour_departure_structure->type;
+        
+        for ($i = 0; $i < $numOptions; $i++) {
+            
+            $optionId = "{$structureType}";
 
-        if ($structureType != self::MAPPING_STRUCTURE_TYPE_NOTSET) {
-            $numOptions = 1;
-            if ($structureType == self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE || $structureType == self::MAPPING_STRUCTURE_TYPE_DEPARTURE_CODE || $structureType == self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME) {
-                if (isset($tour->tour_departure_structure->departure_types->type)) {
-                    $numOptions = count($tour->tour_departure_structure->departure_types->type);
+            if (!in_array($structureType, [self::MAPPING_STRUCTURE_TYPE_SINGLE && $structureType !== self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
+                if (isset($tour->tour_departure_structure->departure_types->type->fields->field->value)) {
+                    $mappingFieldValue = $tour->tour_departure_structure->departure_types->type[$i]->fields->field->value;
+                    $optionId = "{$structureType}|{$mappingFieldValue}";
                 }
             }
-            for ($i = 0; $i < $numOptions; $i++) {
-                $optionId = "";
-                if ($numOptions == 1) {
-                    $optionId = "{$tour->distribution_identifier}|{$structureType}";
+            
+            
+            $optionDefault = $structureType == self::MAPPING_STRUCTURE_TYPE_SINGLE ? true : false;
+            $optionInternalName = "";
+
+            // As of now, we don't add supplier_tour_code since it is operators only.
+            $optionInternalName = $tour->tour_name ? (string) $tour->tour_name : '';
+            if (isset($tour->supplier_tour_code)) {
+                $optionInternalName .= (string) $tour->supplier_tour_code;
+            }
+
+            if (empty($optionInternalName)){
+                $this->info[] = "option {$optionId} internalName field is missing";
+            }
+
+            $optionReference = isset($tour->supplier_tour_code) ? (string) $tour->supplier_tour_code : null;
+            if (empty($optionReference)){
+                $this->info[] = "option {$optionId} reference field is missing";
+            }
+
+            // TODO add self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME case when fixed
+            $optionAvailabilityLocalStartTimes = [];
+            if ($structureType != self::MAPPING_STRUCTURE_TYPE_START_TIME && $structureType != self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME) {
+                if (isset($tour->start_time) && !empty($tour->start_time) && $tour->start_time != self::START_TIME_MULTI) {
+                    $optionAvailabilityLocalStartTimes[] = (string) $tour->start_time;
                 } else {
-                    if (isset($tour->tour_departure_structure->departure_types->type->fields->field->value)) {
-                        $mappingFieldValue = $tour->tour_departure_structure->departure_types->type[$i]->fields->field->value;
-                        $optionId = "{$tour->distribution_identifier}|{$structureType}|{$mappingFieldValue}";
-                    }
+                    $optionAvailabilityLocalStartTimes[] = self::AVAILABILITY_LOCAL_START_TIMES_DEFAULT;
                 }
-                $optionDefault = $structureType == self::MAPPING_STRUCTURE_TYPE_SINGLE ? true : false;
-                $optionInternalName = "";
-                // As of now, we don't add supplier_tour_code since it is operators only.
-                if (isset($tour->tour_name)) {
-                    $optionInternalName = (string) $tour->tour_name;
-                    if (isset($tour->supplier_tour_code)) {
-                        $optionInternalName .= (string) $tour->supplier_tour_code;
-                    } else {
-                        $this->info[] = "option {$optionId} internalName field is missing";
-                    }
-                } else {
-                    $this->info[] = "option {$optionId} internalName field is missing";
-                }
-                $optionReference = null;
-                if (isset($tour->supplier_tour_code)) {
-                    $optionReference = (string) $tour->supplier_tour_code;
-                } else {
-                    $this->info[] = "option {$optionId} reference field is missing";
-                }
-                // TODO add self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME case when fixed
-                $optionAvailabilityLocalStartTimes = [];
-                if ($structureType != self::MAPPING_STRUCTURE_TYPE_START_TIME && $structureType != self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME) {
-                    if (isset($tour->start_time) && !empty($tour->start_time) && $tour->start_time != self::START_TIME_MULTI) {
-                        $optionAvailabilityLocalStartTimes[] = (string) $tour->start_time;
-                    } else {
-                        $optionAvailabilityLocalStartTimes[] = self::AVAILABILITY_LOCAL_START_TIMES_DEFAULT;
-                    }
-                } else if ($structureType == self::MAPPING_STRUCTURE_TYPE_START_TIME) {
-                    if (isset($tour->tour_departure_structure->departure_types->type)) {
-                        $departureTypesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->tour_departure_structure->departure_types, 'type');
-                        foreach ($departureTypesFromXML as $type) {
-                            if (isset($type->active) && $type->active == 1) {
-                                if (isset($type->fields->field->value)) {
-                                    $optionAvailabilityLocalStartTimes[] = (string) $type->fields->field->value;
-                                }
+            } else if ($structureType == self::MAPPING_STRUCTURE_TYPE_START_TIME) {
+                if (isset($tour->tour_departure_structure->departure_types->type)) {
+                    $departureTypesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->tour_departure_structure->departure_types, 'type');
+                    foreach ($departureTypesFromXML as $type) {
+                        if (isset($type->active) && $type->active == 1) {
+                            if (isset($type->fields->field->value)) {
+                                $optionAvailabilityLocalStartTimes[] = (string) $type->fields->field->value;
                             }
                         }
                     }
-                } else {
-                    $this->info[] = "option {$optionId} availabilityLocalStartTimes fields are not present because of invalid mapping structure";
                 }
-                $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
-                $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_DEFAULT;
-                $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
-                if (isset($tour->cancellation_policy) && isset($tour->cancellation_policy->policy)) {
-                    $cancellationPoliciesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->cancellation_policy, 'policy');
-                    $policy = $cancellationPoliciesFromXML[0] ?? null;
-                    if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
-                        $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNITS[(string) $policy->type];
-                        $optionCancellationCutoffAmount = (int) $policy->value;
-                        $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}";
-                        if ($optionCancellationCutoffAmount != 1) {
-                            $optionCancellationCutoff .= "s";
-                        }
-                    } else {
-                        $this->info[] = "option {$optionId} cancellationCutoff info is empty or missing";
+            } else {
+                $this->info[] = "option {$optionId} availabilityLocalStartTimes fields are not present because of invalid mapping structure";
+            }
+            $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
+            $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_DEFAULT;
+            $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
+            if (isset($tour->cancellation_policy) && isset($tour->cancellation_policy->policy)) {
+                $cancellationPoliciesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->cancellation_policy, 'policy');
+                $policy = $cancellationPoliciesFromXML[0] ?? null;
+                if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
+                    $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNITS[(string) $policy->type];
+                    $optionCancellationCutoffAmount = (int) $policy->value;
+                    $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}";
+                    if ($optionCancellationCutoffAmount != 1) {
+                        $optionCancellationCutoff .= "s";
                     }
                 } else {
-                    $this->info[] = "option {$optionId} cancellationCutoff field is missing";
+                    $this->info[] = "option {$optionId} cancellationCutoff info is empty or missing";
                 }
-                $optionRequiredContactFields = $this->getOptionRequiredContactFields($tour);
-                $optionRestrictions = new stdClass();
-                $optionRestrictions->minUnits = null;
-                if (isset($tour->min_booking_size)) {
-                    $optionRestrictions->minUnits = (int) $tour->min_booking_size;
-                }
-                $optionRestrictions->maxUnits = null;
-                if (isset($tour->max_booking_size)) {
-                    $optionRestrictions->maxUnits = (int) $tour->max_booking_size;
-                }
-        
-                $optionUnits = $this->getOptionUnits($tour);
-          
-                $option = (object) [
-                    'id' => $optionId,
-                    'default' => $optionDefault,
-                    'internalName' => $optionInternalName,
-                    'reference' => $optionReference,
-                    'availabilityLocalStartTimes' => $optionAvailabilityLocalStartTimes,
-                    'cancellationCutoff' => $optionCancellationCutoff,
-                    'cancellationCutoffAmount' => $optionCancellationCutoffAmount,
-                    'cancellationCutoffUnit' => $optionCancellationCutoffUnit,
-                    'requiredContactFields' => $optionRequiredContactFields,
-                    'restrictions' => $optionRestrictions,
-                    'units' => $optionUnits
-                ];
-                $options[] = $option;
+            } else {
+                $this->info[] = "option {$optionId} cancellationCutoff field is missing";
             }
-        } else {
-            $this->errors[] = self::ERROR_DEPARTURE_STRUCTURE_NOT_SET;
+            $optionRequiredContactFields = $this->getOptionRequiredContactFields($tour);
+            $optionRestrictions = new stdClass();
+            $optionRestrictions->minUnits = null;
+            if (isset($tour->min_booking_size)) {
+                $optionRestrictions->minUnits = (int) $tour->min_booking_size;
+            }
+            $optionRestrictions->maxUnits = null;
+            if (isset($tour->max_booking_size)) {
+                $optionRestrictions->maxUnits = (int) $tour->max_booking_size;
+            }
+    
+            $optionUnits = $this->getOptionUnits($tour);
+        
+            $option = (object) [
+                'id' => $optionId,
+                'default' => $optionDefault,
+                'internalName' => $optionInternalName,
+                'reference' => $optionReference,
+                'availabilityLocalStartTimes' => $optionAvailabilityLocalStartTimes,
+                'cancellationCutoff' => $optionCancellationCutoff,
+                'cancellationCutoffAmount' => $optionCancellationCutoffAmount,
+                'cancellationCutoffUnit' => $optionCancellationCutoffUnit,
+                'requiredContactFields' => $optionRequiredContactFields,
+                'restrictions' => $optionRestrictions,
+                'units' => $optionUnits
+            ];
+            $options[] = $option;
         }
+
         return $options;
     }
 
@@ -749,6 +747,23 @@ class ProductService
         $distributionIdentifierSplitted = explode('_', $distributionIdentifier);
         
         return $distributionIdentifierSplitted[2];
+    }
+
+    protected function getMappingsCount(SimpleXMLElement $tourDepartureStructure): int
+    {
+        $structureType = (string) $tourDepartureStructure->type;
+
+        switch ($structureType) {
+            case self::MAPPING_STRUCTURE_TYPE_NOTSET:
+                return 0;
+            
+            case self::MAPPING_STRUCTURE_TYPE_SINGLE:
+            case self::MAPPING_STRUCTURE_TYPE_START_TIME:
+                return 1;
+        
+            default:
+                return count($tourDepartureStructure->departure_types->type ?? []);
+        }
     }
 
 }
