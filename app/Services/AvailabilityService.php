@@ -37,6 +37,10 @@ class AvailabilityService
 
     const ERROR_MESSAGE_AVAILABILITY_NEED_DATE = 'Request body must have localDate param or localDateStart + localDateEnd param(s)';
 
+    const TCMS_CUTOFF_BEFORE_START_SECONDS = 'before_start_sec';
+    const TCMS_CUTOFF_DAY_BEFORE_TIME = 'day_before_time';
+    const TCMS_CUTOFF_SAME_DAY_TIME = 'same_day_time';
+
     public function __construct(
         TourCMSService $tourCMSService, 
         ProductService $productService, 
@@ -137,7 +141,7 @@ class AvailabilityService
             return $startDate->format(DateTime::ATOM);
         }
 
-        if ($type == 'before_start_sec') {
+        if ($type == self::TCMS_CUTOFF_BEFORE_START_SECONDS) {
             $interval = new DateInterval("PT{$value}S");
             $startDate->sub($interval);
             return $startDate->format(DateTime::ATOM);
@@ -146,15 +150,15 @@ class AvailabilityService
         $startDate = new DateTime($startDay);
 
         $valueSplitted = explode(':', $value);
-        $hour = $valueSplitted[0] ?? '00';
-        $minutes = $valueSplitted[1] ?? '00';
+        $hour = $valueSplitted[0] ? (int) $valueSplitted[0] : 0;
+        $minutes = $valueSplitted[1] ? (int) $valueSplitted[1] : 0;
 
-        if ('day_before_time') {
+        if ($type == self::TCMS_CUTOFF_DAY_BEFORE_TIME) {
             $startDate->modify('-1 day');
             $startDate->setTime($hour, $minutes);
         }
         
-        if ($type == 'same_day_time') {
+        if ($type == self::TCMS_CUTOFF_SAME_DAY_TIME) {
             $startDate->setTime($hour, $minutes);
         }
 
