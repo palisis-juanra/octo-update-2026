@@ -24,7 +24,7 @@ class AvailabilityServiceTest extends TestCase
             'value' => 3600
         ];
 
-        $expectedCutoff = self::DAY_BEFORE_TO_START_DATE . "T23:00:00+01:00";
+        $expectedCutoff = self::DAY_BEFORE_TO_START_DATE . "T23:00:00Z";
 
         $availabilityService = $this->getMockBuilder(AvailabilityService::class)
             ->onlyMethods([])
@@ -41,7 +41,7 @@ class AvailabilityServiceTest extends TestCase
             'type' => AvailabilityService::TCMS_CUTOFF_DAY_BEFORE_TIME,
             'value' => '13:00'
         ];
-        $expectedCutoff = self::DAY_BEFORE_TO_START_DATE . "T13:00:00+01:00";
+        $expectedCutoff = self::DAY_BEFORE_TO_START_DATE . "T13:00:00Z";
 
         $availabilityService = $this->getMockBuilder(AvailabilityService::class)
             ->onlyMethods([])
@@ -59,7 +59,7 @@ class AvailabilityServiceTest extends TestCase
             'type' => AvailabilityService::TCMS_CUTOFF_SAME_DAY_TIME,
             'value' => '13:00'
         ];
-        $expectedCutoff = self::START_DAY . "T13:00:00+01:00";
+        $expectedCutoff = self::START_DAY . "T13:00:00Z";
 
         $availabilityService = $this->getMockBuilder(AvailabilityService::class)
             ->onlyMethods([])

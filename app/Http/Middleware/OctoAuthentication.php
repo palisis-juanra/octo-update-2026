@@ -53,7 +53,6 @@ class OctoAuthentication
 
         // We should not register ServiceProviders in test enviroment
         if (env('APP_ENV') === 'testing') {
-            Log::info('SKIPPING REGISTER SERVICES PROVIDERS');
             return $next($request);
         }
 

@@ -13,6 +13,7 @@ use App\Transformers\AvailabilityTransformer;
 use App\Transformers\BaseTransformer;
 use DateInterval;
 use DateTime;
+use DateTimeZone;
 use stdClass;
 
 class AvailabilityService
@@ -40,6 +41,7 @@ class AvailabilityService
     const TCMS_CUTOFF_BEFORE_START_SECONDS = 'before_start_sec';
     const TCMS_CUTOFF_DAY_BEFORE_TIME = 'day_before_time';
     const TCMS_CUTOFF_SAME_DAY_TIME = 'same_day_time';
+    const CUTOFF_FORMAT = 'Y-m-d\TH:i:s\Z';
 
     public function __construct(
         TourCMSService $tourCMSService, 
@@ -135,7 +137,7 @@ class AvailabilityService
         $type = (string) $cutoffData['type'];
         $value = (string) $cutoffData['value'];
 
-        $startDate = new DateTime($startDay);
+        $startDate = new DateTime($startDay, new DateTimeZone('UTC'));
 
         if ($value == '0') {
             return $startDate->format(DateTime::ATOM);
@@ -144,10 +146,8 @@ class AvailabilityService
         if ($type == self::TCMS_CUTOFF_BEFORE_START_SECONDS) {
             $interval = new DateInterval("PT{$value}S");
             $startDate->sub($interval);
-            return $startDate->format(DateTime::ATOM);
+            return $startDate->format(self::CUTOFF_FORMAT);
         }
-
-        $startDate = new DateTime($startDay);
 
         $valueSplitted = explode(':', $value);
         $hour = $valueSplitted[0] ? (int) $valueSplitted[0] : 0;
@@ -162,6 +162,6 @@ class AvailabilityService
             $startDate->setTime($hour, $minutes);
         }
 
-        return $startDate->format(DateTime::ATOM);
+        return $startDate->format(self::CUTOFF_FORMAT);
     }
 }
