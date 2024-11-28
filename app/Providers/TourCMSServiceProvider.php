@@ -24,8 +24,6 @@ class TourCMSServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->bind(TourCMSService::class, function (): TourCMSService {
-
-            Log::info('TOURCMS SERVICE PROVIDER WORKING!!!');
             
             $request = app(Request::class);
 
