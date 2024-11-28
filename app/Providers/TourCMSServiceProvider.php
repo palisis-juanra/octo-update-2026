@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use App\Http\Middleware\OctoAuthentication;
 use App\Services\TourCMSService;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
 
