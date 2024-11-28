@@ -20,12 +20,15 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(ExceptionHandler::class, CustomExceptionHandler::class);
 
-        // We need this to use JSONLog as facade
-        $this->app->bind('JSONLogService', function(): JSONLogService {
-                        
-            return app(JSONLogService::class);
+        if (getenv('APP_ENV') !== 'testing') {
+            // We need this to use JSONLog as facade
+            $this->app->bind('JSONLogService', function(): JSONLogService {
+                                    
+                return app(JSONLogService::class);
 
-        });
+            });
+        }
+        
     }
 
     /**

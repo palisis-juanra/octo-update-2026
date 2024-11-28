@@ -10,6 +10,7 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Throwable;
 
@@ -75,10 +76,12 @@ class CustomExceptionHandler extends Handler
             default:
                 try  {
                     JSONLog::error(["message" => "Exception captured by custom error handler", "exception" => $exception]);
+                    return OctoResponse::INTERNAL_SERVER_ERROR();
                 } catch (BindingResolutionException) {
                     parent::report($exception);
+                    return new JsonResponse([], Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
-                return OctoResponse::INTERNAL_SERVER_ERROR();
+                
         }
         
     }

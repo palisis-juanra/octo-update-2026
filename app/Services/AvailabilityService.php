@@ -35,6 +35,8 @@ class AvailabilityService
         self::PARAM_OPTION_ID
     ];
 
+    const ERROR_MESSAGE_AVAILABILITY_NEED_DATE = 'Request body must have localDate param or localDateStart + localDateEnd param(s)';
+
     public function __construct(
         TourCMSService $tourCMSService, 
         ProductService $productService, 
@@ -102,12 +104,16 @@ class AvailabilityService
             }
         } else {
             $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START] ?? '';
+            $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
+            
+            if (empty($localDateStart) || empty($localDateEnd)) {
+                throw new AvailabilityRequestInvalidParamException(self::ERROR_MESSAGE_AVAILABILITY_NEED_DATE);
+            }
 
             if (DateTimeService::validateDate($localDateStart) === false) {
                 throw new AvailabilityRequestInvalidParamException('localDateStart must be a valid date in format YYYY-MM-DD');
             }
     
-            $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
             if (!empty($localeDateEnd) && DateTimeService::validateDate($localDateEnd) === false) {
                 throw new AvailabilityRequestInvalidParamException('localDateEnd must be a valid date in format YYYY-MM-DD');
             }
@@ -132,7 +138,7 @@ class AvailabilityService
         }
 
         if ($type == 'before_start_sec') {
-            $interval = new DateInterval(-$value);
+            $interval = new DateInterval("PT{$value}S");
             $startDate->sub($interval);
             return $startDate->format(DateTime::ATOM);
         }

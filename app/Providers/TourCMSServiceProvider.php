@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Middleware\OctoAuthentication;
 use App\Services\TourCMSService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -20,9 +21,11 @@ class TourCMSServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot()
+    public function boot(): void
     {
         $this->app->bind(TourCMSService::class, function (): TourCMSService {
+
+            Log::info('TOURCMS SERVICE PROVIDER WORKING!!!');
             
             $request = app(Request::class);
 

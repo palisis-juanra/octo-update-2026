@@ -7,8 +7,11 @@ use App\Providers\JSONLogServiceProvider;
 use App\Providers\TourCMSServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
+use Tests\FakeServices\FakeJSONLogServiceProvider;
+use Tests\FakeServices\FakeTourCMSServiceProvider;
 
 
 class OctoAuthentication
@@ -46,6 +49,13 @@ class OctoAuthentication
             self::FIELD_X_CORRELATION_ID => $this->getCorrelationIdFromHeaders($request) ?? Str::uuid(),
             self::FIELD_X_REQUEST_ID => $this->getRequestIdFromHeaders($request),
         ]);
+
+
+        // We should not register ServiceProviders in test enviroment
+        if (env('APP_ENV') === 'testing') {
+            Log::info('SKIPPING REGISTER SERVICES PROVIDERS');
+            return $next($request);
+        }
 
         /* At this point we have the credentials for TourCMS, then
         we can register the service providers */
