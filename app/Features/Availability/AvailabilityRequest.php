@@ -34,6 +34,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     {
         $departures = $this->fetchDeparturesFromAPI($tourCMSService);
         $availabilities = $this->getAvailabilitiesFromDepartures($departures);
+        $this->saveAvailabilities($availabilities);
 
         return $availabilities;
     }
@@ -59,20 +60,21 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         foreach ($departures as $departure) {
             
             $availability = new Availability;
-            
+
+            list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
+            list($endTimeHours, $endTimeMinutes) = explode(":", $departure->end_time ? (string) $departure->end_time : '23:59');
+
             $availability->setDepartureId((int) $departure->departure_id);
-            $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, '00', '00'));
-            $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, '23', '59'));
+            $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
+            $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
             $availability->setAllDay(false);
             //TODO: check if spaces > rates count
             $availability->setAvailable($departure->spaces_remaining > 0);
             $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
             $availability->setMaxUnits($this->maxUnits);
             $availability->setUtcCutoffAt($this->cutoff);
-            $availability->setOpeningHoursFrom($component->start_time ?? '00:00');
-            $availability->setOpeningHoursTo($component->end_time ?? '23:59');
-
-            $availability->save();
+            $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
+            $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
             
             $availabilities[] = $availability;
 
@@ -139,5 +141,17 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         $this->optionId = $optionId;
 
         return $this;
+    }
+
+    /**
+     * Summary of saveAvailabilities
+     * @param Availability[]
+     * @return void
+     */
+    protected function saveAvailabilities(array $availabilities): void
+    {
+        foreach ($availabilities as $availability) {
+            $availability->save();
+        }
     }
 }

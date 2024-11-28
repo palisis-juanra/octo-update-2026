@@ -24,7 +24,7 @@ class OctoResponse {
     const ERROR_MESSAGE_FORBIDDEN = 'Unable to authenticate';
     const ERROR_MESSAGE_SERVER = 'There have been an error while processing the request, please try again later';
     const ERROR_MESSAGE_INVALID_PRODUCT_ID = 'Missing or invalid productId';
-    const ERROR_MESSAGE_INVALID_OPTION_ID = 'Invalid OptionId. Must must one of the following options: SINGLE, START_TIME|{TIME}, DEPARTURE_CODE|{CODE}, SUPPLIER_NOTE|{NOTE} or SUPPLIER_NOTE_PLUS_START_TIME|{NOTE}';
+    const ERROR_MESSAGE_INVALID_OPTION_ID = 'Invalid OptionId. Must must one of the following options: SINGLE, START_TIME, DEPARTURE_CODE|{CODE}, SUPPLIER_NOTE|{NOTE} or SUPPLIER_NOTE_PLUS_START_TIME|{NOTE}';
     const ERROR_MESSAGE_INVALID_UNIT_ID = 'Invalid UnitId. Must be a valid unit id in the scope of the product';
 
     public static function UNAUTHORIZED(string $errorMessage = self::ERROR_MESSAGE_UNAUTHORIZED): Response
