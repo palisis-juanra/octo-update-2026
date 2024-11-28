@@ -12,6 +12,8 @@ Route::get('/auth', function(): JsonResponse { return OctoResponse::OK('OK'); })
 
 Route::get('/supplier', [SupplierController::class, 'index'])->middleware([OctoAuthentication::class]);
 
+Route::get('/suppliers', [SupplierController::class, 'index'])->middleware([OctoAuthentication::class]);
+
 Route::get('products', [ProductController::class, 'index'])->middleware([OctoAuthentication::class]);
 
 Route::get('products/{id}', [ProductController::class, 'show'])->middleware([OctoAuthentication::class]);

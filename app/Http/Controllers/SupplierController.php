@@ -15,6 +15,9 @@ use OpenApi\Attributes as OA;
 
 class SupplierController extends Controller
 {
+
+    const SUPPLIER_PATH = '/suppliers';
+
     public const ENDPOINT_NAME = 'supplier';
     public SupplierService $supplierService;
     public JSONLogService $logger;
@@ -66,7 +69,7 @@ class SupplierController extends Controller
         try {
             $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
             $supplierData = $this->supplierService->getSupplierData($channelId);
-            
+            if ($this->isSuppliersRequest(request()->getRequestUri())) $supplierData = [$supplierData];
             return new JsonResponse($supplierData, Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();
@@ -88,5 +91,10 @@ class SupplierController extends Controller
             $request->get(OctoAuthentication::FIELD_X_CORRELATION_ID),
             $request->get(OctoAuthentication::FIELD_X_REQUEST_ID)
         );
+    }
+
+    protected function isSuppliersRequest($path):bool
+    {
+        return $path == self::SUPPLIER_PATH; 
     }
 }
