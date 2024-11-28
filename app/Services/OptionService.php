@@ -9,9 +9,9 @@ use UnhandledMatchError;
 class OptionService
 {
     const OPTION_SINGLE = 'SINGLE';
-    const OPTION_SINGLE_REGEX = '/^SINGLE/';
+    const OPTION_SINGLE_REGEX = '/^SINGLE$/';
     const OPTION_START_TIME = 'START_TIME';
-    const OPTION_START_TIME_REGEX = '/^(START_TIME\|([01][0-9]|2[0-3]):([0-5][0-9])$)/';
+    const OPTION_START_TIME_REGEX = '/^START_TIME$/';
     const OPTION_DEPARTURE_CODE = 'DEPARTURE_CODE';
     const OPTION_DEPARTURE_CODE_REGEX = '/^(DEPARTURE_CODE\|.*)/';
     const OPTION_SUPPLIER_NOTE = 'SUPPLIER_NOTE';
@@ -51,7 +51,7 @@ class OptionService
      */
     public static function getMappingQueryString(string $optionId): string
     {
-        if ($optionId === self::OPTION_SINGLE) {
+        if ($optionId === self::OPTION_SINGLE || $optionId === self::OPTION_START_TIME) {
             return '';
         }
 
@@ -65,7 +65,6 @@ class OptionService
 
         try {
             $mappingField = match($mappingType) {
-                self::OPTION_START_TIME => 'start_time',
                 self::OPTION_DEPARTURE_CODE => 'code',
                 self::OPTION_SUPPLIER_NOTE, self::OPTION_SUPPLIER_NOTE_PLUS_START_TIME => 'supplier_note',
             };
