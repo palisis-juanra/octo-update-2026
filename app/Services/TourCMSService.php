@@ -89,7 +89,6 @@ class TourCMSService
             $queryString .= $extraParams;
         }
 
-        //error_log($queryString);
         
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response); 
