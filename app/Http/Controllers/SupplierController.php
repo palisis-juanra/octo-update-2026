@@ -15,8 +15,8 @@ use OpenApi\Attributes as OA;
 
 class SupplierController extends Controller
 {
-
-    const SUPPLIER_PATH = '/suppliers';
+    const SUPPLIER_PATH = '/supplier';
+    const SUPPLIERS_PATH = '/suppliers';
 
     public const ENDPOINT_NAME = 'supplier';
     public SupplierService $supplierService;
@@ -95,6 +95,6 @@ class SupplierController extends Controller
 
     protected function isSuppliersRequest($path):bool
     {
-        return $path == self::SUPPLIER_PATH; 
+        return $path == self::SUPPLIERS_PATH; 
     }
 }
