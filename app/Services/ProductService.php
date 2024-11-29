@@ -217,30 +217,27 @@ class ProductService
         return $product;
     }
 
-    public function getProductOptions(\SimpleXMLElement $tour): array
+    public function getProductOptions(SimpleXMLElement $tour): array
     {
 
-        $numOptions = $this->getMappingsCount($tour->tour_departure_structure);
+        $structureType = $tour->tour_departure_structure->type ? (string) $tour->tour_departure_structure->type : null;
 
-        if ($numOptions === 0) {
+        if (empty($structureType) || $structureType == self::MAPPING_STRUCTURE_TYPE_NOTSET) {
             $this->errors[] = self::ERROR_DEPARTURE_STRUCTURE_NOT_SET;
             return [];
         }
 
-        $structureType = $tour->tour_departure_structure->type;
-        
-        for ($i = 0; $i < $numOptions; $i++) {
-            
+        $options = []; 
+        $mappings = $this->getActiveMappingsFromTour($tour);
+
+        foreach ($mappings as $option => $availabilityStartTimes) {
+
             $optionId = "{$structureType}";
 
-            if (!in_array($structureType, [self::MAPPING_STRUCTURE_TYPE_SINGLE && $structureType !== self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
-                if (isset($tour->tour_departure_structure->departure_types->type->fields->field->value)) {
-                    $mappingFieldValue = $tour->tour_departure_structure->departure_types->type[$i]->fields->field->value;
-                    $optionId = "{$structureType}|{$mappingFieldValue}";
-                }
+            if (!in_array($structureType, [self::MAPPING_STRUCTURE_TYPE_SINGLE, self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
+                $optionId .= "|{$option}";
             }
-            
-            
+
             $optionDefault = $structureType == self::MAPPING_STRUCTURE_TYPE_SINGLE ? true : false;
             $optionInternalName = "";
 
@@ -259,26 +256,7 @@ class ProductService
                 $this->info[] = "option {$optionId} reference field is missing";
             }
 
-            // TODO add self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME case when fixed
-            $optionAvailabilityLocalStartTimes = [];
-            if ($structureType != self::MAPPING_STRUCTURE_TYPE_START_TIME && $structureType != self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME) {
-                if (isset($tour->start_time) && !empty($tour->start_time) && $tour->start_time != self::START_TIME_MULTI) {
-                    $optionAvailabilityLocalStartTimes[] = (string) $tour->start_time;
-                } else {
-                    $optionAvailabilityLocalStartTimes[] = self::AVAILABILITY_LOCAL_START_TIMES_DEFAULT;
-                }
-            } else if ($structureType == self::MAPPING_STRUCTURE_TYPE_START_TIME) {
-                if (isset($tour->tour_departure_structure->departure_types->type)) {
-                    $departureTypesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->tour_departure_structure->departure_types, 'type');
-                    foreach ($departureTypesFromXML as $type) {
-                        if (isset($type->active) && $type->active == 1) {
-                            if (isset($type->fields->field->value)) {
-                                $optionAvailabilityLocalStartTimes[] = (string) $type->fields->field->value;
-                            }
-                        }
-                    }
-                }
-            } else {
+            if (empty($availabilityStartTimes)) {
                 $this->info[] = "option {$optionId} availabilityLocalStartTimes fields are not present because of invalid mapping structure";
             }
             $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
@@ -318,7 +296,7 @@ class ProductService
                 'default' => $optionDefault,
                 'internalName' => $optionInternalName,
                 'reference' => $optionReference,
-                'availabilityLocalStartTimes' => $optionAvailabilityLocalStartTimes,
+                'availabilityLocalStartTimes' => $availabilityStartTimes,
                 'cancellationCutoff' => $optionCancellationCutoff,
                 'cancellationCutoffAmount' => $optionCancellationCutoffAmount,
                 'cancellationCutoffUnit' => $optionCancellationCutoffUnit,
@@ -332,7 +310,7 @@ class ProductService
         return $options;
     }
 
-    public function getOptionUnits(\SimpleXMLElement $tour): array
+    public function getOptionUnits(SimpleXMLElement $tour): array
     {
         $optionUnits = [];
         $parent = null;
@@ -749,21 +727,102 @@ class ProductService
         return $distributionIdentifierSplitted[2];
     }
 
-    protected function getMappingsCount(SimpleXMLElement $tourDepartureStructure): int
+    /**
+     * @param SimpleXMLElement $tour Tour XML Node
+     * Get all the active mappings based on its structure type
+     * Each element in array contains option and availabilityStartTimes
+     * @return array[]
+     */
+    protected function getActiveMappingsFromTour(SimpleXMLElement $tour): array
     {
-        $structureType = (string) $tourDepartureStructure->type;
+        $structureType = (string) $tour->tour_departure_structure->type;
+        $types = $this->tourCMSService->getArrayFromXmlNode($tour->tour_departure_structure->departure_types, 'type');
+        $mappings = [];
 
         switch ($structureType) {
-            case self::MAPPING_STRUCTURE_TYPE_NOTSET:
-                return 0;
-            
-            case self::MAPPING_STRUCTURE_TYPE_SINGLE:
+
             case self::MAPPING_STRUCTURE_TYPE_START_TIME:
-                return 1;
-        
+                foreach ($types as $mapping) {
+                    if (isset($mapping->active) && $mapping->active == 1) {
+                        if (isset($mapping->fields->field->value)) {
+                            // Mappings key is empty, because we dont add any option specific for start time mapping
+                            $mappings[''][] = (string) $mapping->fields->field->value;
+                        }
+                    }
+                }
+                return $mappings;
+
+            case self::MAPPING_STRUCTURE_TYPE_DEPARTURE_CODE:
+            case self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE:
+                foreach ($types as $mapping) {
+                    if (isset($mapping->active) && $mapping->active == 1) {
+                        if (isset($mapping->fields->field->value)) {
+
+                            if (isset($tour->start_time) && !empty($tour->start_time) && $tour->start_time != self::START_TIME_MULTI) {
+                                $availabilityStartTime = (string) $tour->start_time;
+                            } else {
+                                $availabilityStartTime = self::AVAILABILITY_LOCAL_START_TIMES_DEFAULT;
+                            }
+
+                            $mappings[(string) $mapping->fields->field->value] = [$availabilityStartTime];
+                        }
+                    }
+                }
+                
+                return $mappings;
+
+            case self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME:
+
+                foreach ($types as $mapping) {
+
+                    if ($mapping->active == 0) {
+                        continue;
+                    }
+
+                    // Skip partials mappings
+                    $partialMapping = $mapping->partial;
+                    if (!empty($partialMapping) && (int) $partialMapping != 0) {
+                        continue;
+                    }
+    
+                    $mappingObject = [];
+    
+                    foreach ($mapping->fields->field as $field) {
+                        
+                        $fieldName = (string) $field->name;
+                        $fieldValue = (string) $field->value;
+    
+                        if ($fieldName == 'supplier_note') {
+                            $mappingObject['supplier_note'] = $fieldValue;
+                                                  
+                        }
+    
+                        if ($fieldName == 'start_time') {
+                            $mappingObject['start_time'] = $fieldValue;
+                        }
+                    }
+    
+                    if (!array_key_exists($mappingObject['supplier_note'], $mappings)){
+                        $mappings[$mappingObject['supplier_note']] = [];
+                    }
+    
+                    if (!in_array($mappingObject['start_time'], $mappings[$mappingObject['supplier_note']])) {
+                        $mappings[$mappingObject['supplier_note']][] = $mappingObject['start_time'];
+                    }
+                }
+                return $mappings;
+            
             default:
-                return count($tourDepartureStructure->departure_types->type ?? []);
+
+                if ((string) $tour->start_time == self::START_TIME_MULTI) {
+                    $this->errors[] = 'Product has an invalid time configuration. Tour cannot be mapped as SINGLE and have multiple start times';
+                    throw new InvalidProductContentException($this->buildProductId($tour), 'Product has an invalid time configuration');
+                }
+
+                return ['' => [(string) $tour->start_time]];
+
         }
+        
     }
 
 }
