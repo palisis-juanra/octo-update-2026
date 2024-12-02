@@ -382,6 +382,131 @@ class ProductServiceTest extends TestCase
         $this->assertCount(1, $productList);
     }
 
+    public function test_whenTourIsMappedBySingleDeparturePerDayButHaveMultipleStartTime_thenWeShouldThrowAnException(): void
+    {
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->logger = $this->mockLogger();
+            
+        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SINGLE.xml'));
+        $tourData = $showTourResponseXML->tour;
+
+        $this->expectException(InvalidProductContentException::class);
+
+        $productServiceMock->getActiveMappingsFromTour($tourData);
+    }
+
+    public function test_whenTourIsMappedBySingleDeparturePerDayAndHaveFixedStartTime_thenWeGetCorrectMapping(): void
+    {
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->logger = $this->mockLogger();
+            
+        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SINGLE.xml'));
+        $tourData = $showTourResponseXML->tour;
+        $tourData->start_time = '13:00';
+
+        $expectedProductOptions = [
+            '' => ['13:00']
+        ];
+
+        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
+        $this->assertEquals($expectedProductOptions, $productOptions);
+    }
+
+    public function test_whenTourIsMappedByStartTime_thenWeGetCorrectMappings(): void
+    {
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->logger = $this->mockLogger();
+            
+        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/START_TIME.xml'));
+        $tourData = $showTourResponseXML->tour;
+
+        $expectedProductOptions = [
+            '' => ['13:00', '15:00', '17:00'],
+        ];
+
+        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
+        $this->assertEquals($expectedProductOptions, $productOptions);
+    }
+
+    public function test_whenTourIsMappedBySupplierNote_thenWeGetCorrectMappings(): void
+    {
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->logger = $this->mockLogger();
+            
+        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE.xml'));
+        $tourData = $showTourResponseXML->tour;
+
+        $expectedProductOptions = [
+            '' => ['00:00'],
+            'TEST_NOTE_1' => ['00:00'],
+            'TEST_NOTE_2' => ['00:00'],
+        ];
+
+        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
+        $this->assertEquals($expectedProductOptions, $productOptions);
+    }
+
+    public function test_whenTourIsMappedByDepartureCode_thenWeGetCorrectMappings(): void
+    {
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->logger = $this->mockLogger();
+            
+        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/DEPARTURE_CODE.xml'));
+        $tourData = $showTourResponseXML->tour;
+
+        $expectedProductOptions = [
+            'ABC' => ['00:00'],
+            '123' => ['00:00'],
+            'xyz' => ['00:00'],
+        ];
+
+        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
+        $this->assertEquals($expectedProductOptions, $productOptions);
+    }
+
+    public function test_whenTourIsMappedBySupplierNotePlusStartTime_thenWeGetOnlyNonPartialAndCorrectMappings(): void
+    {
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->logger = $this->mockLogger();
+            
+        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE_PLUS_START_TIME.xml'));
+        $tourData = $showTourResponseXML->tour;
+
+        $expectedProductOptions = [
+            'SUP_NOTE_TEST' => ['17:00', '13:00'],
+        ];
+
+        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
+        error_log(print_r($productOptions, 1));
+        $this->assertEquals($expectedProductOptions, $productOptions);
+    }
+
+
+
     protected function mockLogger(): JSONLogService|MockObject
     {
         $logger = $this->getMockBuilder(JsonLogService::class)

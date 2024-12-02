@@ -733,7 +733,7 @@ class ProductService
      * Each element in array contains option and availabilityStartTimes
      * @return array[]
      */
-    protected function getActiveMappingsFromTour(SimpleXMLElement $tour): array
+    public function getActiveMappingsFromTour(SimpleXMLElement $tour): array
     {
         $structureType = (string) $tour->tour_departure_structure->type;
         $types = $this->tourCMSService->getArrayFromXmlNode($tour->tour_departure_structure->departure_types, 'type');
