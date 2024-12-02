@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AvailabilityCalendarController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\BookingCancellationController;
 use App\Http\Controllers\BookingReservationController;
@@ -31,3 +32,5 @@ Route::post('/bookings', [BookingReservationController::class, 'index'])->middle
 Route::post('/bookings/{uuid}/confirm', [BookingConfirmationController::class, 'index'])->middleware([OctoAuthentication::class]);
 
 Route::post('/bookings/{uuid}/cancel', [BookingCancellationController::class, 'cancel'])->middleware([OctoAuthentication::class]);
+
+Route::post('/availability/calendar', [AvailabilityCalendarController::class, 'index'])->middleware([OctoAuthentication::class]);
