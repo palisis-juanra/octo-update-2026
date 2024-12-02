@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class CustomExceptionHandler extends Handler
@@ -39,6 +40,8 @@ class CustomExceptionHandler extends Handler
         $exceptionClass = get_class($exception);
 
         switch ($exceptionClass) {
+            case (NotFoundHttpException::class):
+                return OctoResponse::NOT_IMPLEMENTED();
 
             case (MethodNotAllowedHttpException::class):
                 return OctoResponse::BAD_REQUEST('Invalid http request method');
