@@ -6,6 +6,8 @@ use DateTime;
 
 class DateTimeService
 {
+    const FORMAT_ISO8601 = 'Y-m-d\TH:i:s\Z';
+
     public static function getISODateTimeString(string $day = 'now', string $hour = '00', string $minutes = '00'): string
     {
         $dateTime = new DateTime($day);
@@ -27,6 +29,11 @@ class DateTimeService
         $dateTime = DateTime::createFromFormat($format, $date);
 
         return $dateTime && strtolower($dateTime->format($format)) === strtolower($date);
+    }
+
+    public static function getISO8601DateFormatted(DateTime $date): string
+    {
+        return $date->format(self::FORMAT_ISO8601);
     }
 
 

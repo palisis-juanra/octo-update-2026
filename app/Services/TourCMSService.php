@@ -121,6 +121,12 @@ class TourCMSService
         
     }
 
+    public function startNewBooking(SimpleXMLElement $bookingData): SimpleXMLElement
+    {
+        $response = $this->tourCMS->start_new_booking($bookingData, $this->channelId);
+        return $this->handleResponse($response); 
+    }
+
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
     {
         $children = [];

@@ -4,6 +4,8 @@ namespace App\Transformers;
 
 class ProductTransformer extends BaseTransformer
 {
+    const MODE_BOOKING_PRODUCT = 'bookingProduct';
+
     public function __construct(string $mode)
     {
         parent::__construct($mode);
@@ -35,5 +37,10 @@ class ProductTransformer extends BaseTransformer
             "redemptionMethod" => $product->getRedemptionMethod(),
             "options" => $product->getOptions()
         ];
+    }
+
+    protected function bookingProduct($product): array
+    {
+        return $this->fullTransform($product);
     }
 }

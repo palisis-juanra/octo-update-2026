@@ -3,11 +3,11 @@
 namespace App\Models\Availability;
 
 use App\Models\Availability\AvailabilityPricing;
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class Availability extends BaseModel
+class Availability extends Model
 {
     use HasFactory, HasUuids;
 
@@ -93,7 +93,7 @@ class Availability extends BaseModel
      */ 
     public function getDepartureId(): string
     {
-        return $this->departureId;
+        return $this->departure_id;
     }
 
     /**
@@ -103,7 +103,7 @@ class Availability extends BaseModel
      */ 
     public function setDepartureId($departureId): self
     {
-        $this->departureId = $departureId;
+        $this->departure_id = $departureId;
 
         return $this;
     }
@@ -366,5 +366,10 @@ class Availability extends BaseModel
         $this->pricing = $pricing;
 
         return $this;
+    }
+
+    public function getDate(): string
+    {
+        return substr($this->local_date_time_start, 0, 10);
     }
 }

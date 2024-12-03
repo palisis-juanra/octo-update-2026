@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Http\Middleware\OctoAuthentication;
+use App\Models\Option;
 use App\Models\Product;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
@@ -286,7 +287,7 @@ class ProductService
     
             $optionUnits = $this->getOptionUnits($tour);
         
-            $option = (object) [
+            $optionData = (object) [
                 'id' => $optionId,
                 'default' => $optionDefault,
                 'internalName' => $optionInternalName,
@@ -299,7 +300,8 @@ class ProductService
                 'restrictions' => $optionRestrictions,
                 'units' => $optionUnits
             ];
-            $options[] = $option;
+
+            $options[] = Option::create($optionData);
         }
 
         return $options;

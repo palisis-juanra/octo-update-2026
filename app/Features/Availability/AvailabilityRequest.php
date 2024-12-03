@@ -68,7 +68,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
             $availability->setAllDay(false);
-            //TODO: check if spaces > rates count
             $availability->setAvailable($departure->spaces_remaining > 0);
             $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
             $availability->setMaxUnits($this->maxUnits);

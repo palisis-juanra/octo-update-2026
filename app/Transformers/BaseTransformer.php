@@ -14,13 +14,18 @@ abstract class BaseTransformer extends TransformerAbstract
         $this->mode = $mode;
     }
 
-    public function transform(object $object): array
+    public final function transform(object $object): array
     {
         if ($this->mode === self::BASIC){
             return $this->basicTransform($object);
         } 
         if ($this->mode === self::FULL_TRANSFORM){
             return $this->fullTransform($object);
+        }
+
+        if (method_exists($this, $this->mode)) {
+            $mode = $this->mode;
+            return $this->$mode($object);
         }
 
         throw new \InvalidArgumentException('Transformer mode is not supported');
