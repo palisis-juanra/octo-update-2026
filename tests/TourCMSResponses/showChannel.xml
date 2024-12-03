@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<response>
+    <request>GET /c/channel/show.xml</request>
+    <error>OK</error>
+    <channel>
+        <channel_id>142</channel_id>
+        <account_id>1</account_id>
+        <channel_name>PORTUGAL CHANNEL</channel_name>
+        <connection_permission>3</connection_permission>
+        <utc_offset_mins>60</utc_offset_mins>
+        <default_tour_timezone>Europe/Madrid</default_tour_timezone>
+        <lang>en</lang>
+        <tour_count>0</tour_count>
+        <sale_currency>USD</sale_currency>
+        <base_currency>EUR</base_currency>
+        <booking_fee>
+            <description>Booking FEE now</description>
+            <fee>12.00</fee>
+            <fee_display>12.00 %</fee_display>
+            <fee_type>PER_BOOKING</fee_type>
+            <fee_as>PERCENTAGE</fee_as>
+        </booking_fee>
+        <connection_date>2020-06-10 14:58:18</connection_date>
+        <home_url>http://www.solotravelerstour.com</home_url>
+        <credit_card_fee_sale_percentage>0.00</credit_card_fee_sale_percentage>
+        <home_url_tracked>http://live.tourcms.com/track/t.php?p=4&amp;m=0&amp;a=1&amp;k=7a5d90ddb5f5&amp;url=http%3A%2F%2Fwww.solotravelerstour.com</home_url_tracked>
+        <perm_override_sale_price>1</perm_override_sale_price>
+        <perm_waive_cc_fee>0</perm_waive_cc_fee>
+        <logo_url>https://cdntest.tourcms.com/a/1/w142_logo.png</logo_url>
+        <company_name>test</company_name>
+        <booking_style>ENQUIRY</booking_style>
+        <short_desc>Company Description - DIST.php</short_desc>
+        <long_desc>Longer Description</long_desc>
+        <very_long_desc>More longer Description</very_long_desc>
+        <terms_and_conditions>Bookings Conditions</terms_and_conditions>
+        <email_customer>aa@aa.es</email_customer>
+        <twitter>donjuanramongm</twitter>
+        <flickr>http://TEST</flickr>
+        <address_1>Rua da Boavista 667</address_1>
+        <address_city>Porto</address_city>
+        <address_state>Porto</address_state>
+        <address_postcode>4050-110</address_postcode>
+        <address_country>PT</address_country>
+        <commercial_email_private>juan.gonzalez@palisis.com</commercial_email_private>
+        <commercial_contactname_private>juan.gonzalez@palisis.com</commercial_contactname_private>
+        <commercial_pitch_private>Pitch!</commercial_pitch_private>
+        <commercial_ppl_private>1</commercial_ppl_private>
+        <commercial_dir_private>1</commercial_dir_private>
+        <commercial_ppc_private>1</commercial_ppc_private>
+        <commercial_aff_private>1</commercial_aff_private>
+        <commercial_ag_private>1</commercial_ag_private>
+        <commercial_any_private>1</commercial_any_private>
+        <commercial_avleadtime_private>24.4</commercial_avleadtime_private>
+        <commercial_avtransaction_private>27.59</commercial_avtransaction_private>
+        <commercial_avpeople_private>1.8</commercial_avpeople_private>
+        <commercial_avduration_private>1.8</commercial_avduration_private>
+        <commercial_percent_online_private>78</commercial_percent_online_private>
+        <commercial_percent_convert_private>88</commercial_percent_convert_private>
+        <commercial_avclick2book_private>0</commercial_avclick2book_private>
+        <geo_location>
+            <geocode>41.1565545,-8.6211924</geocode>
+            <google_place_name>Boavista Guest House</google_place_name>
+            <google_place_id>ChIJk38CzgBlJA0RjvrZ31x7-a4</google_place_id>
+        </geo_location>
+        <contact_us_link></contact_us_link>
+        <privacy_policy_link></privacy_policy_link>
+        <branding_colour>17A320</branding_colour>
+        <payment_gateway>
+            <gateway_id>18</gateway_id>
+            <name>Spreedly</name>
+            <gateway_type>SPRE</gateway_type>
+            <spreedly_environment_key>9xyyNh89TMduskMtOTh48V2wrJ8</spreedly_environment_key>
+            <take_visa>1</take_visa>
+            <take_mastercard>1</take_mastercard>
+            <take_diners>0</take_diners>
+            <take_discover>0</take_discover>
+            <take_amex>0</take_amex>
+            <take_unionpay>0</take_unionpay>
+        </payment_gateway>
+        <payment_gateway_marketplace>
+            <gateway_id></gateway_id>
+            <name></name>
+            <gateway_type></gateway_type>
+            <take_visa></take_visa>
+            <take_mastercard></take_mastercard>
+            <take_diners></take_diners>
+            <take_discover></take_discover>
+            <take_amex></take_amex>
+            <take_unionpay></take_unionpay>
+        </payment_gateway_marketplace>
+    </channel>
+</response>  

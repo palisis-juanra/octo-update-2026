@@ -1,0 +1,22 @@
+openapi: 3.0.0
+paths:
+  /supplier:
+    get:
+      description: 'Returns the supplier and associated contact details.'
+      operationId: c29db95450168487cd0d797292c58d09
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  id: { description: 'Supplier ID.', type: string }
+                  name: { description: 'Name the supplier uses to identify itself.', type: string }
+                  endpoint: { description: 'Base URL that will be prepended to all other paths.', type: string }
+                  contact: { description: 'Supplier contact details.', type: object, items: { properties: { website: { description: 'Website of the supplier.', type: null|string }, email: { description: 'The email support contact for the Supplier.', type: null|string }, telephone: { description: 'The phone support contact for the Supplier.', type: null|string }, address: { description: 'The mail address support contact for the Supplier.', type: null|string } }, type: object } }
+                type: object
+        '403':
+          description: Forbidden
+        '500':
+          description: 'Internal Server Error'
