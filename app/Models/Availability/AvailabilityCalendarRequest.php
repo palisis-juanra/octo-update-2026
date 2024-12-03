@@ -35,11 +35,10 @@ class AvailabilityCalendarRequest
     {
         $datesAndDeals = $this->fetchDatesAndDealsFromAPI($tourCMSService);
         $availabilities = $this->getAvailabilitiesFromDatesAndDeals($datesAndDeals);
-        error_log(print_r($availabilities, true));
         return $availabilities;
     }
 
-    protected function fetchDatesAndDealsFromAPI(TourCMSService $tourCMSService): array
+    public function fetchDatesAndDealsFromAPI(TourCMSService $tourCMSService): array
     {
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
 
@@ -54,7 +53,7 @@ class AvailabilityCalendarRequest
         return $datesAndDeals;
     }
 
-    protected function getAvailabilitiesFromDatesAndDeals(array $datesAndDeals): array
+    public function getAvailabilitiesFromDatesAndDeals(array $datesAndDeals): array
     {
         $availabilities = [];
 
@@ -79,6 +78,11 @@ class AvailabilityCalendarRequest
         return $availabilities;
     }
 
+    public function getTourId()
+    {
+        return $this->tourId;
+    }
+
     public function getOptionId(): string
     {
         return $this->optionId;
@@ -93,7 +97,11 @@ class AvailabilityCalendarRequest
     {
         return $this->localDateEnd;
     }
-
+    
+    public function getUnits(): array
+    {
+        return $this->units;
+    }
     public function getOctoStatusFromTourCMSStatus(string $status): string
     {
         if ($status == self::TCMS_STATUS_OPEN || $status == self::TCMS_STATUS_ASKFIRST) {

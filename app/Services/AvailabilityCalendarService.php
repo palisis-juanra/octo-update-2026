@@ -57,7 +57,7 @@ class AvailabilityCalendarService
     {
 
         $productId = $requestParams[self::PARAM_PRODUCT_ID] ?? '';
-        $tourId = $this->productService->getTourIdFromProductId($productId) ?? '';
+        $tourId = !empty($productId) ? $this->productService->getTourIdFromProductId($productId) : '';
         $optionId = $requestParams[self::PARAM_OPTION_ID] ?? '';
         $localDateStart = $requestParams[self::PARAM_LOCAL_DATE_START] ?? '';
         $localDateEnd = $requestParams[self::PARAM_LOCAL_DATE_END] ?? '';
