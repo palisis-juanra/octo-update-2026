@@ -15,7 +15,7 @@ class InvalidAvailabilityIdException extends Exception
         $this->availabilityId = $availabilityId;
     }
 
-    public function getOptionId()
+    public function getAvailabilityId()
     {
         return $this->availabilityId;
     }
