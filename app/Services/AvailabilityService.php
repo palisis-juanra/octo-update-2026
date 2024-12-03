@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Exceptions\AvailabilityRequestInvalidParamException;
+use App\Exceptions\BadRequestException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Features\Availability\AvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
@@ -29,6 +30,7 @@ class AvailabilityService
     const PARAM_LOCAL_DATE = 'localDate';
     const PARAM_LOCAL_DATE_START = 'localDateStart';
     const PARAM_LOCAL_DATE_END = 'localDateEnd';
+    const PARAM_AVAILABILITY_IDS = 'availabilityIds';
     const PARAM_UNITS = 'units';
     const PARAM_CURRENCY = 'currency';
     const REQUIRED_PARAMS = [
@@ -103,14 +105,24 @@ class AvailabilityService
         }
 
         $localDate = $requestParams[AvailabilityService::PARAM_LOCAL_DATE] ?? '';
+        $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START] ?? '';
+        $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
+        $availabilityIds = $requestParams[AvailabilityService::PARAM_AVAILABILITY_IDS] ?? [];
 
         if (!empty($localDate)) {
+
+            if (!empty($localDateStart) || !empty($localDateEnd) || !empty($availabilityIds)) {
+                throw new BadRequestException("You must pass in one of the following combinations of parameters for this endpoint: localDate / localeDateStart and localDateEnd / availabilityIds");
+            }
+
             if (DateTimeService::validateDate($localDate) === false) {
                 throw new AvailabilityRequestInvalidParamException('localDate must be a valid date in format YYYY-MM-DD');
             }
         } else {
-            $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START] ?? '';
-            $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
+
+            if (!empty($localDate) || !empty($availabilityIds)) {
+                throw new BadRequestException("You must pass in one of the following combinations of parameters for this endpoint: localDate or localeDateStart and localDateEnd or availabilityIds");
+            }
             
             if (empty($localDateStart) || empty($localDateEnd)) {
                 throw new AvailabilityRequestInvalidParamException(self::ERROR_MESSAGE_AVAILABILITY_NEED_DATE);
