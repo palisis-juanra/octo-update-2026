@@ -140,7 +140,7 @@ class AvailabilityService
         $startDate = new DateTime($startDay, new DateTimeZone('UTC'));
 
         if ($value == '0') {
-            return $startDate->format(DateTime::ATOM);
+            return $startDate->format(self::CUTOFF_FORMAT);
         }
 
         if ($type == self::TCMS_CUTOFF_BEFORE_START_SECONDS) {
