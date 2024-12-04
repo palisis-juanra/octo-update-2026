@@ -108,25 +108,20 @@ class BookingReservationService
         throw new NoAvailabilityException;
     }
 
-    protected function getBookingDataForStartNewBooking(array $unitItems, string $componentKey, string $uuid = null): SimpleXMLElement
+    public function getBookingDataForStartNewBooking(array $unitItems, string $componentKey, string $uuid = null): SimpleXMLElement
     {
         $booking = new SimpleXMLElement('<booking />');
         $booking->addChild('manage_uuid', 1);
         if (!is_null($uuid)) {
             $booking->addChild('booking_uuid', $uuid);
         }
-        $booking->addChild('total_customers', $this->getCustomersCount($unitItems));
+        $booking->addChild('total_customers', count($unitItems));
         $components = $booking->addChild('components');
         $component = $components->addChild('component');
         $component->addChild('component_key', $componentKey);
         $booking->addChild('customers');
 
         return $booking;
-    }
-
-    protected function getCustomersCount(array $unitItems): int
-    {
-        return count($unitItems);
     }
 
 }
