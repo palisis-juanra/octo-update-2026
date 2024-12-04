@@ -797,7 +797,7 @@ class ProductService
             
             default:
 
-                if ((string) $tour->start_time == self::START_TIME_MULTI) {
+                if ((string) $tour->start_time == self::START_TIME_MULTI || empty($tour->start_time)) {
                     $this->errors[] = 'Product has an invalid time configuration. Tour cannot be mapped as SINGLE and have multiple start times';
                     throw new InvalidProductContentException($this->buildProductId($tour), 'Product has an invalid time configuration');
                 }

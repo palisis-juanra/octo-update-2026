@@ -7,6 +7,7 @@ class BookingTransformer extends BaseTransformer
     protected ProductTransformer $productTransformer;
     protected OptionTransformer $optionTransformer;
     protected AvailabilityTransformer $availabilityTransformer;
+    protected ContactTransformer $contactTransformer;
 
     public function __construct(string $mode)
     {
@@ -14,6 +15,7 @@ class BookingTransformer extends BaseTransformer
         $this->productTransformer = new ProductTransformer(ProductTransformer::MODE_BOOKING_PRODUCT);
         $this->availabilityTransformer = new AvailabilityTransformer(AvailabilityTransformer::MODE_BOOKING_AVAILABILITY);
         $this->optionTransformer = new OptionTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->contactTransformer = new ContactTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     protected function basicTransform($booking): array
@@ -41,23 +43,28 @@ class BookingTransformer extends BaseTransformer
             'utcCreatedAt' => $booking->getUtcCreatedAt(),
             'utcUpdatedAt' => $booking->getUtcUpdatedAt(),
             'utcExpiresAt' => $booking->getUtcExpiresAt(),
-            'utcReedemedAt' => $booking->getUtcReedemedAt(),
+            'utcRedeemedAt' => $booking->getUtcRedeemedAt(),
             'utcConfirmedAt' => $booking->getUtcConfirmedAt(),
             'productId' => $product->getId(),
             'product' => $this->productTransformer->transform($product),
             'optionId' => $option->getId(),
             'option' => $this->optionTransformer->transform($option),
+            'cancellable' => $booking->getCancellable(),
+            'cancellation' => $booking->getCancellation(),
+            'freesale' => $product->getAllowFreesale(),
             'availabilityId' => $availability->getId(),
             'availability' => $this->availabilityTransformer->transform($availability),
-            'contact' => $booking->getContact(),
+            'contact' => $this->contactTransformer->transform($booking->getContact()),
             'notes' => $booking->getNotes(),
             'deliveryMethods' => $product->getDeliveryMethods(),
             'voucher' => [
                 'redemptionMethod' => $product->getRedemptionMethod(),
-                'utcRedeemedAt' => $booking->getUtcReedemedAt(),
-                'deliveryOptions' => []
+                'utcRedeemedAt' => $booking->getUtcRedeemedAt(),
+                'deliveryOptions' => [
+                    "deliveryFormat" => "QRCODE"
+                ]
             ],
-            'units' => $booking->getUnits()
+            'unitItems' => $booking->getUnits()
         ];
     }
 }

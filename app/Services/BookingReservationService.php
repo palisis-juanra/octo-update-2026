@@ -22,7 +22,7 @@ class BookingReservationService
     public function reserve(Product $product, Option $option, Availability $availability, array $unitItems, ?string $uuid = null, string $notes = ''): Booking
     {
         $date = $availability->getDate();
-        $checkAvailQueryString = $this->generateCheckAvailQueryString($date, $unitItems);
+        $checkAvailQueryString = $this->generateCheckAvailQueryString($date, unitItems: $unitItems);
 
         // Make Check Avail
         $tourId = $this->productService->getTourIdFromProductId($product->getId());

@@ -60,8 +60,10 @@ class AvailabilityTransformer extends BaseTransformer
             'localDateTimeEnd' => $availability->getLocalDateTimeEnd(),
             'allDay' => $availability->getAllDay(),
             'openingHours' => [
-                'from' => $availability->getOpeningHoursFrom(),
-                'to' => $availability->getOpeningHoursTo()
+                [
+                    'from' => $availability->getOpeningHoursFrom(),
+                    'to' => $availability->getOpeningHoursTo()
+                ]
             ]
         ];
     }

@@ -14,7 +14,6 @@ use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\BookingTransformer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -37,7 +36,7 @@ class BookingReservationController extends Controller
     public function index(Request $request): JsonResponse
     {
         $requestParams = $request->post();
-        $this->logger->info(["message" => "Starting to process request", "request" => $request->getContent()]);
+        $this->logger->info(["message" => "Starting to process request", "request" => "$request->getContent()"]);
         $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
 
         $this->validateRequestParams($requestParams, $channelId);

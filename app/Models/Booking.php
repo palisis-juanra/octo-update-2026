@@ -9,6 +9,7 @@ use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
 use stdClass;
 
@@ -35,6 +36,7 @@ class Booking extends Model
         $this->contact = new stdClass;
         $this->notes = null;
         $this->units = [];
+        $this->contact = new Contact;
     }
 
     public static function createFromXML(
@@ -140,7 +142,7 @@ class Booking extends Model
         return $this->utcUpdatedAt;
     }
 
-    public function getUtcReedemedAt(): ?string
+    public function getUtcRedeemedAt(): ?string
     {
         return $this->utcRedeemedAt;
     }
@@ -230,11 +232,6 @@ class Booking extends Model
         return $this->cancellation;
     }
 
-    public function getContact(): stdClass
-    {
-        return $this->contact;
-    }
-
     public function setNotes(string $notes): self
     {
         $this->notes = $notes;
@@ -264,7 +261,16 @@ class Booking extends Model
         $option = $this->product->getOptionById($this->getOption()->getId());
         foreach ($unitItems as $unitItem) {
             $unitId = (string) $unitItem['unitId'];
-            $this->units[] = $option->getUnitById($unitId);
+
+            $unit = $option->getUnitById($unitId);
+            $unit->unitId = $unit->id;
+            $unit->uuid = Uuid::uuid4();
+            $unit->status = 'ON_HOLD';
+            $unit->utcRedeemedAt = $this->getUtcRedeemedAt();
+            $unit->contact = $this->getContact();
+            $unit->ticket = null;
+
+            $this->units[] = $unit;
         }
 
         return $this;
@@ -273,6 +279,18 @@ class Booking extends Model
     public function getUnits(): ?array
     {
         return $this->units;
+    }
+
+    public function setContact(Contact $contact): self
+    {
+        $this->contact = $contact;
+
+        return $this;
+    }
+
+    public function getContact(): Contact
+    {
+        return $this->contact;
     }
 
 }

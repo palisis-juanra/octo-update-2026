@@ -13,6 +13,7 @@ class UnitService
     public const UNIT_ID_FIELD = 'unitId';
     public const UNIT_QUANTITY_FIELD = 'quantity';
     public const ERROR_MESSAGE_INVALID_UNITS = 'Invalid units param, must be an array of unit objects';
+    public const ERROR_MESSAGE_INVALID_UNIT_ITEMS = 'Invalid or empty unitItems';
 
     public function validateUnits(array $unitsObjects): bool
     {
@@ -40,7 +41,7 @@ class UnitService
     public function validateUnitItems(array $unitItems)
     {
         if (empty($unitItems)) {
-            throw new UnprocessableEntityHttpException('Request must contain unitItems');
+            throw new UnprocessableEntityHttpException(self::ERROR_MESSAGE_INVALID_UNIT_ITEMS);
         }
 
         foreach ($unitItems as $unitObject) {
