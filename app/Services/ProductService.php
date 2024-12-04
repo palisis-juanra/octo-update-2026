@@ -105,12 +105,7 @@ class ProductService
     const MAX_AGE_DEFAULT = 99;
     const MIN_AGE_DEFAULT = 1;
     const ERROR_AVAILABILITY_TYPE_MISSING = 'availabilityType field is missing';
-    const ERROR_DELIVERY_FORMATS_MISSING = 'delivery formats field is missing';
-    const ERROR_DELIVERY_FORMATS_EMPTY = 'delivery formats field is empty';
-    const ERROR_DELIVERY_METHODS_MISSING = 'delivery methods field is missing';
-    const ERROR_DELIVERY_METHODS_EMPTY = 'delivery methods field is empty';
     const ERROR_DEPARTURE_STRUCTURE_NOT_SET = 'the tour departure structure is not set';
-    const ERROR_REDEMPTION_METHOD_MISSING_OR_EMPTY = 'redemption method field is missing or empty';
     const ERROR_REFERENCE_MISSING = 'reference field is missing';
     const ERROR_TIMEZONE_MISSING = 'timeZone field is missing';
     const ERROR_TOUR_MAPPING_MISSING = 'the tour mapping is missing';    
@@ -459,14 +454,12 @@ class ProductService
             return false;
         }
         // Invalid redemption method
-        if (!isset($tour->redemption_method) || empty($tour->redemption_method)) {
-            $this->logInfo("skipped product {$id}: redemption method field is missing or empty.");
-            return false;
-        }
-        if (!in_array($tour->redemption_method, self::REDEMPTION_METHODS)) {
-            $redemptionMethod = (string) $tour->redemption_method;
-            $this->logInfo("skipped product {$id}: invalid redemption method: {$redemptionMethod}.");
-            return false;
+        if (isset($tour->redemption_method) && !empty($tour->redemption_method)) {
+            if (!in_array($tour->redemption_method, self::REDEMPTION_METHODS)) {
+                $redemptionMethod = (string) $tour->redemption_method;
+                $this->logInfo("skipped product {$id}: invalid redemption method: {$redemptionMethod}.");
+                return false;
+            }
         }
         // Invalid tour mapping
         if (!isset($tour->tour_departure_structure->type) || $tour->tour_departure_structure->type == self::MAPPING_STRUCTURE_TYPE_NOTSET) {
@@ -552,17 +545,16 @@ class ProductService
     protected function getProductDeliveryFormats(\SimpleXMLElement $tour): array
     {
         $deliveryFormats = [];
-        if (!isset($tour->delivery_formats) || empty($tour->delivery_formats)) {
-            $this->errors[] = self::ERROR_DELIVERY_FORMATS_MISSING;
-            return $deliveryFormats;
-        }
 
-        $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
-        if (count($deliveryFormatsFromXML) == 0) {
-            $this->errors[] = self::ERROR_DELIVERY_FORMATS_EMPTY;
-            return $deliveryFormats;
+        if (!isset($tour->delivery_formats) || empty($tour->delivery_formats)) {
+            return [self::DELIVERY_FORMAT_QRCODE];
         }
         
+        $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
+        if (count($deliveryFormatsFromXML) <= 0) {
+            return [self::DELIVERY_FORMAT_QRCODE];
+        }
+
         foreach ($deliveryFormatsFromXML as $deliveryFormat) {
             if (array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
                 $deliveryFormats[] = self::DELIVERY_FORMATS[(string) $deliveryFormat];
@@ -570,44 +562,41 @@ class ProductService
                 $this->errors[] = "invalid delivery format: {$deliveryFormat}";
             }
         }
-        
-        
         return $deliveryFormats;
     }
 
     protected function getProductDeliveryMethods(\SimpleXMLElement $tour): array
     {
         $deliveryMethods = [];
-        if (isset($tour->delivery_methods) && !empty($tour->delivery_methods)) {
-            $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
-            if (count($deliveryMethodsFromXML) != 0) {
-                foreach ($deliveryMethodsFromXML as $deliveryMethod) {
-                    if (in_array($deliveryMethod, self::DELIVERY_METHODS)) {
-                        $deliveryMethods[] = (string) $deliveryMethod;
-                    } else {
-                        $this->errors[] = "invalid delivery method: {$deliveryMethod}";
-                    }
-                }
+
+        if (!isset($tour->delivery_methods) || empty($tour->delivery_methods)) {
+            return [self::DELIVERY_METHOD_VOUCHER];
+        }
+
+        $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
+        if (count($deliveryMethodsFromXML) <= 0) {
+            return [self::DELIVERY_METHOD_VOUCHER];
+        }
+
+        foreach ($deliveryMethodsFromXML as $deliveryMethod) {
+            if (in_array($deliveryMethod, self::DELIVERY_METHODS)) {
+                $deliveryMethods[] = (string) $deliveryMethod;
             } else {
-                $this->errors[] = self::ERROR_DELIVERY_METHODS_EMPTY;
+                $this->errors[] = "invalid delivery method: {$deliveryMethod}";
             }
-        } else {
-            $this->errors[] = self::ERROR_DELIVERY_METHODS_MISSING;
         }
         return $deliveryMethods;
     }
 
     protected function getProductRedemptionMethod(\SimpleXMLElement $tour): string
     {
-        $redemptionMethod = "";
+        $redemptionMethod = self::REDEMPTION_METHOD_DIGITAL;
         if (isset($tour->redemption_method) && !empty($tour->redemption_method)) {
             if (in_array($tour->redemption_method, self::REDEMPTION_METHODS)) {
                 $redemptionMethod = (string) $tour->redemption_method;
             } else {
                 $this->errors[] = "invalid redemption method: {$tour->redemption_method}";
             }
-        } else {
-            $this->errors[] = self::ERROR_REDEMPTION_METHOD_MISSING_OR_EMPTY;
         }
         return $redemptionMethod;
     }
@@ -675,19 +664,15 @@ class ProductService
     protected function areTourDeliveryFormatsValidForProductList(\SimpleXMLElement $tour): bool
     {
         $id = $this->buildProductId($tour);
-        if (!isset($tour->delivery_formats)) {
-            $this->logInfo("skipped product {$id}: delivery formats field is missing.");
-            return false;
-        }
-        $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
-        if (empty($deliveryFormatsFromXML)) {
-            $this->logInfo("skipped product {$id}: delivery formats field is empty.");
-            return false;
-        }
-        foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-            if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
-                $this->logInfo("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
-                return false;
+        if (isset($tour->delivery_formats)) {
+            $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
+            if (!empty($deliveryFormatsFromXML)) {
+                foreach ($deliveryFormatsFromXML as $deliveryFormat) {
+                    if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
+                        $this->logInfo("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
+                        return false;
+                    }
+                }
             }
         }
         return true;
@@ -696,19 +681,15 @@ class ProductService
     protected function areTourDeliveryMethodsValidForProductList(\SimpleXMLElement $tour): bool
     {
         $id = $this->buildProductId($tour);
-        if (!isset($tour->delivery_methods)) {
-            $this->logInfo("skipped product {$id}: delivery methods field is missing.");
-            return false;
-        }
-        $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
-        if (empty($deliveryMethodsFromXML)) {
-            $this->logInfo("skipped product {$id}: delivery methods field is empty.");
-            return false;
-        }
-        foreach ($deliveryMethodsFromXML as $deliveryMethod) {
-            if (!in_array($deliveryMethod, self::DELIVERY_METHODS)) {
-                $this->logInfo("skipped product {$id}: invalid delivery method: {$deliveryMethod}.");
-                return false;
+        if (isset($tour->delivery_methods)) {
+            $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
+            if (!empty($deliveryMethodsFromXML)) {
+                foreach ($deliveryMethodsFromXML as $deliveryMethod) {
+                    if (!in_array($deliveryMethod, self::DELIVERY_METHODS)) {
+                        $this->logInfo("skipped product {$id}: invalid delivery method: {$deliveryMethod}.");
+                        return false;
+                    }
+                }
             }
         }
         return true;
