@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InvalidUnitIdException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class UnitService
 {
@@ -29,8 +30,19 @@ class UnitService
         return true;
     }
 
+    /**
+     * Validate Unit Items
+     * @param array $unitItems
+     * @throws \Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException
+     * @throws \App\Exceptions\BadRequestException
+     * @return bool
+     */
     public function validateUnitItems(array $unitItems)
     {
+        if (empty($unitItems)) {
+            throw new UnprocessableEntityHttpException('Request must contain unitItems');
+        }
+
         foreach ($unitItems as $unitObject) {
 
             if (!is_array($unitObject) || 

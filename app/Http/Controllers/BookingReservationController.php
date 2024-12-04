@@ -47,7 +47,7 @@ class BookingReservationController extends Controller
         $availabilityId = $requestParams[OctoRequest::AVAILABILITY_ID];
         $availability = $this->availabilityService->find($availabilityId);
 
-        $unitItems = $requestParams[OctoRequest::UNIT_ITEMS];
+        $unitItems = $requestParams[OctoRequest::UNIT_ITEMS] ?? null;
         $uuid = $requestParams[OctoRequest::UUID] ?? null;
         $notes = $requestParams[self::FIELD_NOTES] ?? '';
 

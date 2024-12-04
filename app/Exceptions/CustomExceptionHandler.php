@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Throwable;
 
 class CustomExceptionHandler extends Handler
@@ -62,6 +63,7 @@ class CustomExceptionHandler extends Handler
                 return OctoResponse::INVALID_AVAILABILITY_ID($exception->availabilityId);
             
             case (NoAvailabilityException::class):
+            case (UnprocessableEntityHttpException::class):
                 return OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
 
             case (NoMatchingDataException::class):
