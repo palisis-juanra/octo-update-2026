@@ -41,6 +41,7 @@ class AvailabilityCalendarRequest
     public function fetchDatesAndDealsFromAPI(TourCMSService $tourCMSService): array
     {
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
+        error_log(print_r($mappingQueryString, true));
 
         $response = $tourCMSService->showTourDatesAndDeals($this->tourId, $this->localDateStart, $this->localDateEnd, $mappingQueryString);
 

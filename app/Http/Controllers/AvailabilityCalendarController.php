@@ -8,7 +8,6 @@ use App\Exceptions\NoMatchingDataException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityCalendarService;
-use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;

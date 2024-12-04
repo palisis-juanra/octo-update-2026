@@ -23,6 +23,11 @@ class AvailabilityCalendarService
         self::PARAM_LOCAL_DATE_START,
         self::PARAM_LOCAL_DATE_END
     ];
+    const DATE_FORMAT = 'Y-m-d';
+    const ERROR_MESSAGE_LOCAL_DATE_START_INVALID = 'localDateStart must be a valid date in format YYYY-MM-DD';
+    const ERROR_MESSAGE_LOCAL_DATE_END_INVALID = 'localDateEnd must be a valid date in format YYYY-MM-DD';
+    const ERROR_MESSAGE_EMPTY_REQUIRED_PARAM = 'Empty required param';
+    const ERROR_MESSAGE_MISSING_REQUIRED_PARAMS = 'Missing Required Params: ';
 
     public TourCMSService $tourCMSService;
     public ProductService $productService;
@@ -71,12 +76,12 @@ class AvailabilityCalendarService
         $missingParams = array_diff(self::REQUIRED_PARAMS, array_keys($requestParams));
 
         if (!empty($missingParams)) {
-            throw new AvailabilityRequestMissingParamException('Missing Required Params: ' . implode(', ', $missingParams));
+            throw new AvailabilityRequestMissingParamException(self::ERROR_MESSAGE_MISSING_REQUIRED_PARAMS . implode(', ', $missingParams));
         }
 
         foreach (self::REQUIRED_PARAMS as $param) {
             if (empty($requestParams[$param])) {
-                throw new AvailabilityRequestMissingParamException('Empty required params: ' . $param);
+                throw new AvailabilityRequestMissingParamException(self::ERROR_MESSAGE_EMPTY_REQUIRED_PARAM . ": {$param}");
             }
         }
 
@@ -90,16 +95,16 @@ class AvailabilityCalendarService
         $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START];
 
         if ($this->validateDate($localDateStart) === false) {
-            throw new AvailabilityRequestInvalidParamException('localDateStart must be a valid date in format YYYY-MM-DD');
+            throw new AvailabilityRequestInvalidParamException(self::ERROR_MESSAGE_LOCAL_DATE_START_INVALID);
         }
 
         $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
         if ($this->validateDate($localDateEnd) === false) {
-            throw new AvailabilityRequestInvalidParamException('localDateEnd must be a valid date in format YYYY-MM-DD');
+            throw new AvailabilityRequestInvalidParamException(self::ERROR_MESSAGE_LOCAL_DATE_END_INVALID);
         }
     }
 
-    public function validateDate($date, $format = 'Y-m-d'): bool
+    public function validateDate($date, $format = self::DATE_FORMAT): bool
     {
         $dateTime = DateTime::createFromFormat($format, $date);
 
