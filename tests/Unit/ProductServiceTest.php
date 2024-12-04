@@ -9,7 +9,7 @@ use App\Services\JSONLogService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use PHPUnit\Framework\MockObject\MockObject;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
 
 class ProductServiceTest extends TestCase

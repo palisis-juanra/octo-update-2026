@@ -101,9 +101,7 @@ class JSONLogService
         $logArray = $this->addEntriesToLogArray($baseLogArray, $logArray);
 
         $log = json_encode($logArray);
-        //Log::info($log);
         $this->removeWhiteSpacesFromLog($log);
-        
 
         Log::$logType($log);
 

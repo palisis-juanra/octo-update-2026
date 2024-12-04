@@ -64,8 +64,6 @@ class Booking extends Model
         if (!is_null($notes)){
             $booking->setNotes($notes);
         }
-        
-        Log::info($startNewBookingData->asXML());
 
         return $booking;
     }

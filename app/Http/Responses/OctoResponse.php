@@ -10,6 +10,7 @@ class OctoResponse {
 
     const FIELD_PRODUCT_ID = 'productId';
     const FIELD_OPTION_ID = 'optionId';
+    const FIELD_UNIT_ID = 'unitId';
     const FIELD_ERROR_CODE = 'error';
     const FIELD_ERROR_MESSAGE = 'errorMessage';
     const FIELD_ERROR_LOG_ID = 'errorLogId';
@@ -96,7 +97,7 @@ class OctoResponse {
         $data = [
             self::FIELD_ERROR_CODE => self::ERROR_CODE_INVALID_UNIT_ID,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
-            self::FIELD_OPTION_ID => $unitId
+            self::FIELD_UNIT_ID => $unitId
         ];
 
         return new JsonResponse($data, Response::HTTP_BAD_REQUEST); 
@@ -140,6 +141,6 @@ class OctoResponse {
             self::FIELD_ERROR_MESSAGE => $errorMessage 
         ];
 
-        return new JsonResponse($data, Response::HTTP_UNPROCESSABLE_ENTITY);
+        return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
     }
 }

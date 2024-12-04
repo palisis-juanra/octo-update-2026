@@ -36,7 +36,13 @@ class BookingReservationService
         }
 
         $departureId = $availability->getAttributes()['departure_id'];
-        $component = $this->getComponentByDepartureId($availableComponents, $departureId);
+        try {
+            $component = $this->getComponentByDepartureId($availableComponents, $departureId);
+        } catch (NoAvailabilityException $e) {
+            $this->logger->info("No component with departure ID {$departureId} found");
+            throw $e;
+        }
+        
         $componentKey = (string) $component->component_key;
 
         // Start new booking with the componentId required
@@ -51,7 +57,7 @@ class BookingReservationService
             $availability, 
             $unitItems,
             $notes);
-
+        $this->logger->info(["message" => "Temporary booking with ID {$booking->getId()} and UUID {$booking->getUuid()} created successfully"]);
         return $booking;
     }
 
@@ -82,7 +88,7 @@ class BookingReservationService
     {
         $dateQueryString = "date={$date}";
         $ratesQueryString = $this->generateRatesQueryStringFromUnitItems($unitItems);
-        return "{$ratesQueryString}&{$dateQueryString}";
+        return "{$dateQueryString}&{$ratesQueryString}";
     }
 
     /**

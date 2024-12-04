@@ -7,12 +7,14 @@ use App\Http\Middleware\OctoAuthentication;
 use App\Http\Requests\OctoRequest;
 use App\Services\AvailabilityService;
 use App\Services\BookingReservationService;
+use App\Services\JSONLogService;
 use App\Services\OptionService;
 use App\Services\ProductService;
 use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\BookingTransformer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -25,7 +27,8 @@ class BookingReservationController extends Controller
         public ProductService $productService,
         public AvailabilityService $availabilityService,
         public OptionService $optionService,
-        public UnitService $unitService
+        public UnitService $unitService,
+        public JSONLogService $logger
     ) 
     {
         $this->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
@@ -34,6 +37,8 @@ class BookingReservationController extends Controller
     public function index(Request $request): JsonResponse
     {
         $requestParams = $request->post();
+        Log::info($request->getContent());
+        //$this->logger->info(["request" => $requestParams]);
         $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
 
         $this->validateRequestParams($requestParams, $channelId);

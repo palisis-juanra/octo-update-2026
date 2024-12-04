@@ -51,7 +51,7 @@ class CustomExceptionHandler extends Handler
 
             case (InvalidProductIdException::class):
             case (InvalidProductContentException::class):
-                return OctoResponse::INVALID_PRODUCT_ID($exception->productId, $exception->getMessage());
+                return OctoResponse::INVALID_PRODUCT_ID($exception->productId);
 
             case (InvalidOptionIdException::class):
                 return OctoResponse::INVALID_OPTION_ID($exception->optionId);

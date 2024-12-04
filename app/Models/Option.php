@@ -15,7 +15,7 @@ class Option extends Model
     protected ?string $reference;
     protected array $availabilityStartTimes;
     protected string $cancellationCutoff;
-    protected string $cancellationCutoffAmount;
+    protected int $cancellationCutoffAmount;
     protected string $cancellationCutoffUnit;
     protected array $requiredContactFields;
     protected object $restrictions;
@@ -112,14 +112,14 @@ class Option extends Model
         return $this->cancellationCutoff;
     }
 
-    public function setCancellationCutoffAmount(string $cancellationCutoffAmount): self
+    public function setCancellationCutoffAmount(int $cancellationCutoffAmount): self
     {
         $this->cancellationCutoffAmount = $cancellationCutoffAmount;
 
         return $this;
     }
 
-    public function getCancellationCutoffAmount(): ?string
+    public function getCancellationCutoffAmount(): ?int
     {
         return $this->cancellationCutoffAmount;
     }

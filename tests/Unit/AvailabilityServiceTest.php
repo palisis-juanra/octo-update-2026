@@ -4,7 +4,6 @@ namespace Tests\Unit;
 
 use App\Services\AvailabilityService;
 use PHPUnit\Framework\TestCase;
-use SimpleXMLElement;
 
 class AvailabilityServiceTest extends TestCase
 {
