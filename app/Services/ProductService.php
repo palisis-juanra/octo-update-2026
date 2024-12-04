@@ -287,19 +287,19 @@ class ProductService
     
             $optionUnits = $this->getOptionUnits($tour);
         
-            $optionData = (object) [
-                'id' => $optionId,
-                'default' => $optionDefault,
-                'internalName' => $optionInternalName,
-                'reference' => $optionReference,
-                'availabilityLocalStartTimes' => $availabilityStartTimes,
-                'cancellationCutoff' => $optionCancellationCutoff,
-                'cancellationCutoffAmount' => $optionCancellationCutoffAmount,
-                'cancellationCutoffUnit' => $optionCancellationCutoffUnit,
-                'requiredContactFields' => $optionRequiredContactFields,
-                'restrictions' => $optionRestrictions,
-                'units' => $optionUnits
-            ];
+            $optionData = new stdClass();
+            $optionData->id = $optionId;
+            $optionData->default = $optionDefault;
+            $optionData->internalName = $optionInternalName;
+            $optionData->reference = $optionReference;
+            $optionData->availabilityLocalStartTimes = $availabilityStartTimes;
+            $optionData->cancellationCutoff = $optionCancellationCutoff;
+            $optionData->cancellationCutoffAmount = $optionCancellationCutoffAmount;
+            $optionData->cancellationCutoffUnit = $optionCancellationCutoffUnit;
+            $optionData->requiredContactFields = $optionRequiredContactFields;
+            $optionData->restrictions = $optionRestrictions;
+            $optionData->units = $optionUnits;
+            
 
             $options[] = Option::create($optionData);
         }

@@ -8,6 +8,7 @@ abstract class BaseTransformer extends TransformerAbstract
 {
     public const BASIC = 'BASIC';
     public const FULL_TRANSFORM = 'FULL_TRANSFORM';
+    public const ERROR_MESSAGE_MODE_NOT_SUPPORTED = 'Transformer mode is not supported';
 
     private string $mode;
     protected Manager $manager;
@@ -32,7 +33,7 @@ abstract class BaseTransformer extends TransformerAbstract
             return $this->$mode($object);
         }
 
-        throw new \InvalidArgumentException('Transformer mode is not supported');
+        throw new \InvalidArgumentException(self::ERROR_MESSAGE_MODE_NOT_SUPPORTED);
     }
 
     abstract protected function basicTransform($object): array;

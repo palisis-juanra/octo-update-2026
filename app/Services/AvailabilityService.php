@@ -185,7 +185,7 @@ class AvailabilityService
     public function find(string $availabilityId): Availability
     {
         $availability = Availability::find($availabilityId);
-        if (is_null($availability)){
+        if (is_null($availability)) {
             throw new InvalidAvailabilityIdException($availabilityId);
         }
         return $availability;
