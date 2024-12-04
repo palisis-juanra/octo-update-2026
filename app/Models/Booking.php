@@ -275,6 +275,8 @@ class Booking extends Model
             $newUnitItem->requiredContactFields = $unit->requiredContactFields;
             $newUnitItem->restrictions = $unit->restrictions;
 
+            $newUnitItem->unit = $unit;
+
             $newUnitItem->unitId = $unit->id;
             $newUnitItem->uuid = Uuid::uuid4();
             $newUnitItem->status = 'ON_HOLD';
@@ -286,8 +288,10 @@ class Booking extends Model
                 'redemptionMethod' => $this->getProduct()->getRedemptionMethod(),
                 'utcRedeemedAt' => $this->getUtcRedeemedAt(),
                 'deliveryOptions' => [
-                    "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
-                    "deliveryValue" => $this->getProduct()->getDeliveryFormats()[0]
+                    [
+                        "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
+                        "deliveryValue" => $this->getProduct()->getDeliveryFormats()[0]
+                    ]
                 ]
             ];
 
