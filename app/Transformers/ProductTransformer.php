@@ -2,13 +2,18 @@
 
 namespace App\Transformers;
 
+use League\Fractal\Resource\Collection;
+
 class ProductTransformer extends BaseTransformer
 {
     const MODE_BOOKING_PRODUCT = 'bookingProduct';
 
+    protected OptionTransformer $optionTransformer;
+
     public function __construct(string $mode)
     {
         parent::__construct($mode);
+        $this->optionTransformer = new OptionTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     protected function basicTransform($product): array
@@ -21,6 +26,9 @@ class ProductTransformer extends BaseTransformer
 
     protected function fullTransform($product): array
     {
+        $optionsResource = new Collection($product->getOptions(), $this->optionTransformer);
+        $optionsTransformed = $this->manager->createData($optionsResource)->toArray()['data'];
+
         return [
             'id' => $product->getId(),
             'internalName' => $product->getInternalName(),
@@ -35,7 +43,7 @@ class ProductTransformer extends BaseTransformer
             "deliveryFormats" => $product->getDeliveryFormats(),
             "deliveryMethods" => $product->getDeliveryMethods(),
             "redemptionMethod" => $product->getRedemptionMethod(),
-            "options" => $product->getOptions()
+            "options" => $optionsTransformed
         ];
     }
 

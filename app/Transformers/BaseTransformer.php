@@ -1,5 +1,7 @@
 <?php
 namespace App\Transformers;
+
+use League\Fractal\Manager;
 use \League\Fractal\TransformerAbstract;
 
 abstract class BaseTransformer extends TransformerAbstract
@@ -8,10 +10,12 @@ abstract class BaseTransformer extends TransformerAbstract
     public const FULL_TRANSFORM = 'FULL_TRANSFORM';
 
     private string $mode;
+    protected Manager $manager;
 
     public function __construct(string $mode = self::BASIC)
     {
         $this->mode = $mode;
+        $this->manager = new Manager;
     }
 
     public final function transform(object $object): array

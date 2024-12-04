@@ -10,11 +10,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
+use stdClass;
 
 class Booking extends Model
 {
     use HasFactory;
     const STATUS_ON_HOLD = 'ON_HOLD';
+
+    protected array $units;
 
     public function __construct()
     {
@@ -29,8 +32,9 @@ class Booking extends Model
         $this->resellerReference = null;
         $this->cancellable = false;
         $this->cancellation = null;
-        $this->contact = [];
+        $this->contact = new stdClass;
         $this->notes = null;
+        $this->units = [];
     }
 
     public static function createFromXML(
@@ -38,6 +42,7 @@ class Booking extends Model
         Product $product,
         Option $option,
         Availability $availability,
+        array $unitItems,
         ?string $notes = ''
     ): Booking
     {
@@ -54,6 +59,7 @@ class Booking extends Model
         $booking->setProduct($product);
         $booking->setOption($option);
         $booking->setAvailability($availability);
+        $booking->setUnits($unitItems);
         
         if (!is_null($notes)){
             $booking->setNotes($notes);
@@ -226,7 +232,7 @@ class Booking extends Model
         return $this->cancellation;
     }
 
-    public function getContact(): array
+    public function getContact(): stdClass
     {
         return $this->contact;
     }
@@ -253,6 +259,22 @@ class Booking extends Model
     public function getExpirationMinutes(): ?int
     {
         return $this->expirationMinutes;
+    }
+
+    public function setUnits(array $unitItems): self
+    {
+        $option = $this->product->getOptionById($this->getOption()->getId());
+        foreach ($unitItems as $unitItem) {
+            $unitId = (string) $unitItem['unitId'];
+            $this->units[] = $option->getUnitById($unitId);
+        }
+
+        return $this;
+    }
+
+    public function getUnits(): ?array
+    {
+        return $this->units;
     }
 
 }

@@ -29,6 +29,7 @@ class BookingTransformer extends BaseTransformer
         $product = $booking->getProduct();
         $option = $booking->getOption();
         $availability = $booking->getAvailability();
+        $units = $booking->getUnits();
 
         return [
             'id' => $booking->getId(),
@@ -55,7 +56,8 @@ class BookingTransformer extends BaseTransformer
                 'redemptionMethod' => $product->getRedemptionMethod(),
                 'utcRedeemedAt' => $booking->getUtcReedemedAt(),
                 'deliveryOptions' => []
-            ]
+            ],
+            'units' => $booking->getUnits()
         ];
     }
 }

@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Exceptions\InvalidUnitIdException;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
+use stdClass;
 
 class Option extends Model
 {
     protected string $id;
-    protected string $default;
+    protected bool $default;
     protected string $internalName;
     protected ?string $reference;
     protected array $availabilityStartTimes;
@@ -49,14 +52,14 @@ class Option extends Model
         return $this->id;
     }
 
-    public function setDefault(string $default): self
+    public function setDefault(bool $default): self
     {
         $this->default = $default;
 
         return $this;
     }
 
-    public function getDefault(): ?string
+    public function getDefault(): ?bool
     {
         return $this->default;
     }
@@ -167,5 +170,22 @@ class Option extends Model
     public function getUnits(): ?array
     {
         return $this->units;
+    }
+
+    /**
+     * Get unit by it's ID
+     * @param string $unitId
+     * @throws \App\Exceptions\InvalidUnitIdException
+     * @return \stdClass
+     */
+    public function getUnitById(string $unitId): stdClass
+    {
+        foreach ($this->units as $unit) {
+            if ($unit->id == $unitId) {
+                return $unit;
+            }
+        }
+        
+        throw new InvalidUnitIdException($unitId);
     }
 }
