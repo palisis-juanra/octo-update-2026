@@ -34,8 +34,12 @@ class AvailabilityTransformer extends BaseTransformer
             'capacity' => $availability->getCapacity(),
             'maxUnits' => $availability->getMaxUnits(),
             'utcCutoffAt' => $availability->getUtcCutoffAt(),
-            'openingHoursFrom' => $availability->getOpeningHoursFrom(),
-            'openingHoursTo' => $availability->getOpeningHoursTo()
+            'openingHours' => [
+                [
+                    'to' => $availability->getOpeningHoursFrom(),
+                    'from' => $availability->getOpeningHoursTo()
+                ]
+            ]
         ];
 
         if (!empty($availability->getPricing())) {

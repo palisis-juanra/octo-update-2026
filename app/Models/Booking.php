@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Availability\Availability;
 use App\Services\DateTimeService;
+use App\Transformers\BaseTransformer;
+use App\Transformers\ContactTransformer;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -262,15 +264,34 @@ class Booking extends Model
         foreach ($unitItems as $unitItem) {
             $unitId = (string) $unitItem['unitId'];
 
+            // TODO Create Model for UnitItem and its transformer
             $unit = $option->getUnitById($unitId);
-            $unit->unitId = $unit->id;
-            $unit->uuid = Uuid::uuid4();
-            $unit->status = 'ON_HOLD';
-            $unit->utcRedeemedAt = $this->getUtcRedeemedAt();
-            $unit->contact = $this->getContact();
-            $unit->ticket = null;
 
-            $this->units[] = $unit;
+            $newUnitItem = new stdClass;
+            $newUnitItem->id = $unit->id;
+            $newUnitItem->internalName = $unit->internalName;
+            $newUnitItem->reference = $unit->reference;
+            $newUnitItem->type = $unit->type;
+            $newUnitItem->requiredContactFields = $unit->requiredContactFields;
+            $newUnitItem->restrictions = $unit->restrictions;
+
+            $newUnitItem->unitId = $unit->id;
+            $newUnitItem->uuid = Uuid::uuid4();
+            $newUnitItem->status = 'ON_HOLD';
+            $newUnitItem->utcRedeemedAt = $this->getUtcRedeemedAt();
+
+            $contactTransformer = new ContactTransformer(BaseTransformer::FULL_TRANSFORM);
+            $newUnitItem->contact = $contactTransformer->transform($this->getContact());
+            $newUnitItem->ticket = [
+                'redemptionMethod' => $this->getProduct()->getRedemptionMethod(),
+                'utcRedeemedAt' => $this->getUtcRedeemedAt(),
+                'deliveryOptions' => [
+                    "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
+                    "deliveryValue" => $this->getProduct()->getDeliveryFormats()[0]
+                ]
+            ];
+
+            $this->units[] = $newUnitItem;
         }
 
         return $this;

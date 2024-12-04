@@ -64,7 +64,7 @@ class BookingTransformer extends BaseTransformer
                     "deliveryFormat" => "QRCODE"
                 ]
             ],
-            'unitItems' => $booking->getUnits()
+            'unitItems' => $booking->getUnits(),
         ];
     }
 }
