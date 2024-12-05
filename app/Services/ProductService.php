@@ -679,7 +679,7 @@ class ProductService
             $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
             if (!empty($deliveryFormatsFromXML)) {
                 foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-                    if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {q
+                    if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
                         $this->logInfo("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
                         return false;
                     }
