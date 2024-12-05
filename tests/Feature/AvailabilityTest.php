@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Factories\AvailabilityRequestFactory;
-use App\Features\Availability\AvailabilityRequest;
 use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
