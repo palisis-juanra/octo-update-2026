@@ -46,7 +46,7 @@ abstract class PricingAvailabilityRequest extends AvailabilityRequest
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeStringFromTimestamp((string) $component->start_time_utcseconds));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeStringFromTimestamp((string) $component->end_time_utcseconds));
             $availability->setAllDay(false);
-            $availability->setAvailable(true);
+            $availability->setAvailable($this->checkSpacesRemaining($component));
             $availability->setStatus(self::OCTO_STATUS_AVAILABLE);
             $availability->setMaxUnits($this->maxUnits);
             $availability->setUtcCutoffAt($this->cutoff);
