@@ -127,6 +127,13 @@
 		<tour_url>http://tourcms.com/tours/184_trip_to_mulhacen___sierra_nevada_439.php</tour_url>
 		<tour_url_tracked>http://tourcms.com/tours/184_trip_to_mulhacen___sierra_nevada_439.php</tour_url_tracked>
 		<book_url>https://live.tourcms.com/reserve/r1.php?t=184&amp;a=1&amp;w=143&amp;people=1&amp;ty=t&amp;k=cf3ba133fa08</book_url>
+		<delivery_formats>
+			<delivery_format>INVALID_DELIVERY_FORMAT</delivery_format>
+		</delivery_formats>
+		<delivery_methods>
+			<delivery_method>INVALID_DELIVERY_METHOD</delivery_method>
+		</delivery_methods>
+		<redemption_method>INVALID_REDEMPTION_METHOD</redemption_method>
 		<documents>
 			<document>
 				<document_description/>

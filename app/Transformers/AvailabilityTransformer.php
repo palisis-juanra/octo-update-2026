@@ -6,6 +6,8 @@ use App\Transformers\BaseTransformer;
 
 class AvailabilityTransformer extends BaseTransformer
 {
+    const MODE_BOOKING_AVAILABILITY = 'bookingAvailability';
+
     public function __construct(string $mode = BaseTransformer::BASIC)
     {
         parent::__construct($mode);
@@ -32,8 +34,12 @@ class AvailabilityTransformer extends BaseTransformer
             'capacity' => $availability->getCapacity(),
             'maxUnits' => $availability->getMaxUnits(),
             'utcCutoffAt' => $availability->getUtcCutoffAt(),
-            'openingHoursFrom' => $availability->getOpeningHoursFrom(),
-            'openingHoursTo' => $availability->getOpeningHoursTo()
+            'openingHours' => [
+                [
+                    'to' => $availability->getOpeningHoursFrom(),
+                    'from' => $availability->getOpeningHoursTo()
+                ]
+            ]
         ];
 
         if (!empty($availability->getPricing())) {
@@ -48,5 +54,21 @@ class AvailabilityTransformer extends BaseTransformer
         }
 
         return $data;
+    }
+
+    public function bookingAvailability($availability): array
+    {
+        return [
+            'id' => $availability->getId(),
+            'localDateTimeStart' => $availability->getLocalDateTimeStart(), 
+            'localDateTimeEnd' => $availability->getLocalDateTimeEnd(),
+            'allDay' => $availability->getAllDay(),
+            'openingHours' => [
+                [
+                    'from' => $availability->getOpeningHoursFrom(),
+                    'to' => $availability->getOpeningHoursTo()
+                ]
+            ]
+        ];
     }
 }

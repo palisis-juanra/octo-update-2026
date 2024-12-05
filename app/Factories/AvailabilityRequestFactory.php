@@ -39,10 +39,15 @@ class AvailabilityRequestFactory
         }
         
         if (!empty($localDateStart) && !empty($localDateEnd)) {
-            return new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd);
+            $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd);
+            $availabilityRequest->setMinBookingSize($minBookingSize);
+            $availabilityRequest->setUnits($units);
+            return $availabilityRequest;
         }
 
-        return new AvailabilityRequest($tourId, $optionId, $localDate);
-    
+        $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDate);
+        $availabilityRequest->setMinBookingSize($minBookingSize);
+        $availabilityRequest->setUnits($units);
+        return $availabilityRequest;
     }
 }

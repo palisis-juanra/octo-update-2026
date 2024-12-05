@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Exceptions\InvalidOptionIdException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use stdClass;
 
 class Product extends Model
 {
@@ -306,17 +306,6 @@ class Product extends Model
         return $this;
     }
 
-    public function getOptionById(string $id): object | null
-    {
-        foreach ($this->options as $option) {
-            if ((string) $option->id === $id) {
-                return $option;
-            }
-        }
-
-        return null;
-    }
-
     /**
      * Get the value of utcCutoff
      */ 
@@ -368,5 +357,19 @@ class Product extends Model
         $this->cutoff = $cutoff;
 
         return $this;
+    }
+
+    /**
+     * @throws InvalidOptionIdException
+     */
+    public function getOptionById(string $optionId)
+    {
+        foreach ($this->getOptions() as $option) {
+            if ($option->getId() == $optionId) {
+                return Option::create($option);
+            }
+        }
+
+        throw new InvalidOptionIdException($optionId);
     }
 }

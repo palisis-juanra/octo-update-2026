@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Throwable;
 
 class CustomExceptionHandler extends Handler
@@ -39,6 +41,8 @@ class CustomExceptionHandler extends Handler
         $exceptionClass = get_class($exception);
 
         switch ($exceptionClass) {
+            case (NotFoundHttpException::class):
+                return OctoResponse::NOT_IMPLEMENTED();
 
             case (MethodNotAllowedHttpException::class):
                 return OctoResponse::BAD_REQUEST('Invalid http request method');
@@ -46,16 +50,21 @@ class CustomExceptionHandler extends Handler
                 return OctoResponse::FORBIDDEN();
 
             case (InvalidProductIdException::class):
-                return OctoResponse::INVALID_PRODUCT_ID($exception->productId);
-            
             case (InvalidProductContentException::class):
-                return OctoResponse::INVALID_PRODUCT_ID($exception->productId, $exception->getMessage());
+                return OctoResponse::INVALID_PRODUCT_ID($exception->productId);
 
             case (InvalidOptionIdException::class):
                 return OctoResponse::INVALID_OPTION_ID($exception->optionId);
             
             case (InvalidUnitIdException::class):
                 return OctoResponse::INVALID_UNIT_ID($exception->unitId);
+
+            case (InvalidAvailabilityIdException::class):
+                return OctoResponse::INVALID_AVAILABILITY_ID($exception->availabilityId);
+            
+            case (NoAvailabilityException::class):
+            case (UnprocessableEntityHttpException::class):
+                return OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
 
             case (NoMatchingDataException::class):
                 return OctoResponse::INVALID_PRODUCT_ID($exception->productId);

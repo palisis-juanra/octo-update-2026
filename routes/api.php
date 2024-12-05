@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\BookingReservationController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Responses\OctoResponse;
@@ -19,3 +20,5 @@ Route::get('products', [ProductController::class, 'index'])->middleware([OctoAut
 Route::get('products/{id}', [ProductController::class, 'show'])->middleware([OctoAuthentication::class]);
 
 Route::post('/availability', [AvailabilityController::class, 'index'])->middleware([OctoAuthentication::class]);
+
+Route::post('/bookings', [BookingReservationController::class, 'index'])->middleware([OctoAuthentication::class]);

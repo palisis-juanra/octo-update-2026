@@ -5,17 +5,16 @@ namespace App\Services;
 use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\InvalidAvailabilityIdException;
 use App\Http\Middleware\OctoAuthentication;
-use App\Features\Availability\AvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
-use App\Features\Availability\Pricing\MultiDayPricingAvailabilityRequest;
-use App\Features\Availability\Pricing\SingleDayPricingAvailabilityRequest;
+use App\Models\Availability\Availability;
 use App\Transformers\AvailabilityTransformer;
 use App\Transformers\BaseTransformer;
 use DateInterval;
 use DateTime;
 use DateTimeZone;
-use stdClass;
+
 
 class AvailabilityService
 {
@@ -175,5 +174,20 @@ class AvailabilityService
         }
 
         return $startDate->format(self::CUTOFF_FORMAT);
+    }
+
+    /**
+     * Retrieve an availability object from the DB
+     * @param string $availabilityId
+     * @throws \App\Exceptions\InvalidAvailabilityIdException
+     * @return \App\Models\Availability\Availability
+     */
+    public function find(string $availabilityId): Availability
+    {
+        $availability = Availability::find($availabilityId);
+        if (is_null($availability)) {
+            throw new InvalidAvailabilityIdException($availabilityId);
+        }
+        return $availability;
     }
 }

@@ -135,7 +135,7 @@ class ProductTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindAndTransformWithoutDeliveryFormats_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindAndTransformWithoutDeliveryFormats_thenShouldAssumeQRCODE()
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -158,11 +158,11 @@ class ProductTest extends TestCase
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
         // When
-        $this->expectException(InvalidProductContentException::class);
-        $this->expectExceptionMessage("The content of the product is invalid: delivery formats field is missing");
-
         $productId = "{$this->showTourXML->tour->distribution_identifier}|{$this->showTourXML->tour->channel_id}";
         $product = $productServiceMock->find($productId);
+
+        // Then
+        $this->assertEquals([$productServiceMock::DELIVERY_FORMAT_QRCODE], $product->getDeliveryFormats());
     }
 
     public function test_whenCallFindAndTransformWithInvalidDeliveryFormat_thenShouldThrowInvalidProductContentException()
@@ -197,7 +197,7 @@ class ProductTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindAndTransformWithoutDeliveryMethods_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindAndTransformWithoutDeliveryMethods_thenShouldAssumeVOUCHER()
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -220,11 +220,11 @@ class ProductTest extends TestCase
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
         // When
-        $this->expectException(InvalidProductContentException::class);
-        $this->expectExceptionMessage("The content of the product is invalid: delivery methods field is missing");
-
         $productId = "{$this->showTourXML->tour->distribution_identifier}|{$this->showTourXML->tour->channel_id}";
         $product = $productServiceMock->find($productId);
+
+        // Then
+        $this->assertEquals([$productServiceMock::DELIVERY_METHOD_VOUCHER], $product->getDeliveryMethods());
     }
 
     public function test_whenCallFindWithInvalidDeliveryMethod_thenShouldThrowInvalidProductContentException()
@@ -259,7 +259,7 @@ class ProductTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindWithoutRedemptionMethod_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindWithoutRedemptionMethod_thenShouldAssumeDIGITAL()
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -282,11 +282,11 @@ class ProductTest extends TestCase
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
         // When
-        $this->expectException(InvalidProductContentException::class);
-        $this->expectExceptionMessage("The content of the product is invalid: redemption method field is missing");
-
         $productId = "{$this->showTourXML->tour->distribution_identifier}|{$this->showTourXML->tour->channel_id}";
         $product = $productServiceMock->find($productId);
+
+        // Then
+        $this->assertEquals($productServiceMock::REDEMPTION_METHOD_DIGITAL, $product->getRedemptionMethod());
     }
 
     public function test_whenCallFindWithInvalidRedemptionMethod_thenShouldThrowInvalidProductContentException()

@@ -10,22 +10,29 @@ class OctoResponse {
 
     const FIELD_PRODUCT_ID = 'productId';
     const FIELD_OPTION_ID = 'optionId';
+    const FIELD_UNIT_ID = 'unitId';
     const FIELD_ERROR_CODE = 'error';
     const FIELD_ERROR_MESSAGE = 'errorMessage';
     const FIELD_ERROR_LOG_ID = 'errorLogId';
+    const FIELD_AVAILABILITY_ID = 'availabilityId';
     const ERROR_CODE_UNAUTHORIZED = 'UNAUTHORIZED';
     const ERROR_CODE_FORBIDDEN = 'FORBIDDEN';
     const ERROR_CODE_INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR';
+    const ERROR_CODE_NOT_IMPLEMENTED = 'NOT_IMPLEMENTED';
     const ERROR_CODE_INVALID_PRODUCT_ID = 'INVALID_PRODUCT_ID';
     const ERROR_CODE_INVALID_OPTION_ID = 'INVALID_OPTION_ID';
     const ERROR_CODE_INVALID_UNIT_ID = 'INVALID_UNIT_ID';
     const ERROR_CODE_BAD_REQUEST = 'BAD_REQUEST';
+    const ERROR_CODE_INVALID_AVAILABILITY_ID = 'INVALID_AVAILABILITY_ID';
+    const ERROR_CODE_UNPROCESSABLE_ENTITY = 'UNPROCESSABLE_ENTITY';
     const ERROR_MESSAGE_UNAUTHORIZED = 'Authorization Header not present';
     const ERROR_MESSAGE_FORBIDDEN = 'Unable to authenticate';
     const ERROR_MESSAGE_SERVER = 'There have been an error while processing the request, please try again later';
+    const ERROR_MESSAGE_NOT_IMPLEMENTED = 'Endpoint not implemented.';
     const ERROR_MESSAGE_INVALID_PRODUCT_ID = 'Missing or invalid productId';
     const ERROR_MESSAGE_INVALID_OPTION_ID = 'Invalid OptionId. Must must one of the following options: SINGLE, START_TIME, DEPARTURE_CODE|{CODE}, SUPPLIER_NOTE|{NOTE} or SUPPLIER_NOTE_PLUS_START_TIME|{NOTE}';
     const ERROR_MESSAGE_INVALID_UNIT_ID = 'Invalid UnitId. Must be a valid unit id in the scope of the product';
+    const ERROR_MESSAGE_INVALID_AVAILABILITY_ID = 'Invalid AvailabilityId. Must be a valid one';
 
     public static function UNAUTHORIZED(string $errorMessage = self::ERROR_MESSAGE_UNAUTHORIZED): Response
     {
@@ -90,7 +97,7 @@ class OctoResponse {
         $data = [
             self::FIELD_ERROR_CODE => self::ERROR_CODE_INVALID_UNIT_ID,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
-            self::FIELD_OPTION_ID => $unitId
+            self::FIELD_UNIT_ID => $unitId
         ];
 
         return new JsonResponse($data, Response::HTTP_BAD_REQUEST); 
@@ -101,6 +108,37 @@ class OctoResponse {
         $data = [
             self::FIELD_ERROR_CODE => self::ERROR_CODE_BAD_REQUEST,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
+        ];
+
+        return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+    }
+
+    public static function NOT_IMPLEMENTED(string $errorMessage = self::ERROR_MESSAGE_NOT_IMPLEMENTED): Response
+    {
+        $data = [
+            self::FIELD_ERROR_CODE => self::ERROR_CODE_NOT_IMPLEMENTED,
+            self::FIELD_ERROR_MESSAGE => $errorMessage,
+        ];
+
+        return new JsonResponse($data, Response::HTTP_NOT_IMPLEMENTED);
+    }
+
+    public static function INVALID_AVAILABILITY_ID(string $availabilityId, $errorMessage = self::ERROR_MESSAGE_INVALID_AVAILABILITY_ID): Response
+    {
+        $data = [
+            self::FIELD_ERROR_CODE => self::ERROR_CODE_INVALID_AVAILABILITY_ID,
+            self::FIELD_ERROR_MESSAGE => $errorMessage,
+            self::FIELD_AVAILABILITY_ID => $availabilityId
+        ];
+
+        return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+    }
+
+    public static function UNPROCESSABLE_ENTITY(string $errorMessage): Response
+    {
+        $data = [
+            self::FIELD_ERROR_CODE => self::ERROR_CODE_UNPROCESSABLE_ENTITY,
+            self::FIELD_ERROR_MESSAGE => $errorMessage 
         ];
 
         return new JsonResponse($data, Response::HTTP_BAD_REQUEST);

@@ -3,9 +3,9 @@
 namespace App\Models\Availability;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Database\Eloquent\Model;
 
-class AvailabilityPricing extends EloquentModel
+class AvailabilityPricing extends Model
 {
     use HasFactory;
     public string $originalPrice;

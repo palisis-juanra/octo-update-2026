@@ -9,7 +9,7 @@ use App\Services\JSONLogService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use PHPUnit\Framework\MockObject\MockObject;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
 
 class ProductServiceTest extends TestCase
@@ -105,7 +105,7 @@ class ProductServiceTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindAndTransformWithoutDeliveryFormats_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindAndTransformWithoutDeliveryFormats_thenShouldAssumeQRCODE()
     {
         // Given
         $apiResponseXML = $this->showTourXML;
@@ -122,11 +122,11 @@ class ProductServiceTest extends TestCase
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
         // When
-        $this->expectException(InvalidProductContentException::class);
-        $this->expectExceptionMessage("The content of the product is invalid: delivery formats field is missing");
-
         $productId = "{$this->showTourXML->tour->distribution_identifier}|{$this->showTourXML->tour->channel_id}";
         $product = $productServiceMock->find($productId);
+
+        // Then
+        $this->assertEquals([$productServiceMock::DELIVERY_FORMAT_QRCODE], $product->getDeliveryFormats());
     }
 
     public function test_whenCallFindAndTransformWithInvalidDeliveryFormat_thenShouldThrowInvalidProductContentException()
@@ -155,7 +155,7 @@ class ProductServiceTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindAndTransformWithoutDeliveryMethods_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindAndTransformWithoutDeliveryMethods_thenShouldAssumeVOUCHER()
     {
         // Given
         $apiResponseXML = $this->showTourXML;
@@ -172,11 +172,11 @@ class ProductServiceTest extends TestCase
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
         // When
-        $this->expectException(InvalidProductContentException::class);
-        $this->expectExceptionMessage("The content of the product is invalid: delivery methods field is missing");
-
         $productId = "{$this->showTourXML->tour->distribution_identifier}|{$this->showTourXML->tour->channel_id}";
         $product = $productServiceMock->find($productId);
+
+        // Then
+        $this->assertEquals([$productServiceMock::DELIVERY_METHOD_VOUCHER], $product->getDeliveryMethods());
     }
 
     public function test_whenCallFindWithInvalidDeliveryMethod_thenShouldThrowInvalidProductContentException()
@@ -205,7 +205,7 @@ class ProductServiceTest extends TestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_whenCallFindWithoutRedemptionMethod_thenShouldThrowInvalidProductContentException()
+    public function test_whenCallFindWithoutRedemptionMethod_thenShouldAssumeDIGITAL()
     {
         // Given
         $apiResponseXML = $this->showTourXML;
@@ -222,11 +222,11 @@ class ProductServiceTest extends TestCase
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
         // When
-        $this->expectException(InvalidProductContentException::class);
-        $this->expectExceptionMessage("The content of the product is invalid: redemption method field is missing");
-
         $productId = "{$this->showTourXML->tour->distribution_identifier}|{$this->showTourXML->tour->channel_id}";
         $product = $productServiceMock->find($productId);
+
+        // Then
+        $this->assertEquals($productServiceMock::REDEMPTION_METHOD_DIGITAL, $product->getRedemptionMethod());
     }
 
     public function test_whenCallFindWithInvalidRedemptionMethod_thenShouldThrowInvalidProductContentException()

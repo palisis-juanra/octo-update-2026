@@ -14,6 +14,8 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected string $optionId;
     protected string $localDateStart;
     protected string $localDateEnd;
+    protected array $units;
+    protected int $minBookingSize;
     protected int $maxUnits;
     protected string $cutoff;
 
@@ -68,8 +70,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
             $availability->setAllDay(false);
-            //TODO: check if spaces > rates count
-            $availability->setAvailable($departure->spaces_remaining > 0);
+            $availability->setAvailable($this->checkSpacesRemaining($departure));
             $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
             $availability->setMaxUnits($this->maxUnits);
             $availability->setUtcCutoffAt($this->cutoff);
@@ -143,6 +144,18 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $this;
     }
 
+    protected function checkSpacesRemaining(\SimpleXMLElement $departure): bool
+    {
+        $spacesRequired = $this->getMinBookingSize();
+        if (!empty($this->getUnits())) {
+            $spacesRequired = 0;
+            foreach ($this->getUnits() as $unit) {
+                $spacesRequired += (int) $unit['quantity'];
+            }
+        }
+        return $departure->spaces_remaining >= $spacesRequired;
+    }
+
     /**
      * Summary of saveAvailabilities
      * @param Availability[]
@@ -153,5 +166,45 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         foreach ($availabilities as $availability) {
             $availability->save();
         }
+    }
+
+    /**
+     * Get the value of units
+     */ 
+    public function getUnits()
+    {
+        return $this->units;
+    }
+
+    /**
+     * Set the value of units
+     *
+     * @return  self
+     */ 
+    public function setUnits($units)
+    {
+        $this->units = $units;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of minBookingSize
+     */ 
+    public function getMinBookingSize()
+    {
+        return $this->minBookingSize;
+    }
+
+    /**
+     * Set the value of minBookingSize
+     *
+     * @return  self
+     */ 
+    public function setMinBookingSize($minBookingSize)
+    {
+        $this->minBookingSize = $minBookingSize;
+
+        return $this;
     }
 }
