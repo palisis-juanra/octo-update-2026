@@ -11,6 +11,9 @@ class AvailabilityCalendarRequest
     const OCTO_STATUS_CLOSED = 'CLOSED';
     const TCMS_STATUS_OPEN = 'OPEN';
     const TCMS_STATUS_ASKFIRST = 'ASKFIRST';
+    const START_TIME_DEFAULT = '00:00';
+    const END_TIME_DEFAULT = '23:59';
+    const SPACES_REMAINING_UNLIMITED = 'UNLIMITED';
     public string $tourId;
     public string $optionId;
     public string $localDateStart;
@@ -41,7 +44,6 @@ class AvailabilityCalendarRequest
     public function fetchDatesAndDealsFromAPI(TourCMSService $tourCMSService): array
     {
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
-        error_log(print_r($mappingQueryString, true));
 
         $response = $tourCMSService->showTourDatesAndDeals($this->tourId, $this->localDateStart, $this->localDateEnd, $mappingQueryString);
 
@@ -62,14 +64,14 @@ class AvailabilityCalendarRequest
             $availability = new CalendarAvailability();
 
             $openingHours = (object) [
-                'from' => (string) $date->start_time ?? '00:00',
-                'to' => (string) $date->end_time ?? '23:59'
+                'from' => (string) $date->start_time ?? self::START_TIME_DEFAULT,
+                'to' => (string) $date->end_time ?? self::END_TIME_DEFAULT
             ];
 
             $availability->setLocalDate($date->start_date)
-                ->setAvailable($date->spaces_remaining > 0)
+                ->setAvailable($this->checkSpacesRemaining($date))
                 ->setStatus($this->getOctoStatusFromTourCMSStatus((string) $date->status))
-                ->setVacancies($date->spaces_remaining != "UNLIMITED" ? (int) $date->spaces_remaining : null)
+                ->setVacancies($date->spaces_remaining != self::SPACES_REMAINING_UNLIMITED ? (int) $date->spaces_remaining : null)
                 ->setCapacity(null)
                 ->setOpeningHours([$openingHours]);
             
@@ -103,6 +105,14 @@ class AvailabilityCalendarRequest
     {
         return $this->units;
     }
+
+    public function setUnits($units)
+    {
+        $this->units = $units;
+
+        return $this;
+    }
+    
     public function getOctoStatusFromTourCMSStatus(string $status): string
     {
         if ($status == self::TCMS_STATUS_OPEN || $status == self::TCMS_STATUS_ASKFIRST) {
@@ -112,4 +122,15 @@ class AvailabilityCalendarRequest
         return self::OCTO_STATUS_CLOSED;
     }
 
+    public function checkSpacesRemaining(\SimpleXMLElement $date): bool
+    {
+        $spacesRequired = $date->min_booking_size;
+        if (!empty($this->getUnits())) {
+            $spacesRequired = 0;
+            foreach ($this->getUnits() as $unit) {
+                $spacesRequired += (int) $unit['quantity'];
+            }
+        }
+        return $date->spaces_remaining >= $spacesRequired;
+    }
 }

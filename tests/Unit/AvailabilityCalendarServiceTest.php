@@ -32,7 +32,7 @@ class AvailabilityCalendarServiceTest extends TestCase
         $this->datesAndDealsXML = simplexml_load_string($this->datesAndDealsString);
     }
 
-    public function test_whenCallGetCalendar_thenWeGetValidStructure()
+    public function test_whenCallGetCalendar_thenWeGetValidCalendarArray()
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
