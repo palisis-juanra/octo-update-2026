@@ -21,6 +21,7 @@
 		<has_h>0</has_h>
 		<descriptions_last_updated>2024-04-30</descriptions_last_updated>
 		<time_type>strict</time_type>
+        <start_time>09:00</start_time>
 		<cutoff>
 			<type>day_before_time</type>
 			<value>17:00</value>
@@ -93,6 +94,7 @@
 		<has_h>0</has_h>
 		<descriptions_last_updated>2022-11-18</descriptions_last_updated>
 		<time_type>strict</time_type>
+        <start_time>09:00</start_time>
 		<cutoff>
 			<type>before_start_sec</type>
 			<value>0</value>
