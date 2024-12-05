@@ -57,13 +57,7 @@ class BookingTransformer extends BaseTransformer
             'contact' => $this->contactTransformer->transform($booking->getContact()),
             'notes' => $booking->getNotes(),
             'deliveryMethods' => $product->getDeliveryMethods(),
-            'voucher' => [
-                'redemptionMethod' => $product->getRedemptionMethod(),
-                'utcRedeemedAt' => $booking->getUtcRedeemedAt(),
-                'deliveryOptions' => [
-                    "deliveryFormat" => "QRCODE"
-                ]
-            ],
+            'voucher' => $booking->getVoucher(),
             'unitItems' => $booking->getUnits(),
         ];
     }

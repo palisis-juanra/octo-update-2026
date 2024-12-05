@@ -39,6 +39,7 @@ class Booking extends Model
         $this->notes = null;
         $this->units = [];
         $this->contact = new Contact;
+        $this->voucher = null;
     }
 
     public static function createFromXML(
@@ -68,6 +69,18 @@ class Booking extends Model
         if (!is_null($notes)){
             $booking->setNotes($notes);
         }
+
+        
+        if (in_array('VOUCHER', $product->getDeliveryMethods())) {
+            $booking->setVoucher([
+                'redemptionMethod' => $product->getRedemptionMethod(),
+                'utcRedeemedAt' => $product->getUtcRedeemedAt(),
+                'deliveryOptions' => [
+                    "deliveryFormat" => $product->getDeliveryFormats()[0]
+                ]
+            ]);
+        }
+
 
         return $booking;
     }
@@ -268,22 +281,19 @@ class Booking extends Model
             $unit = $option->getUnitById($unitId);
 
             $newUnitItem = new stdClass;
+            $newUnitItem->uuid = Uuid::uuid4();
+            $newUnitItem->resellerReference = null;
+            $newUnitItem->supplierReference = $unit->reference;
+            $newUnitItem->unitId = $unit->id;
             $newUnitItem->id = $unit->id;
-            $newUnitItem->internalName = $unit->internalName;
-            $newUnitItem->reference = $unit->reference;
-            $newUnitItem->type = $unit->type;
-            $newUnitItem->requiredContactFields = $unit->requiredContactFields;
-            $newUnitItem->restrictions = $unit->restrictions;
-
             $newUnitItem->unit = $unit;
 
-            $newUnitItem->unitId = $unit->id;
-            $newUnitItem->uuid = Uuid::uuid4();
             $newUnitItem->status = 'ON_HOLD';
             $newUnitItem->utcRedeemedAt = $this->getUtcRedeemedAt();
-
+            
             $contactTransformer = new ContactTransformer(BaseTransformer::FULL_TRANSFORM);
             $newUnitItem->contact = $contactTransformer->transform($this->getContact());
+
             $newUnitItem->ticket = [
                 'redemptionMethod' => $this->getProduct()->getRedemptionMethod(),
                 'utcRedeemedAt' => $this->getUtcRedeemedAt(),
@@ -316,6 +326,18 @@ class Booking extends Model
     public function getContact(): Contact
     {
         return $this->contact;
+    }
+
+    public function setVoucher(?array $voucher): self
+    {
+        $this->voucher = $voucher;
+        
+        return $this;
+    }
+
+    public function getVoucher(): ?array
+    {
+        return $this->voucher;
     }
 
 }
