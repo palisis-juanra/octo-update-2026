@@ -70,7 +70,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
             $availability->setAllDay(false);
-            //TODO: check if spaces > rates count
             $availability->setAvailable($this->checkSpacesRemaining($departure));
             $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
             $availability->setMaxUnits($this->maxUnits);
@@ -147,20 +146,14 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
     protected function checkSpacesRemaining(\SimpleXMLElement $departure): bool
     {
+        $spacesRequired = $this->getMinBookingSize();
         if (!empty($this->getUnits())) {
             $spacesRequired = 0;
             foreach ($this->getUnits() as $unit) {
-                $spacesRequired += $unit['quantity'];
-            }
-            if ($departure->spaces_remaining >= $spacesRequired) {
-                return true;
-            }
-        } else {
-            if ($departure->spaces_remaining > $this->getMinBookingSize()) {
-                return true;
+                $spacesRequired += (int) $unit['quantity'];
             }
         }
-        return false;
+        return $departure->spaces_remaining >= $spacesRequired;
     }
 
     /**
