@@ -109,7 +109,9 @@ class ProductService
     const ERROR_DEPARTURE_STRUCTURE_NOT_SET = 'the tour departure structure is not set';
     const ERROR_REFERENCE_MISSING = 'reference field is missing';
     const ERROR_TIMEZONE_MISSING = 'timeZone field is missing';
-    const ERROR_TOUR_MAPPING_MISSING = 'the tour mapping is missing';    
+    const ERROR_TOUR_MAPPING_MISSING = 'the tour mapping is missing';  
+    const ERROR_TOUR_WITH_NO_OPTIONS = 'tour has no option available';
+  
     public TourCMSService $tourCMSService;
     public ProductTransformer $productTransformer;
     public JSONLogService $logger;
@@ -132,8 +134,12 @@ class ProductService
         $productList = [];
             foreach ($tourList as $tour) {
                 if ($this->isTourValidForProductList($tour)) {
-                    $product = $this->createProductFromTourXML($tour);
-                    $productList[] = $product;
+                    try {
+                        $product = $this->createProductFromTourXML($tour);
+                        $productList[] = $product;
+                    } catch (InvalidProductContentException $e) {
+                        continue;
+                    }
                 }                
             }
         return $productList;
@@ -176,6 +182,9 @@ class ProductService
         $options = [];
         if (isset($tour->tour_departure_structure->type)) {
             $options = $this->getProductOptions($tour);
+            if (empty($options)) {
+                $this->errors[] = self::ERROR_TOUR_WITH_NO_OPTIONS;
+            }
         } else {
             $this->errors[] = self::ERROR_TOUR_MAPPING_MISSING;
         }
@@ -670,7 +679,7 @@ class ProductService
             $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
             if (!empty($deliveryFormatsFromXML)) {
                 foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-                    if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
+                    if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {q
                         $this->logInfo("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
                         return false;
                     }
