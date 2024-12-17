@@ -66,6 +66,9 @@ class CustomExceptionHandler extends Handler
             case (UnprocessableEntityHttpException::class):
                 return OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
 
+            case (InvalidBookingUUIDException::class):
+                return OctoResponse::INVALID_BOOKING_UUID($exception->bookingUuid);
+
             case (NoMatchingDataException::class):
                 return OctoResponse::INVALID_PRODUCT_ID($exception->productId);
             

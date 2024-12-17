@@ -10,6 +10,7 @@ use App\Exceptions\NoMatchingDataException;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 use stdClass;
 use TourCMS\Utils\TourCMS;
@@ -125,6 +126,27 @@ class TourCMSService
     {
         $response = $this->tourCMS->start_new_booking($bookingData, $this->channelId);
         return $this->handleResponse($response); 
+    }
+
+    public function commitBooking(string $bookingId): SimpleXMLElement
+    {
+        $bookingData = new SimpleXMLElement('<booking />');
+        $bookingData->addChild('booking_id', $bookingId);
+        $response = $this->tourCMS->commit_new_booking($bookingData, $this->channelId);
+        Log::info(print_r($response,1));
+        return $response;
+    }
+
+    public function showBooking(string $bookingId): SimpleXMLElement
+    {
+        $response = $this->tourCMS->show_booking($bookingId, $this->channelId);
+        return $this->handleResponse($response);
+    }
+
+    public function updateCustomer(SimpleXMLElement $customerXML): SimpleXMLElement
+    {
+        $response = $this->tourCMS->update_customer($customerXML, $this->channelId);
+        return $response;
     }
 
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array

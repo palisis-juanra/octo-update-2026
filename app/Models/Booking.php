@@ -18,6 +18,8 @@ class Booking extends Model
 {
     use HasFactory;
     const STATUS_ON_HOLD = 'ON_HOLD';
+    const STATUS_EXPIRED = 'EXPIRED';
+    const STATUS_CONFIRMED = 'CONFIRMED';
 
     protected bool $testMode;
     protected ?string $utcCreatedAt;
@@ -36,8 +38,9 @@ class Booking extends Model
     protected Product $product;
     protected Option $option;
     protected Availability $availability;
-
     protected array $units;
+    protected int $leadCustomerId;
+
     /**
      * The table associated with the model.
      *
@@ -74,7 +77,15 @@ class Booking extends Model
     protected $fillable = [
         'booking_id', 
         'account_id', 
-        'channel_id'
+        'channel_id',
+        'availability_id',
+        'product_id',
+        'option_id',
+        'unit_items'
+    ];
+
+    protected $appends = [
+        
     ];
 
     /*
@@ -122,7 +133,7 @@ class Booking extends Model
         $this->voucher = null;
     }
 
-    public static function createFromXML(
+    public static function createFromStartNewBookingXML(
         SimpleXMLElement $startNewBookingData,
         Product $product,
         Option $option,
@@ -145,6 +156,8 @@ class Booking extends Model
         $booking->setOption($option);
         $booking->setAvailability($availability);
         $booking->setUnits($unitItems);
+
+        $booking->setLeadCustomerId($bookingData->lead_customer_id);
         
         if (!is_null($notes)){
             $booking->setNotes($notes);
@@ -161,6 +174,51 @@ class Booking extends Model
             ]);
         }
 
+
+        return $booking;
+    }
+
+    public static function createFromShowBookingXML(
+        string $bookingUuid,
+        SimpleXMLElement $showBookingXML,
+        Product $product,
+        Option $option,
+        Availability $availability,
+        array $unitItems
+    ): Booking
+    {
+        $booking = new Booking();
+
+        $bookingData = $showBookingXML->booking;
+
+        $booking->setBookingId((int) $bookingData->booking_id);
+        $booking->setUuid((string) $bookingUuid);
+        $booking->setAccountId((int) $bookingData->account_id);
+        $booking->setChannelId((int) $bookingData->channel_id);
+
+        // TODO: use new api field with utc
+        $booking->setUtcCreatedAt((string) $booking->made_date_time);
+
+        $booking->setUtcExpiresAt((int) $bookingData->hold_time_seconds);
+        $booking->setExpirationMinutes((int) $bookingData->hold_time_seconds / 60);
+
+        $status = (int) $bookingData->status == 2 ? Booking::STATUS_CONFIRMED : Booking::STATUS_ON_HOLD;
+        $booking->setStatus($status);
+        
+        $booking->setProduct($product);
+        $booking->setOption($option);
+        $booking->setAvailability($availability);
+        $booking->setUnits($unitItems);
+        
+        if (in_array('VOUCHER', $product->getDeliveryMethods())) {
+            $booking->setVoucher([
+                'redemptionMethod' => $product->getRedemptionMethod(),
+                'utcRedeemedAt' => null,
+                'deliveryOptions' => [
+                    "deliveryFormat" => $product->getDeliveryFormats()[0]
+                ]
+            ]);
+        }
 
         return $booking;
     }
@@ -191,7 +249,12 @@ class Booking extends Model
         return $this;
     }
 
-    public function setUuid(string $uuid): string
+    public function getBookingId(): int
+    {
+        return $this->booking_id;
+    }
+
+    public function setUuid(string $uuid): self
     {
         $this->uuid = $uuid;
 
@@ -227,9 +290,23 @@ class Booking extends Model
         return $this->testMode;
     }
 
+    public function setUtcCreatedAt(string $createdAt): self
+    {
+        $this->utcCreatedAt = $createdAt;
+
+        return $this;
+    }
+
     public function getUtcCreatedAt(): ?string
     {
         return $this->utcCreatedAt;
+    }
+
+    public function setUtcUpdatedAt(string $utcUpdatedAt): self
+    {
+        $this->utcUpdatedAt = $utcUpdatedAt;
+
+        return $this;
     }
 
     public function getUtcUpdatedAt(): ?string
@@ -266,6 +343,7 @@ class Booking extends Model
 
     public function setProduct(Product $product): self
     {
+        $this->product_id = $product->getId();
         $this->product = $product;
 
         return $this;
@@ -278,6 +356,7 @@ class Booking extends Model
 
     public function setOption(Option $option): self
     {
+        $this->option_id = $option->getId();
         $this->option = $option;
 
         return $this;
@@ -290,6 +369,7 @@ class Booking extends Model
 
     public function setAvailability(Availability $availability): self
     {
+        $this->availability_id = $availability->getId();
         $this->availability = $availability;
 
         return $this;
@@ -387,6 +467,7 @@ class Booking extends Model
 
             $this->units[] = $newUnitItem;
         }
+        $this->unit_items = json_encode($this->units);
 
         return $this;
     }
@@ -418,6 +499,18 @@ class Booking extends Model
     public function getVoucher(): ?array
     {
         return $this->voucher;
+    }
+
+    public function setLeadCustomerId(int $leadCustomerId): self
+    {
+        $this->leadCustomerId = $leadCustomerId;
+
+        return $this;
+    }
+
+    public function getLeadCustomerId(): ?int
+    {
+        return $this->leadCustomerId;
     }
 
 }

@@ -50,7 +50,7 @@ class BookingReservationService
         $startNewBookingXML = $this->tourCMSService->startNewBooking($bookingData);
 
         // Create Booking object
-        $booking = Booking::createFromXML(
+        $booking = Booking::createFromStartNewBookingXML(
             $startNewBookingXML, 
             $product, 
             $option, 
