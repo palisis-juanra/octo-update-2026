@@ -59,8 +59,7 @@ class BookingReservationService
             $notes);
         $this->logger->info(["message" => "Temporary booking with ID {$booking->getId()} and UUID {$booking->getUuid()} created successfully"]);
         
-        // TODO Store booking information
-        //$booking->save();
+        $booking->save();
 
         return $booking;
     }

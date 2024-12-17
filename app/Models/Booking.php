@@ -10,7 +10,6 @@ use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
 use stdClass;
@@ -20,7 +19,89 @@ class Booking extends Model
     use HasFactory;
     const STATUS_ON_HOLD = 'ON_HOLD';
 
+    protected bool $testMode;
+    protected ?string $utcCreatedAt;
+    protected ?string $utcUpdatedAt;
+    protected ?string $utcRedeemedAt;
+    protected ?string $utcConfirmedAt;
+    protected ?string $supplierReference;
+    protected ?string $resellerReference;
+    protected ?bool $cancellable;
+    protected ?object $cancellation;
+    protected Contact $contact;
+    protected ?string $notes;
+    protected ?array $voucher;
+    protected ?string $utcExpiresAt;
+    protected int $expirationMinutes;
+    protected Product $product;
+    protected Option $option;
+    protected Availability $availability;
+
     protected array $units;
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'bookings';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'uuid';
+
+    /**
+     * The data type of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
+     * Indicates if the model's ID is auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'booking_id', 
+        'account_id', 
+        'channel_id'
+    ];
+
+    /*
+    protected $guarded = [
+        'testMode',
+        'utcCreatedAt',
+        'utcUpdatedAt',
+        'utcRedeemedAt',
+        'utcConfirmedAt',
+        'supplierReference',
+        'resellerReference',
+        'cancellable',
+        'cancellation',
+        'contact',
+        'notes',
+        'voucher',
+        'utcExpiresAt',
+        'expirationMinutes',
+        'product',
+        'option',
+        'availability',
+        'updated_at',
+        'created_at'
+    ];
+    */
+
+    public static $snakeAttributes = true;
 
     public function __construct()
     {
@@ -35,7 +116,6 @@ class Booking extends Model
         $this->resellerReference = null;
         $this->cancellable = false;
         $this->cancellation = null;
-        $this->contact = new stdClass;
         $this->notes = null;
         $this->units = [];
         $this->contact = new Contact;
