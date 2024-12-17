@@ -18,6 +18,10 @@ return new class extends Migration
             $table->string('account_id');
             $table->string('channel_id');
             $table->string('status');
+            $table->string('availability_id');
+            $table->string('product_id');
+            $table->string('option_id');
+            $table->json('unit_items');
         });
     }
 
