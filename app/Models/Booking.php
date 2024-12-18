@@ -35,7 +35,7 @@ class Booking extends Model
     protected ?string $notes;
     protected ?array $voucher;
     protected ?string $utcExpiresAt;
-    protected int $expirationMinutes;
+    protected ?int $expirationMinutes;
     protected Product $product;
     protected Option $option;
     protected Availability $availability;
@@ -197,11 +197,12 @@ class Booking extends Model
 
         $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
 
-        // TODO: use new api field with utc
-        $booking->setUtcCreatedAt((string) $bookingData->made_date_time);
+        $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
+        $booking->setUtcExpiresAt($bookingData->expiry_date_at_utc_seconds ? (string) $bookingData->expiry_date_at_utc_seconds : null);
+        $booking->setUtcConfirmedAt($bookingData->confirmed_at_utc_seconds ? (string) $bookingData->confirmed_at_utc_seconds : null);
+        $booking->setUtcRedeemedAt(self::getFirstRedeemed($bookingData));
 
-        $booking->setUtcExpiresAt($booking->expiry_date ? strtotime((string) $booking->expiry_date) - strtotime(date('Y-m-d')) : null);
-        $booking->setExpirationMinutes((int) $bookingData->hold_time_seconds / 60);
+        $booking->setExpirationMinutes(null);
 
         $booking->setStatus(self::getBookingStatus($bookingData));
         $booking->setCancellable((bool) $bookingData->cancellable);
@@ -291,9 +292,12 @@ class Booking extends Model
         return $this->testMode;
     }
 
-    public function setUtcCreatedAt(string $createdAt): self
+    public function setUtcCreatedAt(int $createdAt): self
     {
-        $this->utcCreatedAt = $createdAt;
+        $creationDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $creationDateTime->setTimestamp($createdAt);
+
+        $this->utcCreatedAt = DateTimeService::getISO8601DateFormatted($creationDateTime);
 
         return $this;
     }
@@ -320,9 +324,42 @@ class Booking extends Model
         return $this->utcRedeemedAt;
     }
 
+    public function setUtcRedeemedAt(?int $redeemedAt): self
+    {
+        if (is_null($redeemedAt)) {
+            $this->utcRedeemedAt = null;
+
+            return $this;
+        }
+
+        $redeemDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $redeemDateTime->setTimestamp($redeemedAt);
+        $this->utcRedeemedAt = DateTimeService::getISO8601DateFormatted($redeemDateTime);
+
+        return $this;  
+    }
+
     public function getUtcConfirmedAt(): ?string
     {
         return $this->utcConfirmedAt;
+    }
+
+    /**
+     * Set the value of utcConfirmedAt
+     *
+     * @return  self
+     */ 
+    public function setUtcConfirmedAt(?int $confirmedAt): self
+    {
+        if (is_null($confirmedAt)) {
+            $this->utcConfirmedAt = null;
+        }
+
+        $confirmationDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $confirmationDateTime->setTimestamp($confirmedAt);
+        $this->utcConfirmedAt = DateTimeService::getISO8601DateFormatted($confirmationDateTime);
+
+        return $this;
     }
 
 
@@ -431,7 +468,7 @@ class Booking extends Model
         return $this->notes;
     }
 
-    public function setExpirationMinutes(int $expirationMinutes): self
+    public function setExpirationMinutes(?int $expirationMinutes): self
     {
         $this->expirationMinutes = $expirationMinutes;
 
@@ -535,17 +572,35 @@ class Booking extends Model
 
     }
 
-
-    /**
-     * Set the value of utcConfirmedAt
-     *
-     * @return  self
-     */ 
-    public function setUtcConfirmedAt(): self
+    protected static function getFirstRedeemed(SimpleXMLElement $bookingData): ?string
     {
-        $confirmationDateTime = new DateTime('now', new DateTimeZone('UTC'));
-        $this->utcConfirmedAt = DateTimeService::getISO8601DateFormatted($confirmationDateTime);
+        $componentsRedeemed = [];
+        $components = self::getArrayFromXmlNode($bookingData->components, 'component');
 
-        return $this;
+        foreach ($components as $component) {
+            if (!empty((string) $component->redeemed_at)) {
+                $componentsRedeemed[] = (int) $component->redeemed_at_utc_seconds;
+            }
+        }
+
+        if (empty($componentsRedeemed)) {
+            return null;
+        }
+
+        sort($componentsRedeemed);
+
+        return $componentsRedeemed[0];
+
+    }
+
+    protected static function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
+    {
+        $children = [];
+        foreach ($parent->children() as $child) {
+            if (empty($childName) || $child->getName() == $childName) {
+                $children[] = $child;
+            }
+        }
+        return $children;
     }
 }
