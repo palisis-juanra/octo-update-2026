@@ -206,6 +206,16 @@ class Booking extends Model
 
         $booking->setStatus(self::getBookingStatus($bookingData));
         $booking->setCancellable((bool) $bookingData->cancellable);
+
+        if ((int) $bookingData->cancel_reason !== 0) {
+            $cancelObject = new stdClass();
+        
+            $cancelObject->refund = "ALL";
+            $cancelObject->reason = (string) $bookingData->cancel_text;
+            $cancelObject->utcCancelledAt = self::createUtcCancelledAt((int) $bookingData->cancelled_at_utc_seconds);
+
+            $booking->setCancellation($cancelObject);
+        }
         
         $booking->setProduct($product);
         $booking->setOption($option);
@@ -451,6 +461,13 @@ class Booking extends Model
         return $this->cancellable;
     }
 
+    public function setCancellation(?object $cancellation): self
+    {
+        $this->cancellation = $cancellation;
+
+        return $this;
+    }
+
     public function getCancellation(): ?object
     {
         return $this->cancellation;
@@ -591,6 +608,17 @@ class Booking extends Model
 
         return $componentsRedeemed[0];
 
+    }
+
+    protected static function createUtcCancelledAt(?int $cancelledAt): ?string
+    {
+        if (is_null($cancelledAt)) {
+            return null;
+        }
+
+        $cancelledDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $cancelledDateTime->setTimestamp($cancelledAt);
+        return DateTimeService::getISO8601DateFormatted($cancelledDateTime);
     }
 
     protected static function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
