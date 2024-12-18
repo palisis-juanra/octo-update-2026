@@ -52,7 +52,10 @@ class BookingConfirmationService
         } 
 
         $booking = $this->getBooking($booking);
-        $booking->setUtcConfirmedAt();
+        
+        if ($booking->getStatus() === Booking::STATUS_CONFIRMED) {
+            $booking->setUtcConfirmedAt();
+        }
 
         return $booking;
     }
