@@ -133,7 +133,6 @@ class TourCMSService
         $bookingData = new SimpleXMLElement('<booking />');
         $bookingData->addChild('booking_id', $bookingId);
         $response = $this->tourCMS->commit_new_booking($bookingData, $this->channelId);
-        Log::info(print_r($response,1));
         return $response;
     }
 

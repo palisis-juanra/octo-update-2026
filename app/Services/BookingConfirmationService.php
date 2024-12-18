@@ -42,6 +42,7 @@ class BookingConfirmationService
         $error = (string) $commitBookingResponse->error;
 
         if ($error == self::ERROR_BOOKING_ALREADY_COMITTED) {
+            $this->logger->info("Booking {$booking->booking_id} already commited, calling show booking to return booking info");
             return $this->getBooking($booking);
         }
 
@@ -59,6 +60,7 @@ class BookingConfirmationService
     public function getBooking(Booking $booking): Booking
     {
         $showBookingResponse = $this->tourCMSService->showBooking($booking->getBookingId());
+        $this->logger->info(["showBookingResponse" => $showBookingResponse]);
         
         $product = $this->productService->find($booking->product_id);
         $option = $product->getOptionById($booking->option_id);
@@ -79,7 +81,8 @@ class BookingConfirmationService
     {
         $contact = Contact::create($contactData);
         $customerXML = $this->contactService->getCustomerXMLFromContact($booking->getLeadCustomerId(), $contact);
-        $this->tourCMSService->updateCustomer($booking->getLeadCustomerId(), $customerXML);
+        $this->tourCMSService->updateCustomer($customerXML);
+        $this->logger->info(["message" => "updating customer details", "details" => $customerXML]);
         
         $booking->setContact($contact);
         return $booking;

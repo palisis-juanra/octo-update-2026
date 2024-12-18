@@ -19,7 +19,7 @@ class Contact extends BaseModel
     protected ?string $lastName = null;
     protected ?string $emailAddress = null;
     protected ?string $phoneNumber = null;
-    protected array $locales = [];
+    protected ?array $locales = [];
     protected ?string $postalCode = null;
     protected ?string $country = null;
     protected ?string $notes = null;
@@ -33,15 +33,15 @@ class Contact extends BaseModel
     {
         $contact = new Contact();
 
-        $contact->fullName = $attributes[self::FIELD_FULL_NAME];
-        $contact->fistName = $attributes[self::FIELD_FIRST_NAME];
-        $contact->lastName = $attributes[self::FIELD_LAST_NAME];
-        $contact->emailAddress = $attributes[self::FIELD_EMAIL_ADDRESS];
-        $contact->phoneNumber = $attributes[self::FIELD_PHONE_NUMBER];
-        $contact->locales = $attributes[self::FIELD_LOCALES];
-        $contact->postalCode = $attributes[self::FIELD_POSTAL_CODE];
-        $contact->country = $attributes[self::FIELD_COUNTRY];
-        $contact->notes = $attributes[self::FIELD_NOTES];
+        $contact->fullName = $attributes[self::FIELD_FULL_NAME] ?? null;
+        $contact->firstName = $attributes[self::FIELD_FIRST_NAME] ?? null;
+        $contact->lastName = $attributes[self::FIELD_LAST_NAME] ?? null;
+        $contact->emailAddress = $attributes[self::FIELD_EMAIL_ADDRESS]?? null;
+        $contact->phoneNumber = $attributes[self::FIELD_PHONE_NUMBER] ?? null;
+        $contact->locales = $attributes[self::FIELD_LOCALES] ?? [];
+        $contact->postalCode = $attributes[self::FIELD_POSTAL_CODE] ?? null;
+        $contact->country = $attributes[self::FIELD_COUNTRY] ?? null;
+        $contact->notes = $attributes[self::FIELD_NOTES] ?? null;
 
         return $contact;
     }
