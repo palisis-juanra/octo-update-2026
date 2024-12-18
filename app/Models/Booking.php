@@ -20,6 +20,7 @@ class Booking extends Model
     const STATUS_ON_HOLD = 'ON_HOLD';
     const STATUS_EXPIRED = 'EXPIRED';
     const STATUS_CONFIRMED = 'CONFIRMED';
+    const STATUS_CANCELLED = 'CANCELLED';
 
     protected bool $testMode;
     protected ?string $utcCreatedAt;
@@ -156,8 +157,6 @@ class Booking extends Model
         $booking->setOption($option);
         $booking->setAvailability($availability);
         $booking->setUnits($unitItems);
-
-        $booking->setLeadCustomerId($bookingData->lead_customer_id);
         
         if (!is_null($notes)){
             $booking->setNotes($notes);
@@ -196,14 +195,16 @@ class Booking extends Model
         $booking->setAccountId((int) $bookingData->account_id);
         $booking->setChannelId((int) $bookingData->channel_id);
 
-        // TODO: use new api field with utc
-        $booking->setUtcCreatedAt((string) $booking->made_date_time);
+        $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
 
-        $booking->setUtcExpiresAt((int) $bookingData->hold_time_seconds);
+        // TODO: use new api field with utc
+        $booking->setUtcCreatedAt((string) $bookingData->made_date_time);
+
+        $booking->setUtcExpiresAt($booking->expiry_date ? strtotime((string) $booking->expiry_date) - strtotime(date('Y-m-d')) : null);
         $booking->setExpirationMinutes((int) $bookingData->hold_time_seconds / 60);
 
-        $status = (int) $bookingData->status == 2 ? Booking::STATUS_CONFIRMED : Booking::STATUS_ON_HOLD;
-        $booking->setStatus($status);
+        $booking->setStatus(self::getBookingStatus($bookingData));
+        $booking->setCancellable((bool) $bookingData->cancellable);
         
         $booking->setProduct($product);
         $booking->setOption($option);
@@ -325,8 +326,12 @@ class Booking extends Model
     }
 
 
-    public function setUtcExpiresAt(int $seconds): self
+    public function setUtcExpiresAt(?int $seconds): self
     {
+        if (is_null($seconds)) {
+            $this->utcExpiresAt = null;
+            return $this;
+        } 
         $timestamp = time() + $seconds;
 
         $expirationDateTime = new DateTime('now', new DateTimeZone('UTC'));
@@ -395,6 +400,13 @@ class Booking extends Model
     public function getSupplierReference(): ?string
     {
         return $this->supplierReference;
+    }
+
+    public function setCancellable(bool $cancellable): self
+    {
+        $this->cancellable = $cancellable;
+
+        return $this;
     }
 
     public function getCancellable(): bool
@@ -513,4 +525,27 @@ class Booking extends Model
         return $this->leadCustomerId;
     }
 
+    protected static function getBookingStatus(SimpleXMLElement $bookingData): string
+    {
+        if ((int) $bookingData->cancel_reason !== 0) {
+            return Booking::STATUS_CANCELLED;
+        }
+
+        return (int) $bookingData->status == 2 ? Booking::STATUS_CONFIRMED : Booking::STATUS_ON_HOLD;
+
+    }
+
+
+    /**
+     * Set the value of utcConfirmedAt
+     *
+     * @return  self
+     */ 
+    public function setUtcConfirmedAt(): self
+    {
+        $confirmationDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $this->utcConfirmedAt = DateTimeService::getISO8601DateFormatted($confirmationDateTime);
+
+        return $this;
+    }
 }

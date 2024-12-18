@@ -48,9 +48,12 @@ class BookingConfirmationService
         if ($error !== TourCMSService::ERROR_OK) {
             $this->logger->error('API return no matching data, invalid booking ID / channel');
             throw new InvalidBookingUUIDException($booking->uuid);
-        }        
+        } 
 
-        return $this->getBooking($booking);
+        $booking = $this->getBooking($booking);
+        $booking->setUtcConfirmedAt();
+
+        return $booking;
     }
 
     public function getBooking(Booking $booking): Booking

@@ -9,4 +9,5 @@ class OctoRequest
     public const AVAILABILITY_ID = 'availabilityId';
     public const UNIT_ITEMS = 'unitItems';
     public const UUID = 'uuid';
+    public const CONTACT = 'contact';
 }
