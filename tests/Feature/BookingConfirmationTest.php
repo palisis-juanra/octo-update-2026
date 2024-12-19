@@ -135,7 +135,7 @@ class BookingConfirmationTest extends FeatureTestCase
         $this->instance(BookingConfirmationService::class, $this->bookingConfirmationServiceMock);
     }
 
-    public function test_whenBookingUuidIsInvalid_thenWeGetAppropiateError(): void
+    public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
     {
         $response = $this->post("/bookings/". self::INVALID_BOOKING_UUID ."/confirmation", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
 

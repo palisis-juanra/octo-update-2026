@@ -14,7 +14,7 @@ class BookingConfirmationServiceTest extends UnitTestCase
     const FAKE_CUSTOMER_ID = 12345;
     const CONTACT_DATA = '{"fullName": "Armando Garrido", "firstName": "Armando", "lastName": "Garrido", "emailAddress": "armando.garrido@palisis.com", "phoneNumber": "77777777", "postalCode": "18200", "country": "ES", "notes": "Customer notes"}';
 
-    public function test_whenAddContactToBooking_theContactIsCreatedCorrectly(): void
+    public function test_whenAddContactToBooking_thenContactDetaiIsArePresentInTheBooking(): void
     {
         $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
             ->disableOriginalConstructor()
