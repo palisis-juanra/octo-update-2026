@@ -148,6 +148,15 @@ class TourCMSService
         return $response;
     }
 
+    public function cancelBooking(SimpleXMLElement $bookingData): SimpleXMLElement
+    {
+        $response = $this->tourCMS->cancel_booking($bookingData, $this->channelId);
+        if (!($response instanceof SimpleXMLElement)) {
+            $response = simplexml_load_string((string) $response);
+        }
+        return $response;
+    }
+
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
     {
         $children = [];
@@ -172,6 +181,7 @@ class TourCMSService
      */
     protected function handleResponse(mixed $response): SimpleXMLElement
     {
+        if (!$response) throw new APICallNotOKException();
         switch ((string)$response->error) {
             case self::ERROR_OK:
                 if (!($response instanceof SimpleXMLElement)) {

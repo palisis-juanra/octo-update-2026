@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\BookingCancellationController;
 use App\Http\Controllers\BookingReservationController;
 use App\Http\Controllers\BookingConfirmationController;
 use App\Http\Controllers\SupplierController;
@@ -25,3 +26,5 @@ Route::post('/availability', [AvailabilityController::class, 'index'])->middlewa
 Route::post('/bookings', [BookingReservationController::class, 'index'])->middleware([OctoAuthentication::class]);
 
 Route::post('/bookings/{uuid}/confirm', [BookingConfirmationController::class, 'index'])->middleware([OctoAuthentication::class]);
+
+Route::post('/bookings/{uuid}/cancel', [BookingCancellationController::class, 'cancel'])->middleware([OctoAuthentication::class]);

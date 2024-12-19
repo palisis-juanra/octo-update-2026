@@ -137,6 +137,17 @@ class OctoResponse {
         return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
     }
 
+    public static function INVALID_BOOKING_UUID(string $bookingUuid, $errorMessage = self::ERROR_MESSAGE_INVALID_BOOKING_UUID): Response
+    {
+        $data = [
+            self::FIELD_ERROR_CODE => self::ERROR_CODE_INVALID_BOOKING_UUID,
+            self::FIELD_ERROR_MESSAGE => $errorMessage,
+            self::FIELD_BOOKING_UUID => $bookingUuid
+        ];
+
+        return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+    }
+
     public static function UNPROCESSABLE_ENTITY(string $errorMessage): Response
     {
         $data = [
