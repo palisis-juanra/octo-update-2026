@@ -5,10 +5,10 @@ namespace Tests\Unit;
 use App\Models\Supplier;
 use App\Services\SupplierService;
 use App\Services\TourCMSService;
-use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
+use Tests\UnitTestCase;
 
-class SupplierServiceTest extends TestCase
+class SupplierServiceTest extends UnitTestCase
 {
     public string $showChannelString;
     public SimpleXMLElement $showChannelXML;

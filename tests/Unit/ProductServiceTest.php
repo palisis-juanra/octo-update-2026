@@ -9,10 +9,10 @@ use App\Services\JSONLogService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
+use Tests\UnitTestCase;
 
-class ProductServiceTest extends TestCase
+class ProductServiceTest extends UnitTestCase
 {
     public string $showTourString;
     public string $listToursString;

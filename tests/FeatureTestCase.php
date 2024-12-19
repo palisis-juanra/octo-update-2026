@@ -5,7 +5,7 @@ namespace Tests;
 use App\Services\JSONLogService;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
-abstract class TestCase extends BaseTestCase
+abstract class FeatureTestCase extends BaseTestCase
 {
     const AUTH_HEADER_NAME = 'Authorization';
     const OCTO_INVALID_PATTERN_CREDENTIALS = 'Bearer NOVALIDKEY';

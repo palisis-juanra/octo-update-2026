@@ -2,10 +2,9 @@
 
 namespace Tests\Feature;
 
-use Symfony\Component\HttpFoundation\Response;
-use Tests\TestCase;
+use Tests\FeatureTestCase;
 
-class OctoAuthenticationTest extends TestCase
+class OctoAuthenticationTest extends FeatureTestCase
 {
     const AUTH_HEADER_NAME = 'Authorization';
     const OCTO_INVALID_PATTERN_CREDENTIALS = 'Bearer NOVALIDKEY';

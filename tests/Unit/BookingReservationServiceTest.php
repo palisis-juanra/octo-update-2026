@@ -3,11 +3,11 @@
 namespace App\Tests;
 
 use App\Services\BookingReservationService;
-use PHPUnit\Framework\TestCase;
 use SimpleXMLElement;
 use App\Exceptions\NoAvailabilityException;
+use Tests\UnitTestCase;
 
-class BookingReservationServiceTest extends TestCase
+class BookingReservationServiceTest extends UnitTestCase
 {
     public function test_weGenerateCorrectRatesQueryStringFromUnitItems()
     {

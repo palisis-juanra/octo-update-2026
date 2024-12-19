@@ -15,11 +15,11 @@ use App\Services\TourCMSService;
 use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\BookingTransformer;
-use Tests\TestCase;
+use Tests\FeatureTestCase;
 use Illuminate\Testing\TestResponse;
 use SimpleXMLElement;
 
-class BookingReservationTest extends TestCase
+class BookingReservationTest extends FeatureTestCase
 {
     const BOOKINGS_ENDPOINT = '/bookings';
     const VALID_PRODUCT_ID = 'TE_1_67|142';

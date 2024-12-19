@@ -12,12 +12,11 @@ use App\Services\LocaleService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
-use PHPUnit\Framework\MockObject\MockBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use SimpleXMLElement;
-use Tests\TestCase;
+use Tests\FeatureTestCase;
 
-class BookingConfirmationTest extends TestCase
+class BookingConfirmationTest extends FeatureTestCase
 {
     const INVALID_BOOKING_UUID = 'invalidUuid';
     const VALID_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';

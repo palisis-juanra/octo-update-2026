@@ -12,11 +12,11 @@ use App\Services\ProductService;
 use App\Services\TourCMSService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
-use Tests\TestCase;
+use Tests\FeatureTestCase;
 use SimpleXMLElement;
 use Symfony\Component\HttpFoundation\Request;
 
-class ProductTest extends TestCase
+class ProductTest extends FeatureTestCase
 {
     public string $showTourString;
     public string $listToursString;

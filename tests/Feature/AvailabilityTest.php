@@ -11,9 +11,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\App;
 use Mockery;
 use SimpleXMLElement;
-use Tests\TestCase;
+use Tests\FeatureTestCase;
 
-class AvailabilityTest extends TestCase
+class AvailabilityTest extends FeatureTestCase
 {
     use RefreshDatabase;
 
