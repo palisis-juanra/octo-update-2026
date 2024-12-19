@@ -133,6 +133,9 @@ class TourCMSService
         $bookingData = new SimpleXMLElement('<booking />');
         $bookingData->addChild('booking_id', $bookingId);
         $response = $this->tourCMS->commit_new_booking($bookingData, $this->channelId);
+        if (!($response instanceof SimpleXMLElement)) {
+            $response = simplexml_load_string((string) $response);
+        }
         return $response;
     }
 
@@ -145,6 +148,9 @@ class TourCMSService
     public function updateCustomer(SimpleXMLElement $customerXML): SimpleXMLElement
     {
         $response = $this->tourCMS->update_customer($customerXML, $this->channelId);
+        if (!($response instanceof SimpleXMLElement)) {
+            $response = simplexml_load_string((string) $response);
+        }
         return $response;
     }
 

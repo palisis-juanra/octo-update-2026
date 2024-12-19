@@ -82,7 +82,7 @@ class BookingCancellationService
 
         $product = $this->productService->find($booking->product_id);
         $option = $product->getOptionById($booking->option_id);
-        $availability = $this->availabilityService->find($booking->availability_id);
+        $availability = $this->availabilityService->find(availabilityId: $booking->availability_id);
         $unitItems = json_decode($booking->unit_items, 1);
 
         $bookingResponse = $this->createFromShowBookingXML(
@@ -111,15 +111,11 @@ class BookingCancellationService
     public function createCancellationObject(SimpleXMLElement $showBookingXML): object
     {
         $cancellation = new stdClass();
+        error_log($showBookingXML->booking->cancelled_at_utc_seconds);
 
-        $refund = self::REFUND_FULL;
-        $cancellationDateTime = DateTimeService::getISODateTimeStringFromTimestamp($showBookingXML->booking->cancelled_at_utc_seconds);
-        $cancellationDateTimeUtc = new DateTime($cancellationDateTime, new DateTimeZone(self::TIMEZONE_UTC));
-        $utcCancelledAt = DateTimeService::getISO8601DateFormatted($cancellationDateTimeUtc);
-
-        $cancellation->refund = $refund;
+        $cancellation->refund = self::REFUND_FULL;
         $cancellation->reason = (string) $showBookingXML->booking->cancel_text ?? null;
-        $cancellation->utcCancelledAt = $utcCancelledAt;
+        $cancellation->utcCancelledAt =  Booking::createUtcCancelledAt((int) $showBookingXML->booking->cancelled_at_utc_seconds);
 
         return $cancellation;
     }
@@ -137,17 +133,9 @@ class BookingCancellationService
 
         $bookingData = $showBookingXML->booking;
 
-        $createdAtDateTime = DateTimeService::getISODateTimeStringFromTimestamp($bookingData->made_date_time_at_utc_seconds);
-        $createdAtDateTimeUtc = new DateTime($createdAtDateTime, new DateTimeZone(self::TIMEZONE_UTC));
-        $utcCreatedAt = DateTimeService::getISO8601DateFormatted($createdAtDateTimeUtc);
-
-        $confirmedAtDateTime = DateTimeService::getISODateTimeStringFromTimestamp($bookingData->confirmed_at_utc_seconds);
-        $confirmedAtDateTimeUtc = new DateTime($confirmedAtDateTime, new DateTimeZone(self::TIMEZONE_UTC));
-        $utcConfirmedAt = DateTimeService::getISO8601DateFormatted($confirmedAtDateTimeUtc);
-
-        $updatedAtDateTime = DateTimeService::getISODateTimeStringFromTimestamp($bookingData->updated_at_utc_seconds);
-        $updatedAtDateTimeUtc = new DateTime($updatedAtDateTime, new DateTimeZone(self::TIMEZONE_UTC));
-        $utcUpdatedAt = DateTimeService::getISO8601DateFormatted($updatedAtDateTimeUtc);
+        $updatedAtDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $updatedAtDateTime->setTimestamp((int) $bookingData->updated_at_utc_seconds);
+        $utcUpdatedAt = DateTimeService::getISO8601DateFormatted($updatedAtDateTime);
 
         $booking->setBookingId((int) $bookingData->booking_id);
         $booking->setUuid((string) $bookingUuid);
@@ -155,8 +143,8 @@ class BookingCancellationService
         $booking->setChannelId((int) $bookingData->channel_id);
 
         $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
-        $booking->setUtcCreatedAt((string) $utcCreatedAt);
-        $booking->setUtcConfirmedAt((string) $utcConfirmedAt);
+        $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
+        $booking->setUtcConfirmedAt((int) $bookingData->confirmed_at_utc_seconds);
         $booking->setUtcUpdatedAt((string) $utcUpdatedAt);
 
         $booking->setUtcExpiresAt($booking->expiry_date ? strtotime((string) $booking->expiry_date) - strtotime(date('Y-m-d')) : null);
