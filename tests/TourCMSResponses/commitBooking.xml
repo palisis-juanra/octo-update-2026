@@ -1,0 +1,76 @@
+<response>
+    <request>POST /c/booking/new/commit.xml</request>
+    <error>OK</error>
+    <booking>
+        <booking_id>4093</booking_id>
+        <channel_id>142</channel_id>
+        <account_id>1</account_id>
+        <status>2</status>
+        <status_text>Confirmed</status_text>
+        <voucher_url>http://voucher.tourcms.local/print.php?id=njo0qpnhqITrFiutnqFIT%2Bt1f0eugHP2ngu2tI7eNlU%3D</voucher_url>
+        <barcode_data>TOURCMS|1|4093</barcode_data>
+        <components>
+            <component>
+                <component_id>6292</component_id>
+                <linked_component_id>6292</linked_component_id>
+                <product_id>67</product_id>
+                <product_code>BCNFCBAR</product_code>
+                <date_id>32310</date_id>
+                <date_code>13:00-15:00</date_code>
+                <start_date>2024-12-22</start_date>
+                <end_date>2024-12-22</end_date>
+                <local_payment>0</local_payment>
+                <customer_payment>0</customer_payment>
+                <rate_breakdown>r1|a</rate_breakdown>
+                <rate_description>Adultos</rate_description>
+                <start_time>13:00</start_time>
+                <end_time>15:00</end_time>
+                <date_type>departure</date_type>
+                <component_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</component_name>
+                <sale_quantity_rule>PERSON</sale_quantity_rule>
+                <sale_quantity>2</sale_quantity>
+                <urls/>
+            </component>
+            <component>
+                <component_id>6293</component_id>
+                <linked_component_id>6293</linked_component_id>
+                <product_id>67</product_id>
+                <product_code>BCNFCBAR</product_code>
+                <date_id>32310</date_id>
+                <date_code>13:00-15:00</date_code>
+                <start_date>2024-12-22</start_date>
+                <end_date>2024-12-22</end_date>
+                <local_payment>0</local_payment>
+                <customer_payment>0</customer_payment>
+                <rate_breakdown>r2|c</rate_breakdown>
+                <rate_description>Niños</rate_description>
+                <start_time>13:00</start_time>
+                <end_time>15:00</end_time>
+                <date_type>departure</date_type>
+                <component_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</component_name>
+                <sale_quantity_rule>PERSON</sale_quantity_rule>
+                <sale_quantity>1</sale_quantity>
+                <urls/>
+            </component>
+            <component>
+                <component_id>6294</component_id>
+                <linked_component_id>0</linked_component_id>
+                <product_id>0</product_id>
+                <product_code/>
+                <date_id>0</date_id>
+                <date_code/>
+                <start_date>0000-00-00</start_date>
+                <end_date>0000-00-00</end_date>
+                <local_payment>0</local_payment>
+                <customer_payment>0</customer_payment>
+                <rate_breakdown/>
+                <rate_description/>
+                <date_type>fee</date_type>
+                <component_name>Booking FEE now</component_name>
+                <sale_quantity_rule>PERSON</sale_quantity_rule>
+                <sale_quantity>1</sale_quantity>
+                <urls/>
+            </component>
+        </components>
+    </booking>
+</response>

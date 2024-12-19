@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Exceptions\APICallNotOKException;
 use App\Exceptions\InvalidBookingUUIDException;
-use App\Exceptions\NoMatchingDataException;
 use App\Models\Booking;
 use App\Models\Contact;
 
@@ -63,7 +61,7 @@ class BookingConfirmationService
         
         $product = $this->productService->find($booking->product_id);
         $option = $product->getOptionById($booking->option_id);
-        $availability = $this->availabilityService->find(availabilityId: $booking->availability_id);
+        $availability = $this->availabilityService->find($booking->availability_id);
         $unitItems = json_decode($booking->unit_items, 1);
 
         return Booking::createFromShowBookingXML(
