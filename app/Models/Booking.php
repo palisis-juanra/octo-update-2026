@@ -88,34 +88,6 @@ class Booking extends Model
         'unit_items'
     ];
 
-    protected $appends = [
-        
-    ];
-
-    /*
-    protected $guarded = [
-        'testMode',
-        'utcCreatedAt',
-        'utcUpdatedAt',
-        'utcRedeemedAt',
-        'utcConfirmedAt',
-        'supplierReference',
-        'resellerReference',
-        'cancellable',
-        'cancellation',
-        'contact',
-        'notes',
-        'voucher',
-        'utcExpiresAt',
-        'expirationMinutes',
-        'product',
-        'option',
-        'availability',
-        'updated_at',
-        'created_at'
-    ];
-    */
-
     public static $snakeAttributes = true;
 
     public function __construct()

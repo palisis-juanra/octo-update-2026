@@ -2,14 +2,19 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\BookingReservationController;
 use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Models\Availability\Availability;
 use App\Services\AvailabilityService;
+use App\Services\BookingReservationService;
 use App\Services\LocaleService;
+use App\Services\OptionService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
+use App\Transformers\BaseTransformer;
+use App\Transformers\BookingTransformer;
 use Tests\TestCase;
 use Illuminate\Testing\TestResponse;
 use SimpleXMLElement;
@@ -100,9 +105,22 @@ class BookingReservationTest extends TestCase
 
         // Mock ProductService
         $productService = new ProductService($tourCMSServiceMock, $this->getLoggerMock(), new LocaleService);
-        
-
         $this->instance(ProductService::class, $productService);
+
+        // Mock Controller
+        $bookingReservationController = $this->getMockBuilder(BookingReservationController::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+        $bookingReservationController->logger = $this->getLoggerMock();
+        $bookingReservationController->productService = $productService;
+        $bookingReservationController->availabilityService = $availabilityServiceMock;
+        $bookingReservationController->optionService = new OptionService();
+        $bookingReservationController->unitService = new UnitService();
+        $bookingReservationController->bookingService = new BookingReservationService($tourCMSServiceMock, $productService, $this->getLoggerMock());
+        $bookingReservationController->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
+        
+        $this->instance(BookingReservationController::class, $bookingReservationController);
     }
     
     public function test_whenRequestDoesNotHaveProductId_thenWeReturnBadRequest(): void
