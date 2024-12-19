@@ -140,9 +140,10 @@ class Booking extends Model
         if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
             $booking->setVoucher([
                 'redemptionMethod' => $product->getRedemptionMethod(),
-                'utcRedeemedAt' => null,
+                'utcRedeemedAt' => $booking->getUtcRedeemedAt(),
                 'deliveryOptions' => [
-                    "deliveryFormat" => $product->getDeliveryFormats()[0]
+                    "deliveryFormat" => $product->getDeliveryFormats()[0],
+                    "deliveryValue" => (string) $bookingData->voucher_url
                 ]
             ]);
         }
