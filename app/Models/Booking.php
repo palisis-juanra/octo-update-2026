@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Availability\Availability;
 use App\Services\DateTimeService;
+use App\Services\XMLService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ContactTransformer;
 use DateTime;
@@ -21,7 +22,9 @@ class Booking extends Model
     const STATUS_EXPIRED = 'EXPIRED';
     const STATUS_CONFIRMED = 'CONFIRMED';
     const STATUS_CANCELLED = 'CANCELLED';
-
+    const STATUS_PENDING = 'PENDING';
+    const TCMS_CONFIRMED_STATUS = 2;
+    const FIELD_VOUCHER = 'VOUCHER';
     protected bool $testMode;
     protected ?string $utcCreatedAt;
     protected ?string $utcUpdatedAt;
@@ -162,8 +165,7 @@ class Booking extends Model
             $booking->setNotes($notes);
         }
 
-        
-        if (in_array('VOUCHER', $product->getDeliveryMethods())) {
+        if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
             $booking->setVoucher([
                 'redemptionMethod' => $product->getRedemptionMethod(),
                 'utcRedeemedAt' => null,
@@ -198,8 +200,8 @@ class Booking extends Model
         $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
 
         $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
-        $booking->setUtcExpiresAt($bookingData->expiry_date_at_utc_seconds ? (string) $bookingData->expiry_date_at_utc_seconds : null);
-        $booking->setUtcConfirmedAt($bookingData->confirmed_at_utc_seconds ? (string) $bookingData->confirmed_at_utc_seconds : null);
+        $booking->setUtcExpiresAt($bookingData->expiry_date_at_utc_seconds ? (int) $bookingData->expiry_date_at_utc_seconds : null);
+        $booking->setUtcConfirmedAt($bookingData->confirmed_at_utc_seconds ? (int) $bookingData->confirmed_at_utc_seconds : null);
         $booking->setUtcRedeemedAt(self::getFirstRedeemed($bookingData));
 
         $booking->setExpirationMinutes(null);
@@ -222,7 +224,7 @@ class Booking extends Model
         $booking->setAvailability($availability);
         $booking->setUnits($unitItems);
         
-        if (in_array('VOUCHER', $product->getDeliveryMethods())) {
+        if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
             $booking->setVoucher([
                 'redemptionMethod' => $product->getRedemptionMethod(),
                 'utcRedeemedAt' => null,
@@ -585,14 +587,14 @@ class Booking extends Model
             return Booking::STATUS_CANCELLED;
         }
 
-        return (int) $bookingData->status == 2 ? Booking::STATUS_CONFIRMED : Booking::STATUS_ON_HOLD;
+        return (int) $bookingData->status == self::TCMS_CONFIRMED_STATUS ? Booking::STATUS_CONFIRMED : Booking::STATUS_PENDING;
 
     }
 
     protected static function getFirstRedeemed(SimpleXMLElement $bookingData): ?string
     {
         $componentsRedeemed = [];
-        $components = self::getArrayFromXmlNode($bookingData->components, 'component');
+        $components = XMLService::getArrayFromXmlNode($bookingData->components, 'component');
 
         foreach ($components as $component) {
             if (!empty((string) $component->redeemed_at)) {
@@ -621,14 +623,4 @@ class Booking extends Model
         return DateTimeService::getISO8601DateFormatted($cancelledDateTime);
     }
 
-    protected static function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
-    {
-        $children = [];
-        foreach ($parent->children() as $child) {
-            if (empty($childName) || $child->getName() == $childName) {
-                $children[] = $child;
-            }
-        }
-        return $children;
-    }
 }

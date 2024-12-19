@@ -9,6 +9,7 @@ use App\Models\Contact;
 class BookingConfirmationService
 {
     const ERROR_BOOKING_ALREADY_COMITTED = 'BOOKING ALREADY COMMITTED';
+    const ERROR_BOOKING_NOT_FOUND = 'API return no matching data, invalid booking ID / channel';
 
     public function __construct(
         public TourCMSService $tourCMSService,
@@ -45,7 +46,7 @@ class BookingConfirmationService
         }
 
         if ($error !== TourCMSService::ERROR_OK) {
-            $this->logger->error('API return no matching data, invalid booking ID / channel');
+            $this->logger->error(self::ERROR_BOOKING_NOT_FOUND);
             throw new InvalidBookingUUIDException($booking->uuid);
         } 
 
