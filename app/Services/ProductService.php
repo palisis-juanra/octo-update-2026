@@ -42,6 +42,14 @@ class ProductService
         self::DELIVERY_METHOD_VOUCHER,
         self::DELIVERY_METHOD_TICKET
     ];
+    const TCMS_DELIVERY_METHOD_TICKET = 'TICKET';
+    const TCMS_DELIVERY_METHOD_TOUR = 'TOUR';
+    const TCMS_DELIVERY_METHOD_BOOKING = 'BOOKING';
+    const TCMS_DELIVERY_METHODS = [
+        self::TCMS_DELIVERY_METHOD_TICKET,
+        self::TCMS_DELIVERY_METHOD_TOUR,
+        self::TCMS_DELIVERY_METHOD_BOOKING
+    ];
     const REDEMPTION_METHOD_MANIFEST = 'MANIFEST';
     const REDEMPTION_METHOD_DIGITAL = 'DIGITAL';
     const REDEMPTION_METHOD_PRINT = 'PRINT';
@@ -590,8 +598,8 @@ class ProductService
         }
 
         foreach ($deliveryMethodsFromXML as $deliveryMethod) {
-            if (in_array($deliveryMethod, self::DELIVERY_METHODS)) {
-                $deliveryMethods[] = (string) $deliveryMethod;
+            if (in_array($deliveryMethod, self::TCMS_DELIVERY_METHODS)) {
+                $deliveryMethods[] =  $this->getOctoDeliveryMethodFromTourCMS((string) $deliveryMethod);
             } else {
                 $this->errors[] = "invalid delivery method: {$deliveryMethod}";
             }
@@ -696,7 +704,7 @@ class ProductService
             $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
             if (!empty($deliveryMethodsFromXML)) {
                 foreach ($deliveryMethodsFromXML as $deliveryMethod) {
-                    if (!in_array($deliveryMethod, self::DELIVERY_METHODS)) {
+                    if (!in_array($deliveryMethod, self::TCMS_DELIVERY_METHODS)) {
                         $this->logInfo("skipped product {$id}: invalid delivery method: {$deliveryMethod}.");
                         return false;
                     }
@@ -815,6 +823,15 @@ class ProductService
 
         }
         
+    }
+
+    protected function getOctoDeliveryMethodFromTourCMS(string $tcmsDeliveryMethod): string
+    {
+        if ($tcmsDeliveryMethod == self::TCMS_DELIVERY_METHOD_TICKET) {
+            return self::DELIVERY_METHOD_TICKET;
+        }
+
+        return self::DELIVERY_METHOD_VOUCHER;
     }
 
 }
