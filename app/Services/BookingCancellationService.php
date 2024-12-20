@@ -28,7 +28,7 @@ class BookingCancellationService
 
     }
 
-    public function cancelBooking(Booking $booking, ?string $reason = null, ?bool $force = null): Booking
+    public function cancelBooking(Booking $booking, ?string $reason = null, ?bool $force = null): void
     {   
         // Cancel booking with the corresponding booking_uuid
         $bookingData = $this->getCancelBookingXMLRequest($booking->booking_id, $reason);
@@ -39,21 +39,12 @@ class BookingCancellationService
         
         if ($error == self::ERROR_PREVIOUSLY_CANCELLED) {
             $this->logger->info("Booking {$booking->getId()} already cancelled, calling show booking to return booking info");
-            return $this->getBookingObject($booking);
+            return;
         }
         if ($error !== TourCMSService::ERROR_OK) {
             $this->logger->error(self::BOOKING_NOT_FOUND);
             throw new InvalidBookingUUIDException($booking->getUuid());
         }
-
-        $booking = $this->getBookingObject($booking);
-
-        if ($booking->getStatus() == self::STATUS_CANCELLED) {
-            // Update booking information
-            Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
-        }
-
-        return $booking;
 
     }
 
@@ -88,6 +79,21 @@ class BookingCancellationService
         );
 
         return $bookingObject;
+    }
+
+    public function checkIfBookingIsCancellable(Booking $bookingObject): void
+    {
+        if ($bookingObject->getCancellable() == 0) {
+            $this->logger->info("Booking not cancellable: {$bookingObject->getId()}");
+            throw new BookingNotCancellableException;
+        }
+    }
+
+    public function updateBookingStatus(Booking $booking): void
+    {
+        if ($booking->getStatus() == self::STATUS_CANCELLED) {
+            Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
+        }
     }
    
     public function getCancelBookingXMLRequest(string $bookingId, ?string $reason = null): SimpleXMLElement
