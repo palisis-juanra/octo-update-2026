@@ -24,4 +24,4 @@ Route::post('/availability', [AvailabilityController::class, 'index'])->middlewa
 
 Route::post('/bookings', [BookingReservationController::class, 'index'])->middleware([OctoAuthentication::class]);
 
-Route::post('/bookings/{uuid}/confirmation', [BookingConfirmationController::class, 'index'])->middleware([OctoAuthentication::class]);
+Route::post('/bookings/{uuid}/confirm', [BookingConfirmationController::class, 'index'])->middleware([OctoAuthentication::class]);
