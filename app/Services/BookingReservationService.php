@@ -50,7 +50,7 @@ class BookingReservationService
         $startNewBookingXML = $this->tourCMSService->startNewBooking($bookingData);
 
         // Create Booking object
-        $booking = Booking::createFromXML(
+        $booking = Booking::createFromStartNewBookingXML(
             $startNewBookingXML, 
             $product, 
             $option, 
@@ -58,6 +58,9 @@ class BookingReservationService
             $unitItems,
             $notes);
         $this->logger->info(["message" => "Temporary booking with ID {$booking->getId()} and UUID {$booking->getUuid()} created successfully"]);
+        
+        $booking->save();
+
         return $booking;
     }
 

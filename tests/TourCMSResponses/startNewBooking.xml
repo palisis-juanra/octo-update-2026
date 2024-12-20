@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response>
+    <request>POST /c/booking/new/start.xml</request>
+    <error>OK</error>
+    <booking>
+        <booking_id>3889</booking_id>
+        <booking_uuid>2d3e1c7e-e86e-4e0a-8fd7-ca129c264793</booking_uuid>
+        <channel_id>142</channel_id>
+        <account_id>1</account_id>
+        <booking_engine_url>http://localhost/live.tourcms.com/reserve/r2.php?a=1&amp;h=85616d37bc88e5258e0f&amp;bid=3889&amp;w=142</booking_engine_url>
+        <available_component_count>2</available_component_count>
+        <unavailable_component_count>0</unavailable_component_count>
+        <balance_owed_by>A</balance_owed_by>
+        <sale_currency>USD</sale_currency>
+        <sales_revenue>490.00</sales_revenue>
+        <sales_revenue_display>US&amp;#36;490.00</sales_revenue_display>
+        <sales_revenue_due_now>437.50</sales_revenue_due_now>
+        <sales_revenue_due_now_display>US&amp;#36;437.50</sales_revenue_due_now_display>
+        <sales_price_due_ever>437.50</sales_price_due_ever>
+        <sales_price_due_ever_display>US&amp;#36;437.50</sales_price_due_ever_display>
+        <commission>0.00</commission>
+        <commission_tax>0.00</commission_tax>
+        <commission_currency>EUR</commission_currency>
+        <commission_display>&amp;#8364;0.00</commission_display>
+        <commission_tax_display>&amp;#8364;0.00</commission_tax_display>
+        <lead_customer_id>7883</lead_customer_id>
+        <customers>
+            <customer>
+                <customer_id>7883</customer_id>
+                <firstname/>
+                <surname/>
+            </customer>
+            <customer>
+                <customer_id>7884</customer_id>
+                <firstname/>
+                <surname/>
+            </customer>
+            <customer>
+                <customer_id>7885</customer_id>
+                <firstname/>
+                <surname/>
+            </customer>
+        </customers>
+        <components>
+            <component>
+                <component_id>5781</component_id>
+                <product_id>67</product_id>
+            </component>
+            <component>
+                <component_id>5782</component_id>
+                <product_id>67</product_id>
+            </component>
+        </components>
+        <hold_time_seconds>2700</hold_time_seconds>
+    </booking>
+</response>

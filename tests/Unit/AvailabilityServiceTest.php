@@ -4,8 +4,9 @@ namespace Tests\Unit;
 
 use App\Services\AvailabilityService;
 use PHPUnit\Framework\TestCase;
+use Tests\UnitTestCase;
 
-class AvailabilityServiceTest extends TestCase
+class AvailabilityServiceTest extends UnitTestCase
 {
     const START_DAY = '2024-11-30';
     const DAY_BEFORE_TO_START_DATE = '2024-11-29';

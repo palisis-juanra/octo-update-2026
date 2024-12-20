@@ -4,13 +4,13 @@ namespace App\Models;
 
 use App\Models\Availability\Availability;
 use App\Services\DateTimeService;
+use App\Services\XMLService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ContactTransformer;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
 use stdClass;
@@ -19,8 +19,76 @@ class Booking extends Model
 {
     use HasFactory;
     const STATUS_ON_HOLD = 'ON_HOLD';
-
+    const STATUS_EXPIRED = 'EXPIRED';
+    const STATUS_CONFIRMED = 'CONFIRMED';
+    const STATUS_CANCELLED = 'CANCELLED';
+    const STATUS_PENDING = 'PENDING';
+    const TCMS_CONFIRMED_STATUS = 2;
+    const FIELD_VOUCHER = 'VOUCHER';
+    protected bool $testMode;
+    protected ?string $utcCreatedAt;
+    protected ?string $utcUpdatedAt;
+    protected ?string $utcRedeemedAt;
+    protected ?string $utcConfirmedAt;
+    protected ?string $supplierReference;
+    protected ?string $resellerReference;
+    protected ?bool $cancellable;
+    protected ?object $cancellation;
+    protected Contact $contact;
+    protected ?string $notes;
+    protected ?array $voucher;
+    protected ?string $utcExpiresAt;
+    protected ?int $expirationMinutes;
+    protected Product $product;
+    protected Option $option;
+    protected Availability $availability;
     protected array $units;
+    protected int $leadCustomerId;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'bookings';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'uuid';
+
+    /**
+     * The data type of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
+     * Indicates if the model's ID is auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'booking_id', 
+        'account_id', 
+        'channel_id',
+        'availability_id',
+        'product_id',
+        'option_id',
+        'unit_items'
+    ];
+
+    public static $snakeAttributes = true;
 
     public function __construct()
     {
@@ -35,14 +103,13 @@ class Booking extends Model
         $this->resellerReference = null;
         $this->cancellable = false;
         $this->cancellation = null;
-        $this->contact = new stdClass;
         $this->notes = null;
         $this->units = [];
         $this->contact = new Contact;
         $this->voucher = null;
     }
 
-    public static function createFromXML(
+    public static function createFromStartNewBookingXML(
         SimpleXMLElement $startNewBookingData,
         Product $product,
         Option $option,
@@ -70,17 +137,75 @@ class Booking extends Model
             $booking->setNotes($notes);
         }
 
-        
-        if (in_array('VOUCHER', $product->getDeliveryMethods())) {
+        if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
             $booking->setVoucher([
                 'redemptionMethod' => $product->getRedemptionMethod(),
-                'utcRedeemedAt' => $product->getUtcRedeemedAt(),
+                'utcRedeemedAt' => $booking->getUtcRedeemedAt(),
+                'deliveryOptions' => [
+                    "deliveryFormat" => $product->getDeliveryFormats()[0],
+                    "deliveryValue" => (string) $bookingData->voucher_url
+                ]
+            ]);
+        }
+
+
+        return $booking;
+    }
+
+    public static function createFromShowBookingXML(
+        string $bookingUuid,
+        SimpleXMLElement $showBookingXML,
+        Product $product,
+        Option $option,
+        Availability $availability,
+        array $unitItems
+    ): Booking
+    {
+        $booking = new Booking();
+
+        $bookingData = $showBookingXML->booking;
+
+        $booking->setBookingId((int) $bookingData->booking_id);
+        $booking->setUuid((string) $bookingUuid);
+        $booking->setAccountId((int) $bookingData->account_id);
+        $booking->setChannelId((int) $bookingData->channel_id);
+
+        $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
+
+        $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
+        $booking->setUtcExpiresAt($bookingData->expiry_date_at_utc_seconds ? (int) $bookingData->expiry_date_at_utc_seconds : null);
+        $booking->setUtcConfirmedAt($bookingData->confirmed_at_utc_seconds ? (int) $bookingData->confirmed_at_utc_seconds : null);
+        $booking->setUtcRedeemedAt(self::getFirstRedeemed($bookingData));
+
+        $booking->setExpirationMinutes(null);
+
+        $booking->setStatus(self::getBookingStatus($bookingData));
+        $booking->setCancellable((bool) $bookingData->cancellable);
+
+        if ((int) $bookingData->cancel_reason !== 0) {
+            $cancelObject = new stdClass();
+        
+            $cancelObject->refund = "ALL";
+            $cancelObject->reason = (string) $bookingData->cancel_text;
+            $cancelObject->utcCancelledAt = self::createUtcCancelledAt((int) $bookingData->cancelled_at_utc_seconds);
+
+            $booking->setCancellation($cancelObject);
+        }
+        
+        $booking->setProduct($product);
+        $booking->setOption($option);
+        $booking->setAvailability($availability);
+        $booking->setUnits($unitItems);
+        
+        if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
+            $booking->setVoucher([
+                'redemptionMethod' => $product->getRedemptionMethod(),
+                'utcRedeemedAt' => null,
                 'deliveryOptions' => [
                     "deliveryFormat" => $product->getDeliveryFormats()[0]
                 ]
             ]);
         }
-
 
         return $booking;
     }
@@ -111,7 +236,12 @@ class Booking extends Model
         return $this;
     }
 
-    public function setUuid(string $uuid): string
+    public function getBookingId(): int
+    {
+        return $this->booking_id;
+    }
+
+    public function setUuid(string $uuid): self
     {
         $this->uuid = $uuid;
 
@@ -147,9 +277,26 @@ class Booking extends Model
         return $this->testMode;
     }
 
+    public function setUtcCreatedAt(int $createdAt): self
+    {
+        $creationDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $creationDateTime->setTimestamp($createdAt);
+
+        $this->utcCreatedAt = DateTimeService::getISO8601DateFormatted($creationDateTime);
+
+        return $this;
+    }
+
     public function getUtcCreatedAt(): ?string
     {
         return $this->utcCreatedAt;
+    }
+
+    public function setUtcUpdatedAt(string $utcUpdatedAt): self
+    {
+        $this->utcUpdatedAt = $utcUpdatedAt;
+
+        return $this;
     }
 
     public function getUtcUpdatedAt(): ?string
@@ -162,14 +309,51 @@ class Booking extends Model
         return $this->utcRedeemedAt;
     }
 
+    public function setUtcRedeemedAt(?int $redeemedAt): self
+    {
+        if (is_null($redeemedAt)) {
+            $this->utcRedeemedAt = null;
+
+            return $this;
+        }
+
+        $redeemDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $redeemDateTime->setTimestamp($redeemedAt);
+        $this->utcRedeemedAt = DateTimeService::getISO8601DateFormatted($redeemDateTime);
+
+        return $this;  
+    }
+
     public function getUtcConfirmedAt(): ?string
     {
         return $this->utcConfirmedAt;
     }
 
-
-    public function setUtcExpiresAt(int $seconds): self
+    /**
+     * Set the value of utcConfirmedAt
+     *
+     * @return  self
+     */ 
+    public function setUtcConfirmedAt(?int $confirmedAt): self
     {
+        if (is_null($confirmedAt)) {
+            $this->utcConfirmedAt = null;
+        }
+
+        $confirmationDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $confirmationDateTime->setTimestamp($confirmedAt);
+        $this->utcConfirmedAt = DateTimeService::getISO8601DateFormatted($confirmationDateTime);
+
+        return $this;
+    }
+
+
+    public function setUtcExpiresAt(?int $seconds): self
+    {
+        if (is_null($seconds)) {
+            $this->utcExpiresAt = null;
+            return $this;
+        } 
         $timestamp = time() + $seconds;
 
         $expirationDateTime = new DateTime('now', new DateTimeZone('UTC'));
@@ -186,6 +370,7 @@ class Booking extends Model
 
     public function setProduct(Product $product): self
     {
+        $this->product_id = $product->getId();
         $this->product = $product;
 
         return $this;
@@ -198,6 +383,7 @@ class Booking extends Model
 
     public function setOption(Option $option): self
     {
+        $this->option_id = $option->getId();
         $this->option = $option;
 
         return $this;
@@ -210,6 +396,7 @@ class Booking extends Model
 
     public function setAvailability(Availability $availability): self
     {
+        $this->availability_id = $availability->getId();
         $this->availability = $availability;
 
         return $this;
@@ -237,9 +424,23 @@ class Booking extends Model
         return $this->supplierReference;
     }
 
+    public function setCancellable(bool $cancellable): self
+    {
+        $this->cancellable = $cancellable;
+
+        return $this;
+    }
+
     public function getCancellable(): bool
     {
         return $this->cancellable;
+    }
+
+    public function setCancellation(?object $cancellation): self
+    {
+        $this->cancellation = $cancellation;
+
+        return $this;
     }
 
     public function getCancellation(): ?object
@@ -259,7 +460,7 @@ class Booking extends Model
         return $this->notes;
     }
 
-    public function setExpirationMinutes(int $expirationMinutes): self
+    public function setExpirationMinutes(?int $expirationMinutes): self
     {
         $this->expirationMinutes = $expirationMinutes;
 
@@ -307,6 +508,7 @@ class Booking extends Model
 
             $this->units[] = $newUnitItem;
         }
+        $this->unit_items = json_encode($this->units);
 
         return $this;
     }
@@ -338,6 +540,60 @@ class Booking extends Model
     public function getVoucher(): ?array
     {
         return $this->voucher;
+    }
+
+    public function setLeadCustomerId(int $leadCustomerId): self
+    {
+        $this->leadCustomerId = $leadCustomerId;
+
+        return $this;
+    }
+
+    public function getLeadCustomerId(): ?int
+    {
+        return $this->leadCustomerId;
+    }
+
+    protected static function getBookingStatus(SimpleXMLElement $bookingData): string
+    {
+        if ((int) $bookingData->cancel_reason !== 0) {
+            return Booking::STATUS_CANCELLED;
+        }
+
+        return (int) $bookingData->status == self::TCMS_CONFIRMED_STATUS ? Booking::STATUS_CONFIRMED : Booking::STATUS_PENDING;
+
+    }
+
+    protected static function getFirstRedeemed(SimpleXMLElement $bookingData): ?string
+    {
+        $componentsRedeemed = [];
+        $components = XMLService::getArrayFromXmlNode($bookingData->components, 'component');
+
+        foreach ($components as $component) {
+            if (!empty((string) $component->redeemed_at)) {
+                $componentsRedeemed[] = (int) $component->redeemed_at_utc_seconds;
+            }
+        }
+
+        if (empty($componentsRedeemed)) {
+            return null;
+        }
+
+        sort($componentsRedeemed);
+
+        return $componentsRedeemed[0];
+
+    }
+
+    protected static function createUtcCancelledAt(?int $cancelledAt): ?string
+    {
+        if (is_null($cancelledAt)) {
+            return null;
+        }
+
+        $cancelledDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $cancelledDateTime->setTimestamp($cancelledAt);
+        return DateTimeService::getISO8601DateFormatted($cancelledDateTime);
     }
 
 }

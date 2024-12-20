@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\BookingReservationController;
+use App\Http\Controllers\BookingConfirmationController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Responses\OctoResponse;
@@ -22,3 +23,5 @@ Route::get('products/{id}', [ProductController::class, 'show'])->middleware([Oct
 Route::post('/availability', [AvailabilityController::class, 'index'])->middleware([OctoAuthentication::class]);
 
 Route::post('/bookings', [BookingReservationController::class, 'index'])->middleware([OctoAuthentication::class]);
+
+Route::post('/bookings/{uuid}/confirm', [BookingConfirmationController::class, 'index'])->middleware([OctoAuthentication::class]);

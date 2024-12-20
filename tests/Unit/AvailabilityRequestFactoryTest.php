@@ -9,9 +9,9 @@ use App\Features\Availability\Pricing\PricingAvailabilityRequest;
 use App\Features\Availability\Pricing\SingleDayPricingAvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\ProductService;
-use Tests\TestCase;
+use Tests\UnitTestCase;
 
-class AvailabilityRequestFactoryTest extends TestCase
+class AvailabilityRequestFactoryTest extends UnitTestCase
 {
     public $productServiceMock;
     public AvailabilityRequestFactory $factory;

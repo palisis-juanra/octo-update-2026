@@ -4,12 +4,22 @@ namespace App\Models;
 
 class Contact extends BaseModel
 {
+    const FIELD_FULL_NAME = 'fullName';
+    const FIELD_FIRST_NAME = 'firstName';
+    const FIELD_LAST_NAME = 'lastName';
+    const FIELD_EMAIL_ADDRESS = 'emailAddress';
+    const FIELD_PHONE_NUMBER = 'phoneNumber';
+    const FIELD_LOCALES = 'locales';
+    const FIELD_POSTAL_CODE = 'postalCode';
+    const FIELD_COUNTRY = 'country';
+    const FIELD_NOTES = 'notes';
+
     protected ?string $fullName = null;
     protected ?string $firstName = null;
     protected ?string $lastName = null;
     protected ?string $emailAddress = null;
     protected ?string $phoneNumber = null;
-    protected array $locales = [];
+    protected ?array $locales = [];
     protected ?string $postalCode = null;
     protected ?string $country = null;
     protected ?string $notes = null;
@@ -17,6 +27,23 @@ class Contact extends BaseModel
     public function __construct()
     {
 
+    }
+
+    public static function create(array $attributes): Contact
+    {
+        $contact = new Contact();
+
+        $contact->fullName = $attributes[self::FIELD_FULL_NAME] ?? null;
+        $contact->firstName = $attributes[self::FIELD_FIRST_NAME] ?? null;
+        $contact->lastName = $attributes[self::FIELD_LAST_NAME] ?? null;
+        $contact->emailAddress = $attributes[self::FIELD_EMAIL_ADDRESS]?? null;
+        $contact->phoneNumber = $attributes[self::FIELD_PHONE_NUMBER] ?? null;
+        $contact->locales = $attributes[self::FIELD_LOCALES] ?? [];
+        $contact->postalCode = $attributes[self::FIELD_POSTAL_CODE] ?? null;
+        $contact->country = $attributes[self::FIELD_COUNTRY] ?? null;
+        $contact->notes = $attributes[self::FIELD_NOTES] ?? null;
+
+        return $contact;
     }
 
     /**
