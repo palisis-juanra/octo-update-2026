@@ -43,7 +43,7 @@ class BookingCancellationServiceTest extends UnitTestCase
         $bookingCancellationService->checkIfBookingIsCancellable($booking);
     }
 
-    public function test_whenCancelBookingAPIResponseNotOk_thenThrowsInvalidUUIDException(): void
+    public function test_whenCancelBookingAPIResponseIsNotValid_thenThrowsInvalidUUIDException(): void
     {
         // Given
         $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
