@@ -25,6 +25,7 @@ class Booking extends Model
     const STATUS_PENDING = 'PENDING';
     const TCMS_CONFIRMED_STATUS = 2;
     const FIELD_VOUCHER = 'VOUCHER';
+    const CANCELLATION_REFUND_FULL = "FULL";
     protected bool $testMode;
     protected ?string $utcCreatedAt;
     protected ?string $utcUpdatedAt;
@@ -185,7 +186,7 @@ class Booking extends Model
         if ((int) $bookingData->cancel_reason !== 0) {
             $cancelObject = new stdClass();
         
-            $cancelObject->refund = "ALL";
+            $cancelObject->refund = self::CANCELLATION_REFUND_FULL;
             $cancelObject->reason = (string) $bookingData->cancel_text;
             $cancelObject->utcCancelledAt = self::createUtcCancelledAt((int) $bookingData->cancelled_at_utc_seconds);
 
