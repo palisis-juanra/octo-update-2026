@@ -137,7 +137,7 @@ class BookingConfirmationTest extends FeatureTestCase
 
     public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
     {
-        $response = $this->post("/bookings/". self::INVALID_BOOKING_UUID ."/confirmation", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response = $this->post("/bookings/". self::INVALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
 
         
         $response->assertBadRequest();
@@ -149,7 +149,7 @@ class BookingConfirmationTest extends FeatureTestCase
 
     public function test_whenBookingUuidIsCorrect_thenWeCanConfirmTheBooking(): void
     {
-        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirmation", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
         $response->assertOk();
 
         $responseData = $response->decodeResponseJson();
