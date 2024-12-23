@@ -8,11 +8,11 @@ use App\Models\Availability\AvailabilityCalendarRequest;
 use App\Services\AvailabilityCalendarService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
-use Tests\TestCase;
 use SimpleXMLElement;
 use App\Services\OptionService;
+use Tests\UnitTestCase;
 
-class AvailabilityCalendarServiceTest extends TestCase
+class AvailabilityCalendarServiceTest extends UnitTestCase
 {
     const DATES_AND_DEALS_XML_COUNT = 6;
     const VALID_CHANNEL = '123';
@@ -32,11 +32,11 @@ class AvailabilityCalendarServiceTest extends TestCase
         $this->datesAndDealsXML = simplexml_load_string($this->datesAndDealsString);
     }
 
-    public function test_whenCallGetCalendar_thenWeGetValidCalendarArray()
+    public function test_getCalendar_whenCallWithValidRequestParameters_thenWeGetValidCalendarArray()
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
-            ->onlyMethods([])
+            ->onlyMethods(['getAvailabilityRequest'])
             ->disableOriginalConstructor()
             ->getMock();
         
@@ -48,10 +48,22 @@ class AvailabilityCalendarServiceTest extends TestCase
 
         $availabilityCalendarServiceMock->tourCMSService = $tourCMSService;
 
+        $requestParams = [
+            "productId" => 184,
+            "optionId" => 'SINGLE',
+            "localDateStart" => '2024-11-21',
+            "localDateEnd" => '2024-11-28'
+        ];
+
         $availabilityRequestMock = new AvailabilityCalendarRequest('184', 'SINGLE', '2024-11-21', '2024-11-28', []);
 
+        $availabilityCalendarServiceMock
+            ->method('getAvailabilityRequest')
+            ->with($requestParams)
+            ->willReturn($availabilityRequestMock);
+
         // When
-        $calendar = $availabilityCalendarServiceMock->getCalendar($availabilityRequestMock);
+        $calendar = $availabilityCalendarServiceMock->getCalendar($requestParams);
 
         // Then
         $this->assertIsArray($calendar);
@@ -59,7 +71,7 @@ class AvailabilityCalendarServiceTest extends TestCase
         $this->assertCount(self::DATES_AND_DEALS_XML_COUNT, $calendar);
     }
 
-    public function test_whenCallValidateRequestParamsWithMissingParams_thenShouldThrowAvailabilityRequestMissingParamException()
+    public function test_validateRequestParams_whenCallWithMissingLocalDateEndParameter_thenShouldThrowAvailabilityRequestMissingParamException()
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
@@ -79,7 +91,7 @@ class AvailabilityCalendarServiceTest extends TestCase
         $availabilityCalendarServiceMock->validateRequestParams($requestParams);
     }
 
-    public function test_whenCallValidateRequestParamsWithInvalidDate_thenShouldThrowAvailabilityRequestInvalidParamException()
+    public function test_validateRequestParams_whenCallWithInvalidDate_thenShouldThrowAvailabilityRequestInvalidParamException()
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
@@ -116,7 +128,7 @@ class AvailabilityCalendarServiceTest extends TestCase
         $availabilityCalendarServiceMock->validateRequestParams($requestParams);
     }
 
-    public function test_whenCallGetAvailabilityRequest_thenWeGetValidStructure()
+    public function test_getAvailabilityRequest_whenCallWithValidProduct_thenWeGetValidAvailabilityRequest()
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
@@ -150,7 +162,7 @@ class AvailabilityCalendarServiceTest extends TestCase
         $this->assertEquals([], $availabilityRequest->getUnits());
     }
 
-    public function test_whenCallGetAvailabilityRequestWithEmptyParams_thenWeGetEmptyPropertiesStructure()
+    public function test_getAvailabilityRequest_whenCallWithEmptyParams_thenWeGetEmptyAvailabilityCalendarRequest()
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)

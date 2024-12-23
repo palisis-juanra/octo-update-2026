@@ -63,10 +63,10 @@ class AvailabilityCalendarRequest
         foreach ($datesAndDeals as $date) {
             $availability = new CalendarAvailability();
 
-            $openingHours = (object) [
-                'from' => (string) $date->start_time ?? self::START_TIME_DEFAULT,
-                'to' => (string) $date->end_time ?? self::END_TIME_DEFAULT
-            ];
+            $openingHours = new OpeningHours(
+                (string) $date->start_time ?? self::START_TIME_DEFAULT,
+                (string) $date->end_time ?? self::END_TIME_DEFAULT
+            );
 
             $availability->setLocalDate($date->start_date)
                 ->setAvailable($this->checkSpacesRemaining($date))

@@ -88,10 +88,8 @@ class AvailabilityCalendarController extends Controller
             $requestParams['channelId'] = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
 
             $this->availabilityCalendarService->validateRequestParams($requestParams);
-            
-            $availabilityRequest = $this->availabilityCalendarService->getAvailabilityRequest($requestParams);
 
-            $calendar = $this->availabilityCalendarService->getCalendar($availabilityRequest);
+            $calendar = $this->availabilityCalendarService->getCalendar($requestParams);
 
             $calendarData = $this->availabilityCalendarService->getAvailabilityCalendarTransformed($calendar);
 

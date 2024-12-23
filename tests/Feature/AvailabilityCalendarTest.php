@@ -9,9 +9,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\App;
 use Mockery;
 use SimpleXMLElement;
-use Tests\TestCase;
+use Tests\FeatureTestCase;
 
-class AvailabilityCalendarTest extends TestCase
+class AvailabilityCalendarTest extends FeatureTestCase
 {
     use RefreshDatabase;
 

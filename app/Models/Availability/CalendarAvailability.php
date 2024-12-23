@@ -118,7 +118,7 @@ class CalendarAvailability extends Model
     /**
      * Get the value of openingHours
      */ 
-    public function getOpeningHours()
+    public function getOpeningHours(): array
     {
         return $this->openingHours;
     }
@@ -128,7 +128,7 @@ class CalendarAvailability extends Model
      *
      * @return  self
      */ 
-    public function setOpeningHours($openingHours)
+    public function setOpeningHours($openingHours): self
     {
         $this->openingHours = $openingHours;
 

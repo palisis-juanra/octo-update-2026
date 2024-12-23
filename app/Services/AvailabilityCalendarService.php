@@ -42,8 +42,9 @@ class AvailabilityCalendarService
         $this->transformer = new CalendarAvailabilityTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
-    public function getCalendar(AvailabilityCalendarRequest $availabilityRequest): array
+    public function getCalendar(array $requestParams): array
     {
+        $availabilityRequest = $this->getAvailabilityRequest($requestParams);
         $calendar = $availabilityRequest->getAvailabilities($this->tourCMSService);
         return $calendar;
     }
