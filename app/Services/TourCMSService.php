@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
+use App\Exceptions\NoAPIResponseException;
 use App\Http\Middleware\OctoAuthentication;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
@@ -19,6 +20,8 @@ class TourCMSService
 {
     const ERROR_FAIL_SIG = 'FAIL_SIG';
     const NO_MATCHING_DATA = 'NO MATCHING DATA';
+    const ERROR_PREVIOUSLY_CANCELLED = 'PREVIOUSLY CANCELLED';
+    const ERROR_BOOKING_ALREADY_COMMITED = 'BOOKING ALREADY COMMITTED';
     const ERROR_OK = 'OK';
     const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
@@ -133,10 +136,7 @@ class TourCMSService
         $bookingData = new SimpleXMLElement('<booking />');
         $bookingData->addChild('booking_id', $bookingId);
         $response = $this->tourCMS->commit_new_booking($bookingData, $this->channelId);
-        if (!($response instanceof SimpleXMLElement)) {
-            $response = simplexml_load_string((string) $response);
-        }
-        return $response;
+        return $this->handleResponse($response);
     }
 
     public function showBooking(string $bookingId): SimpleXMLElement
@@ -148,19 +148,13 @@ class TourCMSService
     public function updateCustomer(SimpleXMLElement $customerXML): SimpleXMLElement
     {
         $response = $this->tourCMS->update_customer($customerXML, $this->channelId);
-        if (!($response instanceof SimpleXMLElement)) {
-            $response = simplexml_load_string((string) $response);
-        }
-        return $response;
+        return $this->handleResponse($response);
     }
 
     public function cancelBooking(SimpleXMLElement $bookingData): SimpleXMLElement
     {
         $response = $this->tourCMS->cancel_booking($bookingData, $this->channelId);
-        if (!($response instanceof SimpleXMLElement)) {
-            $response = simplexml_load_string((string) $response);
-        }
-        return $response;
+        return $this->handleResponse($response);
     }
 
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
@@ -187,9 +181,11 @@ class TourCMSService
      */
     protected function handleResponse(mixed $response): SimpleXMLElement
     {
-        if (!$response) throw new APICallNotOKException();
+        if (!$response) throw new NoAPIResponseException();
         switch ((string)$response->error) {
             case self::ERROR_OK:
+            case self::ERROR_PREVIOUSLY_CANCELLED:
+            case self::ERROR_BOOKING_ALREADY_COMMITED:
                 if (!($response instanceof SimpleXMLElement)) {
                     $response = simplexml_load_string($response);
                 }

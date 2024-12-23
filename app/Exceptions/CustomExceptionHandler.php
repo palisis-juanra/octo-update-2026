@@ -88,6 +88,16 @@ class CustomExceptionHandler extends Handler
                 
                 return OctoResponse::INTERNAL_SERVER_ERROR();
 
+            case (NoAPIResponseException::class):
+
+                try {
+                    JSONLog::error(["message" => "TourCMS API Call error, no response"]);
+                } catch (BindingResolutionException) {
+                    parent::report($exception);
+                }
+                
+                return OctoResponse::INTERNAL_SERVER_ERROR();
+
             default:
                 try  {
                     JSONLog::error(["message" => "Exception captured by custom error handler", "exception" => $exception]);
