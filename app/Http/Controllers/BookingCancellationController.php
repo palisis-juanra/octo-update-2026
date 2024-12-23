@@ -37,13 +37,13 @@ class BookingCancellationController extends Controller
 
         $bookingObject = $this->bookingCancelService->getBookingObject($booking);
         
-        $this->bookingCancelService->checkIfBookingIsCancellable($bookingObject);
+        $this->bookingCancelService->isBookingCancellable($bookingObject);
 
         $this->bookingCancelService->cancelBooking($bookingObject, $reason, $force);
 
         $booking = $this->bookingCancelService->getBookingObject($booking);
         
-        $this->bookingCancelService->updateBookingStatus($booking);
+        $this->bookingCancelService->updateBookingStatusToCancelled($booking);
 
         $bookingData = $this->transformer->transform($booking);
 

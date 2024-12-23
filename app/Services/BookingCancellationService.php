@@ -81,7 +81,7 @@ class BookingCancellationService
         return $bookingObject;
     }
 
-    public function checkIfBookingIsCancellable(Booking $bookingObject): void
+    public function isBookingCancellable(Booking $bookingObject): void
     {
         if ($bookingObject->getCancellable() == 0) {
             $this->logger->info("Booking not cancellable: {$bookingObject->getId()}");
@@ -89,7 +89,7 @@ class BookingCancellationService
         }
     }
 
-    public function updateBookingStatus(Booking $booking): void
+    public function updateBookingStatusToCancelled(Booking $booking): void
     {
         if ($booking->getStatus() == self::STATUS_CANCELLED) {
             Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
