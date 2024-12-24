@@ -21,13 +21,17 @@ class CalendarAvailabilityTransformer extends BaseTransformer
 
     protected function fullTransform($calendarAvailability): array
     {
+        $openingHours = [];
+        foreach ($calendarAvailability->getOpeningHours() as $openingHoursObject) {
+            $openingHours[] = $this->openingHoursTransformer->transform($openingHoursObject);
+        }
         return [
             'localDate' => $calendarAvailability->getLocalDate(),
             'available' => $calendarAvailability->getAvailable(),
             "status" => $calendarAvailability->getStatus(),
             "vacancies" => $calendarAvailability->getVacancies(),
             "capacity" => $calendarAvailability->getCapacity(),
-            "openingHours" => $this->openingHoursTransformer->transform($calendarAvailability->getOpeningHours()[0]),
+            "openingHours" => $openingHours,
         ];
     }
 }
