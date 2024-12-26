@@ -35,6 +35,9 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     public function getAvailabilities(TourCMSService $tourCMSService): array
     {
         $departures = $this->fetchDeparturesFromAPI($tourCMSService);
+        if (!empty($this->availabilityIds)) {
+            $departures = $this->filterByAvailabilityIds($departures);
+        }
         $availabilities = $this->getAvailabilitiesFromDepartures($departures);
         $this->saveAvailabilities($availabilities);
 
@@ -82,6 +85,19 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         } 
 
         return $availabilities;
+    }
+
+    public function filterByAvailabilityIds(array $departures): array
+    {
+        $filteredDepartures = [];
+        foreach ($departures as $departure) {
+            $id = isset($departure->departure_id) ? $departure->departure_id : $departure->date_id;
+            $departureId = "{$departure->start_date}|{$id}";
+            if (in_array($departureId, $this->availabilityIds)) {
+                $filteredDepartures[] = $departure;
+            }
+        }
+        return $filteredDepartures;
     }
 
     public function getLocalDateStart(): string

@@ -43,6 +43,7 @@ class AvailabilityService
     const TCMS_CUTOFF_DAY_BEFORE_TIME = 'day_before_time';
     const TCMS_CUTOFF_SAME_DAY_TIME = 'same_day_time';
     const CUTOFF_FORMAT = 'Y-m-d\TH:i:s\Z';
+    const AVAILABILITY_ID_REGEX = '/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])\|\d+$/';
 
     public function __construct(
         TourCMSService $tourCMSService, 
@@ -117,6 +118,14 @@ class AvailabilityService
             if (DateTimeService::validateDate($localDate) === false) {
                 throw new AvailabilityRequestInvalidParamException('localDate must be a valid date in format YYYY-MM-DD');
             }
+        } else if (!empty($availabilityIds)) {
+
+            if (!empty($localDate) || !empty($localDateStart) || !empty($localDateEnd)) {
+                throw new BadRequestException("You must pass in one of the following combinations of parameters for this endpoint: localDate / localeDateStart and localDateEnd / availabilityIds");
+            }
+
+            $this->validateAvailabilityIds($availabilityIds);
+
         } else {
 
             if (!empty($localDate) || !empty($availabilityIds)) {
@@ -141,6 +150,16 @@ class AvailabilityService
             $this->unitService->validateUnits($units);
         }
 
+    }
+
+    public function validateAvailabilityIds(array $availabilityIds): bool
+    {
+        foreach ($availabilityIds as $availabilityId) {
+            if (!preg_match(self::AVAILABILITY_ID_REGEX, $availabilityId)) {
+                throw new InvalidAvailabilityIdException($availabilityId);
+            }
+        }
+        return true;
     }
 
     public function getCutoffFromTourCMSCutoff(array $cutoffData, string $startDay): string

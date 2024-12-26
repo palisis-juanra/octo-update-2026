@@ -18,6 +18,7 @@ abstract class BaseAvailabilityRequest
 
     protected int $maxUnits;
     protected string $cutoff;
+    protected array $availabilityIds;
 
     /**
      * Get all the availabilities
@@ -49,5 +50,25 @@ abstract class BaseAvailabilityRequest
     public function getCutoff(): string
     {
         return $this->cutoff;
+    }
+
+    /**
+     * Get the value of availabilityIds
+     */ 
+    public function getAvailabilityIds()
+    {
+        return $this->availabilityIds;
+    }
+
+    /**
+     * Set the value of availabilityIds
+     *
+     * @return  self
+     */ 
+    public function setAvailabilityIds($availabilityIds)
+    {
+        $this->availabilityIds = $availabilityIds;
+
+        return $this;
     }
 }

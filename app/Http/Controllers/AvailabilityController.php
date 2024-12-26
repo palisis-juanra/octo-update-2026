@@ -43,17 +43,19 @@ class AvailabilityController extends Controller
             $product = $this->productService->find($productId);
 
             $octoCapabilities = $request->header('Octo-Capabilities') ?? '';
-            $availabilyRequest = $this->availabilityRequestFactory->get($requestParams, $octoCapabilities, $product->getMinBookingSize());
+            $availabilityRequest = $this->availabilityRequestFactory->get($requestParams, $octoCapabilities, $product->getMinBookingSize());
+            $availabilityIds = $request->get(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
+            $availabilityRequest->setAvailabilityIds($availabilityIds);
             
             $optionId = $request->get(AvailabilityService::PARAM_OPTION_ID);
             $option = $product->getOptionById($optionId);
 
-            $availabilyRequest->setMaxUnits($option->restrictions->maxUnits ?? 10);
+            $availabilityRequest->setMaxUnits($option->restrictions->maxUnits ?? 10);
             $tourCMSCutoff = $product->getCutoff();
-            $octoCutoff = $this->availabilityService->getCutoffFromTourCMSCutoff($tourCMSCutoff, $availabilyRequest->getLocalDateStart());
-            $availabilyRequest->setCutoff($octoCutoff);
+            $octoCutoff = $this->availabilityService->getCutoffFromTourCMSCutoff($tourCMSCutoff, $availabilityRequest->getLocalDateStart());
+            $availabilityRequest->setCutoff($octoCutoff);
 
-            $availabilities = $this->availabilityService->getAvailabilities($availabilyRequest);
+            $availabilities = $this->availabilityService->getAvailabilities($availabilityRequest);
 
             $availabilitiesData = $this->availabilityService->getAvailabilitiesTransformed($availabilities);
 

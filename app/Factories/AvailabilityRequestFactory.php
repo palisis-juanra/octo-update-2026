@@ -26,8 +26,22 @@ class AvailabilityRequestFactory
         $localDate = $requestParams[AvailabilityService::PARAM_LOCAL_DATE] ?? '';
         $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START] ?? '';
         $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
+        $availabilityIds = $requestParams[AvailabilityService::PARAM_AVAILABILITY_IDS] ?? [];
         $currency = $requestParams[AvailabilityService::PARAM_CURRENCY] ?? '';
         $units = $requestParams[AvailabilityService::PARAM_UNITS] ?? [];
+
+        if (!empty($availabilityIds)) {
+            if (count($availabilityIds) == 1) {
+                $localDate = explode('|', $availabilityIds[0])[0];
+            } else {
+                $dates = [];
+                foreach ($availabilityIds as $availabilityId) {
+                    $dates[] = explode('|', $availabilityId)[0];
+                }
+                $localDateStart = min($dates);
+                $localDateEnd = max($dates);
+            }
+        }
 
         if (!empty($octoCapabilities) && strtolower($octoCapabilities) === 'pricing') {
             

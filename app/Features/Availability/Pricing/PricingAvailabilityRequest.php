@@ -19,6 +19,9 @@ abstract class PricingAvailabilityRequest extends AvailabilityRequest
     public function getAvailabilities(TourCMSService $tourCMSService): array
     {
         $components = $this->fetchComponentsFromTourCMS($tourCMSService);
+        if (!empty($this->availabilityIds)) {
+            $components = $this->filterByAvailabilityIds($components);
+        }
         $availabilities = $this->getAvailabilitiesFromComponents($components);
 
         return $availabilities;
