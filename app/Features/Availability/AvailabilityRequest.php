@@ -36,7 +36,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     {
         $departures = $this->fetchDeparturesFromAPI($tourCMSService);
         if (!empty($this->availabilityIds)) {
-            $departures = $this->filterByAvailabilityIds($departures);
+            $departures = $this->filterByAvailabilityIds($departures, $this->availabilityIds);
         }
         $availabilities = $this->getAvailabilitiesFromDepartures($departures);
         $this->saveAvailabilities($availabilities);
@@ -87,13 +87,13 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $availabilities;
     }
 
-    public function filterByAvailabilityIds(array $departures): array
+    public function filterByAvailabilityIds(array $departures, array $availabilityIds): array
     {
         $filteredDepartures = [];
         foreach ($departures as $departure) {
             $id = isset($departure->departure_id) ? $departure->departure_id : $departure->date_id;
             $departureId = "{$departure->start_date}|{$id}";
-            if (in_array($departureId, $this->availabilityIds)) {
+            if (in_array($departureId, $availabilityIds)) {
                 $filteredDepartures[] = $departure;
             }
         }

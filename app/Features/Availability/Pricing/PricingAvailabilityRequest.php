@@ -20,7 +20,7 @@ abstract class PricingAvailabilityRequest extends AvailabilityRequest
     {
         $components = $this->fetchComponentsFromTourCMS($tourCMSService);
         if (!empty($this->availabilityIds)) {
-            $components = $this->filterByAvailabilityIds($components);
+            $components = $this->filterByAvailabilityIds($components, $this->availabilityIds);
         }
         $availabilities = $this->getAvailabilitiesFromComponents($components);
 

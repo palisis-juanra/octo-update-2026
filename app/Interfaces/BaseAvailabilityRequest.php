@@ -55,7 +55,7 @@ abstract class BaseAvailabilityRequest
     /**
      * Get the value of availabilityIds
      */ 
-    public function getAvailabilityIds()
+    public function getAvailabilityIds(): array
     {
         return $this->availabilityIds;
     }
@@ -65,7 +65,7 @@ abstract class BaseAvailabilityRequest
      *
      * @return  self
      */ 
-    public function setAvailabilityIds($availabilityIds)
+    public function setAvailabilityIds($availabilityIds): self
     {
         $this->availabilityIds = $availabilityIds;
 
