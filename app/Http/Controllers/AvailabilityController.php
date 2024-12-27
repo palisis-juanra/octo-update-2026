@@ -17,6 +17,9 @@ use Throwable;
 
 class AvailabilityController extends Controller
 {
+
+    const DEFAULT_MAX_UNITS = 10;
+
     public AvailabilityRequestFactory $availabilityRequestFactory;
     public AvailabilityService $availabilityService;
     public ProductService $productService;
@@ -50,13 +53,12 @@ class AvailabilityController extends Controller
             $optionId = $request->get(AvailabilityService::PARAM_OPTION_ID);
             $option = $product->getOptionById($optionId);
 
-            $availabilityRequest->setMaxUnits($option->restrictions->maxUnits ?? 10);
+            $availabilityRequest->setMaxUnits($option->restrictions->maxUnits ?? self::DEFAULT_MAX_UNITS);
             $tourCMSCutoff = $product->getCutoff();
             $octoCutoff = $this->availabilityService->getCutoffFromTourCMSCutoff($tourCMSCutoff, $availabilityRequest->getLocalDateStart());
             $availabilityRequest->setCutoff($octoCutoff);
 
             $availabilities = $this->availabilityService->getAvailabilities($availabilityRequest);
-
             $availabilitiesData = $this->availabilityService->getAvailabilitiesTransformed($availabilities);
 
             return new JsonResponse($availabilitiesData, Response::HTTP_OK);

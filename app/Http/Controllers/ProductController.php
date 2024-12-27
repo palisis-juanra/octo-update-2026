@@ -337,7 +337,9 @@ class ProductController extends Controller
     {
         try {
             $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+            print 1;
             if (!$this->productService->validateProductId($productId, $channelId)) {
+                $this->logger->info("INVALID PRODUCT: {$e->getFile()} ({$e->getLine()}");
                 return OctoResponse::INVALID_PRODUCT_ID($productId);
             }
             $product = $this->productService->find($productId);
@@ -345,8 +347,10 @@ class ProductController extends Controller
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();
         } catch (InvalidProductContentException $e) {
+            $this->logger->info("INVALID PRODUCT CONTENT: {$e->getFile()} ({$e->getLine()}");
             return OctoResponse::INVALID_PRODUCT_ID($productId, $e->getMessage());
         } catch (NoMatchingDataException) {
+            $this->logger->info("NO MATCHING DATA: {$e->getFile()} ({$e->getLine()}");
             return OctoResponse::INVALID_PRODUCT_ID($productId);
         } catch (APICallNotOKException) {
             return OctoResponse::INTERNAL_SERVER_ERROR();
