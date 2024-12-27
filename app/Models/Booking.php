@@ -174,8 +174,8 @@ class Booking extends Model
         $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
 
         $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
-        $booking->setUtcExpiresAt($bookingData->expiry_date_at_utc_seconds ? (int) $bookingData->expiry_date_at_utc_seconds : null);
-        $booking->setUtcConfirmedAt($bookingData->confirmed_at_utc_seconds ? (int) $bookingData->confirmed_at_utc_seconds : null);
+        $booking->setUtcExpiresAt(isset($bookingData->expiry_date_at_utc_seconds) ? (int) $bookingData->expiry_date_at_utc_seconds : null);
+        $booking->setUtcConfirmedAt(isset($bookingData->confirmed_at_utc_seconds) ? (int) $bookingData->confirmed_at_utc_seconds : null);
         $booking->setUtcRedeemedAt(self::getFirstRedeemed($bookingData));
 
         $booking->setExpirationMinutes(null);
