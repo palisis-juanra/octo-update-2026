@@ -66,7 +66,9 @@ class BookingCancellationService
 
         $product = $this->productService->find($booking->product_id);
         $option = $product->getOptionById($booking->option_id);
-        $availability = $this->availabilityService->find(availabilityId: $booking->availability_id);
+
+        $tourId = explode('|', explode('_', $booking->product_id)[2])[0];
+        $availability = $this->availabilityService->find($booking->availability_id, $tourId, $booking->option_id);
         $unitItems = json_decode($booking->unit_items, 1);
 
         $bookingObject = Booking::createFromShowBookingXML(

@@ -45,6 +45,7 @@ abstract class PricingAvailabilityRequest extends AvailabilityRequest
 
             $availability = new Availability;
             
+            $availability->setId("{$component->start_date}|{$component->date_id}");
             $availability->setDepartureId((int) $component->date_id);
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeStringFromTimestamp((string) $component->start_time_utcseconds));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeStringFromTimestamp((string) $component->end_time_utcseconds));
@@ -58,8 +59,6 @@ abstract class PricingAvailabilityRequest extends AvailabilityRequest
 
             $availability->setCurrency($component->sale_currency);
             $availability->setPricing($pricing);
-
-            $availability->save();
             
             $availabilities[] = $availability;
         }

@@ -6,6 +6,7 @@ use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InvalidAvailabilityIdException;
+use App\Features\Availability\AvailabilityRequest;
 use App\Http\Middleware\OctoAuthentication;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\Availability;
@@ -195,18 +196,20 @@ class AvailabilityService
         return $startDate->format(self::CUTOFF_FORMAT);
     }
 
-    /**
-     * Retrieve an availability object from the DB
-     * @param string $availabilityId
-     * @throws \App\Exceptions\InvalidAvailabilityIdException
-     * @return \App\Models\Availability\Availability
-     */
-    public function find(string $availabilityId): Availability
+    public function find(string $availabilityId, string $tourId, string $optionId): Availability
     {
-        $availability = Availability::find($availabilityId);
-        if (is_null($availability)) {
-            throw new InvalidAvailabilityIdException($availabilityId);
-        }
+        $this->validateAvailabilityIds([$availabilityId]);
+
+        $date = explode('|', $availabilityId)[0];
+        $mappingQueryString = OptionService::getMappingQueryString($optionId);
+
+        $response = $this->tourCMSService->showTourDepartures($tourId,$date, extraParams: $mappingQueryString);
+
+        $departures = $this->tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
+
+        $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $date);
+        $availability = $availabilityRequest->getAvailabilityFromDeparturesById($availabilityId, $departures);
+
         return $availability;
     }
 }

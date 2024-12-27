@@ -2,6 +2,7 @@
 
 namespace App\Features\Availability;
 
+use App\Exceptions\InvalidAvailabilityIdException;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\DateTimeService;
 use App\Services\OptionService;
@@ -39,7 +40,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $departures = $this->filterByAvailabilityIds($departures, $this->availabilityIds);
         }
         $availabilities = $this->getAvailabilitiesFromDepartures($departures);
-        $this->saveAvailabilities($availabilities);
 
         return $availabilities;
     }
@@ -69,6 +69,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
             list($endTimeHours, $endTimeMinutes) = explode(":", $departure->end_time ? (string) $departure->end_time : '23:59');
 
+            $availability->setId("{$departure->start_date}|{$departure->departure_id}");
             $availability->setDepartureId((int) $departure->departure_id);
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
@@ -85,6 +86,32 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         } 
 
         return $availabilities;
+    }
+
+    public function getAvailabilityFromDeparturesById(string $availabilityId, array $departures): Availability
+    {   
+        $filterResult = $this->filterByAvailabilityIds($departures, [$availabilityId]);
+        
+        if (empty($filterResult)) {
+            throw new InvalidAvailabilityIdException($availabilityId);
+        }
+
+        $departure = $filterResult[0];
+            
+        $availability = new Availability;
+
+        list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
+        list($endTimeHours, $endTimeMinutes) = explode(":", $departure->end_time ? (string) $departure->end_time : '23:59');
+
+        $availability->setId("{$departure->start_date}|{$departure->departure_id}");
+        $availability->setDepartureId((int) $departure->departure_id);
+        $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
+        $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
+        $availability->setAllDay(false);
+        $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
+        $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
+
+        return $availability;
     }
 
     public function filterByAvailabilityIds(array $departures, array $availabilityIds): array

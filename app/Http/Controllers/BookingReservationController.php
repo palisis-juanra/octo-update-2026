@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\InvalidAvailabilityIdException;
+use App\Factories\AvailabilityRequestFactory;
+use App\Features\Availability\AvailabilityRequest;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Requests\OctoRequest;
 use App\Services\AvailabilityService;
@@ -10,6 +12,7 @@ use App\Services\BookingReservationService;
 use App\Services\JSONLogService;
 use App\Services\OptionService;
 use App\Services\ProductService;
+use App\Services\TourCMSService;
 use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\BookingTransformer;
@@ -27,7 +30,7 @@ class BookingReservationController extends Controller
         public AvailabilityService $availabilityService,
         public OptionService $optionService,
         public UnitService $unitService,
-        public JSONLogService $logger
+        public JSONLogService $logger,
     ) 
     {
         $this->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
@@ -47,12 +50,13 @@ class BookingReservationController extends Controller
         $optionId = $requestParams[OctoRequest::OPTION_ID];
         $option = $product->getOptionById($optionId);
 
-        $availabilityId = $requestParams[OctoRequest::AVAILABILITY_ID];
-        $availability = $this->availabilityService->find($availabilityId);
-
         $unitItems = $requestParams[OctoRequest::UNIT_ITEMS] ?? null;
         $uuid = $requestParams[OctoRequest::UUID] ?? null;
         $notes = $requestParams[self::FIELD_NOTES] ?? '';
+
+        $availabilityId = $requestParams[OctoRequest::AVAILABILITY_ID];
+        $tourId = explode('|', explode('_', $productId)[2])[0];
+        $availability = $this->availabilityService->find($availabilityId, $tourId, $optionId);
 
         $booking = $this->bookingService->reserve($product, $option, $availability, $unitItems, $uuid, $notes);
         $bookingData = $this->transformer->transform($booking);
