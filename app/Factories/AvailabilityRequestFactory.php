@@ -8,6 +8,7 @@ use App\Features\Availability\Pricing\SingleDayPricingAvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\AvailabilityService;
 use App\Services\ProductService;
+use App\Services\UnitService;
 
 class AvailabilityRequestFactory
 {
@@ -28,7 +29,7 @@ class AvailabilityRequestFactory
         $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
         $availabilityIds = $requestParams[AvailabilityService::PARAM_AVAILABILITY_IDS] ?? [];
         $currency = $requestParams[AvailabilityService::PARAM_CURRENCY] ?? '';
-        $units = $requestParams[AvailabilityService::PARAM_UNITS] ?? [];
+        $units = $requestParams[UnitService::PARAM_UNITS] ?? [];
 
         if (!empty($availabilityIds)) {
             if (count($availabilityIds) == 1) {

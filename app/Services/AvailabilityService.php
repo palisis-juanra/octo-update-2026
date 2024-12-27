@@ -31,7 +31,6 @@ class AvailabilityService
     const PARAM_LOCAL_DATE_START = 'localDateStart';
     const PARAM_LOCAL_DATE_END = 'localDateEnd';
     const PARAM_AVAILABILITY_IDS = 'availabilityIds';
-    const PARAM_UNITS = 'units';
     const PARAM_CURRENCY = 'currency';
     const REQUIRED_PARAMS = [
         self::PARAM_PRODUCT_ID,
@@ -64,7 +63,6 @@ class AvailabilityService
         return $availabilityRequest->getAvailabilities($this->tourCMSService);
     }
 
-
     public function getAvailabilitiesTransformed(array $availabilities): array
     {
         $availabilitiesData = [];
@@ -84,21 +82,9 @@ class AvailabilityService
      */
     public function validateRequestParams(array $requestParams): void
     {
-
-        $missingParams = array_diff(self::REQUIRED_PARAMS, array_keys($requestParams));
-
-        if (!empty($missingParams)) {
-            throw new AvailabilityRequestMissingParamException('Missing Required Params: ' . implode(', ', $missingParams));
-        }
-
-        foreach (self::REQUIRED_PARAMS as $param) {
-            if (empty($requestParams[$param])) {
-                throw new AvailabilityRequestMissingParamException('Empty required params: ' . $param);
-            }
-        }
+        $this->checkRequiredParams($requestParams);
 
         $this->productService->validateProductId($requestParams[AvailabilityService::PARAM_PRODUCT_ID], $requestParams[OctoAuthentication::FIELD_CHANNEL_ID]);
-        
         
         $optionId = $requestParams[self::PARAM_OPTION_ID];
         if (!empty($optionId)) {
@@ -146,21 +132,8 @@ class AvailabilityService
             }
         }
     
-        $units = $requestParams[self::PARAM_UNITS] ?? [];
-        if (!empty($units)) {
-            $this->unitService->validateUnits($units);
-        }
+        $this->unitService->validateUnits($requestParams);
 
-    }
-
-    public function validateAvailabilityIds(array $availabilityIds): bool
-    {
-        foreach ($availabilityIds as $availabilityId) {
-            if (!preg_match(self::AVAILABILITY_ID_REGEX, $availabilityId)) {
-                throw new InvalidAvailabilityIdException($availabilityId);
-            }
-        }
-        return true;
     }
 
     public function getCutoffFromTourCMSCutoff(array $cutoffData, string $startDay): string
@@ -212,4 +185,36 @@ class AvailabilityService
 
         return $availability;
     }
+
+    protected function checkRequiredParams(array $requestParams):bool
+    {
+        $missingParams = array_diff(self::REQUIRED_PARAMS, array_keys($requestParams));
+        if (!empty($missingParams)) {
+            throw new AvailabilityRequestMissingParamException('Missing Required Params: ' . implode(', ', $missingParams));
+        }
+
+        foreach (self::REQUIRED_PARAMS as $param) {
+            if (empty($requestParams[$param])) {
+                throw new AvailabilityRequestMissingParamException('Empty required params: ' . $param);
+            }
+        }
+        return true;
+    }
+    
+    protected function validateAvailabilityId(string $availabilityId):bool
+    {
+        if (!preg_match(self::AVAILABILITY_ID_REGEX, $availabilityId)) {
+            throw new InvalidAvailabilityIdException($availabilityId);
+        }
+        return true;
+    }
+
+    protected function validateAvailabilityIds(array $availabilityIds): bool
+    {
+        foreach ($availabilityIds as $availabilityId) {
+            $this->validateAvailabilityId($availabilityId);
+        }
+        return true;
+    }
+
 }
