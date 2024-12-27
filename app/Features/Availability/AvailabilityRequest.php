@@ -28,6 +28,96 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         $this->localDateEnd = $localDateEnd;
     }
 
+// GET SET FUNCTIONS
+
+    public function getLocalDateStart(): string
+    {
+        return $this->localDateStart;
+    }
+
+    public function getLocalDateEnd(): string
+    {
+        return $this->localDateEnd;
+    }
+
+    /**
+     * Get the value of tourId
+     */ 
+    public function getTourId()
+    {
+        return $this->tourId;
+    }
+
+    /**
+     * Set the value of tourId
+     *
+     * @return  self
+     */ 
+    public function setTourId($tourId)
+    {
+        $this->tourId = $tourId;
+        return $this;
+    }
+
+    /**
+     * Get the value of optionId
+     */ 
+    public function getOptionId()
+    {
+        return $this->optionId;
+    }
+
+    /**
+     * Set the value of optionId
+     *
+     * @return  self
+     */ 
+    public function setOptionId($optionId)
+    {
+        $this->optionId = $optionId;
+        return $this;
+    }
+
+    /**
+     * Get the value of units
+     */ 
+    public function getUnits()
+    {
+        return $this->units;
+    }
+
+    /**
+     * Set the value of units
+     *
+     * @return  self
+     */ 
+    public function setUnits($units)
+    {
+        $this->units = $units;
+        return $this;
+    }
+
+    /**
+     * Get the value of minBookingSize
+     */ 
+    public function getMinBookingSize()
+    {
+        return $this->minBookingSize;
+    }
+
+    /**
+     * Set the value of minBookingSize
+     *
+     * @return  self
+     */ 
+    public function setMinBookingSize($minBookingSize)
+    {
+        $this->minBookingSize = $minBookingSize;
+        return $this;
+    }
+
+// PUBLIC FUNCTIONS
+
     /**
      * Fetch departures info from API and return the availabilities
      * 
@@ -39,65 +129,17 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         if (!empty($this->availabilityIds)) {
             $departures = $this->filterByAvailabilityIds($departures, $this->availabilityIds);
         }
-        $availabilities = $this->getAvailabilitiesFromDepartures($departures);
-
-        return $availabilities;
-    }
-
-    protected function fetchDeparturesFromAPI(TourCMSService $tourCMSService): array
-    {
-        $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
-
-        $response = $tourCMSService->showTourDepartures($this->tourId,$this->localDateStart, $this->localDateEnd, $mappingQueryString);
-
-        if (!isset($response->tour->dates_and_prices)) {
-            return [];
-        }
-
-        $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
-
-        return $departures;
-    }
-
-    protected function getAvailabilitiesFromDepartures(array $departures)
-    {   
-        $availabilities = [];
-        foreach ($departures as $departure) {
-            
-            $availability = new Availability;
-
-            list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
-            list($endTimeHours, $endTimeMinutes) = explode(":", $departure->end_time ? (string) $departure->end_time : '23:59');
-
-            $availability->setId("{$departure->start_date}|{$departure->departure_id}");
-            $availability->setDepartureId((int) $departure->departure_id);
-            $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
-            $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
-            $availability->setAllDay(false);
-            $availability->setAvailable($this->checkSpacesRemaining($departure));
-            $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
-            $availability->setMaxUnits($this->maxUnits);
-            $availability->setUtcCutoffAt($this->cutoff);
-            $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
-            $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
-            
-            $availabilities[] = $availability;
-
-        } 
-
-        return $availabilities;
+        return $this->getAvailabilitiesFromDepartures($departures);
     }
 
     public function getAvailabilityFromDeparturesById(string $availabilityId, array $departures): Availability
     {   
-        $filterResult = $this->filterByAvailabilityIds($departures, [$availabilityId]);
-        
+        $filterResult = $this->filterByAvailabilityIds($departures, [$availabilityId]); 
         if (empty($filterResult)) {
             throw new InvalidAvailabilityIdException($availabilityId);
         }
 
-        $departure = $filterResult[0];
-            
+        $departure = $filterResult[0];  
         $availability = new Availability;
 
         list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
@@ -118,23 +160,11 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     {
         $filteredDepartures = [];
         foreach ($departures as $departure) {
-            $id = isset($departure->departure_id) ? $departure->departure_id : $departure->date_id;
-            $departureId = "{$departure->start_date}|{$id}";
-            if (in_array($departureId, $availabilityIds)) {
+            if (in_array($this->generateAvailabilityIdFromDepartureOrComponentObject($departure), $availabilityIds)) {
                 $filteredDepartures[] = $departure;
             }
         }
         return $filteredDepartures;
-    }
-
-    public function getLocalDateStart(): string
-    {
-        return $this->localDateStart;
-    }
-
-    public function getLocalDateEnd(): string
-    {
-        return $this->localDateEnd;
     }
 
     public function getOctoStatusFromTourCMSStatus(string $status): string
@@ -146,46 +176,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return self::OCTO_STATUS_CLOSED;
     }
 
-
-    /**
-     * Get the value of tourId
-     */ 
-    public function getTourId()
-    {
-        return $this->tourId;
-    }
-
-    /**
-     * Set the value of tourId
-     *
-     * @return  self
-     */ 
-    public function setTourId($tourId)
-    {
-        $this->tourId = $tourId;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of optionId
-     */ 
-    public function getOptionId()
-    {
-        return $this->optionId;
-    }
-
-    /**
-     * Set the value of optionId
-     *
-     * @return  self
-     */ 
-    public function setOptionId($optionId)
-    {
-        $this->optionId = $optionId;
-
-        return $this;
-    }
+// PRIVATE FUNCTIONS
 
     protected function checkSpacesRemaining(\SimpleXMLElement $departure): bool
     {
@@ -197,6 +188,58 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             }
         }
         return $departure->spaces_remaining >= $spacesRequired;
+    }
+
+    protected function fetchDeparturesFromAPI(TourCMSService $tourCMSService): array
+    {
+        $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
+
+        $response = $tourCMSService->showTourDepartures($this->tourId,$this->localDateStart, $this->localDateEnd, $mappingQueryString);
+
+        if (!isset($response->tour->dates_and_prices)) {
+            return [];
+        }
+
+        $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
+
+        return $departures;
+    }
+
+    protected function getAvailabilitiesFromDepartures(array $departures):array
+    {   
+        $availabilities = [];
+        foreach ($departures as $departure) {
+            
+            $availability = new Availability;
+
+            list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
+            list($endTimeHours, $endTimeMinutes) = explode(":", $departure->end_time ? (string) $departure->end_time : '23:59');
+
+            $availability->setId($this->generateAvailabilityIdFromDepartureOrComponentObject($departure));
+            $availability->setDepartureId((int) $departure->departure_id);
+            $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
+            $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
+            $availability->setAllDay(false);
+            $availability->setAvailable($this->checkSpacesRemaining($departure));
+            $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
+            $availability->setMaxUnits($this->maxUnits);
+            $availability->setUtcCutoffAt($this->cutoff);
+            $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
+            $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
+            
+            $availabilities[] = $availability;
+
+        } 
+
+        return $availabilities;
+    }
+
+    protected function generateAvailabilityIdFromDepartureOrComponentObject($departure):string
+    {
+        // Depending if availability or show_tour_departures the departure id changes the var name.
+        $departureId = isset($departure->departure_id) ? (string)$departure->departure_id : (string)$departure->date_id;
+        $startDate = (string)$departure->start_date;
+        return "{$startDate}|{$departureId}";
     }
 
     /**
@@ -211,43 +254,4 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         }
     }
 
-    /**
-     * Get the value of units
-     */ 
-    public function getUnits()
-    {
-        return $this->units;
-    }
-
-    /**
-     * Set the value of units
-     *
-     * @return  self
-     */ 
-    public function setUnits($units)
-    {
-        $this->units = $units;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of minBookingSize
-     */ 
-    public function getMinBookingSize()
-    {
-        return $this->minBookingSize;
-    }
-
-    /**
-     * Set the value of minBookingSize
-     *
-     * @return  self
-     */ 
-    public function setMinBookingSize($minBookingSize)
-    {
-        $this->minBookingSize = $minBookingSize;
-
-        return $this;
-    }
 }

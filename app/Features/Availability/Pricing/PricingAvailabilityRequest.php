@@ -27,45 +27,6 @@ abstract class PricingAvailabilityRequest extends AvailabilityRequest
         return $availabilities;
     }
 
-    protected function getAvailabilitiesFromComponents(array $components)
-    {   
-        $availabilities = [];
-
-        foreach ($components as $component) {
-
-            $totalPricing = $component->total_price * 100;
-            $netPrice = $component->net_price * 100;
-
-            $pricing = new AvailabilityPricing(
-                $totalPricing,
-                $totalPricing,
-                $netPrice,
-                $this->currency
-            );
-
-            $availability = new Availability;
-            
-            $availability->setId("{$component->start_date}|{$component->date_id}");
-            $availability->setDepartureId((int) $component->date_id);
-            $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeStringFromTimestamp((string) $component->start_time_utcseconds));
-            $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeStringFromTimestamp((string) $component->end_time_utcseconds));
-            $availability->setAllDay(false);
-            $availability->setAvailable(true);
-            $availability->setStatus(self::OCTO_STATUS_AVAILABLE);
-            $availability->setMaxUnits($this->maxUnits);
-            $availability->setUtcCutoffAt($this->cutoff);
-            $availability->setOpeningHoursFrom($component->start_time ?? '00:00');
-            $availability->setOpeningHoursTo($component->end_time ?? '23:59');
-
-            $availability->setCurrency($component->sale_currency);
-            $availability->setPricing($pricing);
-            
-            $availabilities[] = $availability;
-        }
-
-        return $availabilities;
-    }
-
     public function getOctoStatusFromTourCMSStatus(string $tourCMSStatus): string
     {
         return BaseAvailabilityRequest::OCTO_STATUS_AVAILABLE;
@@ -91,4 +52,43 @@ abstract class PricingAvailabilityRequest extends AvailabilityRequest
 
         return $params;
     }
+
+    protected function getAvailabilitiesFromComponents(array $components)
+    {   
+        $availabilities = [];
+
+        foreach ($components as $component) {
+
+            $totalPricing = $component->total_price * 100;
+            $netPrice = $component->net_price * 100;
+
+            $pricing = new AvailabilityPricing(
+                $totalPricing,
+                $totalPricing,
+                $netPrice,
+                $this->currency
+            );
+
+            $availability = new Availability;
+            
+            $availability->setId($this->generateAvailabilityIdFromDepartureOrComponentObject($component));
+            $availability->setDepartureId((int) $component->date_id);
+            $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeStringFromTimestamp((string) $component->start_time_utcseconds));
+            $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeStringFromTimestamp((string) $component->end_time_utcseconds));
+            $availability->setAllDay(false);
+            $availability->setAvailable(true);
+            $availability->setStatus(self::OCTO_STATUS_AVAILABLE);
+            $availability->setMaxUnits($this->maxUnits);
+            $availability->setUtcCutoffAt($this->cutoff);
+            $availability->setOpeningHoursFrom($component->start_time ?? '00:00');
+            $availability->setOpeningHoursTo($component->end_time ?? '23:59');
+            $availability->setCurrency($component->sale_currency);
+            $availability->setPricing($pricing);
+            
+            $availabilities[] = $availability;
+        }
+
+        return $availabilities;
+    }
+
 } 
