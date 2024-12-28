@@ -64,6 +64,7 @@ class Availability extends Model
     public static $snakeAttributes = true;
 
     public string $currency;
+    public string $date;
     public ?AvailabilityPricing $pricing = null;
     
     public $timestamps = true;
@@ -370,6 +371,12 @@ class Availability extends Model
 
     public function getDate(): string
     {
-        return substr($this->local_date_time_start, 0, 10);
+        return $this->date;
+    }
+
+    public function setDate(string $date): self
+    {
+        $this->date = $date;
+        return $this;
     }
 }
