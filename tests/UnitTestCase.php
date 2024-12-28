@@ -4,6 +4,8 @@ namespace Tests;
 
 use App\Services\JSONLogService;
 use PHPUnit\Framework\TestCase as BaseTestCase;
+use ReflectionClass;
+use ReflectionMethod;
 
 abstract class UnitTestCase extends BaseTestCase
 {
@@ -19,5 +21,14 @@ abstract class UnitTestCase extends BaseTestCase
         $jsonLogServiceMock->method('getLogId')->willReturn('TestLogId');
 
         return $jsonLogServiceMock;
+    }
+
+    public static function getProtectedMethod(object $obj, $name): ReflectionMethod
+    {
+        $class = new ReflectionClass($obj);
+        $method = $class->getMethod($name);
+        $method->setAccessible(true);
+
+        return $method;
     }
 }

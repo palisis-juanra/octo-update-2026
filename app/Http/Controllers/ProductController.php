@@ -337,7 +337,6 @@ class ProductController extends Controller
     {
         try {
             $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
-            print 1;
             if (!$this->productService->validateProductId($productId, $channelId)) {
                 $this->logger->info("INVALID PRODUCT: {$e->getFile()} ({$e->getLine()}");
                 return OctoResponse::INVALID_PRODUCT_ID($productId);

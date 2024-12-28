@@ -90,6 +90,7 @@ class AvailabilityServiceTest extends UnitTestCase
 
         $this->expectException(InvalidAvailabilityIdException::class);
 
-        $availabilityService->validateAvailabilityIds($AvailabilityIds);
+        $validateAvailabilityIdsFunction = $this->getProtectedMethod($availabilityService, 'validateAvailabilityIds');
+        $result = $validateAvailabilityIdsFunction->invokeArgs($availabilityService, [$AvailabilityIds]);
     }
 }
