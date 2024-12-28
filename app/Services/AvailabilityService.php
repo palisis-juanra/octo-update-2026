@@ -37,6 +37,9 @@ class AvailabilityService
         self::PARAM_OPTION_ID
     ];
 
+    const DEFAULT_START_TIME = '00:00';
+    const DEFAULT_END_TIME = '23:59';
+
     const ERROR_MESSAGE_AVAILABILITY_NEED_DATE = 'Request body must have localDate param or localDateStart + localDateEnd param(s)';
 
     const TCMS_CUTOFF_BEFORE_START_SECONDS = 'before_start_sec';
@@ -190,19 +193,24 @@ class AvailabilityService
     {
         $components = $this->tourCMSService->getArrayFromXmlNode($showBookingXML->booking->components, 'component');
         $component = $components[0];
+        return $this->generateAvailabilityObjectFromComponent($component);
+    }
 
-        list($startTimeHours, $startTimeMinutes) = explode(":", $component->start_time ? (string) $component->start_time : '00:00');
-        list($endTimeHours, $endTimeMinutes) = explode(":", $component->end_time ? (string) $component->end_time : '23:59');
+    public function generateAvailabilityObjectFromComponent(SimpleXMLElement $component): Availability
+    {
+        $departureId = $this->getDepartureIdFromAPIResponse($component);
+        list($startTimeHours, $startTimeMinutes) = explode(":", $component->start_time ? (string) $component->start_time : self::DEFAULT_START_TIME);
+        list($endTimeHours, $endTimeMinutes) = explode(":", $component->end_time ? (string) $component->end_time : self::DEFAULT_END_TIME);
 
         $availability = new Availability();
-        $availability->setId($this->generateAvailabilityIdFromComponent($component));
 
-        $availability->setDepartureId((int) $component->departure_id);
+        $availability->setId($this->generateAvailabilityIdFromComponent($component));
+        $availability->setDepartureId($departureId);
         $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $component->start_date, $startTimeHours, $startTimeMinutes));
         $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $component->end_date, $endTimeHours, $endTimeMinutes));
         $availability->setAllDay(false);
-        $availability->setOpeningHoursFrom($component->start_time ?? '00:00');
-        $availability->setOpeningHoursTo($component->end_time ?? '23:59');
+        $availability->setOpeningHoursFrom($component->start_time ?? self::DEFAULT_START_TIME);
+        $availability->setOpeningHoursTo($component->end_time ?? self::DEFAULT_END_TIME);
 
         return $availability;
     }
@@ -212,6 +220,33 @@ class AvailabilityService
         $departureId = (string)$component->date_id;
         $startDate = (string)$component->start_date;
         return "{$startDate}|{$departureId}";
+    }
+
+    public function validateAvailabilityId(string $availabilityId):bool
+    {
+        if (!preg_match(self::AVAILABILITY_ID_REGEX, $availabilityId)) {
+            throw new InvalidAvailabilityIdException($availabilityId);
+        }
+        return true;
+    }
+
+    public function validateAvailabilityIds(array $availabilityIds): bool
+    {
+        foreach ($availabilityIds as $availabilityId) {
+            $this->validateAvailabilityId($availabilityId);
+        }
+        return true;
+    }
+
+    public function getAvailabilityObjectFromAvailabilityId(string $availabilityId): Availability
+    {
+        $availability = new Availability;
+        $availability->setId($availabilityId);
+        $startDate = (string)explode('|', $availabilityId)[0];
+        $departureId = (int)explode('|', $availabilityId)[1];
+        $availability->setDate($startDate);
+        $availability->setDepartureId($departureId);
+        return $availability;
     }
 
     protected function checkRequiredParams(array $requestParams):bool
@@ -228,21 +263,14 @@ class AvailabilityService
         }
         return true;
     }
-    
-    protected function validateAvailabilityId(string $availabilityId):bool
+
+    protected function getDepartureIdFromAPIResponse(SimpleXMLElement $apiResponse):int
     {
-        if (!preg_match(self::AVAILABILITY_ID_REGEX, $availabilityId)) {
-            throw new InvalidAvailabilityIdException($availabilityId);
-        }
-        return true;
+        // Get departureId depending API responses no consistent from TourCMS API. Sometimes field is date_id and others is departure_id
+        $departureId = isset($apiResponse->date_id) ? (int) $apiResponse->date_id : 0;
+        $departureId = $departureId == 0 && isset($apiResponse->departure_id) ? (int) $apiResponse->departure_id : $departureId;
+        return $departureId;
     }
 
-    protected function validateAvailabilityIds(array $availabilityIds): bool
-    {
-        foreach ($availabilityIds as $availabilityId) {
-            $this->validateAvailabilityId($availabilityId);
-        }
-        return true;
-    }
 
 }

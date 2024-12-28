@@ -15,18 +15,14 @@ class BookingService
         public ProductService $productService,
         public AvailabilityService $availabilityService,
     )
-    {
-        
-    }
+    { }
 
     public function getBookingByUuid(string $uuid): Booking
     {
         $booking = Booking::find($uuid);
-        
         if (is_null($booking)) {
             throw new InvalidBookingUUIDException($uuid);
         }
-
         return $booking;
     }
 
