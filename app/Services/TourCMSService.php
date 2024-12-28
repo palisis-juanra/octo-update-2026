@@ -22,6 +22,7 @@ class TourCMSService
     const NO_MATCHING_DATA = 'NO MATCHING DATA';
     const ERROR_PREVIOUSLY_CANCELLED = 'PREVIOUSLY CANCELLED';
     const ERROR_BOOKING_ALREADY_COMMITED = 'BOOKING ALREADY COMMITTED';
+    const ERROR_NO_DATA_CHANGED = 'NO DATA CHANGED';
     const ERROR_OK = 'OK';
     const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
@@ -186,6 +187,7 @@ class TourCMSService
             case self::ERROR_OK:
             case self::ERROR_PREVIOUSLY_CANCELLED:
             case self::ERROR_BOOKING_ALREADY_COMMITED:
+            case self::ERROR_NO_DATA_CHANGED:
                 if (!($response instanceof SimpleXMLElement)) {
                     $response = simplexml_load_string($response);
                 }
