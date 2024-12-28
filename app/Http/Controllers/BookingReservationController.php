@@ -55,8 +55,7 @@ class BookingReservationController extends Controller
         $notes = $requestParams[self::FIELD_NOTES] ?? '';
 
         $availabilityId = $requestParams[OctoRequest::AVAILABILITY_ID];
-        $tourId = explode('|', explode('_', $productId)[2])[0];
-        $availability = $this->availabilityService->find($availabilityId, $tourId, $optionId);
+        $availability = $this->availabilityService->getAvailabilityObjectFromAvailabilityId($availabilityId);
 
         $booking = $this->bookingService->reserve($product, $option, $availability, $unitItems, $uuid, $notes);
         $bookingData = $this->transformer->transform($booking);
