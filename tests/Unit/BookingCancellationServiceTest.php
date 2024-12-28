@@ -19,30 +19,6 @@ class BookingCancellationServiceTest extends UnitTestCase
     const VALID_BOOKING_ID = 4093;
     const VALID_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
 
-    public function test_isBookingCancellable_whenCheckingBookingIsNotCancellable_thenThrowsBookingNotCancellableException(): void
-    {
-        // Given
-        $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods([])
-            ->getMock();
-
-        $bookingCancellationService = $this->getMockBuilder(BookingCancellationService::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods([])
-            ->getMock();
-        $bookingCancellationService->tourCMSService = $tourCMSServiceMock;
-        $bookingCancellationService->logger = $this->getLoggerMock();
-
-        $booking = new Booking();
-        $booking->setCancellable(0);
-
-        // When
-        $this->expectException(BookingNotCancellableException::class);
-
-        $bookingCancellationService->isBookingCancellable($booking);
-    }
-
     public function test_whenCancelBookingAPIResponseIsNotValid_thenThrowsInvalidUUIDException(): void
     {
         // Given

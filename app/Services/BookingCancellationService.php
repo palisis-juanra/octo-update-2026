@@ -13,19 +13,20 @@ use DateTimeZone;
 use SimpleXMLElement;
 use stdClass;
 
-class BookingCancellationService
+class BookingCancellationService extends BookingService
 {
     public const STATUS_CANCELLED = 'CANCELLED';
     public const REFUND_FULL = 'FULL';
     public const BOOKING_NOT_FOUND = 'API return no matching data, invalid booking ID / channel';
     public const ERROR_PREVIOUSLY_CANCELLED = 'PREVIOUSLY CANCELLED';
+
     public function __construct(
         public TourCMSService $tourCMSService,
         public ProductService $productService,
         public AvailabilityService $availabilityService,
         public JSONLogService $logger)
     {
-
+        parent::__construct($tourCMSService, $logger, $productService, $availabilityService);
     }
 
     public function cancelBooking(Booking $booking, ?string $reason = null, ?bool $force = null): void
@@ -46,49 +47,6 @@ class BookingCancellationService
             throw new InvalidBookingUUIDException($booking->getUuid());
         }
 
-    }
-
-    public function getBookingByUuid(string $uuid): Booking
-    {
-        $booking = Booking::find($uuid);
-
-        if (is_null($booking)) {
-            throw new InvalidBookingUUIDException($uuid);
-        }
-
-        return $booking;
-    }
-
-    public function getBookingObject(Booking $booking): Booking
-    {
-        $showBookingResponse = $this->tourCMSService->showBooking($booking->booking_id);
-        $this->logger->info(["showBookingResponse" => $showBookingResponse]);
-
-        $product = $this->productService->find($booking->product_id);
-        $option = $product->getOptionById($booking->option_id);
-
-        $tourId = explode('|', explode('_', $booking->product_id)[2])[0];
-        $availability = $this->availabilityService->find($booking->availability_id, $tourId, $booking->option_id);
-        $unitItems = json_decode($booking->unit_items, 1);
-
-        $bookingObject = Booking::createFromShowBookingXML(
-            $booking->getUuid(),
-            $showBookingResponse,
-            $product,
-            $option,
-            $availability,
-            $unitItems,
-        );
-
-        return $bookingObject;
-    }
-
-    public function isBookingCancellable(Booking $bookingObject): void
-    {
-        if ($bookingObject->getCancellable() == 0) {
-            $this->logger->info("Booking not cancellable: {$bookingObject->getId()}");
-            throw new BookingNotCancellableException;
-        }
     }
 
     public function updateBookingStatusToCancelled(Booking $booking): void

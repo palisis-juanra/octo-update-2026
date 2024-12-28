@@ -16,7 +16,9 @@ class BookingCancellationController extends Controller
 {
     public const FIELD_REASON = 'reason';
     public const FIELD_FORCE = 'force';
+    
     public BookingTransformer $transformer;
+
     public function __construct(
         public BookingCancellationService $bookingCancelService,
         public JSONLogService $logger
@@ -35,13 +37,16 @@ class BookingCancellationController extends Controller
 
         $booking = $this->bookingCancelService->getBookingByUuid($uuid);
 
-        $bookingObject = $this->bookingCancelService->getBookingObject($booking);
+        $bookingObject = $this->bookingCancelService->getBooking($booking);
         
-        $this->bookingCancelService->isBookingCancellable($bookingObject);
+        if(!$bookingObject->isBookingCancellable()) {
+            $this->logger->info("Booking not cancellable: {$bookingObject->getId()}");
+            throw new BookingNotCancellableException;
+        };
 
         $this->bookingCancelService->cancelBooking($bookingObject, $reason, $force);
 
-        $booking = $this->bookingCancelService->getBookingObject($booking);
+        $booking = $this->bookingCancelService->getBooking($booking);
         
         $this->bookingCancelService->updateBookingStatusToCancelled($booking);
 

@@ -555,6 +555,11 @@ class Booking extends Model
         return $this->leadCustomerId;
     }
 
+    public function isBookingCancellable(): bool
+    {
+        return $this->getCancellable() == 1;
+    }
+
     protected static function getBookingStatus(SimpleXMLElement $bookingData): string
     {
         if ((int) $bookingData->cancel_reason !== 0) {

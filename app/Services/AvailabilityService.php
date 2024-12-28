@@ -15,7 +15,7 @@ use App\Transformers\BaseTransformer;
 use DateInterval;
 use DateTime;
 use DateTimeZone;
-
+use SimpleXMLElement;
 
 class AvailabilityService
 {
@@ -184,6 +184,34 @@ class AvailabilityService
         $availability = $availabilityRequest->getAvailabilityFromDeparturesById($availabilityId, $departures);
 
         return $availability;
+    }
+
+    public function generateAvailabilityFromBookingXML(SimpleXMLElement $showBookingXML): Availability
+    {
+        $components = $this->tourCMSService->getArrayFromXmlNode($showBookingXML->booking->components, 'component');
+        $component = $components[0];
+
+        list($startTimeHours, $startTimeMinutes) = explode(":", $component->start_time ? (string) $component->start_time : '00:00');
+        list($endTimeHours, $endTimeMinutes) = explode(":", $component->end_time ? (string) $component->end_time : '23:59');
+
+        $availability = new Availability();
+        $availability->setId($this->generateAvailabilityIdFromComponent($component));
+
+        $availability->setDepartureId((int) $component->departure_id);
+        $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $component->start_date, $startTimeHours, $startTimeMinutes));
+        $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $component->end_date, $endTimeHours, $endTimeMinutes));
+        $availability->setAllDay(false);
+        $availability->setOpeningHoursFrom($component->start_time ?? '00:00');
+        $availability->setOpeningHoursTo($component->end_time ?? '23:59');
+
+        return $availability;
+    }
+
+    public function generateAvailabilityIdFromComponent(SimpleXMLElement $component): string
+    {
+        $departureId = (string)$component->date_id;
+        $startDate = (string)$component->start_date;
+        return "{$startDate}|{$departureId}";
     }
 
     protected function checkRequiredParams(array $requestParams):bool

@@ -6,7 +6,7 @@ use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Booking;
 use App\Models\Contact;
 
-class BookingConfirmationService
+class BookingConfirmationService extends BookingService
 {
     const ERROR_BOOKING_ALREADY_COMITTED = 'BOOKING ALREADY COMMITTED';
     const ERROR_BOOKING_NOT_FOUND = 'API return no matching data, invalid booking ID / channel';
@@ -20,18 +20,7 @@ class BookingConfirmationService
         public ContactService $contactService
     )
     {
-        
-    }
-
-    public function getBookingByUuid(string $uuid): Booking
-    {
-        $booking = Booking::find($uuid);
-        
-        if (is_null($booking)) {
-            throw new InvalidBookingUUIDException($uuid);
-        }
-
-        return $booking;
+        parent::__construct($tourCMSService, $logger, $productService, $availabilityService);
     }
 
     public function confirmBooking(Booking $booking): Booking
@@ -53,28 +42,6 @@ class BookingConfirmationService
         $booking = $this->getBooking($booking);
 
         return $booking;
-    }
-
-    public function getBooking(Booking $booking): Booking
-    {
-        $showBookingResponse = $this->tourCMSService->showBooking($booking->getBookingId());
-        $this->logger->info(["showBookingResponse" => $showBookingResponse]);
-        
-        $product = $this->productService->find($booking->product_id);
-        $option = $product->getOptionById($booking->option_id);
-
-        $tourId = explode('|', explode('_', $booking->product_id)[2])[0];
-        $availability = $this->availabilityService->find($booking->availability_id, $tourId, $booking->option_id);
-        $unitItems = json_decode($booking->unit_items, 1);
-
-        return Booking::createFromShowBookingXML(
-            $booking->getUuid(),
-            $showBookingResponse, 
-            $product, 
-            $option, 
-            $availability, 
-            $unitItems
-        );
     }
 
     public function addContactToBooking(array $contactData, Booking $booking): Booking
