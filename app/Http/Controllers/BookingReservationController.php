@@ -3,17 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\InvalidAvailabilityIdException;
-use App\Factories\AvailabilityRequestFactory;
-use App\Features\Availability\AvailabilityRequest;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Requests\OctoRequest;
-use App\Models\Availability\Availability;
 use App\Services\AvailabilityService;
 use App\Services\BookingReservationService;
 use App\Services\JSONLogService;
 use App\Services\OptionService;
 use App\Services\ProductService;
-use App\Services\TourCMSService;
 use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\BookingTransformer;
