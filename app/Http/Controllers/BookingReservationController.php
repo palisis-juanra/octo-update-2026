@@ -7,6 +7,7 @@ use App\Factories\AvailabilityRequestFactory;
 use App\Features\Availability\AvailabilityRequest;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Requests\OctoRequest;
+use App\Models\Availability\Availability;
 use App\Services\AvailabilityService;
 use App\Services\BookingReservationService;
 use App\Services\JSONLogService;
@@ -73,7 +74,7 @@ class BookingReservationController extends Controller
         $this->optionService->validateOptionId($optionId);
 
         $availabilityId = $params[OctoRequest::AVAILABILITY_ID] ?? '';
-        if (empty($availabilityId)){
+        if (empty($availabilityId) || !$this->availabilityService->validateAvailabilityId($availabilityId)){
             throw new InvalidAvailabilityIdException($availabilityId);
         }
 
