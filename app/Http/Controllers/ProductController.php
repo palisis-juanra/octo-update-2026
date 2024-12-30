@@ -348,7 +348,7 @@ class ProductController extends Controller
         } catch (InvalidProductContentException $e) {
             $this->logger->info("INVALID PRODUCT CONTENT: {$e->getFile()} ({$e->getLine()}");
             return OctoResponse::INVALID_PRODUCT_ID($productId, $e->getMessage());
-        } catch (NoMatchingDataException) {
+        } catch (NoMatchingDataException $e) {
             $this->logger->info("NO MATCHING DATA: {$e->getFile()} ({$e->getLine()}");
             return OctoResponse::INVALID_PRODUCT_ID($productId);
         } catch (APICallNotOKException) {

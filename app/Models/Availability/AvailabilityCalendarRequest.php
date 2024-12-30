@@ -14,10 +14,12 @@ class AvailabilityCalendarRequest
     const START_TIME_DEFAULT = '00:00';
     const END_TIME_DEFAULT = '23:59';
     const SPACES_REMAINING_UNLIMITED = 'UNLIMITED';
+
     public string $tourId;
     public string $optionId;
     public string $localDateStart;
     public string $localDateEnd;
+    
     protected array $units;
 
     public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '', ?array $units = null)

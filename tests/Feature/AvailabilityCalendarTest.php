@@ -56,67 +56,77 @@ class AvailabilityCalendarTest extends FeatureTestCase
 
     public function test_whenWeDontSendProductId_thenWeGetBadRequestResponse(): void
     {
-        $response = $this->post(self::AVAILABILIY_PATH, 
-        [
-            'optionId' => self::VALID_OPTION_ID,
-            'localDateStart' => self::VALID_LOCAL_DATE,
-            'localDateEnd' => self::VALID_LOCAL_DATE
-        ], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
-    );
-        
+        $response = $this->post(
+            self::AVAILABILIY_PATH,
+            [
+                'optionId' => self::VALID_OPTION_ID,
+                'localDateStart' => self::VALID_LOCAL_DATE,
+                'localDateEnd' => self::VALID_LOCAL_DATE
+            ],
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+        );
+
         $response->assertBadRequest();
     }
 
     public function test_whenWeDontSendOptionId_thenWeGetBadRequestResponse(): void
     {
-        $response = $this->post(self::AVAILABILIY_PATH, 
-        [
-            'productId' => self::VALID_PRODUCT_ID,
-            'localDateStart' => self::VALID_LOCAL_DATE,
-            'localDateEnd' => self::VALID_LOCAL_DATE
-        ], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
-    );
-        
+        $response = $this->post(
+            self::AVAILABILIY_PATH,
+            [
+                'productId' => self::VALID_PRODUCT_ID,
+                'localDateStart' => self::VALID_LOCAL_DATE,
+                'localDateEnd' => self::VALID_LOCAL_DATE
+            ],
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+        );
+
         $response->assertBadRequest();
     }
 
     public function test_whenWeDontSendlocalDateStart_thenWeGetBadRequestResponse(): void
     {
-        $response = $this->post(self::AVAILABILIY_PATH, 
-        [
-            'productId' => self::VALID_PRODUCT_ID,
-            'optionId' => self::VALID_OPTION_ID,
-            'localDateEnd' => self::VALID_LOCAL_DATE
-        ], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
-    );
-        
+        $response = $this->post(
+            self::AVAILABILIY_PATH,
+            [
+                'productId' => self::VALID_PRODUCT_ID,
+                'optionId' => self::VALID_OPTION_ID,
+                'localDateEnd' => self::VALID_LOCAL_DATE
+            ],
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+        );
+
         $response->assertBadRequest();
     }
 
     public function test_whenWeDontSendLocalDateEnd_thenWeGetBadRequestResponse(): void
     {
-        $response = $this->post(self::AVAILABILIY_PATH, 
-        [
-            'productId' => self::VALID_PRODUCT_ID,
-            'optionId' => self::VALID_OPTION_ID,
-            'localDateStart' => self::VALID_LOCAL_DATE,
-        ], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
-    );
-        
+        $response = $this->post(
+            self::AVAILABILIY_PATH,
+            [
+                'productId' => self::VALID_PRODUCT_ID,
+                'optionId' => self::VALID_OPTION_ID,
+                'localDateStart' => self::VALID_LOCAL_DATE,
+            ],
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+        );
+
         $response->assertBadRequest();
     }
 
     public function test_whenWeSendInvalidProductId_thenWeGetBadRequestResponse(): void
     {
-        $response = $this->post(self::AVAILABILIY_PATH, 
-        [
-            'productId' => self::INVALID_PRODUCT_ID,
-            'optionId' => self::VALID_OPTION_ID,
-            'localDateStart' => self::VALID_LOCAL_DATE,
-            'localDateEnd' => self::VALID_LOCAL_DATE
-        ], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
-    );
-        
+        $response = $this->post(
+            self::AVAILABILIY_PATH,
+            [
+                'productId' => self::INVALID_PRODUCT_ID,
+                'optionId' => self::VALID_OPTION_ID,
+                'localDateStart' => self::VALID_LOCAL_DATE,
+                'localDateEnd' => self::VALID_LOCAL_DATE
+            ],
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+        );
+
         $responseData = $response->decodeResponseJson();
         $response->assertBadRequest();
         $this->assertEquals(OctoResponse::ERROR_CODE_INVALID_PRODUCT_ID, $responseData['error']);
@@ -125,13 +135,15 @@ class AvailabilityCalendarTest extends FeatureTestCase
 
     public function test_whenWeSendInvalidOptionId_thenWeGetBadRequestResponse(): void
     {
-        $response = $this->post(self::AVAILABILIY_PATH, 
+        $response = $this->post(
+            self::AVAILABILIY_PATH,
             [
                 'productId' => self::VALID_PRODUCT_ID,
                 'optionId' => self::INVALID_OPTION_ID,
                 'localDateStart' => self::VALID_LOCAL_DATE,
                 'localDateEnd' => self::VALID_LOCAL_DATE
-            ], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+            ],
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
         );
 
         $responseData = $response->decodeResponseJson();
@@ -142,13 +154,15 @@ class AvailabilityCalendarTest extends FeatureTestCase
 
     public function test_whenWeSendInvalidLocalDateStart_thenWeGetBadRequestResponse(): void
     {
-        $response = $this->post(self::AVAILABILIY_PATH, 
+        $response = $this->post(
+            self::AVAILABILIY_PATH,
             [
                 'productId' => self::VALID_PRODUCT_ID,
                 'optionId' => self::VALID_OPTION_ID,
                 'localDateStart' => self::INVALID_LOCAL_DATE,
                 'localDateEnd' => self::VALID_LOCAL_DATE
-            ], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+            ],
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
         );
 
         $response->assertBadRequest();
@@ -156,13 +170,15 @@ class AvailabilityCalendarTest extends FeatureTestCase
 
     public function test_whenWeSendInvalidLocalDateEnd_thenWeGetBadRequestResponse(): void
     {
-        $response = $this->post(self::AVAILABILIY_PATH, 
+        $response = $this->post(
+            self::AVAILABILIY_PATH,
             [
                 'productId' => self::VALID_PRODUCT_ID,
                 'optionId' => self::VALID_OPTION_ID,
                 'localDateStart' => self::VALID_LOCAL_DATE,
                 'localDateEnd' => self::INVALID_LOCAL_DATE
-            ], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+            ],
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
         );
 
         $response->assertBadRequest();
@@ -172,20 +188,20 @@ class AvailabilityCalendarTest extends FeatureTestCase
     {
 
         $response = $this->post(
-            self::AVAILABILIY_PATH, 
+            self::AVAILABILIY_PATH,
             [
-                'productId' => self::VALID_PRODUCT_ID, 
+                'productId' => self::VALID_PRODUCT_ID,
                 'optionId' => self::VALID_OPTION_ID,
                 'localDateStart' => self::VALID_LOCAL_DATE,
                 'localDateEnd' => self::VALID_LOCAL_DATE
-            ], 
+            ],
             [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
         );
 
         $responseData = $response->decodeResponseJson();
         $response->assertOk();
 
-        $this->assertNotEmpty($responseData);        
+        $this->assertNotEmpty($responseData);
     }
 }
 

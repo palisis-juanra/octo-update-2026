@@ -28,7 +28,7 @@ class CalendarAvailability extends Model
      *
      * @return  self
      */ 
-    public function setLocalDate($localDate): self
+    public function setLocalDate(string $localDate): self
     {
         $this->localDate = $localDate;
 
@@ -48,7 +48,7 @@ class CalendarAvailability extends Model
      *
      * @return  self
      */ 
-    public function setAvailable($available): self
+    public function setAvailable(bool $available): self
     {
         $this->available = $available;
 
@@ -68,7 +68,7 @@ class CalendarAvailability extends Model
      *
      * @return  self
      */ 
-    public function setStatus($status): self
+    public function setStatus(string $status): self
     {
         $this->status = $status;
 
@@ -88,7 +88,7 @@ class CalendarAvailability extends Model
      *
      * @return  self
      */ 
-    public function setVacancies($vacancies): self
+    public function setVacancies(?int $vacancies): self
     {
         $this->vacancies = $vacancies;
 
@@ -108,7 +108,7 @@ class CalendarAvailability extends Model
      *
      * @return  self
      */ 
-    public function setCapacity($capacity): self
+    public function setCapacity(?int $capacity): self
     {
         $this->capacity = $capacity;
 
@@ -128,7 +128,7 @@ class CalendarAvailability extends Model
      *
      * @return  self
      */ 
-    public function setOpeningHours($openingHours): self
+    public function setOpeningHours(array $openingHours): self
     {
         $this->openingHours = $openingHours;
 

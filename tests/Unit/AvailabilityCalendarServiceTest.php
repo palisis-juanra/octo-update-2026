@@ -91,6 +91,43 @@ class AvailabilityCalendarServiceTest extends UnitTestCase
         $availabilityCalendarServiceMock->validateRequestParams($requestParams);
     }
 
+    public function test_validateRequestParams_whenCallWithLocalDateEndEarlierThanLocalDateStart_thenShouldThrowAvailabilityRequestInvalidParamException()
+    {
+        // Given
+        $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods(['validateProductId'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->method('validateProductId')->willReturn(true);
+
+        $optionServiceMock = $this->getMockBuilder(OptionService::class)
+            ->onlyMethods(['validateOptionId'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $optionServiceMock->method('validateOptionId')->willReturn(true);
+
+        $availabilityCalendarServiceMock->productService = $productServiceMock;
+        $availabilityCalendarServiceMock->optionService = $optionServiceMock;
+        
+        $requestParams = [
+            "productId" => self::VALID_PRODUCT_ID,
+            "optionId" => self::VALID_OPTION_ID,
+            "localDateStart" => self::VALID_LOCAL_DATE_END,
+            "localDateEnd" => self::VALID_LOCAL_DATE_START,
+            "channel" => self::VALID_CHANNEL
+        ];
+
+        // Then
+        $this->expectException(AvailabilityRequestInvalidParamException::class);
+
+        $availabilityCalendarServiceMock->validateRequestParams($requestParams);
+    }
+
     public function test_validateRequestParams_whenCallWithInvalidDate_thenShouldThrowAvailabilityRequestInvalidParamException()
     {
         // Given

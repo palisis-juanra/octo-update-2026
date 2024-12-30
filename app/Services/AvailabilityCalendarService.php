@@ -26,6 +26,7 @@ class AvailabilityCalendarService
     const DATE_FORMAT = 'Y-m-d';
     const ERROR_MESSAGE_LOCAL_DATE_START_INVALID = 'localDateStart must be a valid date in format YYYY-MM-DD';
     const ERROR_MESSAGE_LOCAL_DATE_END_INVALID = 'localDateEnd must be a valid date in format YYYY-MM-DD';
+    const ERROR_MESSAGE_LOCAL_DATE_INVALID_ORDER = 'localDateEnd must not be earlier than localDateStart';
     const ERROR_MESSAGE_EMPTY_REQUIRED_PARAM = 'Empty required param';
     const ERROR_MESSAGE_MISSING_REQUIRED_PARAMS = 'Missing Required Params: ';
 
@@ -100,8 +101,13 @@ class AvailabilityCalendarService
         }
 
         $localDateEnd = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_END] ?? '';
+
         if ($this->validateDate($localDateEnd) === false) {
             throw new AvailabilityRequestInvalidParamException(self::ERROR_MESSAGE_LOCAL_DATE_END_INVALID);
+        }
+
+        if ($localDateStart > $localDateEnd) {
+            throw new AvailabilityRequestInvalidParamException(self::ERROR_MESSAGE_LOCAL_DATE_INVALID_ORDER);
         }
     }
 
