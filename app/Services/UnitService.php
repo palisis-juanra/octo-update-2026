@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class UnitService
 {
-    public const UNIT_ID_REGEX = '/^([A-Z]{2}_\d+_\d+\|r\d+)$/';
+    public const UNIT_ID_REGEX = '/^[A-Z]{2}_\d+_\d+\|r(10|[1-9])$/';
     public const ID_FIELD = 'id';
     public const UNIT_ID_FIELD = 'unitId';
     public const UNIT_QUANTITY_FIELD = 'quantity';
