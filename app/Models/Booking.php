@@ -159,7 +159,8 @@ class Booking extends Model
         Product $product,
         Option $option,
         Availability $availability,
-        array $unitItems
+        array $unitItems,
+        Contact $contact
     ): Booking
     {
         $booking = new Booking();
@@ -172,7 +173,10 @@ class Booking extends Model
         $booking->setChannelId((int) $bookingData->channel_id);
 
         $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
-
+        if (isset($bookingData->agent_ref) && !empty((string)$bookingData->agent_ref)) {
+            $booking->setResellerReference((string) $bookingData->agent_ref);
+        }
+        $booking->setContact($contact);
         $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
         $booking->setUtcExpiresAt(isset($bookingData->expiry_date_at_utc_seconds) ? (int) $bookingData->expiry_date_at_utc_seconds : null);
         $booking->setUtcConfirmedAt(isset($bookingData->confirmed_at_utc_seconds) ? (int) $bookingData->confirmed_at_utc_seconds : null);
@@ -411,6 +415,13 @@ class Booking extends Model
     public function getResellerReference(): ?string
     {
         return $this->resellerReference;
+    }
+
+    public function setResellerReference(string $resellerReference): self
+    {
+        $this->resellerReference = $resellerReference;
+
+        return $this;
     }
 
     public function setSupplierReference(string $supplierReference): self

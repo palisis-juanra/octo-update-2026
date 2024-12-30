@@ -132,10 +132,13 @@ class TourCMSService
         return $this->handleResponse($response); 
     }
 
-    public function commitBooking(string $bookingId): SimpleXMLElement
+    public function commitBooking(string $bookingId, ?string $agentRef = ''): SimpleXMLElement
     {
         $bookingData = new SimpleXMLElement('<booking />');
         $bookingData->addChild('booking_id', $bookingId);
+        if (!empty($agentRef)) {
+            $bookingData->addChild('agent_ref', $agentRef);
+        }
         $response = $this->tourCMS->commit_new_booking($bookingData, $this->channelId);
         return $this->handleResponse($response);
     }

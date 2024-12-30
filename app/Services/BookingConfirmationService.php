@@ -25,7 +25,7 @@ class BookingConfirmationService extends BookingService
 
     public function confirmBooking(Booking $booking): Booking
     {
-        $commitBookingResponse = $this->tourCMSService->commitBooking($booking->booking_id);
+        $commitBookingResponse = $this->tourCMSService->commitBooking($booking->booking_id, $booking->getResellerReference());
         $this->logger->info(["commitBookingResponse" => $commitBookingResponse]);
         $error = (string) $commitBookingResponse->error;
 

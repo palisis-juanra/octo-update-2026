@@ -10,4 +10,5 @@ class OctoRequest
     public const UNIT_ITEMS = 'unitItems';
     public const UUID = 'uuid';
     public const CONTACT = 'contact';
+    public const RESELLER_REFERENCE = 'resellerReference';
 }

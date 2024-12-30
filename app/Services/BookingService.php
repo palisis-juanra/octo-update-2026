@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Availability\Availability;
 use App\Models\Booking;
+use App\Models\Contact;
 use SimpleXMLElement;
 
 class BookingService
@@ -36,6 +37,7 @@ class BookingService
         $availability = new Availability();
         $availability = $this->availabilityService->generateAvailabilityFromBookingXML($showBookingResponse);
         $unitItems = json_decode($booking->unit_items, 1);
+        $contact = Contact::createContactArrayFromXML($showBookingResponse);
 
         return Booking::createFromShowBookingXML(
             $booking->getUuid(),
@@ -43,7 +45,8 @@ class BookingService
             $product, 
             $option, 
             $availability, 
-            $unitItems
+            $unitItems,
+            $contact
         );
     }
 }
