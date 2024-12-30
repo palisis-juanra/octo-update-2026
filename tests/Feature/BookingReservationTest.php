@@ -117,7 +117,7 @@ class BookingReservationTest extends FeatureTestCase
         $bookingReservationController->availabilityService = $availabilityServiceMock;
         $bookingReservationController->optionService = new OptionService();
         $bookingReservationController->unitService = new UnitService();
-        $bookingReservationController->bookingService = new BookingReservationService($tourCMSServiceMock, $productService, $this->getLoggerMock());
+        $bookingReservationController->bookingService = new BookingReservationService($tourCMSServiceMock, $productService, $availabilityServiceMock, $this->getLoggerMock());
         $bookingReservationController->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
         
         $this->instance(BookingReservationController::class, $bookingReservationController);
