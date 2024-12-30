@@ -31,7 +31,7 @@ class BookingGetTest extends FeatureTestCase
     const INVALID_BOOKING_UUID = 'invalid booking id';
     const TCMS_BOOKING_ID = 4093;
     const VALID_PRODUCT_ID = 'TE_1_67|142';
-    const VALID_AVAILABILITY_ID = '5f981c36-d5ac-49a9-bbd3-ebf2ccdb0229';
+    const VALID_AVAILABILITY_ID = '2024-12-22|32310';
     const VALID_OPTION_ID = 'START_TIME';
     const VALID_UNIT_ITEMS = [
         [

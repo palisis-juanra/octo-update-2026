@@ -24,7 +24,7 @@ class BookingReservationTest extends FeatureTestCase
     const BOOKINGS_ENDPOINT = '/bookings';
     const VALID_PRODUCT_ID = 'TE_1_67|142';
     const INVALID_PRODUCT_ID = 'invalidProductId';
-    const VALID_AVAILABILITY_ID = '5f981c36-d5ac-49a9-bbd3-ebf2ccdb0229';
+    const VALID_AVAILABILITY_ID = '2024-12-05|32293';
     const INVALID_AVAILABILITY_ID = 'invalidAvailabilityId';
     const VALID_OPTION_ID = 'START_TIME';
     const INVALID_OPTION_ID = 'invalidOptionId';
