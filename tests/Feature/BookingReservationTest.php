@@ -6,6 +6,7 @@ use App\Http\Controllers\BookingReservationController;
 use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Models\Availability\Availability;
+use App\Models\Booking;
 use App\Services\AvailabilityService;
 use App\Services\BookingReservationService;
 use App\Services\LocaleService;
@@ -15,13 +16,17 @@ use App\Services\TourCMSService;
 use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\BookingTransformer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\FeatureTestCase;
 use Illuminate\Testing\TestResponse;
 use SimpleXMLElement;
 
 class BookingReservationTest extends FeatureTestCase
 {
+    use RefreshDatabase;
+
     const BOOKINGS_ENDPOINT = '/bookings';
+    const RESPONSE_TEMPORARY_BOOKING_ID = '1|142|3889';
     const VALID_PRODUCT_ID = 'TE_1_67|142';
     const INVALID_PRODUCT_ID = 'invalidProductId';
     const VALID_AVAILABILITY_ID = '2024-12-05|32293';
@@ -123,7 +128,7 @@ class BookingReservationTest extends FeatureTestCase
         $this->instance(BookingReservationController::class, $bookingReservationController);
     }
     
-    public function test_whenRequestDoesNotHaveProductId_thenWeReturnBadRequest(): void
+    public function test_whenRequestDoesNotHaveProductId_thenWeReturnBadRequestAndInvalidProductIdErrorMessage(): void
     {
             $body = [
                 OctoRequest::AVAILABILITY_ID => self::VALID_AVAILABILITY_ID,
@@ -138,7 +143,7 @@ class BookingReservationTest extends FeatureTestCase
             $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_PRODUCT_ID);
     }
 
-    public function test_whenRequestHaveEmptyProductId_thenWeReturnBadRequest(): void
+    public function test_whenRequestHaveEmptyProductId_thenWeReturnBadRequestAndInvalidProductIdErrorMessage(): void
     {
             $body = [
                 OctoRequest::PRODUCT_ID => '',
@@ -154,7 +159,7 @@ class BookingReservationTest extends FeatureTestCase
             $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_PRODUCT_ID);
     }
 
-    public function test_whenRequestHaveAnInvalidProductId_thenWeReturnBadRequest(): void
+    public function test_whenRequestHaveAnInvalidProductId_thenWeReturnBadRequestAndInvalidProductIdErrorMessage(): void
     {
             $body = [
                 OctoRequest::PRODUCT_ID => self::INVALID_PRODUCT_ID,
@@ -170,7 +175,7 @@ class BookingReservationTest extends FeatureTestCase
             $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_PRODUCT_ID);
     }
 
-    public function test_whenRequestDoesNotHaveOptionId_thenWeReturnBadRequest(): void
+    public function test_whenRequestDoesNotHaveOptionId_thenWeReturnBadRequestAndInvalidOptionIdErrorMessage(): void
     {
             $body = [
                 OctoRequest::PRODUCT_ID => self::VALID_PRODUCT_ID,
@@ -185,7 +190,7 @@ class BookingReservationTest extends FeatureTestCase
             $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_OPTION_ID);
     }
 
-    public function test_whenRequestHaveEmptyOptionId_thenWeReturnBadRequest(): void
+    public function test_whenRequestHaveEmptyOptionId_thenWeReturnBadRequestAndInvalidOptionIdErrorMessage(): void
     {
         
         $body = [
@@ -203,7 +208,7 @@ class BookingReservationTest extends FeatureTestCase
         
     }
 
-    public function test_whenRequestHaveInvalidOptionId_thenWeReturnBadRequest(): void
+    public function test_whenRequestHaveInvalidOptionId_thenWeReturnBadRequestAndInvalidOptionIdErrorMessage(): void
     {
     
         $body = [
@@ -221,7 +226,7 @@ class BookingReservationTest extends FeatureTestCase
         
     }
 
-    public function test_whenRequestDoesNotHaveUnitItems_thenWeReturnBadRequest(): void
+    public function test_whenRequestDoesNotHaveUnitItems_thenWeReturnBadRequestAndInvalidUnitItemsErrorMessage(): void
     {
         $body = [
             OctoRequest::PRODUCT_ID => self::VALID_PRODUCT_ID,
@@ -237,7 +242,7 @@ class BookingReservationTest extends FeatureTestCase
         $this->assertEquals($responseData['errorMessage'], UnitService::ERROR_MESSAGE_INVALID_UNIT_ITEMS);
     }
 
-    public function test_whenRequestHaveInvalidUnitItems_thenWeReturnBadRequest(): void
+    public function test_whenRequestHaveInvalidUnitItems_thenWeReturnBadRequestAndInvalidUnitItemsErrorMessage(): void
     {
         $body = [
             OctoRequest::PRODUCT_ID => self::VALID_PRODUCT_ID,
@@ -304,7 +309,7 @@ class BookingReservationTest extends FeatureTestCase
         $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_AVAILABILITY_ID);
     }
 
-    public function test_whenRequestIsCorrect_thenWeReturnBookingInformation(): void
+    public function test_whenRequestIsCorrect_thenWeReturnHttpOKAndBookingInformation(): void
     {
         $body = [
             OctoRequest::PRODUCT_ID => self::VALID_PRODUCT_ID,
@@ -316,8 +321,15 @@ class BookingReservationTest extends FeatureTestCase
         // Call endpoint
         $response = $this->callEndpoint($body);
 
-        $responseData = $response->decodeResponseJson();
         $response->assertOk();
+        $responseData = $response->decodeResponseJson();
+        $responseData->assertFragment([
+            "id" => self::RESPONSE_TEMPORARY_BOOKING_ID,
+            "productId" => self::VALID_PRODUCT_ID,
+            "status" => Booking::STATUS_ON_HOLD,
+            "availabilityId" => self::VALID_AVAILABILITY_ID,
+            "optionId" => self::VALID_OPTION_ID
+        ]);
     }
 
     protected function callEndpoint(array $body): TestResponse
