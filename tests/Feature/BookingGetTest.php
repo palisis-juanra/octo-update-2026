@@ -9,7 +9,7 @@ use App\Http\Responses\OctoResponse;
 use App\Models\Availability\Availability;
 use App\Models\Booking;
 use App\Services\AvailabilityService;
-use App\Services\BookingConfirmationService;
+use App\Services\BookingService;
 use App\Services\LocaleService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
@@ -42,7 +42,7 @@ class BookingGetTest extends FeatureTestCase
         ]
     ];
 
-    public MockObject $bookingConfirmationServiceMock;
+    public MockObject $bookingServiceMock;
     public BookingTransformer $transformer;
 
     public SimpleXMLElement $showTourXML;
@@ -60,13 +60,13 @@ class BookingGetTest extends FeatureTestCase
 
     public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
     {
-        $this->createBookingConfirmationServiceMock(['getBookingByUuid']);
+        $this->createBookingServiceMock(['getBookingByUuid']);
 
-        $this->bookingConfirmationServiceMock
+        $this->bookingServiceMock
             ->method('getBookingByUuid')
             ->willThrowException(new InvalidBookingUUIDException(self::INVALID_BOOKING_UUID));
 
-        $this->instance(BookingConfirmationService::class, $this->bookingConfirmationServiceMock);
+        $this->instance(BookingService::class, $this->bookingServiceMock);
 
         $response = $this->getJson(
             "/bookings/" . self::INVALID_BOOKING_UUID
@@ -80,13 +80,13 @@ class BookingGetTest extends FeatureTestCase
 
     public function test_whenBookingNotFound_thenExpectsInvalidBookingUuidError(): void
     {
-        $this->createBookingConfirmationServiceMock(['getBookingByUuid']);
+        $this->createBookingServiceMock(['getBookingByUuid']);
 
-        $this->bookingConfirmationServiceMock
+        $this->bookingServiceMock
             ->method('getBookingByUuid')
             ->willThrowException(new NoMatchingDataException());
 
-        $this->instance(BookingConfirmationService::class, $this->bookingConfirmationServiceMock);
+        $this->instance(BookingService::class, $this->bookingServiceMock);
 
         $response = $this->getJson(
             "/bookings/" . self::VALID_BOOKING_UUID
@@ -99,9 +99,9 @@ class BookingGetTest extends FeatureTestCase
 
     public function test_whenApiCallFails_thenExpectsInternalServerError(): void
     {
-        $this->createBookingConfirmationServiceMock(['getBookingByUuid']);
+        $this->createBookingServiceMock(['getBookingByUuid']);
 
-        $this->bookingConfirmationServiceMock
+        $this->bookingServiceMock
             ->method('getBookingByUuid')
             ->willThrowException(new APICallNotOKException());
 
@@ -112,7 +112,7 @@ class BookingGetTest extends FeatureTestCase
         $response->assertStatus(Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
-    public function test_whenBookingUuidIsValid_thenReturnsBookingDetails(): void
+    public function test_whenBookingUuidIsValidAndAPIreturnsTheBooking_thenShouldReturnsBookingObject(): void
     {
         $this->showTourXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTour_67.xml'));
         $this->showBookingXML = simplexml_load_file('tests/TourCMSResponses/showBooking.xml');
@@ -173,8 +173,8 @@ class BookingGetTest extends FeatureTestCase
         $getBookingResponse->option_id = self::VALID_OPTION_ID;
         $getBookingResponse->availability_id = self::VALID_AVAILABILITY_ID;
         
-        $this->createBookingConfirmationServiceMock(['getBookingByUuid']);
-        $this->bookingConfirmationServiceMock
+        $this->createBookingServiceMock(['getBookingByUuid']);
+        $this->bookingServiceMock
             ->method('getBookingByUuid')
             ->willReturnCallback(function(string $uuid) use ($getBookingResponse): Booking {
                 if ($uuid == self::VALID_BOOKING_UUID) {
@@ -183,12 +183,12 @@ class BookingGetTest extends FeatureTestCase
                 throw new InvalidBookingUUIDException($uuid);
             });
         
-        $this->bookingConfirmationServiceMock->tourCMSService = $this->tourCMSServiceMock;
-        $this->bookingConfirmationServiceMock->logger = $this->getLoggerMock();
-        $this->bookingConfirmationServiceMock->productService = $this->productService;
-        $this->bookingConfirmationServiceMock->availabilityService = $this->availabilityServiceMock;
+        $this->bookingServiceMock->tourCMSService = $this->tourCMSServiceMock;
+        $this->bookingServiceMock->logger = $this->getLoggerMock();
+        $this->bookingServiceMock->productService = $this->productService;
+        $this->bookingServiceMock->availabilityService = $this->availabilityServiceMock;
         
-        $this->instance(BookingConfirmationService::class, $this->bookingConfirmationServiceMock);
+        $this->instance(BookingService::class, $this->bookingServiceMock);
 
         $response = $this->getJson(
             "/bookings/" . self::VALID_BOOKING_UUID
@@ -205,9 +205,9 @@ class BookingGetTest extends FeatureTestCase
             "optionId" => self::VALID_OPTION_ID
         ]);
     }
-    protected function createBookingConfirmationServiceMock(array $methods): void
+    protected function createBookingServiceMock(array $methods): void
     {
-        $this->bookingConfirmationServiceMock = $this->getMockBuilder(BookingConfirmationService::class)
+        $this->bookingServiceMock = $this->getMockBuilder(BookingService::class)
         ->disableOriginalConstructor()
         ->onlyMethods($methods)
         ->getMock();

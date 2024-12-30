@@ -70,9 +70,9 @@ class BookingReservationController extends Controller
         $this->optionService->validateOptionId($optionId);
 
         $availabilityId = $params[OctoRequest::AVAILABILITY_ID] ?? '';
-        if (empty($availabilityId) || !$this->availabilityService->validateAvailabilityId($availabilityId)){
+        if (!$this->availabilityService->validateAvailabilityId($availabilityId)) {
             throw new InvalidAvailabilityIdException($availabilityId);
-        }
+        };
 
         $unitItems = $params[OctoRequest::UNIT_ITEMS] ?? [];
         $this->unitService->validateUnitItems($unitItems);

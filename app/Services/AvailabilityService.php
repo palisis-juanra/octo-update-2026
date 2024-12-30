@@ -224,16 +224,15 @@ class AvailabilityService
 
     public function validateAvailabilityId(string $availabilityId):bool
     {
-        if (!preg_match(self::AVAILABILITY_ID_REGEX, $availabilityId)) {
-            throw new InvalidAvailabilityIdException($availabilityId);
-        }
-        return true;
+        return !(empty($availabilityId) || !preg_match(self::AVAILABILITY_ID_REGEX, $availabilityId));
     }
 
     public function validateAvailabilityIds(array $availabilityIds): bool
     {
         foreach ($availabilityIds as $availabilityId) {
-            $this->validateAvailabilityId($availabilityId);
+            if (!$this->validateAvailabilityId($availabilityId)) {
+                throw new InvalidAvailabilityIdException($availabilityId);
+            };
         }
         return true;
     }

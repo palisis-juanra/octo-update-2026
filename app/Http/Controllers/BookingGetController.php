@@ -8,6 +8,7 @@ use App\Exceptions\NoMatchingDataException;
 use App\Facades\JSONLog;
 use App\Http\Responses\OctoResponse;
 use App\Services\BookingConfirmationService;
+use App\Services\BookingService;
 use App\Services\JSONLogService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\BookingTransformer;
@@ -19,11 +20,11 @@ class BookingGetController extends Controller
 {
     public const ENDPOINT_NAME = 'bookings';
 
-    public BookingConfirmationService $bookingService;
+    public BookingService $bookingService;
     public BookingTransformer $transformer;
     public JSONLogService $logger;
 
-    public function __construct(BookingConfirmationService $bookingService, JSONLogService $logger)
+    public function __construct(BookingService $bookingService, JSONLogService $logger)
     {
         $this->logger = $logger;
         $this->bookingService = $bookingService;

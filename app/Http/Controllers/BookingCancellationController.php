@@ -39,7 +39,7 @@ class BookingCancellationController extends Controller
 
         $bookingObject = $this->bookingCancelService->getBooking($booking);
         
-        if(!$bookingObject->isBookingCancellable()) {
+        if (!$bookingObject->isBookingCancellable()) {
             $this->logger->info("Booking not cancellable: {$bookingObject->getId()}");
             throw new BookingNotCancellableException;
         };
