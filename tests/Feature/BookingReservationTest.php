@@ -225,7 +225,7 @@ class BookingReservationTest extends FeatureTestCase
     {
         $body = [
             OctoRequest::PRODUCT_ID => self::VALID_PRODUCT_ID,
-            OctoRequest::AVAILABILITY_ID => self::INVALID_AVAILABILITY_ID,
+            OctoRequest::AVAILABILITY_ID => self::VALID_AVAILABILITY_ID,
             OctoRequest::OPTION_ID => self::VALID_OPTION_ID,
         ];
 
@@ -241,7 +241,7 @@ class BookingReservationTest extends FeatureTestCase
     {
         $body = [
             OctoRequest::PRODUCT_ID => self::VALID_PRODUCT_ID,
-            OctoRequest::AVAILABILITY_ID => self::INVALID_AVAILABILITY_ID,
+            OctoRequest::AVAILABILITY_ID => self::VALID_AVAILABILITY_ID,
             OctoRequest::OPTION_ID => self::VALID_OPTION_ID,
             OctoRequest::UNIT_ITEMS => []
         ];
@@ -252,6 +252,56 @@ class BookingReservationTest extends FeatureTestCase
         $response->assertBadRequest();
         $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_UNPROCESSABLE_ENTITY);
         $this->assertEquals($responseData['errorMessage'], UnitService::ERROR_MESSAGE_INVALID_UNIT_ITEMS);
+    }
+
+    public function test_whenRequestHaveInvalidAvailabilityId_thenWeReturnBadRequestAndInvalidAvailabilityError(): void
+    {
+        $body = [
+            OctoRequest::PRODUCT_ID => self::VALID_PRODUCT_ID,
+            OctoRequest::AVAILABILITY_ID => self::INVALID_AVAILABILITY_ID,
+            OctoRequest::OPTION_ID => self::VALID_OPTION_ID,
+            OctoRequest::UNIT_ITEMS => []
+        ];
+
+        $response = $this->callEndpoint($body);
+
+        $responseData = $response->decodeResponseJson();
+        $response->assertBadRequest();
+        $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_INVALID_AVAILABILITY_ID);
+        $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_AVAILABILITY_ID);
+    }
+
+    public function test_whenRequestHaveNoAvailabilityId_thenWeReturnBadRequestAndInvalidAvailabilityError(): void
+    {
+        $body = [
+            OctoRequest::PRODUCT_ID => self::VALID_PRODUCT_ID,
+            OctoRequest::OPTION_ID => self::VALID_OPTION_ID,
+            OctoRequest::UNIT_ITEMS => []
+        ];
+
+        $response = $this->callEndpoint($body);
+
+        $responseData = $response->decodeResponseJson();
+        $response->assertBadRequest();
+        $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_INVALID_AVAILABILITY_ID);
+        $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_AVAILABILITY_ID);
+    }
+
+    public function test_whenRequestHaveEmptyAvailabilityId_thenWeReturnBadRequestAndInvalidAvailabilityError(): void
+    {
+        $body = [
+            OctoRequest::PRODUCT_ID => self::VALID_PRODUCT_ID,
+            OctoRequest::AVAILABILITY_ID => '',
+            OctoRequest::OPTION_ID => self::VALID_OPTION_ID,
+            OctoRequest::UNIT_ITEMS => []
+        ];
+
+        $response = $this->callEndpoint($body);
+
+        $responseData = $response->decodeResponseJson();
+        $response->assertBadRequest();
+        $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_INVALID_AVAILABILITY_ID);
+        $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_AVAILABILITY_ID);
     }
 
     public function test_whenRequestIsCorrect_thenWeReturnBookingInformation(): void
