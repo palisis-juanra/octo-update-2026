@@ -147,7 +147,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         if (!empty($this->availabilityIds)) {
             $departures = $this->filterByAvailabilityIds($departures, $this->availabilityIds);
         }
-        return $this->getAvailabilitiesFromDepartures($departures);
+        return $this->getAvailabilitiesFromDepartures($departures, $tourCMSService);
     }
 
     public function getAvailabilityFromDeparturesById(string $availabilityId, array $departures): Availability
@@ -225,7 +225,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $departures;
     }
 
-    protected function getAvailabilitiesFromDepartures(array $departures):array
+    protected function getAvailabilitiesFromDepartures(array $departures, TourCMSService $tourCMSService):array
     {   
         $availabilities = [];
         foreach ($departures as $departure) {
@@ -249,7 +249,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
             $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
             if ($this->allowPricing) {
-                $pricing = $this->getPricingForMultipleDays($departure);
+                $pricing = $this->getPricingForMultipleDays($departure, $tourCMSService);
                 $availability->setCurrency($this->currency);
                 $availability->setPricing($pricing);
             }
@@ -280,22 +280,18 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         }
     }
 
-    protected function getPricingForMultipleDays(SimpleXMLElement $departure): AvailabilityPricing
+    protected function getPricingForMultipleDays(SimpleXMLElement $departure, TourCMSService $tourCMSService): AvailabilityPricing
     {
         $totalPricing = 0;
         $netPrice = 0;
+        $ratesArray = $this->ratesFromShowTourDepartureXML($departure, $tourCMSService);
         foreach ($this->units as $unit) {
-            $rateIndex = explode('|', $unit['id'])[1][1];
-            if($rateIndex == 1) {
-                $totalPricing += (float) $departure->main_price->rate_price * $unit['quantity'];
-                $netPrice += (float) $departure->main_price->net_price * $unit['quantity'];
-            } else {
-                if(!isset($departure->extra_rates->rate[$rateIndex - 2]->rate_price)) {
-                    throw new InvalidUnitIdException($unit['id']);
-                }
-                $totalPricing += (float) $departure->extra_rates->rate[$rateIndex - 2]->rate_price * $unit['quantity'];
-                $netPrice += (float) $departure->extra_rates->rate[$rateIndex - 2]->net_price * $unit['quantity'];
+            $rateId = explode('|', $unit['id'])[1];
+            if(!array_key_exists($rateId, $ratesArray)) {
+                throw new InvalidUnitIdException($unit['id']);
             }
+            $totalPricing += (float) $ratesArray[$rateId]->rate_price * $unit['quantity'];
+            $netPrice += (float) $ratesArray[$rateId]->net_price * $unit['quantity'];
         }
         $totalPricing = $totalPricing * 100;
         $netPrice = $netPrice * 100;
@@ -306,6 +302,17 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $netPrice,
             $this->currency
         );
+    }
+
+    protected function ratesFromShowTourDepartureXML(SimpleXMLElement $departure, TourCMSService $tourCMSService)
+    {
+        $ratesArray = [];
+        $ratesArray['r1'] = $departure->main_price;
+        $departureRates = $tourCMSService->getArrayFromXmlNode($departure->extra_rates, 'rate');
+        foreach ($departureRates as $rate) {
+            $ratesArray[(string)$rate->rate_id] = $rate;
+        } 
+        return $ratesArray;
     }
 
 }

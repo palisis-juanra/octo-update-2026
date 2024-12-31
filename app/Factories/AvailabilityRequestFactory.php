@@ -44,26 +44,17 @@ class AvailabilityRequestFactory
             }
         }
 
-        if (!empty($octoCapabilities) && strtolower($octoCapabilities) === 'pricing') {
-            
-            if (!empty($localDateStart) && !empty($localDateEnd)) {
-                $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, true);
-                $availabilityRequest->setMinBookingSize($minBookingSize);
-                $availabilityRequest->setUnits($units);
-                return $availabilityRequest;
-            }
-
+        $pricing = !empty($octoCapabilities) && strtolower($octoCapabilities) === 'pricing';
+        $multiDates = !empty($localDateStart) && !empty($localDateEnd);
+        if ($pricing && !$multiDates) {
             return new SingleDayPricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize);
         }
-        
-        if (!empty($localDateStart) && !empty($localDateEnd)) {
-            $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd);
-            $availabilityRequest->setMinBookingSize($minBookingSize);
-            $availabilityRequest->setUnits($units);
-            return $availabilityRequest;
+        if (!$multiDates) {
+            $localDateEnd = '';
+            $localDateStart = $localDate;
         }
 
-        $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDate);
+        $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, $pricing);
         $availabilityRequest->setMinBookingSize($minBookingSize);
         $availabilityRequest->setUnits($units);
         return $availabilityRequest;
