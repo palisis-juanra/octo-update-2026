@@ -5,14 +5,11 @@ namespace App\Http\Controllers;
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Exceptions\NoMatchingDataException;
-use App\Facades\JSONLog;
 use App\Http\Responses\OctoResponse;
-use App\Services\BookingConfirmationService;
 use App\Services\BookingService;
 use App\Services\JSONLogService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\BookingTransformer;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 

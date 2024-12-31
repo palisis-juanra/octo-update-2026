@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\BookingNotCancellableException;
-use App\Models\Booking;
 use App\Services\BookingCancellationService;
 use App\Services\JSONLogService;
 use App\Transformers\BaseTransformer;
