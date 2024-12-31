@@ -79,24 +79,6 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
         $this->assertEquals($requestParams["localDate"], $availabilityRequest->getLocalDateStart());
     }
 
-    public function test_whenRequestHasAPeriodOfTimeWithPricingHeader_thenMultiDayAvailabilityRequestIsCreated()
-    {
-        $requestParams = [
-            "productId" => "TE_1_67|142",
-            "optionId" => "START_TIME|13:00",
-            "localDateStart" => "2024-11-18",
-            "localDateEnd" => "2024-11-25",
-        ];
-
-        $availabilityRequest = $this->factory->get($requestParams, self::PRICING_HEADER);
-
-        $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
-        $this->assertInstanceOf(PricingAvailabilityRequest::class, $availabilityRequest);
-        $this->assertInstanceOf(MultiDayPricingAvailabilityRequest::class, $availabilityRequest);
-        $this->assertEquals($requestParams["localDateStart"], $availabilityRequest->getLocalDateStart());
-        $this->assertEquals($requestParams["localDateEnd"], $availabilityRequest->getLocalDateEnd());
-    }
-
     public function test_whenRequestHasMultipleAvailabilityIds_thenLocalDateStartAndLocalDateEndMatchMinAndMaxDate()
     {
         $requestParams = [

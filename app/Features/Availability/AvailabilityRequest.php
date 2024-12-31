@@ -3,11 +3,14 @@
 namespace App\Features\Availability;
 
 use App\Exceptions\InvalidAvailabilityIdException;
+use App\Exceptions\InvalidUnitIdException;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
 use App\Models\Availability\Availability;
+use App\Models\Availability\AvailabilityPricing;
+use SimpleXMLElement;
 
 class AvailabilityRequest extends BaseAvailabilityRequest
 {
@@ -19,13 +22,16 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected int $minBookingSize;
     protected int $maxUnits;
     protected string $cutoff;
+    protected bool $allowPricing;
+    protected string $currency;
 
-    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '')
+    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allowPricing = false)
     {
         $this->tourId = $tourId;
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
+        $this->allowPricing = $allowPricing;
     }
 
 // GET SET FUNCTIONS
@@ -116,6 +122,18 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $this;
     }
 
+    public function setAllowPricing(bool $allowPricing)
+    {
+        $this->allowPricing = $allowPricing;
+        return $this;
+    }
+
+    public function setCurrency(string $currency)
+    {
+        $this->currency = $currency;
+        return $this;
+    }
+
 // PUBLIC FUNCTIONS
 
     /**
@@ -199,7 +217,9 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         if (!isset($response->tour->dates_and_prices)) {
             return [];
         }
-
+        if ($this->allowPricing) {
+            $this->currency = $response->tour->sale_currency;
+        }
         $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
 
         return $departures;
@@ -209,6 +229,8 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     {   
         $availabilities = [];
         foreach ($departures as $departure) {
+
+          
             
             $availability = new Availability;
 
@@ -226,7 +248,11 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setUtcCutoffAt($this->cutoff);
             $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
             $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
-            
+            if ($this->allowPricing) {
+                $pricing = $this->getPricingForMultipleDays($departure);
+                $availability->setCurrency($this->currency);
+                $availability->setPricing($pricing);
+            }
             $availabilities[] = $availability;
 
         } 
@@ -252,6 +278,34 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         foreach ($availabilities as $availability) {
             $availability->save();
         }
+    }
+
+    protected function getPricingForMultipleDays(SimpleXMLElement $departure): AvailabilityPricing
+    {
+        $totalPricing = 0;
+        $netPrice = 0;
+        foreach ($this->units as $unit) {
+            $rateIndex = explode('|', $unit['id'])[1][1];
+            if($rateIndex == 1) {
+                $totalPricing += (float) $departure->main_price->rate_price * $unit['quantity'];
+                $netPrice += (float) $departure->main_price->net_price * $unit['quantity'];
+            } else {
+                if(!isset($departure->extra_rates->rate[$rateIndex - 2]->rate_price)) {
+                    throw new InvalidUnitIdException($unit['id']);
+                }
+                $totalPricing += (float) $departure->extra_rates->rate[$rateIndex - 2]->rate_price * $unit['quantity'];
+                $netPrice += (float) $departure->extra_rates->rate[$rateIndex - 2]->net_price * $unit['quantity'];
+            }
+        }
+        $totalPricing = $totalPricing * 100;
+        $netPrice = $netPrice * 100;
+
+        return new AvailabilityPricing(
+            $totalPricing,
+            $totalPricing,
+            $netPrice,
+            $this->currency
+        );
     }
 
 }

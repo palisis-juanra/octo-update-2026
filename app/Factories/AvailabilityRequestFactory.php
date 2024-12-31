@@ -47,7 +47,10 @@ class AvailabilityRequestFactory
         if (!empty($octoCapabilities) && strtolower($octoCapabilities) === 'pricing') {
             
             if (!empty($localDateStart) && !empty($localDateEnd)) {
-                return new MultiDayPricingAvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, $units, $currency, $minBookingSize);
+                $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, true);
+                $availabilityRequest->setMinBookingSize($minBookingSize);
+                $availabilityRequest->setUnits($units);
+                return $availabilityRequest;
             }
 
             return new SingleDayPricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize);
