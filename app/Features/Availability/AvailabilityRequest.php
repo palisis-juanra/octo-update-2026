@@ -218,7 +218,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             return [];
         }
         if ($this->allowPricing) {
-            $this->currency = $response->tour->sale_currency;
+            $this->currency = (string)$response->tour->sale_currency;
         }
         $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
 

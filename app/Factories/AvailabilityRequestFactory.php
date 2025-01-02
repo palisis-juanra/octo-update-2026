@@ -5,6 +5,7 @@ namespace App\Factories;
 use App\Features\Availability\AvailabilityRequest;
 use App\Features\Availability\Pricing\MultiDayPricingAvailabilityRequest;
 use App\Features\Availability\Pricing\SingleDayPricingAvailabilityRequest;
+use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\AvailabilityService;
 use App\Services\ProductService;
@@ -44,7 +45,7 @@ class AvailabilityRequestFactory
             }
         }
 
-        $pricing = !empty($octoCapabilities) && strtolower($octoCapabilities) === 'pricing';
+        $pricing = $this->isPricingAllowed($octoCapabilities);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
             return new SingleDayPricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize);
@@ -58,5 +59,10 @@ class AvailabilityRequestFactory
         $availabilityRequest->setMinBookingSize($minBookingSize);
         $availabilityRequest->setUnits($units);
         return $availabilityRequest;
+    }
+
+    protected function isPricingAllowed(string $octoCapabilities): bool
+    {
+        return !empty($octoCapabilities) && strtolower($octoCapabilities) === OctoRequest::CAPABILITIES_PRICING;
     }
 }
