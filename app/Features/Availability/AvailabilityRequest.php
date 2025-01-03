@@ -20,6 +20,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected string $localDateEnd;
     protected array $units;
     protected int $minBookingSize;
+    protected int $maxBookingSize;
     protected int $maxUnits;
     protected string $cutoff;
     protected bool $allowPricing;
@@ -122,6 +123,26 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $this;
     }
 
+    /**
+     * Get the value of maxBookingSize
+     */
+    public function getMaxBookingSize(): int
+    {
+        return $this->maxBookingSize;
+    }
+
+    /**
+     * Set the value of maxBookingSize
+     *
+     * @return  self
+     */
+    public function setMaxBookingSize(int $maxBookingSize)
+    {
+        $this->maxBookingSize = $maxBookingSize;
+        return $this;
+    }
+
+
     public function setAllowPricing(bool $allowPricing)
     {
         $this->allowPricing = $allowPricing;
@@ -206,6 +227,20 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             }
         }
         return $departure->spaces_remaining >= $spacesRequired;
+    }
+
+    protected function isAvailable(\SimpleXMLElement $departure): bool
+    {
+        $spacesRequired = $this->getMinBookingSize();
+        $spacesAllowed = $departure->spaces_remaining;
+        if (!empty($this->getUnits())) {
+            $spacesRequired = 0;
+            $spacesAllowed = $this->getMaxBookingSize();
+            foreach ($this->getUnits() as $unit) {
+                $spacesRequired += (int) $unit['quantity'];
+            }
+        }
+        return $departure->spaces_remaining >= $spacesRequired && $spacesAllowed >= $spacesRequired;
     }
 
     protected function fetchDeparturesFromAPI(TourCMSService $tourCMSService): array

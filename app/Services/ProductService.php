@@ -225,7 +225,8 @@ class ProductService
                 ->setRedemptionMethod($redemptionMethod)
                 ->setOptions($options)
                 ->setCutoff((array) $tour->cutoff)
-                ->setMinBookingSize((int) $tour->min_booking_size ?? 1);
+                ->setMinBookingSize((int) $tour->min_booking_size ?? 1)
+                ->setMaxBookingSize((int) $tour->max_booking_size ?? 1);
 
         return $product;
     }

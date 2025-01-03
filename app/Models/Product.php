@@ -338,6 +338,18 @@ class Product extends Model
         return $this;
     }
 
+    public function getMaxBookingSize(): int
+    {
+        return $this->maxBookingSize;
+    }
+
+    public function setMaxBookingSize(int $maxBookingSize): self
+    {
+        $this->maxBookingSize = $maxBookingSize;
+
+        return $this;
+    }
+
 
     /**
      * Get the value of cutoff

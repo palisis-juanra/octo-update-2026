@@ -20,7 +20,7 @@ class AvailabilityRequestFactory
         $this->productService = $productService;
     }
 
-    public function get(array $requestParams, string $octoCapabilities, int $minBookingSize = 1): BaseAvailabilityRequest
+    public function get(array $requestParams, string $octoCapabilities, int $minBookingSize = 1, int $maxBookingSize = 1): BaseAvailabilityRequest
     {
         $productId = $requestParams[AvailabilityService::PARAM_PRODUCT_ID] ?? '';
         $tourId = $this->productService->getTourIdFromProductId($productId) ?? '';
@@ -57,6 +57,7 @@ class AvailabilityRequestFactory
 
         $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, $pricing);
         $availabilityRequest->setMinBookingSize($minBookingSize);
+        $availabilityRequest->setMaxBookingSize($maxBookingSize);
         $availabilityRequest->setUnits($units);
         return $availabilityRequest;
     }
