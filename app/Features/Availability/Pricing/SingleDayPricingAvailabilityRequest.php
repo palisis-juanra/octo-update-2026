@@ -33,16 +33,10 @@ class SingleDayPricingAvailabilityRequest extends PricingAvailabilityRequest
         $params .= "&{$mappingQueryString}";
 
         $response = $tourCMSService->checkAvailability($params, $this->tourId);
-        JSONLog::info(["message" => "Check tour availability response for {$this->localDateStart}", "response" => $response]);
-
         if (empty($response->available_components)) {
-            JSONLog::info("No available components for {$this->localDateStart}");
             return [];
         }
-
         $availableComponents = $tourCMSService->getArrayFromXmlNode($response->available_components, 'component');
-        JSONLog::info(["message" => "Available components for {$this->localDateStart}", "components" => $availableComponents]);
-
         return $availableComponents;
     }
     

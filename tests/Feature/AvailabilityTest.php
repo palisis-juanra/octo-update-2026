@@ -253,6 +253,33 @@ class AvailabilityTest extends FeatureTestCase
         $response->assertOk();
         $this->assertNotEmpty($responseData);
     }
+
+    public function test_whenPricingAndSingleDate_thenCheckAvailabilityIsCalledOnce()
+    {
+
+        $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
+        $tourCMSServiceMock->shouldReceive('checkAvailability')->once()->andReturn($this->checkAvailXML);
+
+        App::instance(TourCMSService::class, $tourCMSServiceMock);
+
+        $response = $this->post(
+            '/availability', 
+            [
+                'productId' => self::VALID_PRODUCT_ID, 
+                'optionId' => self::VALID_OPTION_ID,
+                'localDate' => self::VALID_LOCAL_DATE
+            ], 
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                self::OCTO_CAPABILITIES => 'pricing'
+            ]
+        );
+
+        $responseData = $response->decodeResponseJson();
+
+        $response->assertOk();
+        $this->assertNotEmpty($responseData);
+    }
     
 }
-
