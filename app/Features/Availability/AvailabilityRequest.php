@@ -229,20 +229,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $departure->spaces_remaining >= $spacesRequired;
     }
 
-    protected function isAvailable(\SimpleXMLElement $departure): bool
-    {
-        $spacesRequired = $this->getMinBookingSize();
-        $spacesAllowed = $departure->spaces_remaining;
-        if (!empty($this->getUnits())) {
-            $spacesRequired = 0;
-            $spacesAllowed = $this->getMaxBookingSize();
-            foreach ($this->getUnits() as $unit) {
-                $spacesRequired += (int) $unit['quantity'];
-            }
-        }
-        return $departure->spaces_remaining >= $spacesRequired && $spacesAllowed >= $spacesRequired;
-    }
-
     protected function fetchDeparturesFromAPI(TourCMSService $tourCMSService): array
     {
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
