@@ -113,6 +113,8 @@ class ProductService
     const PAX_COUNT_DEFAULT = 1;
     const MAX_AGE_DEFAULT = 99;
     const MIN_AGE_DEFAULT = 1;
+    const MAX_BOOKING_SIZE = 10;
+    const MIN_BOOKING_SIZE = 1;
     const ERROR_AVAILABILITY_TYPE_MISSING = 'availabilityType field is missing';
     const ERROR_DEPARTURE_STRUCTURE_NOT_SET = 'the tour departure structure is not set';
     const ERROR_REFERENCE_MISSING = 'reference field is missing';
@@ -225,8 +227,8 @@ class ProductService
                 ->setRedemptionMethod($redemptionMethod)
                 ->setOptions($options)
                 ->setCutoff((array) $tour->cutoff)
-                ->setMinBookingSize((int) $tour->min_booking_size ?? 1)
-                ->setMaxBookingSize((int) $tour->max_booking_size ?? 1);
+                ->setMinBookingSize((int)$tour->min_booking_size ?? self::MIN_BOOKING_SIZE)
+                ->setMaxBookingSize((int)$tour->max_booking_size ?? self::MAX_BOOKING_SIZE);
 
         return $product;
     }
