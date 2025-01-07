@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Http\Responses\OctoResponse;
+use App\Services\AvailabilityCalendarService;
 use App\Services\JSONLogService;
 use App\Services\TourCMSService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,7 +55,7 @@ class AvailabilityCalendarTest extends FeatureTestCase
 
     }
 
-    public function test_whenWeDontSendProductId_thenWeGetBadRequestResponse(): void
+    public function test_whenThereIsNoProductId_thenWeGetBadRequestResponseAndMissingRequiredParamsProductIdErrorMessage(): void
     {
         $response = $this->post(
             self::AVAILABILIY_PATH,
@@ -67,9 +68,11 @@ class AvailabilityCalendarTest extends FeatureTestCase
         );
 
         $response->assertBadRequest();
+        $this->assertEquals(OctoResponse::ERROR_CODE_BAD_REQUEST, $response['error']);
+        $this->assertEquals(AvailabilityCalendarService::ERROR_MESSAGE_MISSING_REQUIRED_PARAMS . "productId", $response['errorMessage']);
     }
 
-    public function test_whenWeDontSendOptionId_thenWeGetBadRequestResponse(): void
+    public function test_whenThereIsNoOptionId_thenWeGetBadRequestResponseAndMissingRequiredParamsOptionIdErrorMessage(): void
     {
         $response = $this->post(
             self::AVAILABILIY_PATH,
@@ -82,9 +85,11 @@ class AvailabilityCalendarTest extends FeatureTestCase
         );
 
         $response->assertBadRequest();
+        $this->assertEquals(OctoResponse::ERROR_CODE_BAD_REQUEST, $response['error']);
+        $this->assertEquals(AvailabilityCalendarService::ERROR_MESSAGE_MISSING_REQUIRED_PARAMS . "optionId", $response['errorMessage']);
     }
 
-    public function test_whenWeDontSendlocalDateStart_thenWeGetBadRequestResponse(): void
+    public function test_whenThereIsNoLocalDateStart_thenWeGetBadRequestResponseAndMissingRequiredParamsLocalDateStartErrorMessage(): void
     {
         $response = $this->post(
             self::AVAILABILIY_PATH,
@@ -97,9 +102,11 @@ class AvailabilityCalendarTest extends FeatureTestCase
         );
 
         $response->assertBadRequest();
+        $this->assertEquals(OctoResponse::ERROR_CODE_BAD_REQUEST, $response['error']);
+        $this->assertEquals(AvailabilityCalendarService::ERROR_MESSAGE_MISSING_REQUIRED_PARAMS . "localDateStart", $response['errorMessage']);
     }
 
-    public function test_whenWeDontSendLocalDateEnd_thenWeGetBadRequestResponse(): void
+    public function test_whenThereIsNoLocalDateEnd_thenWeGetBadRequestResponseAndMissingRequiredParamsLocalDateEndErrorMessage(): void
     {
         $response = $this->post(
             self::AVAILABILIY_PATH,
@@ -112,9 +119,11 @@ class AvailabilityCalendarTest extends FeatureTestCase
         );
 
         $response->assertBadRequest();
+        $this->assertEquals(OctoResponse::ERROR_CODE_BAD_REQUEST, $response['error']);
+        $this->assertEquals(AvailabilityCalendarService::ERROR_MESSAGE_MISSING_REQUIRED_PARAMS . "localDateEnd", $response['errorMessage']);
     }
 
-    public function test_whenWeSendInvalidProductId_thenWeGetBadRequestResponse(): void
+    public function test_whenWeSendInvalidProductId_thenWeGetBadRequestResponseAndInvalidProductIdError(): void
     {
         $response = $this->post(
             self::AVAILABILIY_PATH,
@@ -133,7 +142,7 @@ class AvailabilityCalendarTest extends FeatureTestCase
         $this->assertEquals(OctoResponse::ERROR_MESSAGE_INVALID_PRODUCT_ID, $responseData['errorMessage']);
     }
 
-    public function test_whenWeSendInvalidOptionId_thenWeGetBadRequestResponse(): void
+    public function test_whenWeSendInvalidOptionId_thenWeGetBadRequestResponseAndInvalidOptionIdError(): void
     {
         $response = $this->post(
             self::AVAILABILIY_PATH,
@@ -152,7 +161,7 @@ class AvailabilityCalendarTest extends FeatureTestCase
         $this->assertEquals(OctoResponse::ERROR_MESSAGE_INVALID_OPTION_ID, $responseData['errorMessage']);
     }
 
-    public function test_whenWeSendInvalidLocalDateStart_thenWeGetBadRequestResponse(): void
+    public function test_whenWeSendInvalidLocalDateStart_thenWeGetBadRequestResponseAndInvalidLocalDateStartErrorMessage(): void
     {
         $response = $this->post(
             self::AVAILABILIY_PATH,
@@ -166,9 +175,11 @@ class AvailabilityCalendarTest extends FeatureTestCase
         );
 
         $response->assertBadRequest();
+        $this->assertEquals(OctoResponse::ERROR_CODE_BAD_REQUEST, $response['error']);
+        $this->assertEquals(AvailabilityCalendarService::ERROR_MESSAGE_LOCAL_DATE_START_INVALID, $response['errorMessage']);
     }
 
-    public function test_whenWeSendInvalidLocalDateEnd_thenWeGetBadRequestResponse(): void
+    public function test_whenWeSendInvalidLocalDateEnd_thenWeGetBadRequestResponseAndInvalidLocalDateEndErrorMessage(): void
     {
         $response = $this->post(
             self::AVAILABILIY_PATH,
@@ -182,9 +193,11 @@ class AvailabilityCalendarTest extends FeatureTestCase
         );
 
         $response->assertBadRequest();
+        $this->assertEquals(OctoResponse::ERROR_CODE_BAD_REQUEST, $response['error']);
+        $this->assertEquals(AvailabilityCalendarService::ERROR_MESSAGE_LOCAL_DATE_END_INVALID, $response['errorMessage']);
     }
 
-    public function test_whenWeSendCorrectData_thenWeCallToTourcmsApi()
+    public function test_whenWeSendCorrectData_thenWeGetValidAvailabilityCalendarResponse()
     {
 
         $response = $this->post(
