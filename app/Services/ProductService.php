@@ -209,9 +209,10 @@ class ProductService
             $infoString = implode(', ', $this->info);
             $this->logInfo("The product is missing some non-critical information: {$infoString}", null, ['productId' => $id]);
         }
+        $minBookingSize = (int)$tour->min_booking_size <= 0 ? self::MIN_BOOKING_SIZE : (int)$tour->min_booking_size;
+        $maxBookingSize = (int)$tour->max_booking_size <= 0 ? self::MAX_BOOKING_SIZE : (int)$tour->max_booking_size;
 
         $product = new Product();
-
         $product->setId($id)
                 ->setInternalName($internalName)
                 ->setReference($reference)
@@ -227,8 +228,8 @@ class ProductService
                 ->setRedemptionMethod($redemptionMethod)
                 ->setOptions($options)
                 ->setCutoff((array) $tour->cutoff)
-                ->setMinBookingSize((int)$tour->min_booking_size <= 0 ? self::MIN_BOOKING_SIZE : (int)$tour->min_booking_size)
-                ->setMaxBookingSize((int)$tour->max_booking_size <= 0 ? self::MAX_BOOKING_SIZE : (int)$tour->max_booking_size);
+                ->setMinBookingSize($minBookingSize)
+                ->setMaxBookingSize($maxBookingSize);
 
         return $product;
     }
