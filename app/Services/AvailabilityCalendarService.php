@@ -35,12 +35,12 @@ class AvailabilityCalendarService
     public OptionService $optionService;
     public CalendarAvailabilityTransformer $transformer;
 
-    public function __construct(TourCMSService $tourCMSService, ProductService $productService, OptionService $optionService)
+    public function __construct(TourCMSService $tourCMSService, ProductService $productService, OptionService $optionService, ?CalendarAvailabilityTransformer $transformer = null)
     {
         $this->tourCMSService = $tourCMSService;
         $this->productService = $productService;
         $this->optionService = $optionService;
-        $this->transformer = new CalendarAvailabilityTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->transformer = $transformer ?? new CalendarAvailabilityTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     public function getCalendar(array $requestParams): array

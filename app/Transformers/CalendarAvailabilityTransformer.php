@@ -5,7 +5,7 @@ namespace App\Transformers;
 class CalendarAvailabilityTransformer extends BaseTransformer
 {
     protected OpeningHoursTransformer $openingHoursTransformer;
-    public function __construct(string $mode = BaseTransformer::BASIC)
+    public function __construct(string $mode = BaseTransformer::FULL_TRANSFORM)
     {
         parent::__construct($mode);
         $this->openingHoursTransformer = new OpeningHoursTransformer(BaseTransformer::FULL_TRANSFORM);
