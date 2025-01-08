@@ -505,6 +505,43 @@ class ProductServiceTest extends UnitTestCase
         $this->assertEquals($expectedProductOptions, $productOptions);
     }
 
+    public function test_getOptionUnits_whenTourPermitOnlyChildIsFalseAndTourHasChildRate_thenChildRateUnitRestrictionAccompaniedByContainsAdultUnitId(): void
+    {
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->logger = $this->mockLogger();
+            
+        $showTourResponseXML = $this->showTourXML;
+        $tourData = $showTourResponseXML->tour;
+        $tourData->tour_permit_child_only = 0;
+
+        $expectedAccompaniedBy = ['TE_1_184|r1'];
+
+        $optionUnits = $productServiceMock->getOptionUnits($tourData);
+        $this->assertNotEmpty($optionUnits);
+        $this->assertEquals($expectedAccompaniedBy, $optionUnits[1]->restrictions->accompaniedBy);
+    }
+
+    public function test_getOptionUnits_whenTourPermitOnlyChildIsTrueAndTourHasChildRate_thenChildRateUnitRestrictionAccompaniedByIsEmpty(): void
+    {
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->logger = $this->mockLogger();
+            
+        $showTourResponseXML = $this->showTourXML;
+        $tourData = $showTourResponseXML->tour;
+        $tourData->tour_permit_child_only = 1;
+
+        $optionUnits = $productServiceMock->getOptionUnits($tourData);
+        $this->assertEmpty($optionUnits[1]->restrictions->accompaniedBy);
+    }
+
 
 
     protected function mockLogger(): JSONLogService|MockObject
