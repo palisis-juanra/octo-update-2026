@@ -340,6 +340,8 @@ class ProductService
     {
         $optionUnits = [];
         $ratesFromXML = $this->getRatesFromXML($tour);
+        $adultRates = $this->getAdultRates($tour);
+        $permitChildOnly = (int) $tour->tour_permit_child_only == 1;
 
         if (count($ratesFromXML) > 0) {
             foreach ($ratesFromXML as $rate) {
@@ -391,7 +393,7 @@ class ProductService
                     $unitRestrictions->maxQuantity = (int) $rate->maximum;
                 }
                 $unitRestrictions->paxCount = self::PAX_COUNT_DEFAULT;
-                $unitRestrictions->accompaniedBy = $this->getAccompaniedBy($tour, $rate);
+                $unitRestrictions->accompaniedBy = $this->getAccompaniedBy($permitChildOnly, $unitType, $adultRates);
 
                 $unit = (object) [
                     'id' => $unitId,
@@ -457,18 +459,15 @@ class ProductService
         return $adultRates;
     }
 
-    public function getAccompaniedBy(SimpleXMLElement $tour, SimpleXMLElement $rate): array
+    public function getAccompaniedBy(bool $permitChildOnly, string $unitType, array $adultRates): array
     {
-        $accompaniedBy = [];
-        if ($tour->tour_permit_child_only == 0) {
-            if (isset($rate->agecat)) {
-                if (in_array(self::UNIT_TYPES[(string) $rate->agecat], self::UNIT_TYPES_CHILDREN)) {
-                    $adultRates = $this->getAdultRates($tour);
-                    $accompaniedBy = $adultRates;
-                }
-            }
+        if ($permitChildOnly) {
+            return [];
         }
-        return $accompaniedBy;
+        if (!in_array($unitType, self::UNIT_TYPES_CHILDREN)) {
+            return [];
+        }
+        return $adultRates;
     }
 
     /**
