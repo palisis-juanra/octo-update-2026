@@ -87,6 +87,14 @@ class ProductService
         'i' => self::UNIT_TYPE_INFANT,
         's' => self::UNIT_TYPE_SENIOR
     ];
+    const UNIT_TYPES_ADULTS = [
+        self::UNIT_TYPE_SENIOR,
+        self::UNIT_TYPE_ADULT
+    ];
+    const UNIT_TYPES_CHILDREN = [
+        self::UNIT_TYPE_INFANT,
+        self::UNIT_TYPE_CHILD
+    ];
     const CONTACT_FIELD_FIRST_NAME = 'firstName';
     const CONTACT_FIELD_LAST_NAME = 'lastName';
     const CONTACT_FIELD_PHONE_NUMBER = 'phoneNumber';
@@ -331,15 +339,7 @@ class ProductService
     public function getOptionUnits(SimpleXMLElement $tour): array
     {
         $optionUnits = [];
-        $parent = null;
-        if (isset($tour->new_booking->people_selection)) {
-            $parent = $tour->new_booking->people_selection;
-        } else if (isset($tour->people_selection)) {
-            $parent = $tour->people_selection;
-        } else if (is_null($parent)) {
-            return $optionUnits;
-        }
-        $ratesFromXML = $this->tourCMSService->getArrayFromXmlNode($parent, 'rate');
+        $ratesFromXML = $this->getRatesFromXML($tour);
 
         if (count($ratesFromXML) > 0) {
             foreach ($ratesFromXML as $rate) {
@@ -391,8 +391,7 @@ class ProductService
                     $unitRestrictions->maxQuantity = (int) $rate->maximum;
                 }
                 $unitRestrictions->paxCount = self::PAX_COUNT_DEFAULT;
-                // Currently unsupported, empty by default.
-                $unitRestrictions->accompaniedBy = [];
+                $unitRestrictions->accompaniedBy = $this->getAccompaniedBy($tour, $rate);
 
                 $unit = (object) [
                     'id' => $unitId,
@@ -428,6 +427,48 @@ class ProductService
         $apiResponse = $this->tourCMSService->listTours($channelId, "?".TourCMSService::LIST_TOURS_EXTENDED_TOUR_INFO_PARAM);
         $toursFromXML = $this->tourCMSService->getArrayFromXmlNode($apiResponse, 'tour');
         return $toursFromXML;
+    }
+
+    public function getRatesFromXML(SimpleXMLElement $tour): array
+    {
+        $ratesFromXML = [];
+        $parent = null;
+        if (isset($tour->new_booking->people_selection)) {
+            $parent = $tour->new_booking->people_selection;
+        } else if (isset($tour->people_selection)) {
+            $parent = $tour->people_selection;
+        } else if (is_null($parent)) {
+            return $ratesFromXML;
+        }
+        return $this->tourCMSService->getArrayFromXmlNode($parent, 'rate');
+    }
+
+    public function getAdultRates(SimpleXMLElement $tour): array
+    {
+        $adultRates = [];
+        $ratesFromXML = $this->getRatesFromXML($tour);
+        foreach ($ratesFromXML as $rate) {
+            if (isset($rate->agecat)) {
+                if (in_array(self::UNIT_TYPES[(string) $rate->agecat], self::UNIT_TYPES_ADULTS)) {
+                    $adultRates[] = $this->buildUnitId($tour, $rate);
+                }
+            }
+        }
+        return $adultRates;
+    }
+
+    public function getAccompaniedBy(SimpleXMLElement $tour, SimpleXMLElement $rate): array
+    {
+        $accompaniedBy = [];
+        if ($tour->tour_permit_child_only == 0) {
+            if (isset($rate->agecat)) {
+                if (in_array(self::UNIT_TYPES[(string) $rate->agecat], self::UNIT_TYPES_CHILDREN)) {
+                    $adultRates = $this->getAdultRates($tour);
+                    $accompaniedBy = $adultRates;
+                }
+            }
+        }
+        return $accompaniedBy;
     }
 
     /**
