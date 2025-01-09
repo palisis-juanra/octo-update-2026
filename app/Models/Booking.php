@@ -486,11 +486,8 @@ class Booking extends Model
     public function setUnits(array $unitItems): self
     {
         $option = $this->product->getOptionById(optionId: $this->getOption()->getId());
+
         foreach ($unitItems as $unitItem) {
-            
-            /*if (empty($unitItems)) {
-                throw InvalidUnit
-            }*/
 
             $unitId = (string) $unitItem['unitId'];
             
