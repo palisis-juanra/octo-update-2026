@@ -16,13 +16,14 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     protected string $currency;
     protected array $units;
     protected int $minBookingSize;
+    protected int $maxBookingSize;
     protected string $tourId;
     protected string $optionId;
     protected string $localDateStart;
     protected string $localDateEnd;
     protected bool $allowPricing = true;
 
-    public function __construct(string $tourId, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize)
+    public function __construct(string $tourId, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize, int $maxBookingSize)
     {
         $this->tourId = $tourId;
         $this->optionId = $optionId;
@@ -31,6 +32,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $this->units = $units;
         $this->currency = $currency;
         $this->minBookingSize = $minBookingSize;
+        $this->maxBookingSize = $maxBookingSize;
 
     }
     public function getAvailabilities(TourCMSService $tourCMSService): array

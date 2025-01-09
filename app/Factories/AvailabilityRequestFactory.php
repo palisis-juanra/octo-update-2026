@@ -21,7 +21,7 @@ class AvailabilityRequestFactory
         $this->productService = $productService;
     }
 
-    public function get(array $requestParams, string $octoCapabilities, int $minBookingSize = 1, int $maxBookingSize = 1): BaseAvailabilityRequest
+    public function get(array $requestParams, string $octoCapabilities, int $minBookingSize = ProductService::MIN_BOOKING_SIZE, int $maxBookingSize = ProductService::MAX_BOOKING_SIZE): BaseAvailabilityRequest
     {
         $productId = $requestParams[AvailabilityService::PARAM_PRODUCT_ID] ?? '';
         $tourId = $this->productService->getTourIdFromProductId($productId) ?? '';
@@ -49,7 +49,7 @@ class AvailabilityRequestFactory
         $pricing = $this->isPricingAllowed($octoCapabilities);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
-            return new PricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize);
+            return new PricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize, $maxBookingSize);
         }
         if (!$multiDates) {
             $localDateEnd = '';

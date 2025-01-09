@@ -229,6 +229,17 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $departure->spaces_remaining >= $spacesRequired;
     }
 
+    protected function checkMaxUnitsExceeded(\SimpleXMLElement $departure): bool
+    {
+        $totalRequestedUnits = 0;
+        if (!empty($this->units)) {
+            foreach ($this->units as $unit) {
+                $totalRequestedUnits += (int) $unit['quantity'];
+            }
+        }
+        return $this->maxBookingSize >= $totalRequestedUnits;
+    }
+
     protected function fetchDeparturesFromAPI(TourCMSService $tourCMSService): array
     {
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
@@ -263,7 +274,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
             $availability->setAllDay(false);
-            $availability->setAvailable($this->checkSpacesRemaining($departure));
+            $availability->setAvailable($this->checkSpacesRemaining($departure) && $this->checkMaxUnitsExceeded($departure));
             $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
             $availability->setMaxUnits($this->maxUnits);
             $availability->setUtcCutoffAt($this->cutoff);
