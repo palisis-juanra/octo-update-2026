@@ -4,6 +4,7 @@ namespace App\Factories;
 
 use App\Features\Availability\AvailabilityRequest;
 use App\Features\Availability\Pricing\MultiDayPricingAvailabilityRequest;
+use App\Features\Availability\Pricing\PricingAvailabilityRequest;
 use App\Features\Availability\Pricing\SingleDayPricingAvailabilityRequest;
 use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
@@ -48,7 +49,7 @@ class AvailabilityRequestFactory
         $pricing = $this->isPricingAllowed($octoCapabilities);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
-            return new SingleDayPricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize);
+            return new PricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize);
         }
         if (!$multiDates) {
             $localDateEnd = '';
