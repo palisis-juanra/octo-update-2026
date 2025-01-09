@@ -35,26 +35,33 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $this->maxBookingSize = $maxBookingSize;
 
     }
+
+    /**
+     * Get the value of localDateStart
+     */ 
+    public function getLocalDateStart(): string
+    {
+        return $this->localDateStart;
+    }
+
+    /**
+     * Set the value of localDateStart
+     *
+     * @return  self
+     */ 
+    public function setLocalDateStart($localDateStart)
+    {
+        $this->localDateStart = $localDateStart;
+
+        return $this;
+    }
+
     public function getAvailabilities(TourCMSService $tourCMSService): array
     {
         $availabilities = parent::getAvailabilities($tourCMSService);
         $checkAvailcomponents = $this->fetchComponentsFromTourCMS($tourCMSService);
         $this->validateAvailableComponents($availabilities, $checkAvailcomponents);
         return $availabilities;
-    }
-
-    protected function fetchComponentsFromTourCMS(TourCMSService $tourCMSService): array
-    {
-        $ratesParams = $this->generateRatesParamsFromUnits($this->units);
-        $params = "date={$this->localDateStart}&{$ratesParams}";
-        $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
-        $params .= "&{$mappingQueryString}";
-        $response = $tourCMSService->checkAvailability($params, $this->tourId);
-        if (empty($response->available_components)) {
-            return [];
-        }
-        $availableComponents = $tourCMSService->getArrayFromXmlNode($response->available_components, 'component');
-        return $availableComponents;
     }
 
     public function getOctoStatusFromTourCMSStatus(string $tourCMSStatus): string
@@ -81,6 +88,15 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         }
 
         return $params;
+    }
+
+    public function indexCheckAvailComponents(array $checkAvailcomponents): array
+    {
+        $checkAvailcomponentsIndexed = [];
+        foreach ($checkAvailcomponents as $checkAvailcomponent) {
+            $checkAvailcomponentsIndexed[$this->generateAvailabilityIdFromDepartureOrComponentObject($checkAvailcomponent)] = $checkAvailcomponent;
+        }
+        return $checkAvailcomponentsIndexed;
     }
 
     protected function getAvailabilitiesFromComponents(array $components)
@@ -142,33 +158,17 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         }
     }
 
-    public function indexCheckAvailComponents(array $checkAvailcomponents): array
+    protected function fetchComponentsFromTourCMS(TourCMSService $tourCMSService): array
     {
-        $checkAvailcomponentsIndexed = [];
-        foreach ($checkAvailcomponents as $checkAvailcomponent) {
-            $checkAvailcomponentsIndexed[$this->generateAvailabilityIdFromDepartureOrComponentObject($checkAvailcomponent)] = $checkAvailcomponent;
+        $ratesParams = $this->generateRatesParamsFromUnits($this->units);
+        $params = "date={$this->localDateStart}&{$ratesParams}";
+        $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
+        $params .= "&{$mappingQueryString}";
+        $response = $tourCMSService->checkAvailability($params, $this->tourId);
+        if (empty($response->available_components)) {
+            return [];
         }
-        return $checkAvailcomponentsIndexed;
+        $availableComponents = $tourCMSService->getArrayFromXmlNode($response->available_components, 'component');
+        return $availableComponents;
     }
-
-      /**
-     * Get the value of localDateStart
-     */ 
-    public function getLocalDateStart(): string
-    {
-        return $this->localDateStart;
-    }
-
-    /**
-     * Set the value of localDateStart
-     *
-     * @return  self
-     */ 
-    public function setLocalDateStart($localDateStart)
-    {
-        $this->localDateStart = $localDateStart;
-
-        return $this;
-    }
-
 } 
