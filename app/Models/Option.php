@@ -178,10 +178,10 @@ class Option extends Model
      * @throws \App\Exceptions\InvalidUnitIdException
      * @return \stdClass
      */
-    public function getUnitById(string $unitId): stdClass
+    public function getUnitById(string $unitId): Unit
     {
         foreach ($this->units as $unit) {
-            if ($unit->id == $unitId) {
+            if ($unit->getId() == $unitId) {
                 return $unit;
             }
         }

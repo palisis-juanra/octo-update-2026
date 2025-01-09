@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use App\Models\Availability\Availability;
+use App\Models\Ticket;
 use App\Services\DateTimeService;
 use App\Services\XMLService;
-use App\Transformers\BaseTransformer;
-use App\Transformers\ContactTransformer;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -486,39 +485,38 @@ class Booking extends Model
 
     public function setUnits(array $unitItems): self
     {
-        $option = $this->product->getOptionById($this->getOption()->getId());
+        $option = $this->product->getOptionById(optionId: $this->getOption()->getId());
         foreach ($unitItems as $unitItem) {
-            $unitId = (string) $unitItem['unitId'];
+            
+            /*if (empty($unitItems)) {
+                throw InvalidUnit
+            }*/
 
-            // TODO Create Model for UnitItem and its transformer
+            $unitId = (string) $unitItem['unitId'];
+            
             $unit = $option->getUnitById($unitId);
 
-            $newUnitItem = new stdClass;
-            $newUnitItem->uuid = Uuid::uuid4();
-            $newUnitItem->resellerReference = null;
-            $newUnitItem->supplierReference = $unit->reference;
-            $newUnitItem->unitId = $unit->id;
-            $newUnitItem->id = $unit->id;
-            $newUnitItem->unit = $unit;
+            $ticket = new Ticket();
+            $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
+            $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
+            $ticket->setDeliveryOptions([
+                "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
+                "deliveryValue" => $this->getProduct()->getDeliveryFormats()[0]
+            ]);
 
-            $newUnitItem->status = 'ON_HOLD';
-            $newUnitItem->utcRedeemedAt = $this->getUtcRedeemedAt();
-            
-            $contactTransformer = new ContactTransformer(BaseTransformer::FULL_TRANSFORM);
-            $newUnitItem->contact = $contactTransformer->transform($this->getContact());
+            $unitItem = new UnitItem();
+            $unitItem->setUuid(Uuid::uuid4());
+            $unitItem->setResellerReference(null);
+            $unitItem->setSupplierReference($unit->reference);
+            $unitItem->setUnitId($unit->getId());
+            $unitItem->setId($unit->getId());
+            $unitItem->setUnit($unit);
+            $unitItem->setStatus('ON_HOLD');
+            $unitItem->setUtcRedeemedAt($this->getUtcRedeemedAt());
+            $unitItem->setContact($this->getContact());
+            $unitItem->setTicket($ticket);
 
-            $newUnitItem->ticket = [
-                'redemptionMethod' => $this->getProduct()->getRedemptionMethod(),
-                'utcRedeemedAt' => $this->getUtcRedeemedAt(),
-                'deliveryOptions' => [
-                    [
-                        "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
-                        "deliveryValue" => $this->getProduct()->getDeliveryFormats()[0]
-                    ]
-                ]
-            ];
-
-            $this->units[] = $newUnitItem;
+            $this->units[] = $unitItem;
         }
         $this->unit_items = json_encode($this->units);
 

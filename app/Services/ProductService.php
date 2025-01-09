@@ -7,6 +7,8 @@ use App\Exceptions\InvalidProductIdException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Models\Option;
 use App\Models\Product;
+use App\Models\Unit;
+use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
 use SimpleXMLElement;
@@ -118,9 +120,6 @@ class ProductService
     const REQUIRED_FIELD_SCOPE_LEADPAX = 'leadpax';
     const REQUIRED_FIELD_SCOPE_OTHERPAX = 'otherpax';
     const LOCALE_CODE_DEFAULT = 'en-GB';
-    const PAX_COUNT_DEFAULT = 1;
-    const MAX_AGE_DEFAULT = 99;
-    const MIN_AGE_DEFAULT = 1;
     const MAX_BOOKING_SIZE = 10;
     const MIN_BOOKING_SIZE = 1;
     const ERROR_AVAILABILITY_TYPE_MISSING = 'availabilityType field is missing';
@@ -370,39 +369,39 @@ class ProductService
                     $this->info[] = "unit {$unitId} type field is missing";
                 }
                 $unitRequiredContactFields = $this->getUnitRequiredContactFields($tour);
-                $unitRestrictions = new stdClass();
-                $unitRestrictions->minAge = self::MIN_AGE_DEFAULT;
+
+
+                $unitRestrictions = new UnitRestrictions();
+
                 if (isset($rate->agerange_min)) {
-                    $unitRestrictions->minAge = (int) $rate->agerange_min;
+                    $unitRestrictions->setMinAge((int) $rate->agerange_min);
                 } else {
                     $this->info[] = "unit {$unitId} restrictions minAge field is missing";
                 }
-                $unitRestrictions->maxAge = self::MAX_AGE_DEFAULT;
+
                 if (isset($rate->agerange_max)) {
-                    $unitRestrictions->maxAge = (int) $rate->agerange_max;
+                    $unitRestrictions->setMaxAge((int) $rate->agerange_max);
                 } else {
                     $this->info[] = "unit {$unitId} restrictions maxAge field is missing";
                 }
-                $unitRestrictions->idRequired = false;
-                $unitRestrictions->minQuantity = null;
-                if (isset($rate->minimum)) {
-                    $unitRestrictions->minQuantity = (int) $rate->minimum;
-                }
-                $unitRestrictions->maxQuantity = null;
-                if (isset($rate->maximum)) {
-                    $unitRestrictions->maxQuantity = (int) $rate->maximum;
-                }
-                $unitRestrictions->paxCount = self::PAX_COUNT_DEFAULT;
-                $unitRestrictions->accompaniedBy = $this->getAccompaniedBy($permitChildOnly, $unitType, $adultRates);
 
-                $unit = (object) [
-                    'id' => $unitId,
-                    'internalName' => $unitInternalName,
-                    'reference' => $unitReference,
-                    'type' => $unitType,
-                    'requiredContactFields' => $unitRequiredContactFields,
-                    'restrictions' => $unitRestrictions
-                ];
+                if (isset($rate->minimum)) {
+                    $unitRestrictions->setMinQuantity((int) $rate->minimum);
+                }
+
+                if (isset($rate->maximum)) {
+                    $unitRestrictions->setMaxQuantity((int) $rate->maximum);
+                }
+                $unitRestrictions->setAccompaniedBy($this->getAccompaniedBy($permitChildOnly, $unitType, $adultRates));
+
+                $unit = new Unit();
+                $unit->setId($unitId);
+                $unit->setInternalName($unitInternalName);
+                $unit->setReference($unitReference);
+                $unit->setType($unitType);
+                $unit->setRequiredContactFields($unitRequiredContactFields);
+                $unit->setRestrictions($unitRestrictions);
+
                 $optionUnits[] = $unit;
             }
         }

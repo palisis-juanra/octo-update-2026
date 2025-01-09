@@ -522,7 +522,7 @@ class ProductServiceTest extends UnitTestCase
 
         $optionUnits = $productServiceMock->getOptionUnits($tourData);
         $this->assertNotEmpty($optionUnits);
-        $this->assertEquals($expectedAccompaniedBy, $optionUnits[1]->restrictions->accompaniedBy);
+        $this->assertEquals($expectedAccompaniedBy, $optionUnits[1]->getRestrictions()->getAccompaniedBy());
     }
 
     public function test_getOptionUnits_whenTourPermitOnlyChildIsTrueAndTourHasChildRate_thenChildRateUnitRestrictionAccompaniedByIsEmpty(): void
@@ -539,7 +539,7 @@ class ProductServiceTest extends UnitTestCase
         $tourData->tour_permit_child_only = 1;
 
         $optionUnits = $productServiceMock->getOptionUnits($tourData);
-        $this->assertEmpty($optionUnits[1]->restrictions->accompaniedBy);
+        $this->assertEmpty($optionUnits[1]->getRestrictions()->getAccompaniedBy());
     }
 
 
