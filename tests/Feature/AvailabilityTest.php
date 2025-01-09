@@ -259,6 +259,7 @@ class AvailabilityTest extends FeatureTestCase
 
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
         $tourCMSServiceMock->shouldReceive('checkAvailability')->once()->andReturn($this->checkAvailXML);
 
         App::instance(TourCMSService::class, $tourCMSServiceMock);

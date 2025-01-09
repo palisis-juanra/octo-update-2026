@@ -63,7 +63,7 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
         $this->assertEquals($requestParams["localDateEnd"], $availabilityRequest->getLocalDateEnd());
     }
 
-    public function test_whenRequestHasAOnlyOneDayWithPricingHeader_thenSingleDayAvailabilityRequestIsCreated()
+    public function test_whenRequestHasAOnlyOneDayWithPricingHeader_thenPricingAvailabilityRequestIsCreated()
     {
         $requestParams = [
             "productId" => "TE_1_67|142",
@@ -75,7 +75,6 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(PricingAvailabilityRequest::class, $availabilityRequest);
-        $this->assertInstanceOf(SingleDayPricingAvailabilityRequest::class, $availabilityRequest);
         $this->assertEquals($requestParams["localDate"], $availabilityRequest->getLocalDateStart());
     }
 
@@ -119,7 +118,7 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
         $this->assertEquals($availabilityIdDate, $availabilityRequest->getLocalDateStart());
     }
 
-    public function test_whenRequestHasOnlyOneAvailabilityIdWithPricingHeader_thenSingleDayPricingAvailabilityRequestIsCreated()
+    public function test_whenRequestHasOnlyOneAvailabilityIdWithPricingHeader_thenPricingAvailabilityRequestIsCreated()
     {
         $requestParams = [
             "productId" => "TE_1_67|142",
@@ -135,7 +134,6 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(PricingAvailabilityRequest::class, $availabilityRequest);
-        $this->assertInstanceOf(SingleDayPricingAvailabilityRequest::class, $availabilityRequest);
         $this->assertEquals($availabilityIdDate, $availabilityRequest->getLocalDateStart());
     }
 
