@@ -123,15 +123,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
 
     protected function validateAvailableComponents(array $components, array $checkAvailcomponents): void
     {
-        $checkAvailcomponentsIndexed = array_combine(
-            array_map(function($checkAvailcomponent) {
-                return $this->generateAvailabilityIdFromDepartureOrComponentObject($checkAvailcomponent);
-            }, $checkAvailcomponents),
-            array_map(function($checkAvailcomponent) {
-                return $checkAvailcomponent;
-            }, $checkAvailcomponents)
-        );
-
+        $checkAvailcomponentsIndexed = $this->indexCheckAvailComponents($checkAvailcomponents);
         foreach ($components as $component) {
             if (!isset($checkAvailcomponentsIndexed[$component->getId()])) {
                 $component->setAvailable(false);
@@ -148,6 +140,15 @@ class PricingAvailabilityRequest extends AvailabilityRequest
                 $component->setPricing($pricing);
             }
         }
+    }
+
+    public function indexCheckAvailComponents(array $checkAvailcomponents): array
+    {
+        $checkAvailcomponentsIndexed = [];
+        foreach ($checkAvailcomponents as $checkAvailcomponent) {
+            $checkAvailcomponentsIndexed[$this->generateAvailabilityIdFromDepartureOrComponentObject($checkAvailcomponent)] = $checkAvailcomponent;
+        }
+        return $checkAvailcomponentsIndexed;
     }
 
       /**
