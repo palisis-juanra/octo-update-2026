@@ -421,6 +421,10 @@
             <type>SINGLE</type>
             <add_new_auto>1</add_new_auto>
             <departure_types/>
+            <start_times>
+                <time>11:00</time>
+                <time>13:00</time>
+            </start_times>
         </tour_departure_structure>
         <validity>
             <validity_type>NOT SET</validity_type>

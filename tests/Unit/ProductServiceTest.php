@@ -382,7 +382,7 @@ class ProductServiceTest extends UnitTestCase
         $this->assertCount(1, $productList);
     }
 
-    public function test_whenTourIsMappedBySingleDeparturePerDayButHaveMultipleStartTime_thenWeShouldThrowAnException(): void
+    public function test_whenTourIsMappedBySingleDeparturePerDayAndDontHaveStartTime_thenWeGetCorrectMappingWithDefaultStartTime(): void
     {
         $productServiceMock = $this->getMockBuilder(ProductService::class)
             ->onlyMethods([])
@@ -393,27 +393,30 @@ class ProductServiceTest extends UnitTestCase
             
         $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SINGLE.xml'));
         $tourData = $showTourResponseXML->tour;
-
-        $this->expectException(InvalidProductContentException::class);
-
-        $productServiceMock->getActiveMappingsFromTour($tourData);
-    }
-
-    public function test_whenTourIsMappedBySingleDeparturePerDayAndHaveFixedStartTime_thenWeGetCorrectMapping(): void
-    {
-        $productServiceMock = $this->getMockBuilder(ProductService::class)
-            ->onlyMethods([])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $productServiceMock->tourCMSService = $this->mockTourCMSService();
-        $productServiceMock->logger = $this->mockLogger();
-            
-        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SINGLE.xml'));
-        $tourData = $showTourResponseXML->tour;
-        $tourData->start_time = '13:00';
+        unset($tourData->tour_departure_structure->start_times);
 
         $expectedProductOptions = [
-            '' => ['13:00']
+            '' => ['09:00']
+        ];
+
+        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
+        $this->assertEquals($expectedProductOptions, $productOptions);
+    }
+
+    public function test_whenTourIsMappedBySingleDeparturePerDay_thenWeGetCorrectMapping(): void
+    {
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->logger = $this->mockLogger();
+            
+        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SINGLE.xml'));
+        $tourData = $showTourResponseXML->tour;
+
+        $expectedProductOptions = [
+            '' => ['11:00', '13:00']
         ];
 
         $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
