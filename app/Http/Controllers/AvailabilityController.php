@@ -48,6 +48,7 @@ class AvailabilityController extends Controller
             $availabilityRequest = $this->availabilityRequestFactory->get($requestParams, $octoCapabilities, $product->getMinBookingSize(), $product->getMaxBookingSize());
             $availabilityIds = $request->get(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
             $availabilityRequest->setAvailabilityIds($availabilityIds);
+            $availabilityRequest->setTourName($product->getInternalName());
             
             $optionId = $request->get(AvailabilityService::PARAM_OPTION_ID);
             $option = $product->getOptionById($optionId);

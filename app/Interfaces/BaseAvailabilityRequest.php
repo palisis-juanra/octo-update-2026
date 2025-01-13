@@ -19,6 +19,8 @@ abstract class BaseAvailabilityRequest
     protected int $maxUnits;
     protected string $cutoff;
     protected array $availabilityIds;
+    protected bool $contentEnabled = false;
+    protected ?string $tourName = null;
 
     /**
      * Get all the availabilities
@@ -68,6 +70,38 @@ abstract class BaseAvailabilityRequest
     public function setAvailabilityIds($availabilityIds): self
     {
         $this->availabilityIds = $availabilityIds;
+
+        return $this;
+    }
+
+    public function getContentEnabled(): bool
+    {
+        return $this->contentEnabled;
+    }
+
+    public function setContentEnabled(bool $contentEnabled): self
+    {
+        $this->contentEnabled = $contentEnabled;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of tourName
+     */ 
+    public function getTourName(): ?string
+    {
+        return $this->tourName;
+    }
+
+    /**
+     * Set the value of tourName
+     *
+     * @return  self
+     */ 
+    public function setTourName(?string $tourName): self
+    {
+        $this->tourName = $tourName;
 
         return $this;
     }

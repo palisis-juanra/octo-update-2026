@@ -57,6 +57,9 @@ class AvailabilityRequestFactory
         }
 
         $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, $pricing);
+        if ($this->isContentEnabled($octoCapabilities)) {
+            $availabilityRequest->setContentEnabled(true);
+        }
         $availabilityRequest->setMinBookingSize($minBookingSize);
         $availabilityRequest->setMaxBookingSize($maxBookingSize);
         $availabilityRequest->setUnits($units);
@@ -65,6 +68,11 @@ class AvailabilityRequestFactory
 
     protected function isPricingAllowed(string $octoCapabilities): bool
     {
-        return !empty($octoCapabilities) && strtolower($octoCapabilities) === OctoRequest::CAPABILITIES_PRICING;
+        return !empty($octoCapabilities) && str_contains(OctoRequest::CAPABILITIES_PRICING, strtolower($octoCapabilities));
+    }
+
+    protected function isContentEnabled(string $octoCapabilities): bool
+    {
+        return !empty($octoCapabilities) && str_contains(OctoRequest::CAPABILITIES_CONTENT, strtolower($octoCapabilities));
     }
 }

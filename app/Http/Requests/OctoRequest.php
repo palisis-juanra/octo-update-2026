@@ -11,5 +11,6 @@ class OctoRequest
     public const UUID = 'uuid';
     public const CONTACT = 'contact';
     public const RESELLER_REFERENCE = 'resellerReference';
-    public const CAPABILITIES_PRICING = 'pricing';
+    public const CAPABILITIES_PRICING = 'octo/pricing';
+    public const CAPABILITIES_CONTENT = 'octo/content';
 }

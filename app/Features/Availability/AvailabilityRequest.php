@@ -262,13 +262,12 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         $availabilities = [];
         foreach ($departures as $departure) {
 
-          
-            
             $availability = new Availability;
 
             list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
             list($endTimeHours, $endTimeMinutes) = explode(":", $departure->end_time ? (string) $departure->end_time : '23:59');
 
+            $availability->setContentEnabled($this->contentEnabled);
             $availability->setId($this->generateAvailabilityIdFromDepartureOrComponentObject($departure));
             $availability->setDepartureId((int) $departure->departure_id);
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
@@ -280,10 +279,14 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setUtcCutoffAt($this->cutoff);
             $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
             $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
-            if ($this->allowPricing) {
+            if (true === $this->allowPricing) {
                 $pricing = $this->getPricingForMultipleDays($departure, $tourCMSService);
                 $availability->setCurrency($this->currency);
                 $availability->setPricing($pricing);
+            }
+            if (true === $this->contentEnabled) {
+                $availability->setTitle(!empty($departure->supplier_note) ? $this->tourName . " " . (string) $departure->supplier_note : null);
+                $availability->setShortDescription(!empty($departure->note) ? (string) $departure->note : null);
             }
             $availabilities[] = $availability;
 
