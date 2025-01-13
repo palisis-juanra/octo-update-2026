@@ -41,20 +41,11 @@ class SupplierService
     public function createSupplierFromChannelData(SimpleXMLElement $channelData, string $octoCapabilities): Supplier
     {
         $src = empty($channelData->logo_url) ? null : (string) $channelData->logo_url;
-
-        $extension = strtolower(pathinfo(parse_url($src, PHP_URL_PATH), PATHINFO_EXTENSION));
-        if (isset(Media::VALID_SOURCE_TYPES[$extension]) && !empty($src)) {
-            $fileType = Media::VALID_SOURCE_TYPES[$extension];
-        } elseif (empty($src)) {
-            $fileType = null;
-        } else {
-            $fileType = 'image/jpeg';
-        }
-
+        $fileType = Media::getFileType($src);
         $media = new Media(
             $src,
             $fileType,
-            !empty($src) ? 'LOGO' : null
+            !empty($src) ? Media::LOGO_REL : null
         );
         $shortDesc = empty($channelData->short_desc) ? null : (string) $channelData->short_desc;
 
