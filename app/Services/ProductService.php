@@ -862,7 +862,20 @@ class ProductService
                     throw new InvalidProductContentException($this->buildProductId($tour), 'Product has an invalid time configuration');
                 }
 
-                return ['' => [(string) $tour->start_time]];
+                $startTimes = [];
+
+                if (isset($tour->tour_departure_structure->start_times)) {
+                    $startTimesFromXML = XMLService::getArrayFromXmlNode($tour->tour_departure_structure->start_times, 'time');
+                    foreach ($startTimesFromXML as $startTime) {
+                        $startTimes[] = (string) $startTime;
+                    }
+                }
+
+                if (empty($startTimes)) {
+                    $startTimes = ['09:00'];
+                }
+
+                return ['' => $startTimes];
 
         }
         
