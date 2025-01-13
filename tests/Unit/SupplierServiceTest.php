@@ -21,7 +21,7 @@ class SupplierServiceTest extends UnitTestCase
     }
 
     
-    public function test_whenCallGetSupplierData_thenWeGetValidStructure()
+    public function test_whenCallGetSupplierDataWithNoCapabilities_thenWeGetValidStructure()
     {
         //Given
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
@@ -34,12 +34,38 @@ class SupplierServiceTest extends UnitTestCase
             ->onlyMethods([])
             ->setConstructorArgs([$tourCMSService])
             ->getMock();
-
+        $capabilities = '';
         // When
         $channelId = (string) $this->showChannelXML->channel->channel_id;
 
-        $supplier = $supplierServiceMock->createSupplierFromChannelData($this->showChannelXML->channel);
-        $supplierData = $supplierServiceMock->getSupplierData($channelId);
+        $supplier = $supplierServiceMock->createSupplierFromChannelData($this->showChannelXML->channel, $capabilities);
+        $supplierData = $supplierServiceMock->getSupplierData($channelId, $capabilities);
+
+        //Then
+        $this->assertInstanceOf(Supplier::class, $supplier);
+        $this->assertIsArray($supplierData);
+        $this->assertNotEmpty($supplierData);
+    }
+
+    public function test_whenCallGetSupplierDataWithCapabilities_thenWeGetValidStructure()
+    {
+        //Given
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+            ->onlyMethods(['showChannel'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+
+        $supplierServiceMock = $this->getMockBuilder(SupplierService::class)
+            ->onlyMethods([])
+            ->setConstructorArgs([$tourCMSService])
+            ->getMock();
+        $capabilities = 'content';
+        // When
+        $channelId = (string) $this->showChannelXML->channel->channel_id;
+
+        $supplier = $supplierServiceMock->createSupplierFromChannelData($this->showChannelXML->channel, $capabilities);
+        $supplierData = $supplierServiceMock->getSupplierData($channelId, $capabilities);
 
         //Then
         $this->assertInstanceOf(Supplier::class, $supplier);
@@ -66,8 +92,8 @@ class SupplierServiceTest extends UnitTestCase
         // When
         $channelId = (string) $this->showChannelXML->channel->channel_id;
 
-        $supplier = $supplierServiceMock->createSupplierFromChannelData($this->showChannelXML->channel);
-        $supplierData = $supplierServiceMock->getSupplierData($channelId);
+        $supplier = $supplierServiceMock->createSupplierFromChannelData($this->showChannelXML->channel, '');
+        $supplierData = $supplierServiceMock->getSupplierData($channelId, '');
         $fullAddress = $supplier->getFullAddress();
         //Then
         $this->assertNotEmpty($fullAddress);

@@ -21,8 +21,11 @@ class Supplier extends Model
     protected string $address_state;
     protected string $address_postcode;
     protected string $address_country;
+    protected string $shortDescription;
+    protected array $media;
+    protected string $octoCapabilities;
 
-    public function __construct(string $id, string $name, string $endpoint, string $website, string $email, string $telephone, string $address_1, string $address_2, string $address_city, string $address_state, string $address_postcode, string $address_country)
+    public function __construct(string $id, string $name, string $endpoint, string $website, string $email, string $telephone, string $address_1, string $address_2, string $address_city, string $address_state, string $address_postcode, string $address_country, string|null $shortDescription, array $media, string $octoCapabilities)
     {
         $this->id = $id;
         $this->name = $name;
@@ -36,7 +39,9 @@ class Supplier extends Model
         $this->address_state = $address_state;
         $this->address_postcode = $address_postcode;
         $this->address_country = $address_country;
-
+        $this->shortDescription = $shortDescription;
+        $this->media = $media;
+        $this->octoCapabilities = $octoCapabilities;
     }
 
     /**
@@ -182,6 +187,21 @@ class Supplier extends Model
         $this->address_1 = $address;
         return $this;
     }
+    public function setShortDescription($shortDescription): self
+    {
+        $this->shortDescription = $shortDescription;
+        return $this;
+    }
+    public function setMedia($media): self
+    {
+        $this->media = $media;
+        return $this;
+    }
+    public function setOctoCapabilities(string $octoCapabilities): self
+    {
+        $this->octoCapabilities = $octoCapabilities;
+        return $this;
+    }
     protected function getAddress1(): string 
     {
         return $this->address_1;
@@ -201,5 +221,17 @@ class Supplier extends Model
     protected function getCountry(): string 
     {
         return $this->address_country ;
+    }
+    public function getShortDescription(): string 
+    {
+        return $this->shortDescription;
+    }
+    public function getMedia(): array 
+    {
+        return $this->media;
+    }
+    public function getOctoCapabilities(): string 
+    {
+        return $this->octoCapabilities;
     }
 }

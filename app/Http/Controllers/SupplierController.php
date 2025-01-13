@@ -67,8 +67,9 @@ class SupplierController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
+            $octoCapabilities = $request->headers->get('Octo-Capabilities') ?? '';
             $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
-            $supplierData = $this->supplierService->getSupplierData($channelId);
+            $supplierData = $this->supplierService->getSupplierData($channelId, $octoCapabilities);
             if ($this->isSuppliersRequest(request()->getRequestUri())) $supplierData = [$supplierData];
             return new JsonResponse($supplierData, Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
