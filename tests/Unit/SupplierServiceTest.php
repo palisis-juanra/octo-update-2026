@@ -71,6 +71,27 @@ class SupplierServiceTest extends UnitTestCase
         $this->assertInstanceOf(Supplier::class, $supplier);
         $this->assertIsArray($supplierData);
         $this->assertNotEmpty($supplierData);
+        $this->assertArrayHasKey('shortDescription', $supplierData);
+        $this->assertEquals('Company Description - DIST.php', $supplierData['shortDescription']);
+    
+        // Assert media field
+        $this->assertArrayHasKey('media', $supplierData);
+        $this->assertIsArray($supplierData['media']);
+        $this->assertNotEmpty($supplierData['media']);
+    
+        $media = $supplierData['media'][0]; // Access first media item
+        $this->assertArrayHasKey('src', $media);
+        $this->assertEquals('https://cdntest.tourcms.com/a/1/w142_logo.png', $media['src']);
+        $this->assertArrayHasKey('type', $media);
+        $this->assertEquals('image/png', $media['type']);
+        $this->assertArrayHasKey('rel', $media);
+        $this->assertEquals('LOGO', $media['rel']);
+        $this->assertArrayHasKey('title', $media);
+        $this->assertNull($media['title']);
+        $this->assertArrayHasKey('caption', $media);
+        $this->assertNull($media['caption']);
+        $this->assertArrayHasKey('copyright', $media);
+        $this->assertNull($media['copyright']);
     }
 
     public function test_whenCallGetSupplierData_thenGetRightCompleteAddress()
