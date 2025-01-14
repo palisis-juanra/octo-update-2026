@@ -59,14 +59,4 @@ class AvailabilityRequestFactory
         $availabilityRequest->setUnits($units);
         return $availabilityRequest;
     }
-
-    protected function isPricingAllowed(string $octoCapabilities): bool
-    {
-        return !empty($octoCapabilities) && str_contains(OctoRequest::CAPABILITIES_PRICING, strtolower($octoCapabilities));
-    }
-
-    protected function isContentEnabled(string $octoCapabilities): bool
-    {
-        return !empty($octoCapabilities) && str_contains(OctoRequest::CAPABILITIES_CONTENT, strtolower($octoCapabilities));
-    }
 }
