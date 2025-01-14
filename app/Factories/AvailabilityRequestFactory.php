@@ -50,7 +50,7 @@ class AvailabilityRequestFactory
             $localDateStart = $localDate;
         }
 
-        $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, $pricing);
+        $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd);
         if (true === OctoRequestFacade::isContentRequired()) {
             $availabilityRequest->setContentEnabled(true);
         }
