@@ -25,11 +25,6 @@ class OctoRequest
         $this->contentCapability = $this->isCapabilityHeaderPresent(self::CAPABILITIES_CONTENT);
     }
 
-    protected function isCapabilityHeaderPresent(string $header)
-    {
-        return !empty($this->capabilitiesHeader) && str_contains($header, strtolower($this->capabilitiesHeader));
-    }
-
     public function isPricingRequired(): bool
     {
         return $this->pricingCapability;
@@ -40,4 +35,8 @@ class OctoRequest
         return $this->contentCapability;
     }
 
+    protected function isCapabilityHeaderPresent(string $header)
+    {
+        return !empty($this->capabilitiesHeader) && str_contains($header, strtolower($this->capabilitiesHeader));
+    }
 }

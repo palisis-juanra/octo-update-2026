@@ -2,20 +2,22 @@
 
 namespace Tests\Unit;
 
+use App\Facades\OctoRequestFacade;
 use App\Factories\AvailabilityRequestFactory;
 use App\Features\Availability\AvailabilityRequest;
-use App\Features\Availability\Pricing\MultiDayPricingAvailabilityRequest;
 use App\Features\Availability\Pricing\PricingAvailabilityRequest;
-use App\Features\Availability\Pricing\SingleDayPricingAvailabilityRequest;
+use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\ProductService;
+use Illuminate\Http\Request;
+use Tests\FeatureTestCase;
 use Tests\UnitTestCase;
 
-class AvailabilityRequestFactoryTest extends UnitTestCase
+class AvailabilityRequestFactoryTest extends FeatureTestCase
 {
     public $productServiceMock;
     public AvailabilityRequestFactory $factory;
-    const PRICING_HEADER = 'pricing';
+    public const PRICING_HEADER = 'pricing';
     
     public function setUp(): void
     {
@@ -37,7 +39,7 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
             "localDate" => "2024-11-28",
         ];
         
-        $availabilityRequest = $this->factory->get($requestParams, '');
+        $availabilityRequest = $this->factory->get($requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(AvailabilityRequest::class, $availabilityRequest);
@@ -55,7 +57,7 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
             "localDateEnd" => "2024-11-25",
         ];
 
-        $availabilityRequest = $this->factory->get($requestParams, '');
+        $availabilityRequest = $this->factory->get($requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(AvailabilityRequest::class, $availabilityRequest);
@@ -65,13 +67,16 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
 
     public function test_whenRequestHasAOnlyOneDayWithPricingHeader_thenPricingAvailabilityRequestIsCreated()
     {
+        OctoRequestFacade::shouldReceive('isPricingRequired')
+            ->andReturn(true);
+
         $requestParams = [
             "productId" => "TE_1_67|142",
             "optionId" => "START_TIME|13:00",
             "localDate" => "2024-11-28",
         ];
 
-        $availabilityRequest = $this->factory->get($requestParams, self::PRICING_HEADER);
+        $availabilityRequest = $this->factory->get($requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(PricingAvailabilityRequest::class, $availabilityRequest);
@@ -95,7 +100,7 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
             $availabilityIdsDates[] = explode('|', $availabilityId)[0];
         }
 
-        $availabilityRequest = $this->factory->get($requestParams, '');
+        $availabilityRequest = $this->factory->get($requestParams);
 
         $this->assertEquals(min($availabilityIdsDates), $availabilityRequest->getLocalDateStart());
         $this->assertEquals(max($availabilityIdsDates), $availabilityRequest->getLocalDateEnd());
@@ -113,13 +118,20 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
 
         $availabilityIdDate = explode('|', $requestParams['availabilityIds'][0])[0];
 
-        $availabilityRequest = $this->factory->get($requestParams, '');
+        $availabilityRequest = $this->factory->get($requestParams);
 
         $this->assertEquals($availabilityIdDate, $availabilityRequest->getLocalDateStart());
     }
 
     public function test_whenRequestHasOnlyOneAvailabilityIdWithPricingHeader_thenPricingAvailabilityRequestIsCreated()
     {
+        $this->withHeaders([
+            OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING,
+        ]);
+
+        OctoRequestFacade::shouldReceive('isPricingRequired')
+            ->andReturn(true);
+
         $requestParams = [
             "productId" => "TE_1_67|142",
             "optionId" => "START_TIME|13:00",
@@ -130,7 +142,7 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
 
         $availabilityIdDate = explode('|', $requestParams['availabilityIds'][0])[0];
 
-        $availabilityRequest = $this->factory->get($requestParams, self::PRICING_HEADER);
+        $availabilityRequest = $this->factory->get($requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(PricingAvailabilityRequest::class, $availabilityRequest);
@@ -149,7 +161,7 @@ class AvailabilityRequestFactoryTest extends UnitTestCase
 
         $availabilityIdDate = explode('|', $requestParams['availabilityIds'][0])[0];
 
-        $availabilityRequest = $this->factory->get($requestParams, '');
+        $availabilityRequest = $this->factory->get($requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(AvailabilityRequest::class, $availabilityRequest);

@@ -2,10 +2,9 @@
 
 namespace App\Factories;
 
+use App\Facades\OctoRequestFacade;
 use App\Features\Availability\AvailabilityRequest;
-use App\Features\Availability\Pricing\MultiDayPricingAvailabilityRequest;
 use App\Features\Availability\Pricing\PricingAvailabilityRequest;
-use App\Features\Availability\Pricing\SingleDayPricingAvailabilityRequest;
 use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\AvailabilityService;
@@ -16,7 +15,7 @@ class AvailabilityRequestFactory
 {
     public function __construct(public ProductService $productService) {}
 
-    public function get(array $requestParams, string $octoCapabilities, int $minBookingSize = ProductService::MIN_BOOKING_SIZE, int $maxBookingSize = ProductService::MAX_BOOKING_SIZE): BaseAvailabilityRequest
+    public function get(array $requestParams, int $minBookingSize = ProductService::MIN_BOOKING_SIZE, int $maxBookingSize = ProductService::MAX_BOOKING_SIZE): BaseAvailabilityRequest
     {
         $productId = $requestParams[AvailabilityService::PARAM_PRODUCT_ID] ?? '';
         $tourId = $this->productService->getTourIdFromProductId($productId) ?? '';
@@ -41,7 +40,7 @@ class AvailabilityRequestFactory
             }
         }
 
-        $pricing = $this->isPricingAllowed($octoCapabilities);
+        $pricing = OctoRequestFacade::isPricingRequired();
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
             return new PricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize, $maxBookingSize);
@@ -52,7 +51,7 @@ class AvailabilityRequestFactory
         }
 
         $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd, $pricing);
-        if ($this->isContentEnabled($octoCapabilities)) {
+        if (true === OctoRequestFacade::isContentRequired()) {
             $availabilityRequest->setContentEnabled(true);
         }
         $availabilityRequest->setMinBookingSize($minBookingSize);

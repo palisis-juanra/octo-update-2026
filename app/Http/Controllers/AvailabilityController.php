@@ -6,7 +6,6 @@ use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Factories\AvailabilityRequestFactory;
 use App\Http\Middleware\OctoAuthentication;
-use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
@@ -24,8 +23,7 @@ class AvailabilityController extends Controller
         public AvailabilityRequestFactory $availabilityRequestFactory, 
         public AvailabilityService $availabilityService, 
         public ProductService $productService, 
-        public JSONLogService $logger, 
-        public OctoRequest $octoRequest) {}
+        public JSONLogService $logger) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -40,7 +38,7 @@ class AvailabilityController extends Controller
             $product = $this->productService->find($productId);
 
             $octoCapabilities = $request->header('Octo-Capabilities') ?? '';
-            $availabilityRequest = $this->availabilityRequestFactory->get($requestParams, $octoCapabilities, $product->getMinBookingSize(), $product->getMaxBookingSize());
+            $availabilityRequest = $this->availabilityRequestFactory->get($requestParams, $product->getMinBookingSize(), $product->getMaxBookingSize());
             $availabilityIds = $request->get(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
             $availabilityRequest->setAvailabilityIds($availabilityIds);
             $availabilityRequest->setTourName($product->getInternalName());
