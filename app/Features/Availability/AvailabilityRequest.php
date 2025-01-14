@@ -24,16 +24,14 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected int $maxBookingSize;
     protected int $maxUnits;
     protected string $cutoff;
-    protected bool $allowPricing;
     protected string $currency;
 
-    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allowPricing = false)
+    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '')
     {
         $this->tourId = $tourId;
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
-        $this->allowPricing = $allowPricing;
     }
 
 // GET SET FUNCTIONS
@@ -143,19 +141,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $this;
     }
 
-
-    public function setAllowPricing(bool $allowPricing)
-    {
-        $this->allowPricing = $allowPricing;
-        return $this;
-    }
-
-    public function setCurrency(string $currency)
-    {
-        $this->currency = $currency;
-        return $this;
-    }
-
 // PUBLIC FUNCTIONS
 
     /**
@@ -250,7 +235,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         if (!isset($response->tour->dates_and_prices)) {
             return [];
         }
-        if ($this->allowPricing) {
+        if (true === OctoRequestFacade::isPricingRequired()) {
             $this->currency = (string)$response->tour->sale_currency;
         }
         $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
@@ -280,7 +265,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setUtcCutoffAt($this->cutoff);
             $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
             $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
-            if (true === $this->allowPricing) {
+            if (true === OctoRequestFacade::isPricingRequired()) {
                 $pricing = $this->getPricingForMultipleDays($departure, $tourCMSService);
                 $availability->setCurrency($this->currency);
                 $availability->setPricing($pricing);

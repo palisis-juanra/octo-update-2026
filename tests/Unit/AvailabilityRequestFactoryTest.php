@@ -9,9 +9,7 @@ use App\Features\Availability\Pricing\PricingAvailabilityRequest;
 use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\ProductService;
-use Illuminate\Http\Request;
 use Tests\FeatureTestCase;
-use Tests\UnitTestCase;
 
 class AvailabilityRequestFactoryTest extends FeatureTestCase
 {
