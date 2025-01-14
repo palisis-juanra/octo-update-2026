@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Http\Request;
+
 class OctoRequest
 {
     public const PRODUCT_ID = 'productId';
@@ -11,6 +13,31 @@ class OctoRequest
     public const UUID = 'uuid';
     public const CONTACT = 'contact';
     public const RESELLER_REFERENCE = 'resellerReference';
+    public const CAPABILITIES_HEADER = 'Octo-Capabilities';
     public const CAPABILITIES_PRICING = 'octo/pricing';
     public const CAPABILITIES_CONTENT = 'octo/content';
+    protected string $capabilitiesHeader = '';
+    protected bool $pricingCapability = false;
+    protected bool $contentCapability = false;
+    public function __construct(public Request $request) {
+        $this->capabilitiesHeader = $request->header(self::CAPABILITIES_HEADER) ?? '';
+        $this->pricingCapability = $this->isCapabilityHeaderPresent(self::CAPABILITIES_PRICING);
+        $this->contentCapability = $this->isCapabilityHeaderPresent(self::CAPABILITIES_CONTENT);
+    }
+
+    protected function isCapabilityHeaderPresent(string $header)
+    {
+        return !empty($this->capabilitiesHeader) && str_contains($header, strtolower($this->capabilitiesHeader));
+    }
+
+    public function isPricingRequired(): bool
+    {
+        return $this->pricingCapability;
+    }
+
+    public function isContentRequired(): bool
+    {
+        return $this->contentCapability;
+    }
+
 }

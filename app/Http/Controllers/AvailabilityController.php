@@ -6,6 +6,7 @@ use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Factories\AvailabilityRequestFactory;
 use App\Http\Middleware\OctoAuthentication;
+use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
@@ -17,20 +18,14 @@ use Symfony\Component\HttpFoundation\Response;
 class AvailabilityController extends Controller
 {
 
-    const DEFAULT_MAX_UNITS = 10;
+    public const DEFAULT_MAX_UNITS = 10;
 
-    public AvailabilityRequestFactory $availabilityRequestFactory;
-    public AvailabilityService $availabilityService;
-    public ProductService $productService;
-    public JSONLogService $logger;
-
-    public function __construct(AvailabilityRequestFactory $factory, AvailabilityService $service, ProductService $productService, JSONLogService $logger)
-    {
-        $this->availabilityRequestFactory = $factory;
-        $this->availabilityService = $service;
-        $this->productService = $productService;
-        $this->logger = $logger;
-    }
+    public function __construct(
+        public AvailabilityRequestFactory $availabilityRequestFactory, 
+        public AvailabilityService $availabilityService, 
+        public ProductService $productService, 
+        public JSONLogService $logger, 
+        public OctoRequest $octoRequest) {}
 
     public function index(Request $request): JsonResponse
     {

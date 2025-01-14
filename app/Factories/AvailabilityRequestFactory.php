@@ -14,12 +14,7 @@ use App\Services\UnitService;
 
 class AvailabilityRequestFactory
 {
-    public ProductService $productService;
-
-    public function __construct(ProductService $productService)
-    {
-        $this->productService = $productService;
-    }
+    public function __construct(public ProductService $productService) {}
 
     public function get(array $requestParams, string $octoCapabilities, int $minBookingSize = ProductService::MIN_BOOKING_SIZE, int $maxBookingSize = ProductService::MAX_BOOKING_SIZE): BaseAvailabilityRequest
     {

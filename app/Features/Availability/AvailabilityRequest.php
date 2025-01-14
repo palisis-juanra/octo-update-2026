@@ -4,6 +4,7 @@ namespace App\Features\Availability;
 
 use App\Exceptions\InvalidAvailabilityIdException;
 use App\Exceptions\InvalidUnitIdException;
+use App\Facades\OctoRequestFacade;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\DateTimeService;
 use App\Services\OptionService;
@@ -284,8 +285,9 @@ class AvailabilityRequest extends BaseAvailabilityRequest
                 $availability->setCurrency($this->currency);
                 $availability->setPricing($pricing);
             }
-            if (true === $this->contentEnabled) {
-                $availability->setTitle(!empty($departure->supplier_note) ? $this->tourName . " " . (string) $departure->supplier_note : null);
+            if (true === OctoRequestFacade::isContentRequired()) {
+                $supplierNote = !empty($departure->supplier_note) ? (string) $departure->supplier_note : '';
+                $availability->setTitle("{$this->tourName} {$supplierNote}");
                 $availability->setShortDescription(!empty($departure->note) ? (string) $departure->note : null);
             }
             $availabilities[] = $availability;
