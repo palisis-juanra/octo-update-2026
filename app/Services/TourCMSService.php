@@ -61,9 +61,9 @@ class TourCMSService
         return $response;
     }
 
-    public function showTour(string $tourId): SimpleXMLElement
+    public function showTour(string $tourId, ?string $channelId = null): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_tour($tourId, $this->channelId);
+        $response = $this->tourCMS->show_tour($tourId, $channelId ?? $this->channelId);
         $response = $this->handleResponse($response);
 
         return $response; 

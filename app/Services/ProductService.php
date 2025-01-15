@@ -580,7 +580,7 @@ class ProductService
     protected function findTourDataFromAPI(string $productId): SimpleXMLElement
     {
         $apiCallParameters = $this->parseProductId($productId);
-        $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId);
+        $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId, $apiCallParameters->channelId);
         $tour = $apiResponse->tour;
         return $tour;
     }
