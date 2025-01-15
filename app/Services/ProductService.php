@@ -1088,6 +1088,35 @@ class ProductService
                 $categoryLabels[] = self::TCMS_TOUR_TAGS_TO_CATEGORY_LABELS[(string) $tag->token];
             }
         }
+
+        if ((int) $tour->tourleader_type == 2) {
+            $categoryLabels[] = 'self-guided';
+        } else if ((int) $tour->tourleader_type == 1) {
+            $categoryLabels[] = 'guided-tours';
+        }
+
+        if ((int) $tour->product_type == 3) {
+            $categoryLabels[] = 'multi-day';
+        }
+
+        if ((int) $tour->accomrating > 1) {
+            $categoryLabels[] = 'accommodation-included';
+        }
+
+        switch ((int) $tour->grade) {
+            case 1:
+                $categoryLabels[] = 'trip-difficulty-easy';
+                break;
+            case 2:
+            case 3:
+                $categoryLabels[] = 'trip-difficulty-medium';
+                break;
+            case 4:
+            case 5:
+                $categoryLabels[] = 'trip-difficulty-medium';
+                break;
+        }
+
         return $categoryLabels;
     }
 
