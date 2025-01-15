@@ -15,6 +15,7 @@ use App\Models\Unit;
 use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
+use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 use stdClass;
 
@@ -146,6 +147,34 @@ class ProductService
         self::FEATURE_TYPE_CANCELLATION_TERM => 'cancellation_policy->policy->name'
     ];
     public const DEFAULT_DURATION_MINUTES = 60;
+    public const TCMS_TOUR_TAGS_TO_CATEGORY_LABELS = [
+        'adults-only' => 'adults-only',
+        'animals' => 'animals',
+        'audio-guide' => 'audio-guide',
+        'beaches' => 'beaches',
+        'bike-tours' => 'bike-tours',
+        'boat-tours' => 'boat-tours',
+        'city-cards' => 'city-cards',
+        'classes' => 'classes',
+        'day-trips' => 'day-trips',
+        'family-friendly' => 'family-friendly',
+        'fast-track' => 'fast-track',
+        'food' => 'food',
+        'history' => 'history',
+        'hop-on-hop-off' => 'hop-on-hop-off',
+        'literature' => 'literature',
+        'live-music' => 'live-music',
+        'museums' => 'museums',
+        'nightlife' => 'nightlife',
+        'outdoors' => 'outdoors',
+        'private-tours '=> 'private-tours',
+        'romantic' => 'romantic',
+        'small-group-tours' => 'small-group-tours',
+        'sports' => 'sports',
+        'theme-parks' => 'theme-parks',
+        'walking-tours' => 'walking-tours',
+        'suitable-for-wheelchairs' => 'wheelchair-accessible'
+    ];
   
     public ProductTransformer $productTransformer;
 
@@ -1052,7 +1081,14 @@ class ProductService
 
     protected function getProductCategoryLabels(SimpleXMLElement $tour): array
     {
-        return XMLService::getArrayFromXmlNode($tour->tour_tags, 'tag_token');
+        $categoryLabels = [];
+        $tourTags = XMLService::getArrayFromXmlNode($tour->tour_tags, 'tag');
+        foreach ($tourTags as $tag) {
+            if (!empty($tag->token) && array_key_exists((string) $tag->token, self::TCMS_TOUR_TAGS_TO_CATEGORY_LABELS)) {
+                $categoryLabels[] = self::TCMS_TOUR_TAGS_TO_CATEGORY_LABELS[(string) $tag->token];
+            }
+        }
+        return $categoryLabels;
     }
 
     protected function getDurationMinutesFrom(SimpleXMLElement $tour): int
