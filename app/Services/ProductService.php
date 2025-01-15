@@ -1051,11 +1051,6 @@ class ProductService
         return $locations;
     }
 
-    protected function getProductCategoryLabels(SimpleXMLElement $tour): array
-    {
-        
-    }
-
     protected function getDurationMinutesFrom(SimpleXMLElement $tour): int
     {
         if (!isset($tour->start_time) || !isset($tour->end_time)) {
