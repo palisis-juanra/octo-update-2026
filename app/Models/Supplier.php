@@ -23,9 +23,8 @@ class Supplier extends Model
     protected string $address_country;
     protected string $shortDescription;
     protected array $media;
-    protected string $octoCapabilities;
 
-    public function __construct(string $id, string $name, string $endpoint, string $website, string $email, string $telephone, string $address_1, string $address_2, string $address_city, string $address_state, string $address_postcode, string $address_country, string|null $shortDescription, array $media, string $octoCapabilities)
+    public function __construct(string $id, string $name, string $endpoint, string $website, string $email, string $telephone, string $address_1, string $address_2, string $address_city, string $address_state, string $address_postcode, string $address_country, string|null $shortDescription, array $media)
     {
         $this->id = $id;
         $this->name = $name;
@@ -41,7 +40,6 @@ class Supplier extends Model
         $this->address_country = $address_country;
         $this->shortDescription = $shortDescription;
         $this->media = $media;
-        $this->octoCapabilities = $octoCapabilities;
     }
 
     /**
@@ -197,11 +195,6 @@ class Supplier extends Model
         $this->media = $media;
         return $this;
     }
-    public function setOctoCapabilities(string $octoCapabilities): self
-    {
-        $this->octoCapabilities = $octoCapabilities;
-        return $this;
-    }
     protected function getAddress1(): string 
     {
         return $this->address_1;
@@ -229,9 +222,5 @@ class Supplier extends Model
     public function getMedia(): array 
     {
         return $this->media;
-    }
-    public function getOctoCapabilities(): string 
-    {
-        return $this->octoCapabilities;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Tests\Unit;
 
+use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
 use App\Models\Supplier;
 use App\Services\SupplierService;
 use App\Services\TourCMSService;
@@ -50,22 +52,24 @@ class SupplierServiceTest extends UnitTestCase
     public function test_whenCallGetSupplierDataWithCapabilities_thenWeGetValidStructure()
     {
         //Given
+        
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showChannel'])
-            ->disableOriginalConstructor()
-            ->getMock();
+        ->onlyMethods(['showChannel'])
+        ->disableOriginalConstructor()
+        ->getMock();
         $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        
+        OctoRequestFacade::shouldReceive('isContentRequired')
+        ->andReturn(true);
 
         $supplierServiceMock = $this->getMockBuilder(SupplierService::class)
-            ->onlyMethods([])
-            ->setConstructorArgs([$tourCMSService])
+        ->onlyMethods([])
+        ->setConstructorArgs([$tourCMSService])
             ->getMock();
-        $capabilities = 'content';
         // When
         $channelId = (string) $this->showChannelXML->channel->channel_id;
-
-        $supplier = $supplierServiceMock->createSupplierFromChannelData($this->showChannelXML->channel, $capabilities);
-        $supplierData = $supplierServiceMock->getSupplierData($channelId, $capabilities);
+        $supplier = $supplierServiceMock->createSupplierFromChannelData($this->showChannelXML->channel);
+        $supplierData = $supplierServiceMock->getSupplierData($channelId);
 
         //Then
         $this->assertInstanceOf(Supplier::class, $supplier);

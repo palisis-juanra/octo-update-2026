@@ -37,6 +37,9 @@ class OctoRequest
 
     protected function isCapabilityHeaderPresent(string $header)
     {
-        return !empty($this->capabilitiesHeader) && str_contains($header, strtolower($this->capabilitiesHeader));
+        $capabilitiesArray = explode(',', strtolower($this->capabilitiesHeader));
+        $capabilitiesArray = array_map('trim', $capabilitiesArray);
+        $a = in_array($header, $capabilitiesArray);
+        return !empty($this->capabilitiesHeader) && $a;
     }
 }

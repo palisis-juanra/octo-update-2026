@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
@@ -273,7 +274,7 @@ class AvailabilityTest extends FeatureTestCase
             ], 
             [
                 self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                self::OCTO_CAPABILITIES => 'pricing'
+                self::OCTO_CAPABILITIES => OctoRequest::CAPABILITIES_PRICING
             ]
         );
 

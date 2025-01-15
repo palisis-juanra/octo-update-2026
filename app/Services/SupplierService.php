@@ -30,15 +30,15 @@ class SupplierService
      * @throws APICallNotOKException
      * @return array
      */
-    public function getSupplierData(string $channelId, string $octoCapabilities): array
+    public function getSupplierData(string $channelId): array
     {
         $showChannelResponse = $this->tourCMSService->showChannel($channelId);
         $channelData = $showChannelResponse->channel;
-        $supplier = $this->createSupplierFromChannelData($channelData, $octoCapabilities);
+        $supplier = $this->createSupplierFromChannelData($channelData);
         return $this->supplierTransformer->transform($supplier);
     }
 
-    public function createSupplierFromChannelData(SimpleXMLElement $channelData, string $octoCapabilities): Supplier
+    public function createSupplierFromChannelData(SimpleXMLElement $channelData): Supplier
     {
         $src = empty($channelData->logo_url) ? null : (string) $channelData->logo_url;
         $fileType = Media::getFileType($src);
@@ -64,7 +64,6 @@ class SupplierService
             (string) $channelData->address_country,
             (string) $shortDesc,
             (array) [$media],
-            (string) $octoCapabilities
         );
     }
 

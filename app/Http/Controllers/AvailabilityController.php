@@ -37,7 +37,6 @@ class AvailabilityController extends Controller
             $productId = $request->post('productId');
             $product = $this->productService->find($productId);
 
-            $octoCapabilities = $request->header('Octo-Capabilities') ?? '';
             $availabilityRequest = $this->availabilityRequestFactory->get($requestParams, $product->getMinBookingSize(), $product->getMaxBookingSize());
             $availabilityIds = $request->get(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
             $availabilityRequest->setAvailabilityIds($availabilityIds);

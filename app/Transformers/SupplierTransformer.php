@@ -2,6 +2,7 @@
 
 namespace App\Transformers;
 
+use App\Facades\OctoRequestFacade;
 use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 
@@ -33,7 +34,7 @@ class SupplierTransformer extends BaseTransformer
                 "address" => $supplier->getFullAddress()
             ]
         ];
-        if ($supplier->getOctoCapabilities() == OctoRequest::CAPABILITIES_CONTENT) {
+        if (OctoRequestFacade::isContentRequired()) {
             $data['shortDescription'] = $supplier->getShortDescription();
             $data['media'] = [];
             foreach ($supplier->getMedia() as $media) {
