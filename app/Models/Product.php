@@ -25,6 +25,7 @@ class Product extends Model
     protected string $redemptionMethod;
     protected array $options;
     protected array $cutoff;
+    protected ?ProductContent $content = null;
 
     /**
      * Get the value of id
@@ -383,5 +384,25 @@ class Product extends Model
         }
 
         throw new InvalidOptionIdException($optionId);
+    }
+
+    /**
+     * Get the value of content
+     */ 
+    public function getContent(): ?ProductContent
+    {
+        return $this->content;
+    }
+
+    /**
+     * Set the value of content
+     *
+     * @return  self
+     */ 
+    public function setContent(?ProductContent $content): self
+    {
+        $this->content = $content;
+
+        return $this;
     }
 }
