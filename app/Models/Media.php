@@ -5,12 +5,17 @@ namespace App\Models;
 
 class Media extends BaseModel
 {
-    public const VALID_SOURCE_TYPES = [
+    public const VALID_IMAGE_TYPES = [
         "jpg" => "image/jpeg",
         "jpeg" => "image/jpeg",
         "png" => "image/png",
         "gif" => "image/gif",
         "webp" => "image/webp"
+    ];
+
+    public const VALID_VIDEO_TYPES = [
+        "vimeo" => "external/vimeo",
+        "youtube" => "external/youtube"
     ];
 
     public const REL_LOGO = 'LOGO';
@@ -25,7 +30,7 @@ class Media extends BaseModel
     protected ?string $copyright;
 
 
-    public function __construct(string | null $src, string|null $type = 'image/jpeg', string | null $rel = self::REL_LOGO, string $title = null, string $caption = null, string $copyright = null)
+    public function __construct(string | null $src, string|null $type = self::VALID_IMAGE_TYPES["jpeg"], string | null $rel = self::REL_LOGO, string $title = null, string $caption = null, string $copyright = null)
     {
         $this->src = $src;
         $this->type = $type;
@@ -121,11 +126,11 @@ class Media extends BaseModel
 
     static function getFileType(string $src):string|null
     {
-        $fileType = self::VALID_SOURCE_TYPES['jpeg'];
+        $fileType = self::VALID_IMAGE_TYPES['jpeg'];
 
         $extension = strtolower(pathinfo(parse_url($src, PHP_URL_PATH), PATHINFO_EXTENSION));
-        if (isset(self::VALID_SOURCE_TYPES[$extension])) {
-            $fileType = self::VALID_SOURCE_TYPES[$extension];
+        if (isset(self::VALID_IMAGE_TYPES[$extension])) {
+            $fileType = self::VALID_IMAGE_TYPES[$extension];
         } 
         if (empty($src)) {
             $fileType = null;

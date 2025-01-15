@@ -147,34 +147,6 @@ class ProductService
         self::FEATURE_TYPE_CANCELLATION_TERM => 'cancellation_policy->policy->name'
     ];
     public const DEFAULT_DURATION_MINUTES = 60;
-    public const TCMS_TOUR_TAGS_TO_CATEGORY_LABELS = [
-        'adults-only' => 'adults-only',
-        'animals' => 'animals',
-        'audio-guide' => 'audio-guide',
-        'beaches' => 'beaches',
-        'bike-tours' => 'bike-tours',
-        'boat-tours' => 'boat-tours',
-        'city-cards' => 'city-cards',
-        'classes' => 'classes',
-        'day-trips' => 'day-trips',
-        'family-friendly' => 'family-friendly',
-        'fast-track' => 'fast-track',
-        'food' => 'food',
-        'history' => 'history',
-        'hop-on-hop-off' => 'hop-on-hop-off',
-        'literature' => 'literature',
-        'live-music' => 'live-music',
-        'museums' => 'museums',
-        'nightlife' => 'nightlife',
-        'outdoors' => 'outdoors',
-        'private-tours '=> 'private-tours',
-        'romantic' => 'romantic',
-        'small-group-tours' => 'small-group-tours',
-        'sports' => 'sports',
-        'theme-parks' => 'theme-parks',
-        'walking-tours' => 'walking-tours',
-        'suitable-for-wheelchairs' => 'wheelchair-accessible'
-    ];
   
     public ProductTransformer $productTransformer;
 
@@ -289,7 +261,7 @@ class ProductService
             $features = $this->getProductFeatures($tour);
             $media = $this->getProductMedia($tour);
             $locations = $this->getProductLocations($tour);
-            $categoryLabels = $this->getProductCategoryLabels($tour);
+            $categoryLabels = CategoryLabelService::getFromTourXML($tour);
             $durationMinutesFrom = $this->getDurationMinutesFrom($tour);
             
             $productContent->setTitle((string) $tour->tour_name)
@@ -992,7 +964,7 @@ class ProductService
             foreach ($videos as $video) {
                 $src = (string) $video->video_url;
                 $videoObject = new Media($src);
-                $videoObject->setType($video->video_service);
+                $videoObject->setType(Media::VALID_VIDEO_TYPES[(string) $video->video_service]);
                 $videoObject->setRel(Media::REL_GALLERY);
                 $media[] = $videoObject;
             }
@@ -1081,43 +1053,7 @@ class ProductService
 
     protected function getProductCategoryLabels(SimpleXMLElement $tour): array
     {
-        $categoryLabels = [];
-        $tourTags = XMLService::getArrayFromXmlNode($tour->tour_tags, 'tag');
-        foreach ($tourTags as $tag) {
-            if (!empty($tag->token) && array_key_exists((string) $tag->token, self::TCMS_TOUR_TAGS_TO_CATEGORY_LABELS)) {
-                $categoryLabels[] = self::TCMS_TOUR_TAGS_TO_CATEGORY_LABELS[(string) $tag->token];
-            }
-        }
-
-        if ((int) $tour->tourleader_type == 2) {
-            $categoryLabels[] = 'self-guided';
-        } else if ((int) $tour->tourleader_type == 1) {
-            $categoryLabels[] = 'guided-tours';
-        }
-
-        if ((int) $tour->product_type == 3) {
-            $categoryLabels[] = 'multi-day';
-        }
-
-        if ((int) $tour->accomrating > 1) {
-            $categoryLabels[] = 'accommodation-included';
-        }
-
-        switch ((int) $tour->grade) {
-            case 1:
-                $categoryLabels[] = 'trip-difficulty-easy';
-                break;
-            case 2:
-            case 3:
-                $categoryLabels[] = 'trip-difficulty-medium';
-                break;
-            case 4:
-            case 5:
-                $categoryLabels[] = 'trip-difficulty-medium';
-                break;
-        }
-
-        return $categoryLabels;
+        
     }
 
     protected function getDurationMinutesFrom(SimpleXMLElement $tour): int
