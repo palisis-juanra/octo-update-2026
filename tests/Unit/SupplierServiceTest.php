@@ -23,7 +23,7 @@ class SupplierServiceTest extends UnitTestCase
     }
 
     
-    public function test_whenCallGetSupplierDataWithNoCapabilities_thenWeGetValidStructure()
+    public function test_whenCallGetSupplierDataWithNoCapabilities_thenWeHaveSupplierResponseJson()
     {
         //Given
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
@@ -49,7 +49,7 @@ class SupplierServiceTest extends UnitTestCase
         $this->assertNotEmpty($supplierData);
     }
 
-    public function test_whenCallGetSupplierDataWithCapabilities_thenWeGetValidStructure()
+    public function test_whenCallGetSupplierDataWithCapabilities_thenWeGetSupplierResponseWithContentCapabilityInfo()
     {
         //Given
         

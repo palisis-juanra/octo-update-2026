@@ -16,10 +16,13 @@ class OctoRequest
     public const CAPABILITIES_HEADER = 'Octo-Capabilities';
     public const CAPABILITIES_PRICING = 'octo/pricing';
     public const CAPABILITIES_CONTENT = 'octo/content';
+
     protected string $capabilitiesHeader = '';
     protected bool $pricingCapability = false;
     protected bool $contentCapability = false;
-    public function __construct(public Request $request) {
+
+    public function __construct(public Request $request)
+    {
         $this->capabilitiesHeader = $request->header(self::CAPABILITIES_HEADER) ?? '';
         $this->pricingCapability = $this->isCapabilityHeaderPresent(self::CAPABILITIES_PRICING);
         $this->contentCapability = $this->isCapabilityHeaderPresent(self::CAPABILITIES_CONTENT);
@@ -39,7 +42,6 @@ class OctoRequest
     {
         $capabilitiesArray = explode(',', strtolower($this->capabilitiesHeader));
         $capabilitiesArray = array_map('trim', $capabilitiesArray);
-        $a = in_array($header, $capabilitiesArray);
-        return !empty($this->capabilitiesHeader) && $a;
+        return !empty($this->capabilitiesHeader) && in_array($header, $capabilitiesArray);
     }
 }
