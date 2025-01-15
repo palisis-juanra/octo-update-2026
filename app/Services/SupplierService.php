@@ -45,7 +45,7 @@ class SupplierService
         $media = new Media(
             $src,
             $fileType,
-            !empty($src) ? Media::LOGO_REL : null
+            !empty($src) ? Media::REL_LOGO : null
         );
         $shortDesc = empty($channelData->short_desc) ? null : (string) $channelData->short_desc;
 
