@@ -22,7 +22,7 @@ class BookingConfirmationTest extends FeatureTestCase
     const VALID_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
     const TCMS_BOOKING_ID = 4093;
     const VALID_PRODUCT_ID = 'TE_1_67|142';
-    const VALID_AVAILABILITY_ID = '5f981c36-d5ac-49a9-bbd3-ebf2ccdb0229';
+    const VALID_AVAILABILITY_ID = '2024-12-22|32310';
     const VALID_OPTION_ID = 'START_TIME';
     const VALID_UNIT_ITEMS = [
         [

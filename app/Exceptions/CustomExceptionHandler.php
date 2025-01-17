@@ -65,10 +65,13 @@ class CustomExceptionHandler extends Handler
             case (NoAvailabilityException::class):
             case (UnprocessableEntityHttpException::class):
                 return OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
-
+            
+            case (BookingNotCancellableException::class):
+                return OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
+            
             case (InvalidBookingUUIDException::class):
                 return OctoResponse::INVALID_BOOKING_UUID($exception->bookingUuid);
-
+                
             case (NoMatchingDataException::class):
                 return OctoResponse::INVALID_PRODUCT_ID($exception->productId);
             
@@ -79,6 +82,16 @@ class CustomExceptionHandler extends Handler
 
                 try {
                     JSONLog::error(["message" => "TourCMS API Call error"]);
+                } catch (BindingResolutionException) {
+                    parent::report($exception);
+                }
+                
+                return OctoResponse::INTERNAL_SERVER_ERROR();
+
+            case (NoAPIResponseException::class):
+
+                try {
+                    JSONLog::error(["message" => "TourCMS API Call error, no response"]);
                 } catch (BindingResolutionException) {
                     parent::report($exception);
                 }

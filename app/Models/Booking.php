@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use App\Models\Availability\Availability;
+use App\Models\Ticket;
 use App\Services\DateTimeService;
 use App\Services\XMLService;
-use App\Transformers\BaseTransformer;
-use App\Transformers\ContactTransformer;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,6 +24,7 @@ class Booking extends Model
     const STATUS_PENDING = 'PENDING';
     const TCMS_CONFIRMED_STATUS = 2;
     const FIELD_VOUCHER = 'VOUCHER';
+    const CANCELLATION_REFUND_FULL = "FULL";
     protected bool $testMode;
     protected ?string $utcCreatedAt;
     protected ?string $utcUpdatedAt;
@@ -158,7 +158,8 @@ class Booking extends Model
         Product $product,
         Option $option,
         Availability $availability,
-        array $unitItems
+        array $unitItems,
+        Contact $contact
     ): Booking
     {
         $booking = new Booking();
@@ -171,10 +172,13 @@ class Booking extends Model
         $booking->setChannelId((int) $bookingData->channel_id);
 
         $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
-
+        if (isset($bookingData->agent_ref) && !empty((string)$bookingData->agent_ref)) {
+            $booking->setResellerReference((string) $bookingData->agent_ref);
+        }
+        $booking->setContact($contact);
         $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
-        $booking->setUtcExpiresAt($bookingData->expiry_date_at_utc_seconds ? (int) $bookingData->expiry_date_at_utc_seconds : null);
-        $booking->setUtcConfirmedAt($bookingData->confirmed_at_utc_seconds ? (int) $bookingData->confirmed_at_utc_seconds : null);
+        $booking->setUtcExpiresAt(isset($bookingData->expiry_date_at_utc_seconds) ? (int) $bookingData->expiry_date_at_utc_seconds : null);
+        $booking->setUtcConfirmedAt(isset($bookingData->confirmed_at_utc_seconds) ? (int) $bookingData->confirmed_at_utc_seconds : null);
         $booking->setUtcRedeemedAt(self::getFirstRedeemed($bookingData));
 
         $booking->setExpirationMinutes(null);
@@ -185,7 +189,7 @@ class Booking extends Model
         if ((int) $bookingData->cancel_reason !== 0) {
             $cancelObject = new stdClass();
         
-            $cancelObject->refund = "ALL";
+            $cancelObject->refund = self::CANCELLATION_REFUND_FULL;
             $cancelObject->reason = (string) $bookingData->cancel_text;
             $cancelObject->utcCancelledAt = self::createUtcCancelledAt((int) $bookingData->cancelled_at_utc_seconds);
 
@@ -412,6 +416,13 @@ class Booking extends Model
         return $this->resellerReference;
     }
 
+    public function setResellerReference(string $resellerReference): self
+    {
+        $this->resellerReference = $resellerReference;
+
+        return $this;
+    }
+
     public function setSupplierReference(string $supplierReference): self
     {
         $this->supplierReference = $supplierReference;
@@ -474,39 +485,35 @@ class Booking extends Model
 
     public function setUnits(array $unitItems): self
     {
-        $option = $this->product->getOptionById($this->getOption()->getId());
-        foreach ($unitItems as $unitItem) {
-            $unitId = (string) $unitItem['unitId'];
+        $option = $this->product->getOptionById(optionId: $this->getOption()->getId());
 
-            // TODO Create Model for UnitItem and its transformer
+        foreach ($unitItems as $unitItem) {
+
+            $unitId = (string) $unitItem['unitId'];
+            
             $unit = $option->getUnitById($unitId);
 
-            $newUnitItem = new stdClass;
-            $newUnitItem->uuid = Uuid::uuid4();
-            $newUnitItem->resellerReference = null;
-            $newUnitItem->supplierReference = $unit->reference;
-            $newUnitItem->unitId = $unit->id;
-            $newUnitItem->id = $unit->id;
-            $newUnitItem->unit = $unit;
+            $ticket = new Ticket();
+            $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
+            $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
+            $ticket->setDeliveryOptions([
+                "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
+                "deliveryValue" => $this->getProduct()->getDeliveryFormats()[0]
+            ]);
 
-            $newUnitItem->status = 'ON_HOLD';
-            $newUnitItem->utcRedeemedAt = $this->getUtcRedeemedAt();
-            
-            $contactTransformer = new ContactTransformer(BaseTransformer::FULL_TRANSFORM);
-            $newUnitItem->contact = $contactTransformer->transform($this->getContact());
+            $unitItem = new UnitItem();
+            $unitItem->setUuid(Uuid::uuid4());
+            $unitItem->setResellerReference(null);
+            $unitItem->setSupplierReference($unit->reference);
+            $unitItem->setUnitId($unit->getId());
+            $unitItem->setId($unit->getId());
+            $unitItem->setUnit($unit);
+            $unitItem->setStatus('ON_HOLD');
+            $unitItem->setUtcRedeemedAt($this->getUtcRedeemedAt());
+            $unitItem->setContact($this->getContact());
+            $unitItem->setTicket($ticket);
 
-            $newUnitItem->ticket = [
-                'redemptionMethod' => $this->getProduct()->getRedemptionMethod(),
-                'utcRedeemedAt' => $this->getUtcRedeemedAt(),
-                'deliveryOptions' => [
-                    [
-                        "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
-                        "deliveryValue" => $this->getProduct()->getDeliveryFormats()[0]
-                    ]
-                ]
-            ];
-
-            $this->units[] = $newUnitItem;
+            $this->units[] = $unitItem;
         }
         $this->unit_items = json_encode($this->units);
 
@@ -552,6 +559,11 @@ class Booking extends Model
     public function getLeadCustomerId(): ?int
     {
         return $this->leadCustomerId;
+    }
+
+    public function isBookingCancellable(): bool
+    {
+        return $this->getCancellable() == 1;
     }
 
     protected static function getBookingStatus(SimpleXMLElement $bookingData): string

@@ -2,12 +2,15 @@
 
 namespace App\Transformers;
 
+use League\Fractal\Resource\Collection;
+
 class BookingTransformer extends BaseTransformer
 {
     protected ProductTransformer $productTransformer;
     protected OptionTransformer $optionTransformer;
     protected AvailabilityTransformer $availabilityTransformer;
     protected ContactTransformer $contactTransformer;
+    protected UnitItemTransformer $unitItemTransformer;
 
     public function __construct(string $mode)
     {
@@ -16,6 +19,7 @@ class BookingTransformer extends BaseTransformer
         $this->availabilityTransformer = new AvailabilityTransformer(AvailabilityTransformer::MODE_BOOKING_AVAILABILITY);
         $this->optionTransformer = new OptionTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->contactTransformer = new ContactTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->unitItemTransformer = new UnitItemTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     protected function basicTransform($booking): array
@@ -31,7 +35,9 @@ class BookingTransformer extends BaseTransformer
         $product = $booking->getProduct();
         $option = $booking->getOption();
         $availability = $booking->getAvailability();
-        $units = $booking->getUnits();
+
+        $unitItemsResource = new Collection($booking->getUnits(), $this->unitItemTransformer);
+        $unitItemsTransformed = $this->manager->createData($unitItemsResource)->toArray()['data'];
 
         return [
             'id' => $booking->getId(),
@@ -58,7 +64,7 @@ class BookingTransformer extends BaseTransformer
             'notes' => $booking->getNotes(),
             'deliveryMethods' => $product->getDeliveryMethods(),
             'voucher' => $booking->getVoucher(),
-            'unitItems' => $booking->getUnits(),
+            'unitItems' => $unitItemsTransformed,
         ];
     }
 }

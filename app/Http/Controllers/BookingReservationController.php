@@ -27,7 +27,7 @@ class BookingReservationController extends Controller
         public AvailabilityService $availabilityService,
         public OptionService $optionService,
         public UnitService $unitService,
-        public JSONLogService $logger
+        public JSONLogService $logger,
     ) 
     {
         $this->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
@@ -47,12 +47,12 @@ class BookingReservationController extends Controller
         $optionId = $requestParams[OctoRequest::OPTION_ID];
         $option = $product->getOptionById($optionId);
 
-        $availabilityId = $requestParams[OctoRequest::AVAILABILITY_ID];
-        $availability = $this->availabilityService->find($availabilityId);
-
         $unitItems = $requestParams[OctoRequest::UNIT_ITEMS] ?? null;
         $uuid = $requestParams[OctoRequest::UUID] ?? null;
         $notes = $requestParams[self::FIELD_NOTES] ?? '';
+
+        $availabilityId = $requestParams[OctoRequest::AVAILABILITY_ID];
+        $availability = $this->availabilityService->getAvailabilityObjectFromAvailabilityId($availabilityId);
 
         $booking = $this->bookingService->reserve($product, $option, $availability, $unitItems, $uuid, $notes);
         $bookingData = $this->transformer->transform($booking);
@@ -70,9 +70,9 @@ class BookingReservationController extends Controller
         $this->optionService->validateOptionId($optionId);
 
         $availabilityId = $params[OctoRequest::AVAILABILITY_ID] ?? '';
-        if (empty($availabilityId)){
+        if (!$this->availabilityService->validateAvailabilityId($availabilityId)) {
             throw new InvalidAvailabilityIdException($availabilityId);
-        }
+        };
 
         $unitItems = $params[OctoRequest::UNIT_ITEMS] ?? [];
         $this->unitService->validateUnitItems($unitItems);

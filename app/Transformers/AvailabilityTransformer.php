@@ -41,6 +41,11 @@ class AvailabilityTransformer extends BaseTransformer
                 ]
             ]
         ];
+        
+        if (true === $availability->getContentEnabled()) {
+            $data['title'] = $availability->getTitle();
+            $data['shortDescription'] = $availability->getShortDescription();
+        }
 
         if (!empty($availability->getPricing())) {
             $pricing = $availability->getPricing();

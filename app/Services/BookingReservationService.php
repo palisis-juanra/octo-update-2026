@@ -7,6 +7,7 @@ use App\Models\Availability\Availability;
 use App\Models\Booking;
 use App\Models\Option;
 use App\Models\Product;
+use App\Services\AvailabilityService;
 use SimpleXMLElement;
 
 class BookingReservationService
@@ -14,14 +15,16 @@ class BookingReservationService
     public function __construct(
         public TourCMSService $tourCMSService,
         public ProductService $productService,
+        public AvailabilityService $availabilityService,
         public JSONLogService $logger)
-    {
-
-    }
+    { }
 
     public function reserve(Product $product, Option $option, Availability $availability, array $unitItems, ?string $uuid = null, string $notes = ''): Booking
     {
         $date = $availability->getDate();
+        $departureId = $availability->getAttributes()['departure_id'];
+        $availabilityId = $availability->getId();
+
         $checkAvailQueryString = $this->generateCheckAvailQueryString($date, unitItems: $unitItems);
 
         // Make Check Avail
@@ -31,11 +34,10 @@ class BookingReservationService
 
         $availableComponents = $this->tourCMSService->getArrayFromXmlNode($checkAvailXML->available_components, 'component');
         if (empty($availableComponents)) {
-            $this->logger->info("No components availables for availability id {$availability->getId()}");
+            $this->logger->info("No components availables for availability id {$availabilityId}");
             throw new NoAvailabilityException;
         }
 
-        $departureId = $availability->getAttributes()['departure_id'];
         try {
             $component = $this->getComponentByDepartureId($availableComponents, $departureId);
         } catch (NoAvailabilityException $e) {
@@ -44,23 +46,23 @@ class BookingReservationService
         }
         
         $componentKey = (string) $component->component_key;
+        $aailabilityFromComponent = $this->availabilityService->generateAvailabilityObjectFromComponent($component);
 
         // Start new booking with the componentId required
         $bookingData = $this->getBookingDataForStartNewBooking($unitItems, $componentKey, $uuid);
         $startNewBookingXML = $this->tourCMSService->startNewBooking($bookingData);
+        $this->logger->info(["message" => "Temporary booking created in TourCMS"]);
 
         // Create Booking object
         $booking = Booking::createFromStartNewBookingXML(
             $startNewBookingXML, 
             $product, 
             $option, 
-            $availability, 
+            $aailabilityFromComponent, 
             $unitItems,
             $notes);
-        $this->logger->info(["message" => "Temporary booking with ID {$booking->getId()} and UUID {$booking->getUuid()} created successfully"]);
-        
         $booking->save();
-
+        $this->logger->info(["message" => "Temporary booking persisted with ID {$booking->getId()} and UUID {$booking->getUuid()}"]);
         return $booking;
     }
 

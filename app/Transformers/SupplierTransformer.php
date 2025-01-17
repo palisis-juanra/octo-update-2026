@@ -2,6 +2,10 @@
 
 namespace App\Transformers;
 
+use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
+use App\Http\Responses\OctoResponse;
+
 class SupplierTransformer extends BaseTransformer
 {
     public function __construct(string $mode = BaseTransformer::BASIC)
@@ -19,7 +23,7 @@ class SupplierTransformer extends BaseTransformer
 
     protected function fullTransform($supplier): array
     {
-        return [
+        $data = [
             'id' => $supplier->getId(),
             'name' => $supplier->getName(),
             "endpoint" => $supplier->getEndpoint(),
@@ -30,5 +34,13 @@ class SupplierTransformer extends BaseTransformer
                 "address" => $supplier->getFullAddress()
             ]
         ];
+        if (OctoRequestFacade::isContentRequired()) {
+            $data['shortDescription'] = $supplier->getShortDescription();
+            $data['media'] = [];
+            foreach ($supplier->getMedia() as $media) {
+                $data['media'][] = $media->toArray();
+            }
+        }
+        return $data;
     }
 }

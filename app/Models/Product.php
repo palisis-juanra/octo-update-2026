@@ -25,6 +25,7 @@ class Product extends Model
     protected string $redemptionMethod;
     protected array $options;
     protected array $cutoff;
+    protected ?ProductContent $content = null;
 
     /**
      * Get the value of id
@@ -338,6 +339,18 @@ class Product extends Model
         return $this;
     }
 
+    public function getMaxBookingSize(): int
+    {
+        return $this->maxBookingSize;
+    }
+
+    public function setMaxBookingSize(int $maxBookingSize): self
+    {
+        $this->maxBookingSize = $maxBookingSize;
+
+        return $this;
+    }
+
 
     /**
      * Get the value of cutoff
@@ -371,5 +384,25 @@ class Product extends Model
         }
 
         throw new InvalidOptionIdException($optionId);
+    }
+
+    /**
+     * Get the value of content
+     */ 
+    public function getContent(): ?ProductContent
+    {
+        return $this->content;
+    }
+
+    /**
+     * Set the value of content
+     *
+     * @return  self
+     */ 
+    public function setContent(?ProductContent $content): self
+    {
+        $this->content = $content;
+
+        return $this;
     }
 }

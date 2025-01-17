@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
@@ -19,6 +20,7 @@ class AvailabilityTest extends FeatureTestCase
 
     const AVAILABILIY_PATH = '/availability';
     const AUTH_HEADER_NAME = 'Authorization';
+    const OCTO_CAPABILITIES = 'Octo-Capabilities';
     const OCTO_INVALID_PATTERN_CREDENTIALS = 'Bearer NOVALIDKEY';
     const OCTO_VALID_PATTERN_CREDENTIALS = 'Bearer 1|142|abc';
     const VALID_PRODUCT_ID = 'TE_1_67|142';
@@ -29,16 +31,20 @@ class AvailabilityTest extends FeatureTestCase
     const INVALID_LOCAL_DATE = 'aaa';
     const VALID_UNIT_ID = 'TE_1_67|r1';
     const INVALID_UNIT_ID = 'aaaa';
+    const VALID_LOCAL_DATE_START = '2024-11-18';
+    const VALID_LOCAL_DATE_END = '2024-11-25';
 
 
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $showTourDeparturesXML;
+    public SimpleXMLElement $checkAvailXML;
     public function setUp(): void
     {
         parent::setUp();
 
         $this->showTourXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTour.xml'));
         $this->showTourDeparturesXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTourDepartures.xml'));
+        $this->checkAvailXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/checkAvailability.xml'));
 
         App::bind(TourCMSService::class, function ($app) {
 
@@ -170,5 +176,112 @@ class AvailabilityTest extends FeatureTestCase
 
         $this->assertNotEmpty($responseData);        
     }
-}
 
+    public function test_whenPricingIsAllowedAndIsMultiDate_thenShowTourDepartureIsCalledOnce()
+    {
+        $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+    
+        App::instance(TourCMSService::class, $tourCMSServiceMock);
+    
+        $response = $this->post(
+            '/availability', 
+            [
+                'productId' => self::VALID_PRODUCT_ID, 
+                'optionId' => self::VALID_OPTION_ID,
+                'localDateStart' => self::VALID_LOCAL_DATE_START,
+                'localDateEnd' => self::VALID_LOCAL_DATE_END
+            ], 
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+            self::OCTO_CAPABILITIES => 'pricing']
+        );
+
+    
+        $responseData = $response->decodeResponseJson();
+    
+        $response->assertOk();
+        $this->assertNotEmpty($responseData);
+    }
+
+    public function test_whenNoPricingAndMultiDate_thenShowTourDepartureIsCalledOnce()
+    {
+        $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+
+        App::instance(TourCMSService::class, $tourCMSServiceMock);
+    
+        // Petición al endpoint con datos válidos
+        $response = $this->post(
+            '/availability', 
+            [
+                'productId' => self::VALID_PRODUCT_ID, 
+                'optionId' => self::VALID_OPTION_ID,
+                'localDateStart' => self::VALID_LOCAL_DATE_START,
+                'localDateEnd' => self::VALID_LOCAL_DATE_END
+            ], 
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+        );
+    
+        $responseData = $response->decodeResponseJson();
+    
+        $response->assertOk();
+        $this->assertNotEmpty($responseData);
+    }
+
+    public function test_whenNoPricingAndSingleDate_thenShowTourDepartureIsCalledOnce()
+    {
+        $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+
+        App::instance(TourCMSService::class, $tourCMSServiceMock);
+    
+        // Petición al endpoint con datos válidos
+        $response = $this->post(
+            '/availability', 
+            [
+                'productId' => self::VALID_PRODUCT_ID, 
+                'optionId' => self::VALID_OPTION_ID,
+                'localDate' => self::VALID_LOCAL_DATE
+            ], 
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+        );
+    
+        $responseData = $response->decodeResponseJson();
+    
+        $response->assertOk();
+        $this->assertNotEmpty($responseData);
+    }
+
+    public function test_whenPricingAndSingleDate_thenCheckAvailabilityIsCalledOnce()
+    {
+
+        $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+        $tourCMSServiceMock->shouldReceive('checkAvailability')->once()->andReturn($this->checkAvailXML);
+
+        App::instance(TourCMSService::class, $tourCMSServiceMock);
+
+        $response = $this->post(
+            '/availability', 
+            [
+                'productId' => self::VALID_PRODUCT_ID, 
+                'optionId' => self::VALID_OPTION_ID,
+                'localDate' => self::VALID_LOCAL_DATE
+            ], 
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                self::OCTO_CAPABILITIES => OctoRequest::CAPABILITIES_PRICING
+            ]
+        );
+
+        $responseData = $response->decodeResponseJson();
+
+        $response->assertOk();
+        $this->assertNotEmpty($responseData);
+    }
+    
+}

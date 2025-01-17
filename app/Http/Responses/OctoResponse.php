@@ -15,7 +15,7 @@ class OctoResponse {
     const FIELD_ERROR_MESSAGE = 'errorMessage';
     const FIELD_ERROR_LOG_ID = 'errorLogId';
     const FIELD_AVAILABILITY_ID = 'availabilityId';
-    const FIELD_BOOKING_UUID = 'bookingUuid';
+    const FIELD_BOOKING_UUID = 'uuid';
     const ERROR_CODE_UNAUTHORIZED = 'UNAUTHORIZED';
     const ERROR_CODE_FORBIDDEN = 'FORBIDDEN';
     const ERROR_CODE_INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR';

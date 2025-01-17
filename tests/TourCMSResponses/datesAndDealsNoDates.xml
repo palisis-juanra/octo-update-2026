@@ -1,0 +1,6 @@
+<response>
+    <request>
+        GET
+        /c/tour/datesprices/datesndeals/search.xml?id=184&amp;distinct_start_dates=1&amp;startdate_start=2024-11-21&amp;startdate_end=2024-11-28</request>
+    <error>NO MATCHING DATA</error>
+</response>

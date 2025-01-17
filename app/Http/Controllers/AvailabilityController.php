@@ -13,22 +13,17 @@ use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 class AvailabilityController extends Controller
 {
-    public AvailabilityRequestFactory $availabilityRequestFactory;
-    public AvailabilityService $availabilityService;
-    public ProductService $productService;
-    public JSONLogService $logger;
 
-    public function __construct(AvailabilityRequestFactory $factory, AvailabilityService $service, ProductService $productService, JSONLogService $logger)
-    {
-        $this->availabilityRequestFactory = $factory;
-        $this->availabilityService = $service;
-        $this->productService = $productService;
-        $this->logger = $logger;
-    }
+    public const DEFAULT_MAX_UNITS = 10;
+
+    public function __construct(
+        public AvailabilityRequestFactory $availabilityRequestFactory, 
+        public AvailabilityService $availabilityService, 
+        public ProductService $productService, 
+        public JSONLogService $logger) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -42,19 +37,20 @@ class AvailabilityController extends Controller
             $productId = $request->post('productId');
             $product = $this->productService->find($productId);
 
-            $octoCapabilities = $request->header('Octo-Capabilities') ?? '';
-            $availabilyRequest = $this->availabilityRequestFactory->get($requestParams, $octoCapabilities, $product->getMinBookingSize());
+            $availabilityRequest = $this->availabilityRequestFactory->get($requestParams, $product->getMinBookingSize(), $product->getMaxBookingSize());
+            $availabilityIds = $request->get(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
+            $availabilityRequest->setAvailabilityIds($availabilityIds);
+            $availabilityRequest->setTourName($product->getInternalName());
             
             $optionId = $request->get(AvailabilityService::PARAM_OPTION_ID);
             $option = $product->getOptionById($optionId);
 
-            $availabilyRequest->setMaxUnits($option->restrictions->maxUnits ?? 10);
+            $availabilityRequest->setMaxUnits($option->getRestrictions()->maxUnits ?? self::DEFAULT_MAX_UNITS);
             $tourCMSCutoff = $product->getCutoff();
-            $octoCutoff = $this->availabilityService->getCutoffFromTourCMSCutoff($tourCMSCutoff, $availabilyRequest->getLocalDateStart());
-            $availabilyRequest->setCutoff($octoCutoff);
+            $octoCutoff = $this->availabilityService->getCutoffFromTourCMSCutoff($tourCMSCutoff, $availabilityRequest->getLocalDateStart());
+            $availabilityRequest->setCutoff($octoCutoff);
 
-            $availabilities = $this->availabilityService->getAvailabilities($availabilyRequest);
-
+            $availabilities = $this->availabilityService->getAvailabilities($availabilityRequest);
             $availabilitiesData = $this->availabilityService->getAvailabilitiesTransformed($availabilities);
 
             return new JsonResponse($availabilitiesData, Response::HTTP_OK);

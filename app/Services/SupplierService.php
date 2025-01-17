@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
+use App\Models\Media;
 use App\Models\Supplier;
 use App\Services\TourCMSService;
 use App\Transformers\BaseTransformer;
@@ -34,12 +35,20 @@ class SupplierService
         $showChannelResponse = $this->tourCMSService->showChannel($channelId);
         $channelData = $showChannelResponse->channel;
         $supplier = $this->createSupplierFromChannelData($channelData);
-
         return $this->supplierTransformer->transform($supplier);
     }
 
     public function createSupplierFromChannelData(SimpleXMLElement $channelData): Supplier
     {
+        $src = empty($channelData->logo_url) ? null : (string) $channelData->logo_url;
+        $fileType = Media::getFileType($src);
+        $media = new Media(
+            $src,
+            $fileType,
+            !empty($src) ? Media::REL_LOGO : null
+        );
+        $shortDesc = empty($channelData->short_desc) ? null : (string) $channelData->short_desc;
+
         return new Supplier(
             (string) $channelData->channel_id,
             (string) $channelData->channel_name,
@@ -52,7 +61,9 @@ class SupplierService
             (string) $channelData->address_city,
             (string) $channelData->address_state,
             (string) $channelData->address_postcode,
-            (string) $channelData->address_country
+            (string) $channelData->address_country,
+            (string) $shortDesc,
+            (array) [$media],
         );
     }
 

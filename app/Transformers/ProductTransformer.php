@@ -2,6 +2,7 @@
 
 namespace App\Transformers;
 
+use App\Facades\OctoRequestFacade;
 use League\Fractal\Resource\Collection;
 
 class ProductTransformer extends BaseTransformer
@@ -9,11 +10,13 @@ class ProductTransformer extends BaseTransformer
     const MODE_BOOKING_PRODUCT = 'bookingProduct';
 
     protected OptionTransformer $optionTransformer;
+    protected ProductContentTransformer $productContentTransformer;
 
     public function __construct(string $mode)
     {
         parent::__construct($mode);
         $this->optionTransformer = new OptionTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->productContentTransformer = new ProductContentTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     protected function basicTransform($product): array
@@ -29,7 +32,7 @@ class ProductTransformer extends BaseTransformer
         $optionsResource = new Collection($product->getOptions(), $this->optionTransformer);
         $optionsTransformed = $this->manager->createData($optionsResource)->toArray()['data'];
 
-        return [
+        $data = [
             'id' => $product->getId(),
             'internalName' => $product->getInternalName(),
             "reference" => $product->getReference(),
@@ -45,6 +48,13 @@ class ProductTransformer extends BaseTransformer
             "redemptionMethod" => $product->getRedemptionMethod(),
             "options" => $optionsTransformed
         ];
+
+        if (true === OctoRequestFacade::isContentRequired()){
+            $contentData = $this->productContentTransformer->transform($product->getContent());
+            $data = array_merge($data, $contentData);
+        }
+
+        return $data;
     }
 
     protected function bookingProduct($product): array

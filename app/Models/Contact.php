@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use SimpleXMLElement;
+
 class Contact extends BaseModel
 {
     const FIELD_FULL_NAME = 'fullName';
@@ -44,6 +46,17 @@ class Contact extends BaseModel
         $contact->notes = $attributes[self::FIELD_NOTES] ?? null;
 
         return $contact;
+    }
+
+    public static function createContactArrayFromXML(SimpleXMLElement $showBookingResponse): Contact 
+    {
+        $contactArray = [];
+        $contactArray[self::FIELD_FULL_NAME] = $showBookingResponse->lead_customer_name ? (string) $showBookingResponse->lead_customer_name : null ;
+        $contactArray[self::FIELD_EMAIL_ADDRESS] = $showBookingResponse->lead_customer_email ? (string) $showBookingResponse->lead_customer_email : null;
+        $contactArray[self::FIELD_PHONE_NUMBER] = $showBookingResponse->lead_customer_tel_mobile ? $showBookingResponse->lead_customer_tel_mobile : null;
+        $contactArray[self::FIELD_NOTES] = $showBookingResponse->lead_customer_contact_note ? $showBookingResponse->lead_customer_contact_note : null;
+
+        return self::create($contactArray);     
     }
 
     /**

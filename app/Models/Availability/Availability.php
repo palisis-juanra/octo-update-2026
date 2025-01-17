@@ -64,9 +64,13 @@ class Availability extends Model
     public static $snakeAttributes = true;
 
     public string $currency;
+    public string $date;
     public ?AvailabilityPricing $pricing = null;
     
     public $timestamps = true;
+    protected bool $contentEnabled = false;
+    protected ?string $title = null;
+    protected ?string $shortDescription = null;
 
     /**
      * Get the value of id
@@ -341,7 +345,7 @@ class Availability extends Model
      *
      * @return  self
      */ 
-    public function setCurrency($currency): static
+    public function setCurrency($currency): self
     {
         $this->currency = $currency;
 
@@ -370,6 +374,72 @@ class Availability extends Model
 
     public function getDate(): string
     {
-        return substr($this->local_date_time_start, 0, 10);
+        return $this->date;
+    }
+
+    public function setDate(string $date): self
+    {
+        $this->date = $date;
+        return $this;
+    }
+
+    /**
+     * Get the value of contentEnabled
+     */ 
+    public function getContentEnabled(): bool
+    {
+        return $this->contentEnabled;
+    }
+
+    /**
+     * Set the value of contentEnabled
+     *
+     * @return  self
+     */ 
+    public function setContentEnabled(bool $contentEnabled): self
+    {
+        $this->contentEnabled = $contentEnabled;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of title
+     */ 
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set the value of title
+     *
+     * @return  self
+     */ 
+    public function setTitle(?string $title): self
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of shortDescription
+     */ 
+    public function getShortDescription(): ?string
+    {
+        return $this->shortDescription;
+    }
+
+    /**
+     * Set the value of shortDescription
+     *
+     * @return  self
+     */ 
+    public function setShortDescription(?string $shortDescription): self
+    {
+        $this->shortDescription = $shortDescription;
+
+        return $this;
     }
 }

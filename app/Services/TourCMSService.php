@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
+use App\Exceptions\NoAPIResponseException;
 use App\Http\Middleware\OctoAuthentication;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
@@ -19,11 +20,15 @@ class TourCMSService
 {
     const ERROR_FAIL_SIG = 'FAIL_SIG';
     const NO_MATCHING_DATA = 'NO MATCHING DATA';
+    const ERROR_PREVIOUSLY_CANCELLED = 'PREVIOUSLY CANCELLED';
+    const ERROR_BOOKING_ALREADY_COMMITED = 'BOOKING ALREADY COMMITTED';
+    const ERROR_NO_DATA_CHANGED = 'NO DATA CHANGED';
     const ERROR_OK = 'OK';
     const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
     const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
     const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = 'extended_tour_info=1';
     const SHOW_TOUR_DEPARTURES_CLOSED_PARAM = 'show_closed_departures=true';
+    const SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM = 'distinct_start_dates=1';
     const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
 
     private TourCMS $tourCMS;
@@ -56,9 +61,9 @@ class TourCMSService
         return $response;
     }
 
-    public function showTour(string $tourId): SimpleXMLElement
+    public function showTour(string $tourId, ?string $channelId = null): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_tour($tourId, $this->channelId);
+        $response = $this->tourCMS->show_tour($tourId, $channelId ?? $this->channelId);
         $response = $this->handleResponse($response);
 
         return $response; 
@@ -97,6 +102,30 @@ class TourCMSService
         return $response;
     }
 
+    public function showTourDatesAndDeals(string $tourId, string $startDate, string $endDate = '', string $extraParams = null): SimpleXMLElement
+    {
+        $queryString = self::SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM;
+
+        if (!empty($endDate)) {
+            $queryString .= "&startdate_start={$startDate}&startdate_end={$endDate}";
+        } else {
+            $queryString .= "&startdate_start={$startDate}&startdate_end={$startDate}";
+        }
+
+        if (!empty($extraParams)) {
+            if (substr($extraParams, 0, 1) != '&') {
+                $queryString .= '&';
+            }
+
+            $queryString .= $extraParams;
+        }
+
+        $response = $this->tourCMS->show_tour_datesanddeals($tourId, $this->channelId, $queryString);
+        $response = $this->handleResponse($response);
+
+        return $response;
+    }
+
     public function multiCheckAvail(string $tourId, string $startDate, string $endDate, string $ratesQueryString): array
     {
         $requestHandler = new stdClass;
@@ -128,12 +157,15 @@ class TourCMSService
         return $this->handleResponse($response); 
     }
 
-    public function commitBooking(string $bookingId): SimpleXMLElement
+    public function commitBooking(string $bookingId, ?string $agentRef = ''): SimpleXMLElement
     {
         $bookingData = new SimpleXMLElement('<booking />');
         $bookingData->addChild('booking_id', $bookingId);
+        if (!empty($agentRef)) {
+            $bookingData->addChild('agent_ref', $agentRef);
+        }
         $response = $this->tourCMS->commit_new_booking($bookingData, $this->channelId);
-        return $response;
+        return $this->handleResponse($response);
     }
 
     public function showBooking(string $bookingId): SimpleXMLElement
@@ -145,7 +177,13 @@ class TourCMSService
     public function updateCustomer(SimpleXMLElement $customerXML): SimpleXMLElement
     {
         $response = $this->tourCMS->update_customer($customerXML, $this->channelId);
-        return $response;
+        return $this->handleResponse($response);
+    }
+
+    public function cancelBooking(SimpleXMLElement $bookingData): SimpleXMLElement
+    {
+        $response = $this->tourCMS->cancel_booking($bookingData, $this->channelId);
+        return $this->handleResponse($response);
     }
 
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
@@ -172,8 +210,12 @@ class TourCMSService
      */
     protected function handleResponse(mixed $response): SimpleXMLElement
     {
+        if (!$response) throw new NoAPIResponseException();
         switch ((string)$response->error) {
             case self::ERROR_OK:
+            case self::ERROR_PREVIOUSLY_CANCELLED:
+            case self::ERROR_BOOKING_ALREADY_COMMITED:
+            case self::ERROR_NO_DATA_CHANGED:
                 if (!($response instanceof SimpleXMLElement)) {
                     $response = simplexml_load_string($response);
                 }
