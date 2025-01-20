@@ -21,7 +21,7 @@ class VoucherTest extends UnitTestCase
         $this->showBookingXML = simplexml_load_file('./tests/TourCMSResponses/showBooking.xml')->booking;
     }
 
-    public function test_whenBarcodePriorityIsAgentRefAndItsPresent_thenCorrectVoucherValue()
+    public function test_whenBarcodePriorityIsAgentRefAndItsPresent_thenWeGetAgentRef()
     {
         $this->showBookingXML->barcode_priority = Voucher::BARCODE_PRIORITY_AGENT_REF;
         $this->showBookingXML->agent_ref = self::FAKE_AGENT_REF;
@@ -38,7 +38,7 @@ class VoucherTest extends UnitTestCase
         $this->assertEquals($expectedDeliveryOptions, $voucher->getDeliveryOptions());
     }
 
-    public function test_whenBarcodePriorityIsAgentRefAndItsNotPresent_thenCorrectVoucherValue(): void
+    public function test_whenBarcodePriorityIsAgentRefAndItsNotPresent_thenWeGetTourcmsBarcodes(): void
     {
         $this->showBookingXML->barcode_priority = Voucher::BARCODE_PRIORITY_AGENT_REF;
         $this->showBookingXML->agent_ref = '';
@@ -55,7 +55,7 @@ class VoucherTest extends UnitTestCase
         $this->assertEquals($expectedDeliveryOptions, $voucher->getDeliveryOptions());
     }
 
-    public function test_whenBarcodePriorityIsTourcmsBarcodes_thenCorrectVoucherValue(): void
+    public function test_whenBarcodePriorityIsTourcmsBarcodes_thenWeGetTourcmsBarcodes(): void
     {
         $this->showBookingXML->barcode_priority = Voucher::BARCODE_PRIORITY_TOURCMS;
         $voucher = Voucher::create($this->showBookingXML, ProductService::REDEMPTION_METHOD_DIGITAL, self::FAKE_UTC_REDEEMED_AT);

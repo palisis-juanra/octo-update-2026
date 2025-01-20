@@ -12,7 +12,7 @@ class UnitItem
     public string $unitId;
     public Unit $unit;
     public ?string $utcRedeemedAt;
-    public ?Ticket $ticket;
+    public ?Ticket $ticket = null;
     public ?Contact $contact;
 
     public function __construct()
