@@ -497,8 +497,8 @@ class Booking extends Model
             $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
             $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
             $ticket->setDeliveryOptions([
-                "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
-                "deliveryValue" => $this->getProduct()->getDeliveryFormats()[0]
+                "deliveryFormat" => 'QRCODE',
+                "deliveryValue" => 'QRCODE'
             ]);
 
             $unitItem = new UnitItem();

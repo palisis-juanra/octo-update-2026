@@ -199,8 +199,8 @@ class AvailabilityService
     public function generateAvailabilityObjectFromComponent(SimpleXMLElement $component): Availability
     {
         $departureId = $this->getDepartureIdFromAPIResponse($component);
-        list($startTimeHours, $startTimeMinutes) = explode(":", $component->start_time ? (string) $component->start_time : self::DEFAULT_START_TIME);
-        list($endTimeHours, $endTimeMinutes) = explode(":", $component->end_time ? (string) $component->end_time : self::DEFAULT_END_TIME);
+        list($startTimeHours, $startTimeMinutes) = explode(":", !empty($component->start_time) ? (string) $component->start_time : self::DEFAULT_START_TIME);
+        list($endTimeHours, $endTimeMinutes) = explode(":", !empty($component->end_time) ? (string) $component->end_time : self::DEFAULT_END_TIME);
 
         $availability = new Availability();
 
@@ -208,9 +208,9 @@ class AvailabilityService
         $availability->setDepartureId($departureId);
         $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $component->start_date, $startTimeHours, $startTimeMinutes));
         $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $component->end_date, $endTimeHours, $endTimeMinutes));
-        $availability->setAllDay(false);
-        $availability->setOpeningHoursFrom($component->start_time ?? self::DEFAULT_START_TIME);
-        $availability->setOpeningHoursTo($component->end_time ?? self::DEFAULT_END_TIME);
+        $availability->setAllDay((string) $component->availability_type === ProductService::AVAILABILITY_TYPE_OPENING_HOURS);
+        $availability->setOpeningHoursFrom(!empty($component->start_time) ? (string) $component->start_time : self::DEFAULT_START_TIME);
+        $availability->setOpeningHoursTo(!empty($component->end_time) ? (string) $component->end_time : self::DEFAULT_END_TIME);
 
         return $availability;
     }

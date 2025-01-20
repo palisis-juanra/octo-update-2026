@@ -189,6 +189,7 @@ class ProductService
 
     public function createProductFromTourXML(SimpleXMLElement $tour): Product
     {
+        $this->clearInfoAndErrors();
         $id = $this->buildProductId($tour);
         $internalName = (string) $tour->tour_name;
         $reference = null;
@@ -317,7 +318,7 @@ class ProductService
                 $this->info[] = "option {$optionId} reference field is missing";
             }
 
-            if (empty($availabilityStartTimes)) {
+            if (empty($availabilityStartTimes) && ((string) $tour->time_type != self::TIME_TYPE_OPENING_HOURS)) {
                 $this->info[] = "option {$optionId} availabilityLocalStartTimes fields are not present because of invalid mapping structure";
             }
             $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
@@ -351,7 +352,11 @@ class ProductService
             }
     
             $optionUnits = $this->getOptionUnits($tour);
-        
+
+            if ((string) $tour->time_type === self::TIME_TYPE_OPENING_HOURS) {
+                $availabilityStartTimes = [];
+            }
+
             $optionData = new stdClass();
             $optionData->id = $optionId;
             $optionData->default = $optionDefault;
@@ -1073,4 +1078,9 @@ class ProductService
         return trim((string) $image->url);
     }
 
+    protected function clearInfoAndErrors(): void
+    {
+        $this->info = [];
+        $this->errors = [];
+    }
 }

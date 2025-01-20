@@ -250,8 +250,8 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
             $availability = new Availability;
 
-            list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
-            list($endTimeHours, $endTimeMinutes) = explode(":", $departure->end_time ? (string) $departure->end_time : '23:59');
+            list($startTimeHours, $startTimeMinutes) = explode(":", !empty($departure->start_time) ? (string) $departure->start_time : '00:00');
+            list($endTimeHours, $endTimeMinutes) = explode(":", !empty($departure->end_time) ? (string) $departure->end_time : '23:59');
 
             $availability->setContentEnabled($this->contentEnabled);
             $availability->setId($this->generateAvailabilityIdFromDepartureOrComponentObject($departure));
@@ -263,8 +263,9 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
             $availability->setMaxUnits($this->maxUnits);
             $availability->setUtcCutoffAt($this->cutoff);
-            $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
-            $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
+            $availability->setOpeningHoursFrom(!empty($departure->start_time) ? (string) $departure->start_time : '00:00');
+            $availability->setOpeningHoursTo(!empty($departure->end_time) ? (string) $departure->end_time :'23:59');
+
             if (true === OctoRequestFacade::isPricingRequired()) {
                 $pricing = $this->getPricingForMultipleDays($departure, $tourCMSService);
                 $availability->setCurrency($this->currency);

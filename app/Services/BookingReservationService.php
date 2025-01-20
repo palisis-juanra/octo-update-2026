@@ -46,7 +46,8 @@ class BookingReservationService
         }
         
         $componentKey = (string) $component->component_key;
-        $aailabilityFromComponent = $this->availabilityService->generateAvailabilityObjectFromComponent($component);
+        $component->addChild('availability_type', $product->getAvailabilityType());
+        $availabilityFromComponent = $this->availabilityService->generateAvailabilityObjectFromComponent($component);
 
         // Start new booking with the componentId required
         $bookingData = $this->getBookingDataForStartNewBooking($unitItems, $componentKey, $uuid);
@@ -58,7 +59,7 @@ class BookingReservationService
             $startNewBookingXML, 
             $product, 
             $option, 
-            $aailabilityFromComponent, 
+            $availabilityFromComponent, 
             $unitItems,
             $notes);
         $booking->save();

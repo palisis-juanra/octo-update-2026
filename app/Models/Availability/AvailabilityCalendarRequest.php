@@ -66,8 +66,8 @@ class AvailabilityCalendarRequest
             $availability = new CalendarAvailability();
 
             $openingHours = new OpeningHours(
-                (string) $date->start_time ?? self::START_TIME_DEFAULT,
-                (string) $date->end_time ?? self::END_TIME_DEFAULT
+                !empty($date->start_time) ? (string) $date->start_time : self::START_TIME_DEFAULT,
+                !empty($date->end_time) ? (string) $date->end_time : self::END_TIME_DEFAULT
             );
 
             $availability->setLocalDate($date->start_date)

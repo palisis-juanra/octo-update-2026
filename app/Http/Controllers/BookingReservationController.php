@@ -56,6 +56,7 @@ class BookingReservationController extends Controller
 
         $booking = $this->bookingService->reserve($product, $option, $availability, $unitItems, $uuid, $notes);
         $bookingData = $this->transformer->transform($booking);
+        $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
 
         return new JsonResponse($bookingData, Response::HTTP_OK);
     }
