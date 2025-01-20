@@ -14,16 +14,7 @@ class Voucher
 
     public string $redemptionMethod;
     public ?string $utcRedeemedAt = null;
-    public object $deliveryOptions;
-
-    public function __construct()
-    {
-        $this->deliveryOptions = (object) [
-            "deliveryFormat" => self::DELIVERY_FORMAT_QRCODE,
-            "deliveryValue" => "" 
-        ];
-    }
-
+    public array $deliveryOptions = [];
 
     public static function create(SimpleXMLElement $booking, string $redemptionMethod, ?string $utcRedeemedAt = null): self
     {
@@ -31,23 +22,27 @@ class Voucher
         $voucher->redemptionMethod = $redemptionMethod;
         $voucher->utcRedeemedAt = $utcRedeemedAt;
 
+        $deliveryOptions = new stdClass;
+
         switch ((string) $booking->barcode_priority) {
    
             case self::BARCODE_PRIORITY_TOURCMS:
-                $voucher->deliveryOptions->deliveryFormat = self::DELIVERY_FORMAT_QRCODE;
-                $voucher->deliveryOptions->deliveryValue = (string) $booking->barcode_data;
+                $deliveryOptions->deliveryFormat = self::DELIVERY_FORMAT_QRCODE;
+                $deliveryOptions->deliveryValue = (string) $booking->barcode_data;
                 break;
     
             case self::BARCODE_PRIORITY_AGENT_REF:
-                $voucher->deliveryOptions->deliveryFormat = self::DELIVERY_FORMAT_QRCODE;
-                $voucher->deliveryOptions->deliveryValue = !empty($booking->agent_ref) ? (string) $booking->agent_ref  : (string) $booking->barcode_data;
+                $deliveryOptions->deliveryFormat = self::DELIVERY_FORMAT_QRCODE;
+                $deliveryOptions->deliveryValue = !empty($booking->agent_ref) ? (string) $booking->agent_ref  : (string) $booking->barcode_data;
                 break;
             
             default:
-                $voucher->deliveryOptions->deliveryFormat = self::DELIVERY_FORMAT_QRCODE;
-                $voucher->deliveryOptions->deliveryValue = (string) $booking->barcode_data;
+                $deliveryOptions->deliveryFormat = self::DELIVERY_FORMAT_QRCODE;
+                $deliveryOptions->deliveryValue = (string) $booking->barcode_data;
                 break;
         }
+
+        $voucher->setDeliveryOptions([$deliveryOptions]);
 
         return $voucher;
     }
@@ -95,7 +90,7 @@ class Voucher
     /**
      * Get the value of deliveryOptions
      */ 
-    public function getDeliveryOptions(): object
+    public function getDeliveryOptions(): array
     {
         return $this->deliveryOptions;
     }
@@ -105,7 +100,7 @@ class Voucher
      *
      * @return  self
      */ 
-    public function setDeliveryOptions(object $deliveryOptions): self
+    public function setDeliveryOptions(array $deliveryOptions): self
     {
         $this->deliveryOptions = $deliveryOptions;
 

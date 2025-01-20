@@ -28,10 +28,10 @@ class VoucherTest extends UnitTestCase
         $voucher = Voucher::create($this->showBookingXML, ProductService::REDEMPTION_METHOD_DIGITAL, self::FAKE_UTC_REDEEMED_AT);
 
 
-        $expectedDeliveryOptions = (object) [
+        $expectedDeliveryOptions = [(object) [
             "deliveryFormat" => ProductService::DELIVERY_FORMAT_QRCODE,
             "deliveryValue" => self::FAKE_AGENT_REF
-        ];
+        ]];
 
         $this->assertEquals(ProductService::REDEMPTION_METHOD_DIGITAL, $voucher->getRedemptionMethod());
         $this->assertEquals(self::FAKE_UTC_REDEEMED_AT, $voucher->getUtcRedeemedAt());
@@ -45,10 +45,10 @@ class VoucherTest extends UnitTestCase
         $voucher = Voucher::create($this->showBookingXML, ProductService::REDEMPTION_METHOD_DIGITAL, self::FAKE_UTC_REDEEMED_AT);
 
 
-        $expectedDeliveryOptions = (object) [
+        $expectedDeliveryOptions = [(object) [
             "deliveryFormat" => ProductService::DELIVERY_FORMAT_QRCODE,
             "deliveryValue" => (string) $this->showBookingXML->barcode_data
-        ];
+        ]];
 
         $this->assertEquals(ProductService::REDEMPTION_METHOD_DIGITAL, $voucher->getRedemptionMethod());
         $this->assertEquals(self::FAKE_UTC_REDEEMED_AT, $voucher->getUtcRedeemedAt());
@@ -61,10 +61,10 @@ class VoucherTest extends UnitTestCase
         $voucher = Voucher::create($this->showBookingXML, ProductService::REDEMPTION_METHOD_DIGITAL, self::FAKE_UTC_REDEEMED_AT);
 
 
-        $expectedDeliveryOptions = (object) [
+        $expectedDeliveryOptions = [(object) [
             "deliveryFormat" => ProductService::DELIVERY_FORMAT_QRCODE,
             "deliveryValue" => (string) $this->showBookingXML->barcode_data
-        ];
+        ]];
 
         $this->assertEquals(ProductService::REDEMPTION_METHOD_DIGITAL, $voucher->getRedemptionMethod());
         $this->assertEquals(self::FAKE_UTC_REDEEMED_AT, $voucher->getUtcRedeemedAt());

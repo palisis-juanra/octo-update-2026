@@ -36,7 +36,7 @@ class BookingReservationController extends Controller
     public function index(Request $request): JsonResponse
     {
         $requestParams = $request->post();
-        $this->logger->info(["message" => "Starting to process request", "request" => $request->post()]);
+        $this->logger->info(["message" => "Starting to process booking reservation request", "request" => $request->post()]);
         $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
 
         $this->validateRequestParams($requestParams, $channelId);
