@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Booking;
+use App\Models\DeliveryOptions;
 use App\Models\Voucher;
 use App\Services\ProductService;
 use SimpleXMLElement;
@@ -27,15 +28,13 @@ class VoucherTest extends UnitTestCase
         $this->showBookingXML->agent_ref = self::FAKE_AGENT_REF;
         $voucher = Voucher::create($this->showBookingXML, ProductService::REDEMPTION_METHOD_DIGITAL, self::FAKE_UTC_REDEEMED_AT);
 
-
-        $expectedDeliveryOptions = [(object) [
-            "deliveryFormat" => ProductService::DELIVERY_FORMAT_QRCODE,
-            "deliveryValue" => self::FAKE_AGENT_REF
-        ]];
+        $expectedDeliveryOptions = new DeliveryOptions;
+        $expectedDeliveryOptions->setDeliveryFormat(ProductService::DELIVERY_FORMAT_QRCODE);
+        $expectedDeliveryOptions->setDeliveryValue(self::FAKE_AGENT_REF);
 
         $this->assertEquals(ProductService::REDEMPTION_METHOD_DIGITAL, $voucher->getRedemptionMethod());
         $this->assertEquals(self::FAKE_UTC_REDEEMED_AT, $voucher->getUtcRedeemedAt());
-        $this->assertEquals($expectedDeliveryOptions, $voucher->getDeliveryOptions());
+        $this->assertEquals([$expectedDeliveryOptions], $voucher->getDeliveryOptions());
     }
 
     public function test_whenBarcodePriorityIsAgentRefAndItsNotPresent_thenWeGetTourcmsBarcodes(): void
@@ -44,15 +43,13 @@ class VoucherTest extends UnitTestCase
         $this->showBookingXML->agent_ref = '';
         $voucher = Voucher::create($this->showBookingXML, ProductService::REDEMPTION_METHOD_DIGITAL, self::FAKE_UTC_REDEEMED_AT);
 
-
-        $expectedDeliveryOptions = [(object) [
-            "deliveryFormat" => ProductService::DELIVERY_FORMAT_QRCODE,
-            "deliveryValue" => (string) $this->showBookingXML->barcode_data
-        ]];
+        $expectedDeliveryOptions = new DeliveryOptions;
+        $expectedDeliveryOptions->setDeliveryFormat(ProductService::DELIVERY_FORMAT_QRCODE);
+        $expectedDeliveryOptions->setDeliveryValue((string) $this->showBookingXML->barcode_data);
 
         $this->assertEquals(ProductService::REDEMPTION_METHOD_DIGITAL, $voucher->getRedemptionMethod());
         $this->assertEquals(self::FAKE_UTC_REDEEMED_AT, $voucher->getUtcRedeemedAt());
-        $this->assertEquals($expectedDeliveryOptions, $voucher->getDeliveryOptions());
+        $this->assertEquals([$expectedDeliveryOptions], $voucher->getDeliveryOptions());
     }
 
     public function test_whenBarcodePriorityIsTourcmsBarcodes_thenWeGetTourcmsBarcodes(): void
@@ -61,13 +58,12 @@ class VoucherTest extends UnitTestCase
         $voucher = Voucher::create($this->showBookingXML, ProductService::REDEMPTION_METHOD_DIGITAL, self::FAKE_UTC_REDEEMED_AT);
 
 
-        $expectedDeliveryOptions = [(object) [
-            "deliveryFormat" => ProductService::DELIVERY_FORMAT_QRCODE,
-            "deliveryValue" => (string) $this->showBookingXML->barcode_data
-        ]];
+        $expectedDeliveryOptions = new DeliveryOptions;
+        $expectedDeliveryOptions->setDeliveryFormat(ProductService::DELIVERY_FORMAT_QRCODE);
+        $expectedDeliveryOptions->setDeliveryValue((string) $this->showBookingXML->barcode_data);
 
         $this->assertEquals(ProductService::REDEMPTION_METHOD_DIGITAL, $voucher->getRedemptionMethod());
         $this->assertEquals(self::FAKE_UTC_REDEEMED_AT, $voucher->getUtcRedeemedAt());
-        $this->assertEquals($expectedDeliveryOptions, $voucher->getDeliveryOptions());
+        $this->assertEquals([$expectedDeliveryOptions], $voucher->getDeliveryOptions());
     }
 }

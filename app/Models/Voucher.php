@@ -22,23 +22,23 @@ class Voucher
         $voucher->redemptionMethod = $redemptionMethod;
         $voucher->utcRedeemedAt = $utcRedeemedAt;
 
-        $deliveryOptions = new stdClass;
+        $deliveryOptions = new DeliveryOptions;
 
         switch ((string) $booking->barcode_priority) {
    
             case self::BARCODE_PRIORITY_TOURCMS:
-                $deliveryOptions->deliveryFormat = self::DELIVERY_FORMAT_QRCODE;
-                $deliveryOptions->deliveryValue = (string) $booking->barcode_data;
+                $deliveryOptions->setDeliveryFormat(self::DELIVERY_FORMAT_QRCODE);
+                $deliveryOptions->setDeliveryValue((string) $booking->barcode_data);
                 break;
     
             case self::BARCODE_PRIORITY_AGENT_REF:
-                $deliveryOptions->deliveryFormat = self::DELIVERY_FORMAT_QRCODE;
-                $deliveryOptions->deliveryValue = !empty($booking->agent_ref) ? (string) $booking->agent_ref  : (string) $booking->barcode_data;
+                $deliveryOptions->setDeliveryFormat(self::DELIVERY_FORMAT_QRCODE);
+                $deliveryOptions->setDeliveryValue(!empty($booking->agent_ref) ? (string) $booking->agent_ref  : (string) $booking->barcode_data);
                 break;
             
             default:
-                $deliveryOptions->deliveryFormat = self::DELIVERY_FORMAT_QRCODE;
-                $deliveryOptions->deliveryValue = (string) $booking->barcode_data;
+                $deliveryOptions->setDeliveryFormat(self::DELIVERY_FORMAT_QRCODE);
+                $deliveryOptions->setDeliveryValue((string) $booking->barcode_data);
                 break;
         }
 
