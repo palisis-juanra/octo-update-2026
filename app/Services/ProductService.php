@@ -236,6 +236,8 @@ class ProductService
         $minBookingSize = (int)$tour->min_booking_size <= 0 ? self::MIN_BOOKING_SIZE : (int)$tour->min_booking_size;
         $maxBookingSize = (int)$tour->max_booking_size <= 0 ? self::MAX_BOOKING_SIZE : (int)$tour->max_booking_size;
 
+        $allDay = $availabilityType === self::AVAILABILITY_TYPE_OPENING_HOURS;
+
         $product = new Product();
         $product->setId($id)
                 ->setInternalName($internalName)
@@ -253,7 +255,8 @@ class ProductService
                 ->setOptions($options)
                 ->setCutoff((array) $tour->cutoff)
                 ->setMinBookingSize($minBookingSize)
-                ->setMaxBookingSize($maxBookingSize);
+                ->setMaxBookingSize($maxBookingSize)
+                ->setAllDay($allDay);
         
         if (true === OctoRequestFacade::isContentRequired()) {
 

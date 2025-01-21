@@ -21,6 +21,7 @@ abstract class BaseAvailabilityRequest
     protected array $availabilityIds;
     protected bool $contentEnabled = false;
     protected ?string $tourName = null;
+    protected bool $allDay = false;
 
     /**
      * Get all the availabilities
@@ -102,6 +103,18 @@ abstract class BaseAvailabilityRequest
     public function setTourName(?string $tourName): self
     {
         $this->tourName = $tourName;
+
+        return $this;
+    }
+
+    public function getAllDay(): bool
+    {
+        return $this->allDay;
+    }
+
+    public function setAllDay(bool $allDay): self
+    {
+        $this->allDay = $allDay;
 
         return $this;
     }

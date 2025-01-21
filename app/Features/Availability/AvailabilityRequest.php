@@ -25,13 +25,15 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected int $maxUnits;
     protected string $cutoff;
     protected string $currency;
+    protected bool $allDay = false;
 
-    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '')
+    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false)
     {
         $this->tourId = $tourId;
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
+        $this->allDay = $allDay;
     }
 
 // GET SET FUNCTIONS
@@ -258,7 +260,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setDepartureId((int) $departure->departure_id);
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
-            $availability->setAllDay(false);
+            $availability->setAllDay($this->allDay);
             $availability->setAvailable($this->checkSpacesRemaining($departure) && $this->checkMaxUnitsExceeded($departure));
             $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
             $availability->setMaxUnits($this->maxUnits);

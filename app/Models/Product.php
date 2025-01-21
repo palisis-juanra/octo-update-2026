@@ -26,6 +26,7 @@ class Product extends Model
     protected array $options;
     protected array $cutoff;
     protected ?ProductContent $content = null;
+    protected bool $allDay = false;
 
     /**
      * Get the value of id
@@ -402,6 +403,26 @@ class Product extends Model
     public function setContent(?ProductContent $content): self
     {
         $this->content = $content;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of allDay
+     */ 
+    public function getAllDay(): bool
+    {
+        return $this->allDay;
+    }
+
+    /**
+     * Set the value of allDay
+     *
+     * @return  self
+     */ 
+    public function setAllDay(bool $allDay): self
+    {
+        $this->allDay = $allDay;
 
         return $this;
     }
