@@ -277,6 +277,10 @@ class ProductService
                             ->setCategoryLabels($categoryLabels)
                             ->setDurationMinutesFrom($durationMinutesFrom);
             $product->setContent($productContent);
+
+            foreach ($product->getOptions() as $option) {
+                $option->setContent($productContent);
+            }
         }
 
         return $product;
@@ -391,8 +395,8 @@ class ProductService
             foreach ($ratesFromXML as $rate) {
                 $unitId = $this->buildUnitId($tour, $rate);
                 $unitInternalName = "";
-                if (isset($rate->label_1)) {
-                    $unitInternalName = (string) $rate->label_1;
+                if (isset($rate->rate_id)) {
+                    $unitInternalName = (string) $rate->rate_id;
                 } else {
                     $this->info[] = "unit {$unitId} internalName field is missing";
                 }
@@ -446,6 +450,10 @@ class ProductService
                 $unit->setType($unitType);
                 $unit->setRequiredContactFields($unitRequiredContactFields);
                 $unit->setRestrictions($unitRestrictions);
+
+                if (true === OctoRequestFacade::isContentRequired()) {
+                    $unit->setTitle((string) $rate->label_1);
+                }
 
                 $optionUnits[] = $unit;
             }

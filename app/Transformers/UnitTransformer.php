@@ -2,7 +2,7 @@
 
 namespace App\Transformers;
 
-use League\Fractal\Resource\Collection;
+use App\Facades\OctoRequestFacade;
 
 class UnitTransformer extends BaseTransformer
 {
@@ -15,8 +15,7 @@ class UnitTransformer extends BaseTransformer
 
     public function basicTransform($unit): array
     {
-
-        return [
+        $data = [
             'id' => $unit->getId(),
             'internalName' => $unit->getInternalName(),
             'reference' => $unit->getReference(),
@@ -24,6 +23,13 @@ class UnitTransformer extends BaseTransformer
             'requiredContactFields' => $unit->getRequiredContactFields(),
             'restrictions' => $this->unitRestrictionsTranformer->transform($unit->getRestrictions())
         ];
+
+        if (true === OctoRequestFacade::isContentRequired()) {
+            $data['title'] = $unit->getTitle();
+            $data['shortDescription'] = $unit->getShortDescription();
+        }
+
+        return $data;
     }
 
     public function fullTransform($unit): array

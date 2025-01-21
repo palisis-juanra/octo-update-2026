@@ -20,6 +20,8 @@ class Unit extends BaseModel
     protected string $type;
     protected array $requiredContactFields;
     protected UnitRestrictions $restrictions;
+    protected string $title;
+    protected ?string $shortDescription = null;
     
     public function __construct()
     {
@@ -145,4 +147,45 @@ class Unit extends BaseModel
 
         return $this;
     }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set the value of title
+     *
+     * @return  self
+     */ 
+    public function setTitle(string $title): self
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of shortDescription
+     */ 
+    public function getShortDescription(): string|null
+    {
+        return $this->shortDescription;
+    }
+
+    /**
+     * Set the value of shortDescription
+     *
+     * @return  self
+     */ 
+    public function setShortDescription(string $shortDescription): self
+    {
+        $this->shortDescription = $shortDescription;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of title
+     */ 
 }

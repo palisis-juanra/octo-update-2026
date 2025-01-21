@@ -2,16 +2,19 @@
 
 namespace App\Transformers;
 
+use App\Facades\OctoRequestFacade;
 use League\Fractal\Resource\Collection;
 
 class OptionTransformer extends BaseTransformer
 {
     protected UnitTransformer $unitTransformer;
+    protected ProductContentTransformer $productContentTransformer;
 
     public function __construct(string $mode)
     {
         parent::__construct($mode);
         $this->unitTransformer = new UnitTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->productContentTransformer = new ProductContentTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     protected function basicTransform($option): array
@@ -28,7 +31,7 @@ class OptionTransformer extends BaseTransformer
         $unitsResource = new Collection($option->getUnits(), $this->unitTransformer);
         $unitsTransformed = $this->manager->createData($unitsResource)->toArray()['data'];
 
-        return [
+        $data = [
             'id' => $option->getId(),
             'default' => $option->getDefault(),
             'internalName' => $option->getInternalName(),
@@ -41,5 +44,12 @@ class OptionTransformer extends BaseTransformer
             'restrictions' => $option->getRestrictions(),
             'units' => $unitsTransformed
         ];
+
+        if (true === OctoRequestFacade::isContentRequired()) {
+            $contentData = $this->productContentTransformer->transform($option->getContent());
+            $data = array_merge($data, $contentData);
+        }
+    
+        return $data;
     }
 }
