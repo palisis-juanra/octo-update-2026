@@ -6,6 +6,7 @@ use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Models\Product;
 use App\Services\JSONLogService;
+use App\Services\LocaleService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -545,7 +546,49 @@ class ProductServiceTest extends UnitTestCase
         $this->assertEmpty($optionUnits[1]->getRestrictions()->getAccompaniedBy());
     }
 
+    public function test_whenTourHasStartTimezone_thenProductHasTourStartTimezoneAsTimezone(): void
+    {
+        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService);
+        
+        $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
+        $this->assertSame((string)$this->showTourXML->tour->start_timezone, $timezone);  
+    }
 
+    public function test_whenTourHasNotStartTimezone_thenProductHasTourEndTimezoneAsTimezone(): void
+    {
+        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService);
+
+        unset($this->showTourXML->tour->start_timezone);
+        $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
+        $this->assertSame((string)$this->showTourXML->tour->end_timezone, $timezone);
+
+        $this->showTourXML->tour->addChild('start_timezone', '');
+        $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
+        $this->assertSame((string)$this->showTourXML->tour->end_timezone, $timezone);
+
+        $this->showTourXML->tour->start_timezone = 'NOTSET';
+        $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
+        $this->assertSame((string)$this->showTourXML->tour->end_timezone, $timezone);
+    }
+
+    public function test_whenTourHasNeitherStartNorEndTimezone_thenProductHasAccountTimezoneAsTimezone(): void
+    {
+        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService);
+
+        unset($this->showTourXML->tour->start_timezone);
+        unset($this->showTourXML->tour->end_timezone);
+
+        $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
+        $this->assertSame((string)$this->showTourXML->tour->account_timezone, $timezone);
+
+        $this->showTourXML->tour->addChild('end_timezone', '');
+        $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
+        $this->assertSame((string)$this->showTourXML->tour->account_timezone, $timezone);
+
+        $this->showTourXML->tour->end_timezone = 'NOTSET';
+        $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
+        $this->assertSame((string)$this->showTourXML->tour->account_timezone, $timezone);
+    }
 
     protected function mockLogger(): JSONLogService|MockObject
     {

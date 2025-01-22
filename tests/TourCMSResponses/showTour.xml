@@ -12,8 +12,8 @@
 		<time_type>strict</time_type>
 		<start_time>MULTI</start_time>
 		<end_time>MULTI</end_time>
-		<account_timezone>NOTSET</account_timezone>
-		<start_timezone>Europe/Madrid</start_timezone>
+		<account_timezone>Europe/London</account_timezone>
+		<start_timezone>Europe/Malta</start_timezone>
 		<end_timezone>Europe/Madrid</end_timezone>
 		<quantity_rule>Q</quantity_rule>
 		<from_price>12.00</from_price>

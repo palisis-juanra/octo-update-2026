@@ -177,7 +177,7 @@ class Option extends Model
      * Get unit by it's ID
      * @param string $unitId
      * @throws \App\Exceptions\InvalidUnitIdException
-     * @return \stdClass
+     * @return \App\Models\Unit
      */
     public function getUnitById(string $unitId): Unit
     {

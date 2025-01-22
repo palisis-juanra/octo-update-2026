@@ -147,6 +147,7 @@ class ProductService
         self::FEATURE_TYPE_CANCELLATION_TERM => 'cancellation_policy->policy->name'
     ];
     public const DEFAULT_DURATION_MINUTES = 60;
+    public const TIMEZONE_NOT_SET = 'NOTSET';
   
     public ProductTransformer $productTransformer;
 
@@ -629,17 +630,24 @@ class ProductService
         return $defaultLocale;
     }
 
-    protected function getProductTimeZone(SimpleXMLElement $tour): string
+    public function getProductTimeZone(SimpleXMLElement $tour): string
     {
-        $timeZone = "";
-        if (isset($tour->start_timezone)) {
-            $timeZone = (string) $tour->start_timezone;
-        } else if (isset($tour->end_timezone) || isset($tour->account_timezone)) {
-            $timeZone = isset($tour->end_timezone) ? (string) $tour->end_timezone : (string) $tour->account_timezone;
-        } else {
-            $this->errors[] = self::ERROR_TIMEZONE_MISSING;
+
+        if (!empty($tour->start_timezone) && (string) $tour->start_timezone !== self::TIMEZONE_NOT_SET) {
+            return (string) $tour->start_timezone;
+        } 
+        
+        if (!empty($tour->end_timezone) && (string) $tour->end_timezone !== self::TIMEZONE_NOT_SET) {
+            return (string) $tour->end_timezone;
         }
-        return $timeZone;
+
+        if (!empty($tour->account_timezone) && (string) $tour->account_timezone !== self::TIMEZONE_NOT_SET) {
+            return (string) $tour->account_timezone;
+        }
+            
+        $this->errors[] = self::ERROR_TIMEZONE_MISSING;
+        
+        return "";
     }
 
     protected function getProductAvailabilityType(SimpleXMLElement $tour): string
