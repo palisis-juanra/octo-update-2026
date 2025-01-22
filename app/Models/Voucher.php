@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ProductService;
 use SimpleXMLElement;
 use stdClass;
 
@@ -12,9 +13,17 @@ class Voucher
     public const DELIVERY_FORMAT_QRCODE = 'QRCODE';
     public const DELIVERY_FORMAT_PDF = 'PDF_URL';
 
-    public string $redemptionMethod;
+    public string $redemptionMethod = ProductService::REDEMPTION_METHOD_DIGITAL;
     public ?string $utcRedeemedAt = null;
     public array $deliveryOptions = [];
+
+    public static function createWithoutOptions(string $redemptionMethod): self
+    {
+        $voucher = new Voucher;
+        $voucher->setRedemptionMethod($redemptionMethod);
+
+        return $voucher;
+    }
 
     public static function create(SimpleXMLElement $booking, string $redemptionMethod, ?string $utcRedeemedAt = null): self
     {

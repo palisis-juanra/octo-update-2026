@@ -142,7 +142,8 @@ class Booking extends Model
         }
 
         if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
-            $voucher = Voucher::create($bookingData, $product->getRedemptionMethod(), $booking->getUtcRedeemedAt());
+            //$voucher = Voucher::create($bookingData, $product->getRedemptionMethod(), $booking->getUtcRedeemedAt());
+            $voucher = Voucher::createWithoutOptions($product->getRedemptionMethod());
             $booking->setVoucher($voucher);
         }
 
