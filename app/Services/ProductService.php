@@ -236,7 +236,7 @@ class ProductService
         $minBookingSize = (int)$tour->min_booking_size <= 0 ? self::MIN_BOOKING_SIZE : (int)$tour->min_booking_size;
         $maxBookingSize = (int)$tour->max_booking_size <= 0 ? self::MAX_BOOKING_SIZE : (int)$tour->max_booking_size;
 
-        $allDay = $availabilityType === self::AVAILABILITY_TYPE_OPENING_HOURS;
+        $allDay = $this->isOpeningHours($tour);
 
         $product = new Product();
         $product->setId($id)
@@ -325,7 +325,7 @@ class ProductService
                 $this->info[] = "option {$optionId} reference field is missing";
             }
 
-            if (empty($availabilityStartTimes) && ((string) $tour->time_type != self::TIME_TYPE_OPENING_HOURS)) {
+            if (empty($availabilityStartTimes) && (false === $this->isOpeningHours($tour))) {
                 $this->info[] = "option {$optionId} availabilityLocalStartTimes fields are not present because of invalid mapping structure";
             }
             $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
@@ -360,7 +360,7 @@ class ProductService
     
             $optionUnits = $this->getOptionUnits($tour);
 
-            if ((string) $tour->time_type === self::TIME_TYPE_OPENING_HOURS) {
+            if (true == $this->isOpeningHours($tour)) {
                 $availabilityStartTimes = [];
             }
 
@@ -648,7 +648,7 @@ class ProductService
         if (isset($tour->time_type)) {
             if ($tour->time_type == self::TIME_TYPE_STRICT || $tour->time_type == self::TIME_TYPE_STRICT_START) {
                 $availabilityType = self::AVAILABILITY_TYPE_START_TIME;
-            } else if ($tour->time_type == self::TIME_TYPE_OPENING_HOURS) {
+            } else if ($this->isOpeningHours($tour)) {
                 $availabilityType = self::AVAILABILITY_TYPE_OPENING_HOURS;
             }
         } else {
@@ -1093,5 +1093,10 @@ class ProductService
     {
         $this->info = [];
         $this->errors = [];
+    }
+
+    protected function isOpeningHours(SimpleXMLElement $tour): bool
+    {
+        return ((string) $tour->time_type) === self::TIME_TYPE_OPENING_HOURS;
     }
 }
