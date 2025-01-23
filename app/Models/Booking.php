@@ -6,6 +6,7 @@ use App\Models\Availability\Availability;
 use App\Models\Ticket;
 use App\Services\DateTimeService;
 use App\Services\ProductService;
+use App\Services\UnitService;
 use App\Services\XMLService;
 use DateTime;
 use DateTimeZone;
@@ -18,15 +19,15 @@ use stdClass;
 class Booking extends Model
 {
     use HasFactory;
-    const STATUS_ON_HOLD = 'ON_HOLD';
-    const STATUS_EXPIRED = 'EXPIRED';
-    const STATUS_CONFIRMED = 'CONFIRMED';
-    const STATUS_CANCELLED = 'CANCELLED';
-    const STATUS_PENDING = 'PENDING';
-    const TCMS_CONFIRMED_STATUS = 2;
-    const FIELD_VOUCHER = 'VOUCHER';
-    const FIELD_TICKET = 'TICKET';
-    const CANCELLATION_REFUND_FULL = "FULL";
+    public const STATUS_ON_HOLD = 'ON_HOLD';
+    public const STATUS_EXPIRED = 'EXPIRED';
+    public const STATUS_CONFIRMED = 'CONFIRMED';
+    public const STATUS_CANCELLED = 'CANCELLED';
+    public const STATUS_PENDING = 'PENDING';
+    public const TCMS_CONFIRMED_STATUS = 2;
+    public const FIELD_VOUCHER = 'VOUCHER';
+    public const FIELD_TICKET = 'TICKET';
+    public const CANCELLATION_REFUND_FULL = "FULL";
     protected bool $testMode;
     protected ?string $utcCreatedAt;
     protected ?string $utcUpdatedAt;
@@ -500,7 +501,7 @@ class Booking extends Model
             $unitItem->setUnitId($unit->getId());
             $unitItem->setId($unit->getId());
             $unitItem->setUnit($unit);
-            $unitItem->setStatus('ON_HOLD');
+            $unitItem->setStatus(self::STATUS_ON_HOLD);
             $unitItem->setUtcRedeemedAt($this->getUtcRedeemedAt());
             $unitItem->setContact($this->getContact());
 
@@ -615,7 +616,7 @@ class Booking extends Model
 
     protected function getTicketValueForUnitItem(string $unitId, int $number): ?string
     {
-        $tcmsRateId = explode("|", $unitId)[1];
+        $tcmsRateId = UnitService::getTourCMSRateId($unitId);
         $components = XMLService::getArrayFromXmlNode($this->bookingData->components, 'component');
         $rateComponent = array_filter($components, 
         function(SimpleXMLElement $component) use ($tcmsRateId) {

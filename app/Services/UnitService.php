@@ -16,6 +16,23 @@ class UnitService
     public const ERROR_MESSAGE_INVALID_UNIT_ITEMS = 'Invalid or empty unitItems';
     public const PARAM_UNITS = 'units';
 
+    /**
+     * Get TourCMS Rate ID from OCTO Unit ID
+     * @param string $unitId
+     * @throws \App\Exceptions\InvalidUnitIdException
+     * @return string
+     */
+    public static function getTourCMSRateId(string $unitId): string
+    {
+        $unitIdExploded = explode("|", $unitId);
+
+        if (array_key_exists(1, $unitIdExploded) === false) {
+            throw new InvalidUnitIdException($unitId);
+        }
+
+        return (string) $unitIdExploded[1];
+    }
+
     public function validateUnits(array $requestParams): bool
     {
         $units = $requestParams[self::PARAM_UNITS] ?? [];
