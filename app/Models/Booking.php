@@ -506,17 +506,18 @@ class Booking extends Model
             $unitItem->setContact($this->getContact());
 
             $ticketValue = self::getTicketValueForUnitItem($unitId, $unitsQuantities[$unitId]);
+            $this->product->setDeliveryMethods([ProductService::DELIVERY_METHOD_TICKET]);
+            $ticket = new Ticket();
+            $ticket->setRedemptionMethod(ProductService::REDEMPTION_METHOD_DIGITAL);
             if (!empty($ticketValue)) {
-                $this->product->setDeliveryMethods([ProductService::DELIVERY_METHOD_TICKET]);
-                $ticket = new Ticket();
                 $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
                 $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
                 $ticket->setDeliveryOptions([
                     "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
                     "deliveryValue" => $ticketValue
                 ]);
-                $unitItem->setTicket($ticket);
             }
+            $unitItem->setTicket($ticket);
             
 
             $this->units[] = $unitItem;
