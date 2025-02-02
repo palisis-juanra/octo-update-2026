@@ -965,7 +965,8 @@ class ProductService
     protected function getProductMedia(SimpleXMLElement $tour): array
     {
         $media = [];
-        
+        if (is_null($tour->images)) return $media;
+
         // Images
         $images = XMLService::getArrayFromXmlNode($tour->images, 'image');
         $imageRel = Media::REL_COVER;
