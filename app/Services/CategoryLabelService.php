@@ -51,7 +51,7 @@ class CategoryLabelService
     public static function getFromTourXML(SimpleXMLElement $tour): array
     {
         $categoryLabels = [];
-        if (empty($tour->tour_tags)) return $categoryLabels;
+        if (empty($tour->tour_tags->tag)) return $categoryLabels;
 
         $tourTags = XMLService::getArrayFromXmlNode($tour->tour_tags, self::TCMS_TAG_FIELD);
         foreach ($tourTags as $tag) {
