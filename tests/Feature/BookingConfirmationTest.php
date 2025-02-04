@@ -84,8 +84,8 @@ class BookingConfirmationTest extends FeatureTestCase
         $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
         $response->assertOk();
 
-        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.deliveryValue", "10246817");
-        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.deliveryFormat", "QRCODE");
+        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryValue", "10246817");
+        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryFormat", "QRCODE");
         $response->assertJsonPath("unitItems.1.ticket.redemptionMethod", "DIGITAL");
         $response->assertJsonPath("unitItems.1.ticket.utcRedeemedAt", null);
     }
