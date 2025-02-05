@@ -6,7 +6,6 @@ use App\Features\Availability\AvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\Availability;
 use App\Models\Availability\AvailabilityPricing;
-use App\Models\Product;
 use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
@@ -22,8 +21,9 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     protected string $localDateStart;
     protected string $localDateEnd;
     protected bool $allowPricing = true;
+    protected bool $allDay = false;
 
-    public function __construct(string $tourId, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize, int $maxBookingSize)
+    public function __construct(string $tourId, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize, int $maxBookingSize, bool $allDay = false)
     {
         $this->tourId = $tourId;
         $this->optionId = $optionId;
@@ -33,6 +33,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $this->currency = $currency;
         $this->minBookingSize = $minBookingSize;
         $this->maxBookingSize = $maxBookingSize;
+        $this->allDay = $allDay;
 
     }
 

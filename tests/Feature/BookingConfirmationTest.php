@@ -45,9 +45,56 @@ class BookingConfirmationTest extends FeatureTestCase
     {
         parent::setUp();
 
+        
+    }
+
+    public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
+    {
+        $this->mockServices('tests/TourCMSResponses/showBooking.xml');
+        $response = $this->post("/bookings/". self::INVALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+
+        
+        $response->assertBadRequest();
+        
+        $responseData = $response->decodeResponseJson();
+        $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_INVALID_BOOKING_UUID);
+        $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_BOOKING_UUID);
+    }
+
+    public function test_whenBookingUuidIsCorrect_thenWeCanConfirmTheBooking(): void
+    {
+        $this->mockServices('tests/TourCMSResponses/showBooking.xml');
+        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response->assertOk();
+
+        $responseData = $response->decodeResponseJson();
+        $responseData->assertFragment([
+            "id" => "1|142|4093",
+            "uuid" => self::VALID_BOOKING_UUID,
+            "status" => Booking::STATUS_CONFIRMED,
+            "productId" => self::VALID_PRODUCT_ID,
+            "availabilityId" => self::VALID_AVAILABILITY_ID,
+            "optionId" => self::VALID_OPTION_ID
+        ]);
+    }
+
+    public function test_whenBookingHasTickets_thenWeGetItOnResponse()
+    {
+        $this->mockServices('tests/TourCMSResponses/showBookingWithTickets.xml');
+        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response->assertOk();
+
+        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryValue", "10246817");
+        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryFormat", "QRCODE");
+        $response->assertJsonPath("unitItems.1.ticket.redemptionMethod", "DIGITAL");
+        $response->assertJsonPath("unitItems.1.ticket.utcRedeemedAt", null);
+    }
+
+    protected function mockServices(string $showBookingFile): void
+    {
         $this->showTourXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTour_67.xml'));
         $this->commitBookingXML = simplexml_load_file('tests/TourCMSResponses/commitBooking.xml');
-        $this->showBookingXML = simplexml_load_file('tests/TourCMSResponses/showBooking.xml');
+        $this->showBookingXML = simplexml_load_file($showBookingFile);
         
         $date = '2024-12-05';
 
@@ -133,33 +180,5 @@ class BookingConfirmationTest extends FeatureTestCase
         $this->bookingConfirmationServiceMock->availabilityService = $this->availabilityServiceMock;
     
         $this->instance(BookingConfirmationService::class, $this->bookingConfirmationServiceMock);
-    }
-
-    public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
-    {
-        $response = $this->post("/bookings/". self::INVALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
-
-        
-        $response->assertBadRequest();
-        
-        $responseData = $response->decodeResponseJson();
-        $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_INVALID_BOOKING_UUID);
-        $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_BOOKING_UUID);
-    }
-
-    public function test_whenBookingUuidIsCorrect_thenWeCanConfirmTheBooking(): void
-    {
-        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
-        $response->assertOk();
-
-        $responseData = $response->decodeResponseJson();
-        $responseData->assertFragment([
-            "id" => "1|142|4093",
-            "uuid" => self::VALID_BOOKING_UUID,
-            "status" => Booking::STATUS_CONFIRMED,
-            "productId" => self::VALID_PRODUCT_ID,
-            "availabilityId" => self::VALID_AVAILABILITY_ID,
-            "optionId" => self::VALID_OPTION_ID
-        ]);
     }
 }

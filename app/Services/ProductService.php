@@ -147,6 +147,7 @@ class ProductService
         self::FEATURE_TYPE_CANCELLATION_TERM => 'cancellation_policy->policy->name'
     ];
     public const DEFAULT_DURATION_MINUTES = 60;
+    public const TIMEZONE_NOT_SET = 'NOTSET';
   
     public ProductTransformer $productTransformer;
 
@@ -189,6 +190,7 @@ class ProductService
 
     public function createProductFromTourXML(SimpleXMLElement $tour): Product
     {
+        $this->clearInfoAndErrors();
         $id = $this->buildProductId($tour);
         $internalName = (string) $tour->tour_name;
         $reference = null;
@@ -235,6 +237,8 @@ class ProductService
         $minBookingSize = (int)$tour->min_booking_size <= 0 ? self::MIN_BOOKING_SIZE : (int)$tour->min_booking_size;
         $maxBookingSize = (int)$tour->max_booking_size <= 0 ? self::MAX_BOOKING_SIZE : (int)$tour->max_booking_size;
 
+        $allDay = $this->isOpeningHours($tour);
+
         $product = new Product();
         $product->setId($id)
                 ->setInternalName($internalName)
@@ -252,7 +256,8 @@ class ProductService
                 ->setOptions($options)
                 ->setCutoff((array) $tour->cutoff)
                 ->setMinBookingSize($minBookingSize)
-                ->setMaxBookingSize($maxBookingSize);
+                ->setMaxBookingSize($maxBookingSize)
+                ->setAllDay($allDay);
         
         if (true === OctoRequestFacade::isContentRequired()) {
 
@@ -273,6 +278,10 @@ class ProductService
                             ->setCategoryLabels($categoryLabels)
                             ->setDurationMinutesFrom($durationMinutesFrom);
             $product->setContent($productContent);
+
+            foreach ($product->getOptions() as $option) {
+                $option->setContent($productContent);
+            }
         }
 
         return $product;
@@ -317,7 +326,7 @@ class ProductService
                 $this->info[] = "option {$optionId} reference field is missing";
             }
 
-            if (empty($availabilityStartTimes)) {
+            if (empty($availabilityStartTimes) && (false === $this->isOpeningHours($tour))) {
                 $this->info[] = "option {$optionId} availabilityLocalStartTimes fields are not present because of invalid mapping structure";
             }
             $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
@@ -351,7 +360,11 @@ class ProductService
             }
     
             $optionUnits = $this->getOptionUnits($tour);
-        
+
+            if (true == $this->isOpeningHours($tour)) {
+                $availabilityStartTimes = [];
+            }
+
             $optionData = new stdClass();
             $optionData->id = $optionId;
             $optionData->default = $optionDefault;
@@ -383,8 +396,8 @@ class ProductService
             foreach ($ratesFromXML as $rate) {
                 $unitId = $this->buildUnitId($tour, $rate);
                 $unitInternalName = "";
-                if (isset($rate->label_1)) {
-                    $unitInternalName = (string) $rate->label_1;
+                if (isset($rate->rate_id)) {
+                    $unitInternalName = (string) $rate->rate_id;
                 } else {
                     $this->info[] = "unit {$unitId} internalName field is missing";
                 }
@@ -438,6 +451,10 @@ class ProductService
                 $unit->setType($unitType);
                 $unit->setRequiredContactFields($unitRequiredContactFields);
                 $unit->setRestrictions($unitRestrictions);
+
+                if (true === OctoRequestFacade::isContentRequired()) {
+                    $unit->setTitle((string) $rate->label_1);
+                }
 
                 $optionUnits[] = $unit;
             }
@@ -613,17 +630,24 @@ class ProductService
         return $defaultLocale;
     }
 
-    protected function getProductTimeZone(SimpleXMLElement $tour): string
+    public function getProductTimeZone(SimpleXMLElement $tour): string
     {
-        $timeZone = "";
-        if (isset($tour->start_timezone)) {
-            $timeZone = (string) $tour->start_timezone;
-        } else if (isset($tour->end_timezone) || isset($tour->account_timezone)) {
-            $timeZone = isset($tour->end_timezone) ? (string) $tour->end_timezone : (string) $tour->account_timezone;
-        } else {
-            $this->errors[] = self::ERROR_TIMEZONE_MISSING;
+
+        if (!empty($tour->start_timezone) && (string) $tour->start_timezone !== self::TIMEZONE_NOT_SET) {
+            return (string) $tour->start_timezone;
+        } 
+        
+        if (!empty($tour->end_timezone) && (string) $tour->end_timezone !== self::TIMEZONE_NOT_SET) {
+            return (string) $tour->end_timezone;
         }
-        return $timeZone;
+
+        if (!empty($tour->account_timezone) && (string) $tour->account_timezone !== self::TIMEZONE_NOT_SET) {
+            return (string) $tour->account_timezone;
+        }
+            
+        $this->errors[] = self::ERROR_TIMEZONE_MISSING;
+        
+        return "";
     }
 
     protected function getProductAvailabilityType(SimpleXMLElement $tour): string
@@ -632,7 +656,7 @@ class ProductService
         if (isset($tour->time_type)) {
             if ($tour->time_type == self::TIME_TYPE_STRICT || $tour->time_type == self::TIME_TYPE_STRICT_START) {
                 $availabilityType = self::AVAILABILITY_TYPE_START_TIME;
-            } else if ($tour->time_type == self::TIME_TYPE_OPENING_HOURS) {
+            } else if ($this->isOpeningHours($tour)) {
                 $availabilityType = self::AVAILABILITY_TYPE_OPENING_HOURS;
             }
         } else {
@@ -941,7 +965,8 @@ class ProductService
     protected function getProductMedia(SimpleXMLElement $tour): array
     {
         $media = [];
-        
+        if (empty($tour->images)) return $media;
+
         // Images
         $images = XMLService::getArrayFromXmlNode($tour->images, 'image');
         $imageRel = Media::REL_COVER;
@@ -1073,4 +1098,14 @@ class ProductService
         return trim((string) $image->url);
     }
 
+    protected function clearInfoAndErrors(): void
+    {
+        $this->info = [];
+        $this->errors = [];
+    }
+
+    protected function isOpeningHours(SimpleXMLElement $tour): bool
+    {
+        return ((string) $tour->time_type) === self::TIME_TYPE_OPENING_HOURS;
+    }
 }

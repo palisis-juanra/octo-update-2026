@@ -11,6 +11,7 @@ class BookingTransformer extends BaseTransformer
     protected AvailabilityTransformer $availabilityTransformer;
     protected ContactTransformer $contactTransformer;
     protected UnitItemTransformer $unitItemTransformer;
+    protected VoucherTransformer $voucherTransformer;
 
     public function __construct(string $mode)
     {
@@ -20,6 +21,7 @@ class BookingTransformer extends BaseTransformer
         $this->optionTransformer = new OptionTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->contactTransformer = new ContactTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->unitItemTransformer = new UnitItemTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->voucherTransformer = new VoucherTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     protected function basicTransform($booking): array
@@ -63,7 +65,7 @@ class BookingTransformer extends BaseTransformer
             'contact' => $this->contactTransformer->transform($booking->getContact()),
             'notes' => $booking->getNotes(),
             'deliveryMethods' => $product->getDeliveryMethods(),
-            'voucher' => $booking->getVoucher(),
+            'voucher' => (null !== $booking->getVoucher()) ? $this->voucherTransformer->transform($booking->getVoucher()) : null,
             'unitItems' => $unitItemsTransformed,
         ];
     }

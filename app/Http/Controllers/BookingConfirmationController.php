@@ -26,7 +26,7 @@ class BookingConfirmationController
 
     public function index(Request $request, string $uuid): JsonResponse
     {
-        $this->logger->info(["message" => "Starting to process confirm booking request", "request" => $request->post()]);
+        $this->logger->info(["message" => "Starting to process booking confirmation request", "request" => $request->post()]);
 
         $contact = $request->post(OctoRequest::CONTACT);
 
@@ -49,6 +49,7 @@ class BookingConfirmationController
             $this->service->addContactToBooking($contact, $booking);
         }
         $bookingData = $this->transformer->transform($booking);
+        $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
 
         return new JsonResponse($bookingData, Response::HTTP_OK);
     }

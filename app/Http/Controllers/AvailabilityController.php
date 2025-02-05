@@ -37,7 +37,7 @@ class AvailabilityController extends Controller
             $productId = $request->post('productId');
             $product = $this->productService->find($productId);
 
-            $availabilityRequest = $this->availabilityRequestFactory->get($requestParams, $product->getMinBookingSize(), $product->getMaxBookingSize());
+            $availabilityRequest = $this->availabilityRequestFactory->get($requestParams, $product->getMinBookingSize(), $product->getMaxBookingSize(), $product->getAllDay());
             $availabilityIds = $request->get(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
             $availabilityRequest->setAvailabilityIds($availabilityIds);
             $availabilityRequest->setTourName($product->getInternalName());

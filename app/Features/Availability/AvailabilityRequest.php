@@ -25,13 +25,15 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected int $maxUnits;
     protected string $cutoff;
     protected string $currency;
+    protected bool $allDay = false;
 
-    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '')
+    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false)
     {
         $this->tourId = $tourId;
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
+        $this->allDay = $allDay;
     }
 
 // GET SET FUNCTIONS
@@ -250,21 +252,22 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
             $availability = new Availability;
 
-            list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
-            list($endTimeHours, $endTimeMinutes) = explode(":", $departure->end_time ? (string) $departure->end_time : '23:59');
+            list($startTimeHours, $startTimeMinutes) = explode(":", !empty($departure->start_time) ? (string) $departure->start_time : '00:00');
+            list($endTimeHours, $endTimeMinutes) = explode(":", !empty($departure->end_time) ? (string) $departure->end_time : '23:59');
 
             $availability->setContentEnabled($this->contentEnabled);
             $availability->setId($this->generateAvailabilityIdFromDepartureOrComponentObject($departure));
             $availability->setDepartureId((int) $departure->departure_id);
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
-            $availability->setAllDay(false);
+            $availability->setAllDay($this->allDay);
             $availability->setAvailable($this->checkSpacesRemaining($departure) && $this->checkMaxUnitsExceeded($departure));
             $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
             $availability->setMaxUnits($this->maxUnits);
             $availability->setUtcCutoffAt($this->cutoff);
-            $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
-            $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
+            $availability->setOpeningHoursFrom(!empty($departure->start_time) ? (string) $departure->start_time : '00:00');
+            $availability->setOpeningHoursTo(!empty($departure->end_time) ? (string) $departure->end_time :'23:59');
+
             if (true === OctoRequestFacade::isPricingRequired()) {
                 $pricing = $this->getPricingForMultipleDays($departure, $tourCMSService);
                 $availability->setCurrency($this->currency);

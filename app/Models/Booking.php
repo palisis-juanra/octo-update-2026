@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Models\Availability\Availability;
 use App\Models\Ticket;
 use App\Services\DateTimeService;
+use App\Services\ProductService;
+use App\Services\UnitService;
 use App\Services\XMLService;
 use DateTime;
 use DateTimeZone;
@@ -17,14 +19,15 @@ use stdClass;
 class Booking extends Model
 {
     use HasFactory;
-    const STATUS_ON_HOLD = 'ON_HOLD';
-    const STATUS_EXPIRED = 'EXPIRED';
-    const STATUS_CONFIRMED = 'CONFIRMED';
-    const STATUS_CANCELLED = 'CANCELLED';
-    const STATUS_PENDING = 'PENDING';
-    const TCMS_CONFIRMED_STATUS = 2;
-    const FIELD_VOUCHER = 'VOUCHER';
-    const CANCELLATION_REFUND_FULL = "FULL";
+    public const STATUS_ON_HOLD = 'ON_HOLD';
+    public const STATUS_EXPIRED = 'EXPIRED';
+    public const STATUS_CONFIRMED = 'CONFIRMED';
+    public const STATUS_CANCELLED = 'CANCELLED';
+    public const STATUS_PENDING = 'PENDING';
+    public const TCMS_CONFIRMED_STATUS = 2;
+    public const FIELD_VOUCHER = 'VOUCHER';
+    public const FIELD_TICKET = 'TICKET';
+    public const CANCELLATION_REFUND_FULL = "FULL";
     protected bool $testMode;
     protected ?string $utcCreatedAt;
     protected ?string $utcUpdatedAt;
@@ -36,7 +39,7 @@ class Booking extends Model
     protected ?object $cancellation;
     protected Contact $contact;
     protected ?string $notes;
-    protected ?array $voucher;
+    protected ?Voucher $voucher;
     protected ?string $utcExpiresAt;
     protected ?int $expirationMinutes;
     protected Product $product;
@@ -44,6 +47,7 @@ class Booking extends Model
     protected Availability $availability;
     protected array $units;
     protected int $leadCustomerId;
+    protected SimpleXMLElement $bookingData;
 
     /**
      * The table associated with the model.
@@ -121,6 +125,7 @@ class Booking extends Model
         $booking = new Booking();
 
         $bookingData = $startNewBookingData->booking;
+        $booking->bookingData = $bookingData;
 
         $booking->setBookingId((int) $bookingData->booking_id);
         $booking->setUuid((string) $bookingData->booking_uuid);
@@ -138,14 +143,8 @@ class Booking extends Model
         }
 
         if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
-            $booking->setVoucher([
-                'redemptionMethod' => $product->getRedemptionMethod(),
-                'utcRedeemedAt' => $booking->getUtcRedeemedAt(),
-                'deliveryOptions' => [
-                    "deliveryFormat" => $product->getDeliveryFormats()[0],
-                    "deliveryValue" => (string) $bookingData->voucher_url
-                ]
-            ]);
+            $voucher = Voucher::createWithoutOptions($product->getRedemptionMethod());
+            $booking->setVoucher($voucher);
         }
 
 
@@ -165,6 +164,7 @@ class Booking extends Model
         $booking = new Booking();
 
         $bookingData = $showBookingXML->booking;
+        $booking->bookingData = $bookingData;
 
         $booking->setBookingId((int) $bookingData->booking_id);
         $booking->setUuid((string) $bookingUuid);
@@ -202,13 +202,8 @@ class Booking extends Model
         $booking->setUnits($unitItems);
         
         if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
-            $booking->setVoucher([
-                'redemptionMethod' => $product->getRedemptionMethod(),
-                'utcRedeemedAt' => null,
-                'deliveryOptions' => [
-                    "deliveryFormat" => $product->getDeliveryFormats()[0]
-                ]
-            ]);
+            $voucher = Voucher::create($bookingData, $product->getRedemptionMethod(), $booking->getUtcRedeemedAt());
+            $booking->setVoucher($voucher);
         }
 
         return $booking;
@@ -485,21 +480,19 @@ class Booking extends Model
 
     public function setUnits(array $unitItems): self
     {
+        $unitsQuantities = [];
         $option = $this->product->getOptionById(optionId: $this->getOption()->getId());
 
         foreach ($unitItems as $unitItem) {
-
-            $unitId = (string) $unitItem['unitId'];
             
+            $unitId = (string) $unitItem['unitId'];
             $unit = $option->getUnitById($unitId);
-
-            $ticket = new Ticket();
-            $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
-            $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
-            $ticket->setDeliveryOptions([
-                "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
-                "deliveryValue" => $this->getProduct()->getDeliveryFormats()[0]
-            ]);
+            
+            if (array_key_exists($unitId, $unitsQuantities)) {
+                $unitsQuantities[$unitId]++;
+            } else {
+                $unitsQuantities[$unitId] = 1;
+            }
 
             $unitItem = new UnitItem();
             $unitItem->setUuid(Uuid::uuid4());
@@ -508,10 +501,24 @@ class Booking extends Model
             $unitItem->setUnitId($unit->getId());
             $unitItem->setId($unit->getId());
             $unitItem->setUnit($unit);
-            $unitItem->setStatus('ON_HOLD');
+            $unitItem->setStatus(self::STATUS_ON_HOLD);
             $unitItem->setUtcRedeemedAt($this->getUtcRedeemedAt());
             $unitItem->setContact($this->getContact());
+
+            $ticketValue = self::getTicketValueForUnitItem($unitId, $unitsQuantities[$unitId]);
+            $this->product->setDeliveryMethods([ProductService::DELIVERY_METHOD_TICKET]);
+            $ticket = new Ticket();
+            $ticket->setRedemptionMethod(ProductService::REDEMPTION_METHOD_DIGITAL);
+            if (!empty($ticketValue)) {
+                $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
+                $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
+                $ticket->setDeliveryOptions([
+                    "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
+                    "deliveryValue" => $ticketValue
+                ]);
+            }
             $unitItem->setTicket($ticket);
+            
 
             $this->units[] = $unitItem;
         }
@@ -537,14 +544,14 @@ class Booking extends Model
         return $this->contact;
     }
 
-    public function setVoucher(?array $voucher): self
+    public function setVoucher(?Voucher $voucher): self
     {
         $this->voucher = $voucher;
         
         return $this;
     }
 
-    public function getVoucher(): ?array
+    public function getVoucher(): ?Voucher
     {
         return $this->voucher;
     }
@@ -606,6 +613,28 @@ class Booking extends Model
         $cancelledDateTime = new DateTime('now', new DateTimeZone('UTC'));
         $cancelledDateTime->setTimestamp($cancelledAt);
         return DateTimeService::getISO8601DateFormatted($cancelledDateTime);
+    }
+
+    protected function getTicketValueForUnitItem(string $unitId, int $number): ?string
+    {
+        $tcmsRateId = UnitService::getTourCMSRateId($unitId);
+        $components = XMLService::getArrayFromXmlNode($this->bookingData->components, 'component');
+        $rateComponent = array_filter($components, 
+        function(SimpleXMLElement $component) use ($tcmsRateId) {
+            $rateId = explode('|', (string) $component->rate_breakdown)[0];
+            return (($rateId == $tcmsRateId) && ((string) $component->date_type === 'departure')); 
+        });
+
+        if (empty($rateComponent)) {
+            return null;
+        }
+
+        $tickets = reset($rateComponent)->tickets;
+        if (empty($tickets)) { return null; } 
+
+        $tickets = XMLService::getArrayFromXmlNode($tickets, 'ticket');
+        return (string) $tickets[$number-1]->value;
+
     }
 
 }

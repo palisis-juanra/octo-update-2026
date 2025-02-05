@@ -31,9 +31,11 @@ class BookingGetController extends Controller
     public function show(string $bookingUUID): JsonResponse
     {
         try {
+            $this->logger->info(["message" => "Starting to process get booking request", "uuid" => $bookingUUID]);
             $bookingByUUID = $this->bookingService->getBookingByUuid($bookingUUID);
             $bookingXMLResponse = $this->bookingService->getBooking($bookingByUUID);
             $transformedBooking = $this->transformer->transform($bookingXMLResponse);
+            $this->logger->info(["message" => "Request processed, returning response", "response" => $transformedBooking]);
             return new JsonResponse($transformedBooking, Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();

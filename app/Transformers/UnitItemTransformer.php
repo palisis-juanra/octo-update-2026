@@ -27,7 +27,7 @@ class UnitItemTransformer extends BaseTransformer
             'status' => $unitItem->getStatus(),
             'utcRedeemedAt' => $unitItem->getUtcRedeemedAt(),
             'contact' => $this->contactTransformer->transform($unitItem->getContact()),
-            'ticket' => $this->ticketTransformer->transform($unitItem->getTicket())
+            'ticket' => ($unitItem->getTicket() !== null) ? $this->ticketTransformer->transform($unitItem->getTicket()) : null
         ];
     }
 

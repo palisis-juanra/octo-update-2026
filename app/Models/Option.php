@@ -20,6 +20,7 @@ class Option extends Model
     protected array $requiredContactFields;
     protected object $restrictions;
     protected array $units;
+    protected ?ProductContent $content;
 
     public static function create(object $optionData): Option
     {
@@ -176,7 +177,7 @@ class Option extends Model
      * Get unit by it's ID
      * @param string $unitId
      * @throws \App\Exceptions\InvalidUnitIdException
-     * @return \stdClass
+     * @return \App\Models\Unit
      */
     public function getUnitById(string $unitId): Unit
     {
@@ -187,5 +188,25 @@ class Option extends Model
         }
         
         throw new InvalidUnitIdException($unitId);
+    }
+
+    /**
+     * Get the value of content
+     */ 
+    public function getContent(): ProductContent|null
+    {
+        return $this->content;
+    }
+
+    /**
+     * Set the value of content
+     *
+     * @return  self
+     */ 
+    public function setContent(ProductContent $content): self
+    {
+        $this->content = $content;
+
+        return $this;
     }
 }

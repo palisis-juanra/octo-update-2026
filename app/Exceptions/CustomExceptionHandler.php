@@ -42,41 +42,54 @@ class CustomExceptionHandler extends Handler
 
         switch ($exceptionClass) {
             case (NotFoundHttpException::class):
-                return OctoResponse::NOT_IMPLEMENTED();
+                $response = OctoResponse::NOT_IMPLEMENTED();
+                break;
 
             case (MethodNotAllowedHttpException::class):
-                return OctoResponse::BAD_REQUEST('Invalid http request method');
+                $response = OctoResponse::BAD_REQUEST('Invalid http request method');
+                break;
+
             case (FailSignatureException::class): 
-                return OctoResponse::FORBIDDEN();
+                $response = OctoResponse::FORBIDDEN();
+                break;
 
             case (InvalidProductIdException::class):
             case (InvalidProductContentException::class):
-                return OctoResponse::INVALID_PRODUCT_ID($exception->productId);
+                $response = OctoResponse::INVALID_PRODUCT_ID($exception->productId);
+                break;
 
             case (InvalidOptionIdException::class):
-                return OctoResponse::INVALID_OPTION_ID($exception->optionId);
-            
+                $response = OctoResponse::INVALID_OPTION_ID($exception->optionId);
+                break;
+                
             case (InvalidUnitIdException::class):
-                return OctoResponse::INVALID_UNIT_ID($exception->unitId);
+                $response = OctoResponse::INVALID_UNIT_ID($exception->unitId);
+                break;
 
             case (InvalidAvailabilityIdException::class):
-                return OctoResponse::INVALID_AVAILABILITY_ID($exception->availabilityId);
-            
+                $response = OctoResponse::INVALID_AVAILABILITY_ID($exception->availabilityId);
+                break;
+
             case (NoAvailabilityException::class):
             case (UnprocessableEntityHttpException::class):
-                return OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
-            
+                $response = OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
+                break;
+
             case (BookingNotCancellableException::class):
-                return OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
-            
+                $response = OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
+                break;
+
             case (InvalidBookingUUIDException::class):
-                return OctoResponse::INVALID_BOOKING_UUID($exception->bookingUuid);
-                
+                $response = OctoResponse::INVALID_BOOKING_UUID($exception->bookingUuid);
+                break;
+
             case (NoMatchingDataException::class):
-                return OctoResponse::INVALID_PRODUCT_ID($exception->productId);
-            
+                $response = OctoResponse::INVALID_PRODUCT_ID($exception->productId);
+                break;
+                
             case (BadRequestException::class):
-                return OctoResponse::BAD_REQUEST($exception->getMessage());
+                $response = OctoResponse::BAD_REQUEST($exception->getMessage());
+                break;
 
             case (APICallNotOKException::class):
 
@@ -86,7 +99,7 @@ class CustomExceptionHandler extends Handler
                     parent::report($exception);
                 }
                 
-                return OctoResponse::INTERNAL_SERVER_ERROR();
+                $response = OctoResponse::INTERNAL_SERVER_ERROR();
 
             case (NoAPIResponseException::class):
 
@@ -96,7 +109,7 @@ class CustomExceptionHandler extends Handler
                     parent::report($exception);
                 }
                 
-                return OctoResponse::INTERNAL_SERVER_ERROR();
+                $response = OctoResponse::INTERNAL_SERVER_ERROR();
 
             default:
                 try  {
@@ -105,9 +118,13 @@ class CustomExceptionHandler extends Handler
                 } catch (BindingResolutionException) {
                     parent::report($exception);
                     return new JsonResponse([], Response::HTTP_INTERNAL_SERVER_ERROR);
-                }
-                
+                }   
         }
-        
+
+        try {
+            JSONLog::info(["message" => "Request processed by custom exception handler, returning response", "response" => json_decode($response->getContent())]);
+        } catch (BindingResolutionException) {}
+
+        return $response;
     }
 }

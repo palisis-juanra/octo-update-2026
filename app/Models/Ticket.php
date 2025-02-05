@@ -5,7 +5,7 @@ namespace App\Models;
 class Ticket
 {
     protected string $redemptionMethod;
-    protected ?string $utcRedeemedAt;
+    protected ?string $utcRedeemedAt = null;
     protected array $deliveryOptions = []; 
 
     public function __construct()

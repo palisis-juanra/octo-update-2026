@@ -1,35 +1,35 @@
 <response>
-    <request>GET /c/booking/show.xml?booking_id=4093</request>
+    <request>GET /c/booking/show.xml?booking_id=4213</request>
     <error>OK</error>
     <booking>
-        <booking_id>4093</booking_id>
+        <booking_id>4213</booking_id>
+        <booking_uuid/>
         <channel_id>142</channel_id>
         <account_id>1</account_id>
         <channel_name>PORTUGAL CHANNEL</channel_name>
-        <made_date_time>2024-12-19 08:49:09</made_date_time>
-        <made_username>webapimp</made_username>
+        <made_date_time>2025-01-15 09:04:52</made_date_time>
+        <made_username>webapi</made_username>
         <made_type>W</made_type>
         <made_name>WEB API</made_name>
-        <start_date>2024-12-22</start_date>
-        <end_date>2024-12-22</end_date>
-        <booking_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</booking_name>
-        <booking_name_custom/>
+        <start_date>2025-01-15</start_date>
+        <end_date>2025-01-15</end_date>
+        <booking_name>[VOUCHER] UPLOADED BARCODES</booking_name>
+        <booking_name_custom>[VOUCHER] UPLOADED BARCODES</booking_name_custom>
         <status>2</status>
         <status_text>Confirmed</status_text>
-        <voucher_url>http://voucher.tourcms.local/print.php?id=njo0qpnhqITrFiutnqFIT%2Bt1f0eugHP2ngu2tI7eNlU%3D</voucher_url>
-        <barcode_data>TOURCMS|1|4093</barcode_data>
-        <made_date_time_at_utc_seconds>1734601749</made_date_time_at_utc_seconds>
-        <confirmed_at_utc_seconds>1734601749</confirmed_at_utc_seconds>
-        <updated_at_utc_seconds>1734601756</updated_at_utc_seconds>
-        <expiry_date>2025-02-17</expiry_date>
-        <expiry_date_at_utc_seconds>1739754000</expiry_date_at_utc_seconds>
-        <cancellable>1</cancellable>
+        <voucher_url>http://voucher.tourcms.local/print.php?id=2vZFSOYK1T6BpU1%2BAMjw4apsEX6tT02nkZQRS8qyczk%3D</voucher_url>
+        <barcode_data>TOURCMS|1|4213</barcode_data>
+        <barcode_priority>tourcms_barcode</barcode_priority>
+        <made_date_time_at_utc_seconds>1736928240</made_date_time_at_utc_seconds>
+        <confirmed_at_utc_seconds>1736928240</confirmed_at_utc_seconds>
+        <updated_at_utc_seconds>1736928900</updated_at_utc_seconds>
+        <cancellable>0</cancellable>
         <cancel_reason>0</cancel_reason>
         <cancel_text>Not cancelled</cancel_text>
         <final_check>0</final_check>
-        <lead_customer_id>8800</lead_customer_id>
-        <lead_customer_name/>
-        <lead_customer_email/>
+        <lead_customer_id>9371</lead_customer_id>
+        <lead_customer_name>Mrs Test Test</lead_customer_name>
+        <lead_customer_email>armando.garrido@palisis.com</lead_customer_email>
         <lead_customer_tel_home/>
         <lead_customer_tel_mobile/>
         <lead_customer_contact_note/>
@@ -47,27 +47,49 @@
         <sales_revenue_display>US&amp;#36;490.00</sales_revenue_display>
         <deposit>30.04</deposit>
         <deposit_display>US&amp;#36;30.04</deposit_display>
-        <agent_type>RETAIL</agent_type>
-        <agent_ref>AGENT_REF</agent_ref>
+        <agent_credentials/>
+        <agent_ref/>
         <agent_ref_components/>
-        <tracking_miscid>0</tracking_miscid>
-        <commission>0.00</commission>
-        <commission_tax>0.00</commission_tax>
-        <commission_currency>EUR</commission_currency>
-        <commission_display>&amp;#8364;0.00</commission_display>
-        <commission_tax_display>&amp;#8364;0.00</commission_tax_display>
-        <booking_has_net_price>1</booking_has_net_price>
+        <booking_has_net_price>0</booking_has_net_price>
         <payment_status>0</payment_status>
         <payment_status_text>No payment made</payment_status_text>
-        <balance_owed_by>A</balance_owed_by>
-        <balance>437.50</balance>
-        <balance_display>US&amp;#36;437.50</balance_display>
-        <balance_due>2024-11-10</balance_due>
+        <balance_owed_by>C</balance_owed_by>
+        <balance>490.00</balance>
+        <balance_display>US&amp;#36;490.00</balance_display>
+        <balance_due>2024-12-04</balance_due>
         <customer_special_request/>
         <customers_agecat_breakdown>2 Adults, 1 Child</customers_agecat_breakdown>
+        <important_note/>
+        <workflow_note/>
         <customers>
             <customer>
-                <customer_id>8800</customer_id>
+                <customer_id>9371</customer_id>
+                <customer_name>Mrs Test Test</customer_name>
+                <title>Mrs</title>
+                <firstname>Test</firstname>
+                <middlename/>
+                <surname>Test</surname>
+                <agent_customer_ref/>
+                <nationality/>
+                <nationality_text/>
+                <pass_num/>
+                <pass_issue/>
+                <pass_issue_date/>
+                <pass_expiry_date/>
+                <customer_email>armando.garrido@palisis.com</customer_email>
+                <customer_tel_home/>
+                <customer_tel_mobile/>
+                <customer_contact_note/>
+                <gender/>
+                <agecat>a</agecat>
+                <agecat_text>Adult</agecat_text>
+                <insurance_number/>
+                <insurance_supplier_name/>
+                <insurance_note/>
+                <insurance_supplier_id/>
+            </customer>
+            <customer>
+                <customer_id>9372</customer_id>
                 <customer_name/>
                 <title/>
                 <firstname/>
@@ -90,34 +112,10 @@
                 <insurance_number/>
                 <insurance_supplier_name/>
                 <insurance_note/>
+                <insurance_supplier_id/>
             </customer>
             <customer>
-                <customer_id>8801</customer_id>
-                <customer_name/>
-                <title/>
-                <firstname/>
-                <middlename/>
-                <surname/>
-                <agent_customer_ref/>
-                <nationality/>
-                <nationality_text/>
-                <pass_num/>
-                <pass_issue/>
-                <pass_issue_date/>
-                <pass_expiry_date/>
-                <customer_email/>
-                <customer_tel_home/>
-                <customer_tel_mobile/>
-                <customer_contact_note/>
-                <gender/>
-                <agecat>a</agecat>
-                <agecat_text>Adult</agecat_text>
-                <insurance_number/>
-                <insurance_supplier_name/>
-                <insurance_note/>
-            </customer>
-            <customer>
-                <customer_id>8802</customer_id>
+                <customer_id>9373</customer_id>
                 <customer_name/>
                 <title/>
                 <firstname/>
@@ -140,33 +138,54 @@
                 <insurance_number/>
                 <insurance_supplier_name/>
                 <insurance_note/>
+                <insurance_supplier_id/>
             </customer>
         </customers>
         <components>
             <component>
-                <component_id>6292</component_id>
+                <component_id>6575</component_id>
                 <redeemed_at/>
                 <redeemed_at_utc_seconds/>
-                <linked_component_id>6292</linked_component_id>
-                <product_id>67</product_id>
-                <date_id>32310</date_id>
+                <barcode_symbology>CODE_128</barcode_symbology>
+                <operator_reference/>
+                <tickets>
+                    <ticket>
+                        <label/>
+                        <value>10246815</value>
+                    </ticket>
+                    <ticket>
+                        <label/>
+                        <value>10246816</value>
+                    </ticket>
+                </tickets>
+                <linked_component_id>6575</linked_component_id>
+                <product_id>229</product_id>
+                <date_id>33422</date_id>
                 <date_type>departure</date_type>
-                <product_code>BCNFCBAR</product_code>
+                <product_code/>
                 <date_code>13:00-15:00</date_code>
-                <start_date>2024-12-22</start_date>
-                <end_date>2024-12-22</end_date>
+                <start_date>2025-01-15</start_date>
+                <end_date>2025-01-15</end_date>
                 <local_payment>0</local_payment>
                 <customer_payment>0</customer_payment>
+                <upsell_username/>
+                <component_added_datetime>2025-01-15 09:04:52</component_added_datetime>
                 <start_time>13:00</start_time>
                 <end_time>15:00</end_time>
-                <component_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</component_name>
+                <component_name>[OCTO] START_TIME</component_name>
                 <product_note/>
                 <component_note/>
                 <rate_breakdown>r1|a</rate_breakdown>
                 <rate_description>Adultos</rate_description>
+                <rate_code/>
+                <supplier_id>0</supplier_id>
+                <supplier_ref/>
+                <supplier_name/>
+                <supplier_tour_code>SS:TICKETS,QR,30,TOUR</supplier_tour_code>
+                <operational_note/>
                 <supplier_note/>
-                <redeem/>
-                <receipt_info/>
+                <redeem>Voucher redemption Instructions</redeem>
+                <receipt_info>Receipt information</receipt_info>
                 <product_type>4</product_type>
                 <sale_quantity>2</sale_quantity>
                 <sale_quantity_rule>PERSON</sale_quantity_rule>
@@ -181,40 +200,62 @@
                 <sale_price_base>150.00</sale_price_base>
                 <tax_total_base>0.00</tax_total_base>
                 <sale_price_inc_tax_total_base>300.00</sale_price_inc_tax_total_base>
-                <net_price_quantity>2</net_price_quantity>
-                <net_quantity_rule>PERSON</net_quantity_rule>
-                <net_price>187.50</net_price>
-                <net_price_tax_total>0.00</net_price_tax_total>
-                <net_price_inc_tax_total>375.00</net_price_inc_tax_total>
-                <voucher_redemption_status>0</voucher_redemption_status>
-                <voucher_redemption_username/>
+                <cost_quantity>2</cost_quantity>
+                <cost_quantity_rule>PERSON</cost_quantity_rule>
+                <cost_tax_percentage>0.00</cost_tax_percentage>
+                <cost_tax_inclusive>0</cost_tax_inclusive>
+                <cost_currency>EUR</cost_currency>
+                <cost_price>0.00</cost_price>
+                <cost_tax_total>0.00</cost_tax_total>
+                <cost_price_inc_tax_total>0.00</cost_price_inc_tax_total>
+                <cost_exchange_rate>1.0000000000</cost_exchange_rate>
+                <cost_price_base>0.00</cost_price_base>
+                <cost_tax_total_base>0.00</cost_tax_total_base>
+                <cost_price_inc_tax_total_base>0.00</cost_price_inc_tax_total_base>
+                <promo_apply>0</promo_apply>
                 <questions/>
                 <urls/>
             </component>
             <component>
-                <component_id>6293</component_id>
+                <component_id>6576</component_id>
                 <redeemed_at/>
                 <redeemed_at_utc_seconds/>
-                <linked_component_id>6293</linked_component_id>
-                <product_id>67</product_id>
-                <date_id>32310</date_id>
+                <barcode_symbology>CODE_128</barcode_symbology>
+                <operator_reference/>
+                <tickets>
+                    <ticket>
+                        <label/>
+                        <value>10246817</value>
+                    </ticket>
+                </tickets>
+                <linked_component_id>6576</linked_component_id>
+                <product_id>229</product_id>
+                <date_id>33422</date_id>
                 <date_type>departure</date_type>
-                <product_code>BCNFCBAR</product_code>
+                <product_code/>
                 <date_code>13:00-15:00</date_code>
-                <start_date>2024-12-22</start_date>
-                <end_date>2024-12-22</end_date>
+                <start_date>2025-01-15</start_date>
+                <end_date>2025-01-15</end_date>
                 <local_payment>0</local_payment>
                 <customer_payment>0</customer_payment>
+                <upsell_username/>
+                <component_added_datetime>2025-01-15 09:04:52</component_added_datetime>
                 <start_time>13:00</start_time>
                 <end_time>15:00</end_time>
-                <component_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</component_name>
+                <component_name>[OCTO] START_TIME</component_name>
                 <product_note/>
                 <component_note/>
                 <rate_breakdown>r2|c</rate_breakdown>
                 <rate_description>Niños</rate_description>
+                <rate_code/>
+                <supplier_id>0</supplier_id>
+                <supplier_ref/>
+                <supplier_name/>
+                <supplier_tour_code>SS:TICKETS,QR,30,TOUR</supplier_tour_code>
+                <operational_note/>
                 <supplier_note/>
-                <redeem/>
-                <receipt_info/>
+                <redeem>Voucher redemption Instructions</redeem>
+                <receipt_info>Receipt information</receipt_info>
                 <product_type>4</product_type>
                 <sale_quantity>1</sale_quantity>
                 <sale_quantity_rule>PERSON</sale_quantity_rule>
@@ -229,18 +270,24 @@
                 <sale_price_base>50.00</sale_price_base>
                 <tax_total_base>0.00</tax_total_base>
                 <sale_price_inc_tax_total_base>50.00</sale_price_inc_tax_total_base>
-                <net_price_quantity>1</net_price_quantity>
-                <net_quantity_rule>PERSON</net_quantity_rule>
-                <net_price>62.50</net_price>
-                <net_price_tax_total>0.00</net_price_tax_total>
-                <net_price_inc_tax_total>62.50</net_price_inc_tax_total>
-                <voucher_redemption_status>0</voucher_redemption_status>
-                <voucher_redemption_username/>
+                <cost_quantity>1</cost_quantity>
+                <cost_quantity_rule>PERSON</cost_quantity_rule>
+                <cost_tax_percentage>0.00</cost_tax_percentage>
+                <cost_tax_inclusive>0</cost_tax_inclusive>
+                <cost_currency>EUR</cost_currency>
+                <cost_price>0.00</cost_price>
+                <cost_tax_total>0.00</cost_tax_total>
+                <cost_price_inc_tax_total>0.00</cost_price_inc_tax_total>
+                <cost_exchange_rate>1.0000000000</cost_exchange_rate>
+                <cost_price_base>0.00</cost_price_base>
+                <cost_tax_total_base>0.00</cost_tax_total_base>
+                <cost_price_inc_tax_total_base>0.00</cost_price_inc_tax_total_base>
+                <promo_apply>0</promo_apply>
                 <questions/>
                 <urls/>
             </component>
             <component>
-                <component_id>6294</component_id>
+                <component_id>6577</component_id>
                 <redeemed_at/>
                 <redeemed_at_utc_seconds/>
                 <linked_component_id/>
@@ -253,11 +300,17 @@
                 <end_date>0000-00-00</end_date>
                 <local_payment>0</local_payment>
                 <customer_payment>0</customer_payment>
+                <upsell_username/>
+                <component_added_datetime>2025-01-15 09:04:52</component_added_datetime>
                 <component_name>Booking FEE now</component_name>
                 <product_note/>
                 <component_note/>
                 <rate_breakdown/>
                 <rate_description/>
+                <supplier_id>0</supplier_id>
+                <supplier_ref/>
+                <supplier_name/>
+                <operational_note/>
                 <sale_quantity>1</sale_quantity>
                 <sale_quantity_rule>PERSON</sale_quantity_rule>
                 <sale_tax_percentage>0.00</sale_tax_percentage>
@@ -271,13 +324,35 @@
                 <sale_price_base>42.00</sale_price_base>
                 <tax_total_base>0.00</tax_total_base>
                 <sale_price_inc_tax_total_base>42.00</sale_price_inc_tax_total_base>
-                <net_price_quantity>1</net_price_quantity>
-                <net_quantity_rule>PERSON</net_quantity_rule>
-                <net_price>0.00</net_price>
-                <net_price_tax_total>0.00</net_price_tax_total>
-                <net_price_inc_tax_total>0.00</net_price_inc_tax_total>
+                <cost_quantity>1</cost_quantity>
+                <cost_quantity_rule>PERSON</cost_quantity_rule>
+                <cost_tax_percentage>0.00</cost_tax_percentage>
+                <cost_tax_inclusive>0</cost_tax_inclusive>
+                <cost_currency>USD</cost_currency>
+                <cost_price>0.00</cost_price>
+                <cost_tax_total>0.00</cost_tax_total>
+                <cost_price_inc_tax_total>0.00</cost_price_inc_tax_total>
+                <cost_exchange_rate>1.2500000000</cost_exchange_rate>
+                <cost_price_base>0.00</cost_price_base>
+                <cost_tax_total_base>0.00</cost_tax_total_base>
+                <cost_price_inc_tax_total_base>0.00</cost_price_inc_tax_total_base>
+                <promo_apply>0</promo_apply>
                 <urls/>
             </component>
         </components>
+        <custom_fields>
+            <field>
+                <name>SyncIDs</name>
+                <value/>
+            </field>
+            <field>
+                <name>financials</name>
+                <value/>
+            </field>
+            <field>
+                <name>TemSyncIDs</name>
+                <value/>
+            </field>
+        </custom_fields>
     </booking>
 </response>
