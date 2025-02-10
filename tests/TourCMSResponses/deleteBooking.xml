@@ -1,0 +1,4 @@
+<response>
+    <request>POST /c/booking/delete.xml?booking_id=4734</request>
+    <error>OK</error>
+</response>

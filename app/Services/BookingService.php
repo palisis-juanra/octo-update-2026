@@ -9,6 +9,8 @@ use App\Models\Contact;
 
 class BookingService
 {
+    public const TCMS_BOOKING_STATUS_DELETED = '-1';
+
     public function __construct(
         public TourCMSService $tourCMSService,
         public JSONLogService $logger,
@@ -31,6 +33,11 @@ class BookingService
         $showBookingResponse = $this->tourCMSService->showBooking($booking->getBookingId());
         $this->logger->info(["showBookingResponse" => $showBookingResponse]);
         
+        // Deleted booking have no components, we must chech that components exists
+        if (empty($showBookingResponse->booking->components)) {
+            throw new InvalidBookingUUIDException($booking->getUuid());
+        }
+
         $product = $this->productService->find($booking->product_id);
         $option = $product->getOptionById($booking->option_id);
         $availability = new Availability();

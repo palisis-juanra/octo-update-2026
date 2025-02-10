@@ -36,18 +36,16 @@ class BookingCancellationController extends Controller
 
         $booking = $this->bookingCancelService->getBookingByUuid($uuid);
 
-        $bookingObject = $this->bookingCancelService->getBooking($booking);
+        $booking = $this->bookingCancelService->getBooking($booking);
         
-        if (!$bookingObject->isBookingCancellable()) {
-            $this->logger->info("Booking not cancellable: {$bookingObject->getId()}");
+        if (!$booking->isBookingCancellable()) {
+            $this->logger->info("Booking not cancellable: {$booking->getId()}");
             throw new BookingNotCancellableException;
         };
 
-        $this->bookingCancelService->cancelBooking($bookingObject, $reason, $force);
-
-        $booking = $this->bookingCancelService->getBooking($booking);
-        
-        $this->bookingCancelService->updateBookingStatusToCancelled($booking);
+        if (true === $this->bookingCancelService->cancelBooking($booking, $reason, $force)) {
+            $this->bookingCancelService->updateBookingStatusToCancelled($booking);
+        }
 
         $bookingData = $this->transformer->transform($booking);
 

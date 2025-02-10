@@ -29,28 +29,44 @@ class BookingCancellationService extends BookingService
         parent::__construct($tourCMSService, $logger, $productService, $availabilityService);
     }
 
-    public function cancelBooking(Booking $booking, ?string $reason = null, ?bool $force = null): void
+    public function cancelBooking(Booking $booking, ?string $reason = null, ?bool $force = null): bool
     {   
-        // Cancel booking with the corresponding booking_uuid
-        $bookingData = $this->getCancelBookingXMLRequest($booking->booking_id, $reason);
-        
-        $cancelBookingObject = $this->tourCMSService->cancelBooking($bookingData);
-        $this->logger->info(["cancelBookingObject" => $cancelBookingObject]);
-        $error = (string) $cancelBookingObject->error;
-        
-        if ($error == self::ERROR_PREVIOUSLY_CANCELLED) {
-            $this->logger->info("Booking {$booking->getId()} already cancelled, calling show booking to return booking info");
-            return;
+
+        if ($booking->getStatus() == Booking::STATUS_CONFIRMED) {
+            
+            $this->logger->info("Booking {$booking->getUuid()} is confirmed, calling cancel booking endpoint");
+            
+            // Cancel booking with the corresponding booking_uuid
+            $bookingData = $this->getCancelBookingXMLRequest($booking->booking_id, $reason);
+
+            $cancelBookingXML = $this->tourCMSService->cancelBooking($bookingData);
+            $this->logger->info(["Cancel Booking XML Response" => $cancelBookingXML]);
+            $error = (string) $cancelBookingXML->error;
+            
+            if ($error == self::ERROR_PREVIOUSLY_CANCELLED) {
+                $this->logger->info("Booking {$booking->getId()} already cancelled");
+                return true;
+            }
+
+        } else {
+            $this->logger->info("Booking {$booking->getUuid()} is temporary, calling delete booking endpoint");
+            $deleteBookingXML = $this->tourCMSService->deleteBooking(bookingId: $booking->getBookingId());
+            $this->logger->info(["Delete Booking XML Response" => $deleteBookingXML]);
+            $error = (string) $deleteBookingXML->error;
         }
+
         if ($error !== TourCMSService::ERROR_OK) {
             $this->logger->error(self::BOOKING_NOT_FOUND);
             throw new InvalidBookingUUIDException($booking->getUuid());
         }
 
+        return true;
     }
 
     public function updateBookingStatusToCancelled(Booking $booking): void
     {
+        $booking->setStatus(Booking::STATUS_CANCELLED);
+
         if ($booking->getStatus() == self::STATUS_CANCELLED) {
             Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
         }

@@ -27,7 +27,6 @@ class Booking extends Model
     public const TCMS_CONFIRMED_STATUS = 2;
     public const FIELD_VOUCHER = 'VOUCHER';
     public const FIELD_TICKET = 'TICKET';
-    public const CANCELLATION_REFUND_FULL = "FULL";
     protected bool $testMode;
     protected ?string $utcCreatedAt;
     protected ?string $utcUpdatedAt;
@@ -187,13 +186,11 @@ class Booking extends Model
         $booking->setCancellable((bool) $bookingData->cancellable);
 
         if ((int) $bookingData->cancel_reason !== 0) {
-            $cancelObject = new stdClass();
-        
-            $cancelObject->refund = self::CANCELLATION_REFUND_FULL;
-            $cancelObject->reason = (string) $bookingData->cancel_text;
-            $cancelObject->utcCancelledAt = self::createUtcCancelledAt((int) $bookingData->cancelled_at_utc_seconds);
-
-            $booking->setCancellation($cancelObject);
+            $cancellation = new BookingCancellation(
+                self::createUtcCancelledAt((int) $bookingData->cancelled_at_utc_seconds),
+                (string) $bookingData->cancel_text
+            );
+            $booking->setCancellation($cancellation);
         }
         
         $booking->setProduct($product);

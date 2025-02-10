@@ -48,6 +48,7 @@ class BookingCancellationServiceTest extends UnitTestCase
         $booking = new Booking();
         $booking->booking_id = self::VALID_BOOKING_ID;
         $booking->uuid = self::VALID_BOOKING_UUID;
+        $booking->status = Booking::STATUS_CONFIRMED;
         $reason = self::EXAMPLE_REASON;
 
         // When

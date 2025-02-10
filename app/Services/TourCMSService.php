@@ -186,6 +186,12 @@ class TourCMSService
         return $this->handleResponse($response);
     }
 
+    public function deleteBooking(string $bookingId): SimpleXMLElement
+    {
+        $response = $this->tourCMS->delete_booking($bookingId, $this->channelId);
+        return $this->handleResponse($response);
+    }
+
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
     {
         $children = [];
