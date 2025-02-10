@@ -34,14 +34,16 @@ class AvailabilityTest extends FeatureTestCase
     const VALID_LOCAL_DATE_START = '2024-11-18';
     const VALID_LOCAL_DATE_END = '2024-11-25';
 
-
+    public SimpleXMLElement $showChannelXML;
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $showTourDeparturesXML;
     public SimpleXMLElement $checkAvailXML;
+
     public function setUp(): void
     {
         parent::setUp();
 
+        $this->showChannelXML = simplexml_load_file('tests/TourCMSResponses/showChannel.xml');
         $this->showTourXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTour.xml'));
         $this->showTourDeparturesXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTourDepartures.xml'));
         $this->checkAvailXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/checkAvailability.xml'));
@@ -49,8 +51,10 @@ class AvailabilityTest extends FeatureTestCase
         App::bind(TourCMSService::class, function ($app) {
 
             $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+            $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
             $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
             $tourCMSServiceMock->shouldReceive('showTourDepartures')->zeroOrMoreTimes()->andReturn($this->showTourDeparturesXML);
+            $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
 
             return $tourCMSServiceMock;
         });
@@ -161,6 +165,13 @@ class AvailabilityTest extends FeatureTestCase
     public function test_whenWeSendCorrectData_thenWeCallToTourcmsApi()
     {
 
+        $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showChannel')->once()->andReturn($this->showChannelXML);
+        $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+    
+        App::instance(TourCMSService::class, $tourCMSServiceMock);
+
         $response = $this->post(
             '/availability', 
             [
@@ -180,6 +191,7 @@ class AvailabilityTest extends FeatureTestCase
     public function test_whenPricingIsAllowedAndIsMultiDate_thenShowTourDepartureIsCalledOnce()
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showChannel')->once()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
         $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
     
@@ -207,6 +219,7 @@ class AvailabilityTest extends FeatureTestCase
     public function test_whenNoPricingAndMultiDate_thenShowTourDepartureIsCalledOnce()
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showChannel')->once()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
         $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
 
@@ -233,6 +246,7 @@ class AvailabilityTest extends FeatureTestCase
     public function test_whenNoPricingAndSingleDate_thenShowTourDepartureIsCalledOnce()
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showChannel')->once()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
         $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
 
@@ -259,6 +273,7 @@ class AvailabilityTest extends FeatureTestCase
     {
 
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+        $tourCMSServiceMock->shouldReceive('showChannel')->once()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
         $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
         $tourCMSServiceMock->shouldReceive('checkAvailability')->once()->andReturn($this->checkAvailXML);

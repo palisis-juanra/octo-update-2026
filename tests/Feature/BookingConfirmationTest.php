@@ -33,6 +33,7 @@ class BookingConfirmationTest extends FeatureTestCase
         ]
     ];
 
+    public SimpleXMLElement $showChannelXML;
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $commitBookingXML;
     public SimpleXMLElement $showBookingXML;
@@ -92,7 +93,8 @@ class BookingConfirmationTest extends FeatureTestCase
 
     protected function mockServices(string $showBookingFile): void
     {
-        $this->showTourXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTour_67.xml'));
+        $this->showChannelXML = simplexml_load_file('tests/TourCMSResponses/showChannel.xml');
+        $this->showTourXML = simplexml_load_file('tests/TourCMSResponses/showTour_67.xml');
         $this->commitBookingXML = simplexml_load_file('tests/TourCMSResponses/commitBooking.xml');
         $this->showBookingXML = simplexml_load_file($showBookingFile);
         
@@ -103,9 +105,13 @@ class BookingConfirmationTest extends FeatureTestCase
         
         // Mock TourCMSService
         $this->tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour', 'commitBooking', 'showBooking'])
+            ->onlyMethods(['showChannel', 'showTour', 'commitBooking', 'showBooking'])
             ->disableOriginalConstructor()
             ->getMock();
+        
+        $this->tourCMSServiceMock
+            ->method('showChannel')
+            ->willReturn($this->showChannelXML);
         
         $this->tourCMSServiceMock
             ->method('showTour')

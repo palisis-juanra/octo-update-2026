@@ -44,7 +44,7 @@ class BookingGetTest extends FeatureTestCase
 
     public MockObject $bookingServiceMock;
     public BookingTransformer $transformer;
-
+    public SimpleXMLElement $showChannelXML;
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $commitBookingXML;
     public SimpleXMLElement $showBookingXML;
@@ -56,6 +56,7 @@ class BookingGetTest extends FeatureTestCase
     {
         parent::setUp();
         $this->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->showChannelXML = simplexml_load_file('tests/TourCMSResponses/showChannel.xml');
     }
 
     public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
@@ -122,7 +123,7 @@ class BookingGetTest extends FeatureTestCase
         $expectedChannelId = '142';
 
         $this->tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour', 'showBooking'])
+            ->onlyMethods(['showTour', 'showBooking', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         
@@ -135,6 +136,10 @@ class BookingGetTest extends FeatureTestCase
             ->method('showBooking')
             ->with()
             ->willReturn($this->showBookingXML);
+        
+        $this->tourCMSServiceMock
+            ->method('showChannel')
+            ->willReturn($this->showChannelXML);
 
 
         // Mock Availability and AvailabilityService

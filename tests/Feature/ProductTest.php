@@ -21,6 +21,7 @@ class ProductTest extends FeatureTestCase
     public string $showTourString;
     public string $listToursString;
     public string $showTourInvalidString;
+    public SimpleXMLElement $showChannelXML;
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $listToursXML;
     public SimpleXMLElement $showTourInvalidXML;
@@ -30,6 +31,8 @@ class ProductTest extends FeatureTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        $this->showChannelXML = simplexml_load_file('./tests/TourCMSResponses/showChannel.xml');
         $this->showTourString = file_get_contents('./tests/TourCMSResponses/showTour.xml');
         $this->listToursString = file_get_contents('./tests/TourCMSResponses/listTours.xml');
         $this->showTourInvalidString = file_get_contents('./tests/TourCMSResponses/showTourInvalid.xml');
@@ -59,10 +62,11 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($this->showTourXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
         
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
         // When
@@ -89,10 +93,11 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($this->showTourInvalidXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -120,10 +125,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->account_timezone);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -150,10 +156,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->delivery_formats);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -182,10 +189,11 @@ class ProductTest extends FeatureTestCase
         $apiResponseDeliveryFormats->addChild('delivery_format', $invalidDeliveryFormat);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -212,10 +220,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->delivery_methods);
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -244,10 +253,11 @@ class ProductTest extends FeatureTestCase
         $apiResponseDeliveryMethods->addChild('delivery_method', $invalidDeliveryMethod);
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -274,10 +284,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->redemption_method);
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -305,10 +316,11 @@ class ProductTest extends FeatureTestCase
         $apiResponseXML->tour->redemption_method = $invalidRedemptionMethod;
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -335,10 +347,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->tour_departure_structure->type);
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -364,10 +377,11 @@ class ProductTest extends FeatureTestCase
         $apiResponseXML = $this->showTourXML;
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-        ->onlyMethods(['showTour'])
-        ->disableOriginalConstructor()
-        ->getMock();
+            ->onlyMethods(['showTour', 'showChannel'])
+            ->disableOriginalConstructor()
+            ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
         
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
         
@@ -393,7 +407,7 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -421,10 +435,11 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['listTours'])
+            ->onlyMethods(['listTours', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('listTours')->willReturn($this->listToursXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -453,10 +468,11 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['listTours'])
+            ->onlyMethods(['listTours', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('listTours')->willReturn($this->listToursXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
