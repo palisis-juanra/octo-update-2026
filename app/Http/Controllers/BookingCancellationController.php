@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\BookingNotCancellableException;
+use App\Models\BookingCancellation;
 use App\Services\BookingCancellationService;
 use App\Services\JSONLogService;
 use App\Transformers\BaseTransformer;
@@ -44,7 +45,10 @@ class BookingCancellationController extends Controller
         };
 
         if (true === $this->bookingCancelService->cancelBooking($booking, $reason, $force)) {
+
             $this->bookingCancelService->updateBookingStatusToCancelled($booking);
+            $cancellation = new BookingCancellation($reason);
+            $booking->setCancellation($cancellation);
         }
 
         $bookingData = $this->transformer->transform($booking);

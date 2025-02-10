@@ -11,9 +11,9 @@ class BookingCancellation
     protected ?string $reason;
     protected string $utcCancelledAt;
 
-    public function __construct(string $utcCancelledAt, string $reason = null)
+    public function __construct(string $reason = null, string $utcCancelledAt = null)
     {
-        $this->utcCancelledAt = $utcCancelledAt;
+        $this->utcCancelledAt = null !== $utcCancelledAt ? $utcCancelledAt : Booking::createUtcCancelledAt(time());
         $this->reason = $reason;
     }
 

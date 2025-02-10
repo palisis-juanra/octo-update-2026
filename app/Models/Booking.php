@@ -177,20 +177,23 @@ class Booking extends Model
         $booking->setContact($contact);
         $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
         $booking->setUtcExpiresAt(isset($bookingData->expiry_date_at_utc_seconds) ? (int) $bookingData->expiry_date_at_utc_seconds : null);
-        $booking->setUtcConfirmedAt(isset($bookingData->confirmed_at_utc_seconds) ? (int) $bookingData->confirmed_at_utc_seconds : null);
         $booking->setUtcRedeemedAt(self::getFirstRedeemed($bookingData));
 
         $booking->setExpirationMinutes(null);
 
-        $booking->setStatus(self::getBookingStatus($bookingData));
+        $status = self::getBookingStatus($bookingData);
+        $booking->setStatus($status);
+        if ($status == self::STATUS_CONFIRMED) {
+            $booking->setUtcConfirmedAt(isset($bookingData->confirmed_at_utc_seconds) ? (int) $bookingData->confirmed_at_utc_seconds : null);
+        }
         $booking->setCancellable((bool) $bookingData->cancellable);
 
         if ((int) $bookingData->cancel_reason !== 0) {
             $cancellation = new BookingCancellation(
+                (string) $bookingData->cancel_text,
                 self::createUtcCancelledAt((int) $bookingData->cancelled_at_utc_seconds),
-                (string) $bookingData->cancel_text
             );
-            $booking->setCancellation($cancellation);
+            $booking->setCancellation(cancellation: $cancellation);
         }
         
         $booking->setProduct($product);
@@ -601,7 +604,7 @@ class Booking extends Model
 
     }
 
-    protected static function createUtcCancelledAt(?int $cancelledAt): ?string
+    public static function createUtcCancelledAt(?int $cancelledAt): ?string
     {
         if (is_null($cancelledAt)) {
             return null;

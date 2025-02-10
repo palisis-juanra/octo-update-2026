@@ -6,6 +6,7 @@ use App\Exceptions\BookingNotCancellableException;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Availability\Availability;
 use App\Models\Booking;
+use App\Models\BookingCancellation;
 use App\Models\Option;
 use App\Models\Product;
 use DateTime;
