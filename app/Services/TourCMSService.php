@@ -30,6 +30,7 @@ class TourCMSService
     const SHOW_TOUR_DEPARTURES_CLOSED_PARAM = 'show_closed_departures=true';
     const SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM = 'distinct_start_dates=1';
     const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
+    public const INVALID_BOOKING_ID = 'INVALID BOOKING ID';
 
     private TourCMS $tourCMS;
     private TourCMSMulti $tourCMSMulti;

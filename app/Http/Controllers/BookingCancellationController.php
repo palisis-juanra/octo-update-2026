@@ -33,7 +33,6 @@ class BookingCancellationController extends Controller
         $this->logger->info(["message" => "Starting to process cancel booking request", "request" => $request->post()]);
 
         $reason = $requestParams[self::FIELD_REASON] ?? null;
-        $force = $requestParams[self::FIELD_FORCE] ?? null;
 
         $booking = $this->bookingCancelService->getBookingByUuid($uuid);
 
@@ -44,8 +43,16 @@ class BookingCancellationController extends Controller
             throw new BookingNotCancellableException;
         };
 
-        if (true === $this->bookingCancelService->cancelBooking($booking, $reason, $force)) {
+        if ($this->bookingCancelService->shouldWeCancelBooking($booking)) {
+            $this->logger->info("Booking {$booking->getUuid()} is confirmed, calling cancel booking endpoint");
+            $cancelled = $this->bookingCancelService->cancelBooking($booking, $reason);
 
+        } else {
+            $this->logger->info("Booking {$booking->getUuid()} is temporary, calling delete booking endpoint");
+            $cancelled = $this->bookingCancelService->deleteBooking($booking);
+        }
+
+        if (true === $cancelled) {
             $this->bookingCancelService->updateBookingStatusToCancelled($booking);
             $cancellation = new BookingCancellation($reason);
             $booking->setCancellation($cancellation);

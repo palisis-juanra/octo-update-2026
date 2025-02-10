@@ -480,6 +480,11 @@ class ProductService
     public function getTourListData(string $channelId): array
     {
         $apiResponse = $this->tourCMSService->listTours($channelId, "?".TourCMSService::LIST_TOURS_EXTENDED_TOUR_INFO_PARAM);
+
+        if (!isset($apiResponse->tour)) {
+            return [];
+        }
+
         $toursFromXML = XMLService::getArrayFromXmlNode($apiResponse, 'tour');
         return $toursFromXML;
     }

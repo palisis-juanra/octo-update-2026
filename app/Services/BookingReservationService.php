@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\NoAvailabilityException;
+use App\Factories\BookingFactory;
 use App\Models\Availability\Availability;
 use App\Models\Booking;
 use App\Models\Option;
@@ -17,7 +18,7 @@ class BookingReservationService
         public ProductService $productService,
         public AvailabilityService $availabilityService,
         public JSONLogService $logger)
-    { }
+    {}
 
     public function reserve(Product $product, Option $option, Availability $availability, array $unitItems, ?string $uuid = null, string $notes = ''): Booking
     {
@@ -55,7 +56,7 @@ class BookingReservationService
         $this->logger->info(["message" => "Temporary booking created in TourCMS"]);
 
         // Create Booking object
-        $booking = Booking::createFromStartNewBookingXML(
+        $booking = BookingFactory::createFromStartNewBookingXML(
             $startNewBookingXML, 
             $product, 
             $option, 
