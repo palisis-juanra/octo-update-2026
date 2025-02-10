@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
-use stdClass;
 
 class Booking extends Model
 {
@@ -110,103 +109,6 @@ class Booking extends Model
         $this->units = [];
         $this->contact = new Contact;
         $this->voucher = null;
-    }
-
-    public static function createFromStartNewBookingXML(
-        SimpleXMLElement $startNewBookingData,
-        Product $product,
-        Option $option,
-        Availability $availability,
-        array $unitItems,
-        ?string $notes = ''
-    ): Booking
-    {
-        $booking = new Booking();
-
-        $bookingData = $startNewBookingData->booking;
-        $booking->bookingData = $bookingData;
-
-        $booking->setBookingId((int) $bookingData->booking_id);
-        $booking->setUuid((string) $bookingData->booking_uuid);
-        $booking->setAccountId((int) $bookingData->account_id);
-        $booking->setChannelId((int) $bookingData->channel_id);
-        $booking->setUtcExpiresAt((int) $bookingData->hold_time_seconds);
-        $booking->setExpirationMinutes((int) $bookingData->hold_time_seconds / 60);
-        $booking->setProduct($product);
-        $booking->setOption($option);
-        $booking->setAvailability($availability);
-        $booking->setUnits($unitItems);
-        
-        if (!is_null($notes)){
-            $booking->setNotes($notes);
-        }
-
-        if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
-            $voucher = Voucher::createWithoutOptions($product->getRedemptionMethod());
-            $booking->setVoucher($voucher);
-        }
-
-
-        return $booking;
-    }
-
-    public static function createFromShowBookingXML(
-        string $bookingUuid,
-        SimpleXMLElement $showBookingXML,
-        Product $product,
-        Option $option,
-        Availability $availability,
-        array $unitItems,
-        Contact $contact
-    ): Booking
-    {
-        $booking = new Booking();
-
-        $bookingData = $showBookingXML->booking;
-        $booking->bookingData = $bookingData;
-
-        $booking->setBookingId((int) $bookingData->booking_id);
-        $booking->setUuid((string) $bookingUuid);
-        $booking->setAccountId((int) $bookingData->account_id);
-        $booking->setChannelId((int) $bookingData->channel_id);
-
-        $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
-        if (isset($bookingData->agent_ref) && !empty((string)$bookingData->agent_ref)) {
-            $booking->setResellerReference((string) $bookingData->agent_ref);
-        }
-        $booking->setContact($contact);
-        $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
-        $booking->setUtcExpiresAt(isset($bookingData->expiry_date_at_utc_seconds) ? (int) $bookingData->expiry_date_at_utc_seconds : null);
-        $booking->setUtcRedeemedAt(self::getFirstRedeemed($bookingData));
-
-        $booking->setExpirationMinutes(null);
-
-        $status = self::getBookingStatus($bookingData);
-        $booking->setStatus($status);
-        if ($status == self::STATUS_CONFIRMED) {
-            $booking->setUtcConfirmedAt(isset($bookingData->confirmed_at_utc_seconds) ? (int) $bookingData->confirmed_at_utc_seconds : null);
-        }
-        $booking->setCancellable((bool) $bookingData->cancellable);
-
-        if ((int) $bookingData->cancel_reason !== 0) {
-            $cancellation = new BookingCancellation(
-                (string) $bookingData->cancel_text,
-                self::createUtcCancelledAt((int) $bookingData->cancelled_at_utc_seconds),
-            );
-            $booking->setCancellation(cancellation: $cancellation);
-        }
-        
-        $booking->setProduct($product);
-        $booking->setOption($option);
-        $booking->setAvailability($availability);
-        $booking->setUnits($unitItems);
-        
-        if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
-            $voucher = Voucher::create($bookingData, $product->getRedemptionMethod(), $booking->getUtcRedeemedAt());
-            $booking->setVoucher($voucher);
-        }
-
-        return $booking;
     }
 
     public function getId(): string
@@ -579,7 +481,7 @@ class Booking extends Model
             return Booking::STATUS_CANCELLED;
         }
 
-        return (int) $bookingData->status == self::TCMS_CONFIRMED_STATUS ? Booking::STATUS_CONFIRMED : Booking::STATUS_ON_HOLD;
+        return (int) $bookingData->status == self::TCMS_CONFIRMED_STATUS ? Booking::STATUS_CONFIRMED : Booking::STATUS_PENDING;
 
     }
 
@@ -637,4 +539,24 @@ class Booking extends Model
 
     }
 
+
+    /**
+     * Get the value of bookingData
+     */ 
+    public function getBookingData(): SimpleXMLElement
+    {
+        return $this->bookingData;
+    }
+
+    /**
+     * Set the value of bookingData
+     *
+     * @return  self
+     */ 
+    public function setBookingData(SimpleXMLElement $bookingData): self
+    {
+        $this->bookingData = $bookingData;
+
+        return $this;
+    }
 }
