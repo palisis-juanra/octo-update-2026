@@ -46,9 +46,9 @@ class TourCMSService
         $this->channelId = Request::get(OctoAuthentication::FIELD_CHANNEL_ID);
     }
 
-    public function showChannel(string $channelId): SimpleXMLElement
+    public function showChannel(string $channelId = null): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_channel($channelId);
+        $response = $this->tourCMS->show_channel(null === $channelId ? $this->channelId : $channelId);
         $response = $this->handleResponse($response);
 
         return $response;

@@ -199,7 +199,7 @@ class ProductService
         } else {
             $this->info[] = self::ERROR_REFERENCE_MISSING;
         }
-        $locale = $this->getProductLocale($tour);
+        $locale = $this->getProductLocale();
         $timeZone = $this->getProductTimeZone($tour);
         // Currently unsupported - false by default
         $allowFreesale = false;
@@ -333,7 +333,7 @@ class ProductService
             $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_DEFAULT;
             $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
             if (isset($tour->cancellation_policy) && isset($tour->cancellation_policy->policy)) {
-                $cancellationPoliciesFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->cancellation_policy, 'policy');
+                $cancellationPoliciesFromXML = XMLService::getArrayFromXmlNode($tour->cancellation_policy, 'policy');
                 $policy = $cancellationPoliciesFromXML[0] ?? null;
                 if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
                     $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNITS[(string) $policy->type];
@@ -480,7 +480,7 @@ class ProductService
     public function getTourListData(string $channelId): array
     {
         $apiResponse = $this->tourCMSService->listTours($channelId, "?".TourCMSService::LIST_TOURS_EXTENDED_TOUR_INFO_PARAM);
-        $toursFromXML = $this->tourCMSService->getArrayFromXmlNode($apiResponse, 'tour');
+        $toursFromXML = XMLService::getArrayFromXmlNode($apiResponse, 'tour');
         return $toursFromXML;
     }
 
@@ -495,7 +495,7 @@ class ProductService
         } else if (is_null($parent)) {
             return $ratesFromXML;
         }
-        return $this->tourCMSService->getArrayFromXmlNode($parent, 'rate');
+        return XMLService::getArrayFromXmlNode($parent, 'rate');
     }
 
     public function getAdultRates(SimpleXMLElement $tour): array
@@ -603,31 +603,13 @@ class ProductService
         return $tour;
     }
 
-    protected function getProductLocale(SimpleXMLElement $tour): string
+    protected function getProductLocale(): string
     {
-        $defaultLocale = self::LOCALE_CODE_DEFAULT;
-        $countries = [];
-        $languages = [];
-        if (isset($tour->languages_spoken) && !empty($tour->languages_spoken)) {
-            $languages = explode(',', $tour->languages_spoken);
-        }
-        if (isset($tour->country) && !empty($tour->country)) {
-            $generatedLocale = "";
-            $countries = explode(',', $tour->country);
-            foreach ($countries as $country) {
-                foreach ($languages as $language) {
-                    $generatedLocale = $this->localeService->countryCodeToLocale($country, $language);
-                    if (is_string($generatedLocale) && !empty($generatedLocale)) {
-                        return $generatedLocale;
-                    }
-                }
-                $generatedLocale = $this->localeService->countryCodeToLocale($country);
-                if (is_string($generatedLocale) && !empty($generatedLocale)) {
-                    return $generatedLocale;
-                }
-            }
-        }
-        return $defaultLocale;
+        $showChannelXML = $this->tourCMSService->showChannel();
+        $language = !empty($showChannelXML->channel->lang) ? (string) $showChannelXML->channel->lang : 'en';
+        $countryCode = !empty($showChannelXML->channel->address_country) ? (string) $showChannelXML->channel->address_country : 'GB';
+
+        return "{$language}-{$countryCode}";
     }
 
     public function getProductTimeZone(SimpleXMLElement $tour): string
@@ -673,7 +655,7 @@ class ProductService
             return [self::DELIVERY_FORMAT_QRCODE];
         }
         
-        $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
+        $deliveryFormatsFromXML = XMLService::getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
         if (count($deliveryFormatsFromXML) <= 0) {
             return [self::DELIVERY_FORMAT_QRCODE];
         }
@@ -696,7 +678,7 @@ class ProductService
             return [self::DELIVERY_METHOD_VOUCHER];
         }
 
-        $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
+        $deliveryMethodsFromXML = XMLService::getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
         if (count($deliveryMethodsFromXML) <= 0) {
             return [self::DELIVERY_METHOD_VOUCHER];
         }
@@ -737,7 +719,7 @@ class ProductService
         if (is_null($parent)) {
             return $requiredFields;
         }
-        $requiredFieldsFromXML = $this->tourCMSService->getArrayFromXmlNode($parent, 'field');
+        $requiredFieldsFromXML = XMLService::getArrayFromXmlNode($parent, 'field');
         foreach ($requiredFieldsFromXML as $requiredField) {
             $requiredFieldScope = (string) $requiredField->scope;
             if ($requiredFieldScope == self::REQUIRED_FIELD_SCOPE_LEADPAX || $requiredFieldScope == self::REQUIRED_FIELD_SCOPE_ALLPAX) {
@@ -762,7 +744,7 @@ class ProductService
         if (is_null($parent)) {
             return $requiredFields;
         }
-        $requiredFieldsFromXML = $this->tourCMSService->getArrayFromXmlNode($parent, 'field');
+        $requiredFieldsFromXML = XMLService::getArrayFromXmlNode($parent, 'field');
         foreach ($requiredFieldsFromXML as $requiredField) {
             $requiredFieldScope = (string) $requiredField->scope;
             if ($requiredFieldScope == self::REQUIRED_FIELD_SCOPE_OTHERPAX || $requiredFieldScope == self::REQUIRED_FIELD_SCOPE_ALLPAX) {
@@ -788,7 +770,7 @@ class ProductService
     {
         $id = $this->buildProductId($tour);
         if (isset($tour->delivery_formats)) {
-            $deliveryFormatsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
+            $deliveryFormatsFromXML = XMLService::getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
             if (!empty($deliveryFormatsFromXML)) {
                 foreach ($deliveryFormatsFromXML as $deliveryFormat) {
                     if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
@@ -805,7 +787,7 @@ class ProductService
     {
         $id = $this->buildProductId($tour);
         if (isset($tour->delivery_methods)) {
-            $deliveryMethodsFromXML = $this->tourCMSService->getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
+            $deliveryMethodsFromXML = XMLService::getArrayFromXmlNode($tour->delivery_methods, 'delivery_method');
             if (!empty($deliveryMethodsFromXML)) {
                 foreach ($deliveryMethodsFromXML as $deliveryMethod) {
                     if (!in_array($deliveryMethod, self::TCMS_DELIVERY_METHODS)) {
@@ -840,7 +822,7 @@ class ProductService
     public function getActiveMappingsFromTour(SimpleXMLElement $tour): array
     {
         $structureType = (string) $tour->tour_departure_structure->type;
-        $types = $this->tourCMSService->getArrayFromXmlNode($tour->tour_departure_structure->departure_types, 'type');
+        $types = XMLService::getArrayFromXmlNode($tour->tour_departure_structure->departure_types, 'type');
         $mappings = [];
 
         switch ($structureType) {
