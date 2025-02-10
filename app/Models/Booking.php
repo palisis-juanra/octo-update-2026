@@ -579,7 +579,7 @@ class Booking extends Model
             return Booking::STATUS_CANCELLED;
         }
 
-        return (int) $bookingData->status == self::TCMS_CONFIRMED_STATUS ? Booking::STATUS_CONFIRMED : Booking::STATUS_PENDING;
+        return (int) $bookingData->status == self::TCMS_CONFIRMED_STATUS ? Booking::STATUS_CONFIRMED : Booking::STATUS_ON_HOLD;
 
     }
 

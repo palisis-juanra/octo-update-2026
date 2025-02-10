@@ -170,7 +170,7 @@ class TourCMSService
 
     public function showBooking(string $bookingId): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_booking($bookingId, $this->channelId);
+        $response = $this->tourCMS->show_booking("{$bookingId}&show_temporary_bookings=1", $this->channelId);
         return $this->handleResponse($response);
     }
 
