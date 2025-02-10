@@ -2,18 +2,10 @@
 
 namespace App\Services;
 
-use App\Exceptions\BookingNotCancellableException;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Exceptions\NoMatchingDataException;
-use App\Models\Availability\Availability;
 use App\Models\Booking;
-use App\Models\BookingCancellation;
-use App\Models\Option;
-use App\Models\Product;
-use DateTime;
-use DateTimeZone;
 use SimpleXMLElement;
-use stdClass;
 
 class BookingCancellationService extends BookingService
 {
