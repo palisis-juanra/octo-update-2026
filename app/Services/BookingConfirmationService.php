@@ -9,8 +9,9 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class BookingConfirmationService extends BookingService
 {
-    const ERROR_BOOKING_ALREADY_COMITTED = 'BOOKING ALREADY COMMITTED';
-    const ERROR_BOOKING_NOT_FOUND = 'API return no matching data, invalid booking ID / channel';
+    public const ERROR_BOOKING_ALREADY_COMITTED = 'BOOKING ALREADY COMMITTED';
+    public const ERROR_BOOKING_NOT_FOUND = 'API return no matching data, invalid booking ID / channel';
+    public const ERROR_MESSAGE_UNIT_ITEMS_CHANGED = "Unit items must not change between reservation and confirmation";
 
     public function __construct(
         public TourCMSService $tourCMSService,
@@ -72,7 +73,7 @@ class BookingConfirmationService extends BookingService
         }
         if ($bookingUnitItemsArray !== $unitItems) {
             $this->logger->info(["message" => "Units items has changed from reservation to confirmation, throwing exception", "reservation" => $bookingUnitItems, "confirmation" => $unitItems]);
-            throw new UnprocessableEntityHttpException("Unit items must not change between reservation and confirmation");
+            throw new UnprocessableEntityHttpException(self::ERROR_MESSAGE_UNIT_ITEMS_CHANGED);
         }
     }
 }

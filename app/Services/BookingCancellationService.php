@@ -77,9 +77,7 @@ class BookingCancellationService extends BookingService
     {
         $booking->setStatus(Booking::STATUS_CANCELLED);
 
-        if ($booking->getStatus() == self::STATUS_CANCELLED) {
-            Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
-        }
+        Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
     }
    
     

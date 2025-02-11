@@ -148,6 +148,8 @@ class ProductService
     ];
     public const DEFAULT_DURATION_MINUTES = 60;
     public const TIMEZONE_NOT_SET = 'NOTSET';
+    public const DEFAULT_CHANNEL_LANG = 'en';
+    public const DEFAULT_CHANNEL_COUNTRY = 'GB';
   
     public ProductTransformer $productTransformer;
 
@@ -611,8 +613,8 @@ class ProductService
     protected function getProductLocale(): string
     {
         $showChannelXML = $this->tourCMSService->showChannel();
-        $language = !empty($showChannelXML->channel->lang) ? (string) $showChannelXML->channel->lang : 'en';
-        $countryCode = !empty($showChannelXML->channel->address_country) ? (string) $showChannelXML->channel->address_country : 'GB';
+        $language = !empty($showChannelXML->channel->lang) ? (string) $showChannelXML->channel->lang : self::DEFAULT_CHANNEL_LANG;
+        $countryCode = !empty($showChannelXML->channel->address_country) ? (string) $showChannelXML->channel->address_country : self::DEFAULT_CHANNEL_COUNTRY;
 
         return "{$language}-{$countryCode}";
     }

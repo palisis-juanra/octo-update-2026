@@ -31,6 +31,7 @@ class TourCMSService
     const SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM = 'distinct_start_dates=1';
     const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
     public const INVALID_BOOKING_ID = 'INVALID BOOKING ID';
+    public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = "&show_temporary_bookings=1";
 
     private TourCMS $tourCMS;
     private TourCMSMulti $tourCMSMulti;
@@ -171,7 +172,7 @@ class TourCMSService
 
     public function showBooking(string $bookingId): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_booking("{$bookingId}&show_temporary_bookings=1", $this->channelId);
+        $response = $this->tourCMS->show_booking($bookingId . self::QUERYSTRING_SHOW_TEMPORARY_BOOKINGS, $this->channelId);
         return $this->handleResponse($response);
     }
 
