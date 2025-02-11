@@ -9,6 +9,7 @@ use App\Models\Contact;
 use App\Models\Option;
 use App\Models\Product;
 use App\Models\Voucher;
+use App\Services\XMLService;
 use SimpleXMLElement;
 
 class BookingFactory
@@ -82,7 +83,7 @@ class BookingFactory
 
         $booking->setExpirationMinutes(null);
 
-        $status = Booking::getBookingStatus($bookingData);
+        $status = self::getBookingStatus($bookingData);
         $booking->setStatus($status);
         if ($status == Booking::STATUS_CONFIRMED) {
             $booking->setUtcConfirmedAt(isset($bookingData->confirmed_at_utc_seconds) ? (int) $bookingData->confirmed_at_utc_seconds : null);
@@ -109,4 +110,33 @@ class BookingFactory
 
         return $booking;
     }
+
+    public static function getBookingStatus(SimpleXMLElement $bookingData): string
+    {
+        if ((string) $bookingData->status == Booking::TCMS_STATUS_TEMPORARY) {
+            return Booking::STATUS_ON_HOLD;
+        }
+
+        if ((int) $bookingData->cancel_reason !== 0) {
+            return Booking::STATUS_CANCELLED;
+        }
+
+        if (self::isBookingRedeemed(XMLService::getArrayFromXmlNode($bookingData->components, 'component'))) {
+            return Booking::STATUS_REDEEMED;
+        }
+
+        return (int) $bookingData->status == Booking::TCMS_STATUS_CONFIRMED ? Booking::STATUS_CONFIRMED : Booking::STATUS_PENDING;
+    }
+
+    public static function isBookingRedeemed(array $components): bool
+    {
+        foreach ($components as $component) {
+            if (!empty($component->redeemed_at) || !empty($component->redeemed_at_utc_seconds)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

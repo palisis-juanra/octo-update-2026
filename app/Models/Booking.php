@@ -483,24 +483,6 @@ class Booking extends Model
         return $this->getCancellable() == 1;
     }
 
-    protected static function getBookingStatus(SimpleXMLElement $bookingData): string
-    {
-        if ((string)$bookingData->status == self::TCMS_STATUS_TEMPORARY) {
-            return Booking::STATUS_ON_HOLD;
-        }
-
-        if ((int) $bookingData->cancel_reason !== 0) {
-            return Booking::STATUS_CANCELLED;
-        }
-
-        if (self::isBookingRedeemed(XMLService::getArrayFromXmlNode($bookingData->components, 'component'))) {
-            return self::STATUS_REDEEMED;
-        }
-
-        return (int) $bookingData->status == self::TCMS_STATUS_CONFIRMED ? Booking::STATUS_CONFIRMED : Booking::STATUS_PENDING;
-
-    }
-
     protected static function getFirstRedeemed(SimpleXMLElement $bookingData): ?string
     {
         $componentsRedeemed = [];
@@ -574,16 +556,5 @@ class Booking extends Model
         $this->bookingData = $bookingData;
 
         return $this;
-    }
-
-    public static function isBookingRedeemed(array $components): bool
-    {
-        foreach ($components as $component) {
-            if (!empty($component->redeemed_at)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

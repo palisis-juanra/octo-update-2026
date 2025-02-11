@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Services\JSONLogService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
+use App\Services\XMLService;
 use Illuminate\Support\Facades\App;
 use PHPUnit\Framework\MockObject\MockObject;
 use SimpleXMLElement;
@@ -133,6 +134,14 @@ class BookingFactoryTest extends FeatureTestCase
         );
 
         $this->assertEquals(Booking::STATUS_CONFIRMED, $booking->getStatus());
+    }
+
+    public function test_whenSomeComponentIsRedeemed_thenBookingIsRedeemed(): void
+    {
+        $components = simplexml_load_file('tests/TourCMSResponses/components.xml');
+        $components->component[0]->redeemed_at_utc_seconds = 1739282451;
+        $components = XMLService::getArrayFromXmlNode($components, 'component');
+        $this->assertTrue(BookingFactory::isBookingRedeemed($components));
     }
 
     protected function getOption(): Option
