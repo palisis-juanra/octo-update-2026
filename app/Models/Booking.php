@@ -483,6 +483,37 @@ class Booking extends Model
         return $this->getCancellable() == 1;
     }
 
+    public static function createUtcCancelledAt(?int $cancelledAt): ?string
+    {
+        if (is_null($cancelledAt)) {
+            return null;
+        }
+
+        $cancelledDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $cancelledDateTime->setTimestamp($cancelledAt);
+        return DateTimeService::getISO8601DateFormatted($cancelledDateTime);
+    }
+
+    /**
+     * Get the value of bookingData
+     */ 
+    public function getBookingData(): SimpleXMLElement
+    {
+        return $this->bookingData;
+    }
+    
+    /**
+     * Set the value of bookingData
+     *
+     * @return  self
+     */ 
+    public function setBookingData(SimpleXMLElement $bookingData): self
+    {
+        $this->bookingData = $bookingData;
+        
+        return $this;
+    }
+
     protected static function getFirstRedeemed(SimpleXMLElement $bookingData): ?string
     {
         $componentsRedeemed = [];
@@ -504,17 +535,6 @@ class Booking extends Model
 
     }
 
-    public static function createUtcCancelledAt(?int $cancelledAt): ?string
-    {
-        if (is_null($cancelledAt)) {
-            return null;
-        }
-
-        $cancelledDateTime = new DateTime('now', new DateTimeZone('UTC'));
-        $cancelledDateTime->setTimestamp($cancelledAt);
-        return DateTimeService::getISO8601DateFormatted($cancelledDateTime);
-    }
-
     protected function getTicketValueForUnitItem(string $unitId, int $number): ?string
     {
         $tcmsRateId = UnitService::getTourCMSRateId($unitId);
@@ -524,37 +544,16 @@ class Booking extends Model
             $rateId = explode('|', (string) $component->rate_breakdown)[0];
             return (($rateId == $tcmsRateId) && ((string) $component->date_type === 'departure')); 
         });
-
+    
         if (empty($rateComponent)) {
             return null;
         }
-
+    
         $tickets = reset($rateComponent)->tickets;
         if (empty($tickets)) { return null; } 
-
+    
         $tickets = XMLService::getArrayFromXmlNode($tickets, 'ticket');
         return (string) $tickets[$number-1]->value;
-
-    }
-
-
-    /**
-     * Get the value of bookingData
-     */ 
-    public function getBookingData(): SimpleXMLElement
-    {
-        return $this->bookingData;
-    }
-
-    /**
-     * Set the value of bookingData
-     *
-     * @return  self
-     */ 
-    public function setBookingData(SimpleXMLElement $bookingData): self
-    {
-        $this->bookingData = $bookingData;
-
-        return $this;
+    
     }
 }
