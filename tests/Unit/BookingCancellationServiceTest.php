@@ -2,14 +2,9 @@
 
 namespace Tests\Unit;
 
-use App\Exceptions\BookingNotCancellableException;
 use App\Exceptions\InvalidBookingUUIDException;
-use App\Models\Availability\Availability;
 use App\Models\Booking;
-use App\Services\AvailabilityService;
 use App\Services\BookingCancellationService;
-use App\Services\OptionService;
-use App\Services\ProductService;
 use App\Services\TourCMSService;
 use Tests\UnitTestCase;
 

@@ -86,7 +86,7 @@ class BookingCancellationService extends BookingService
     public function shouldWeCancelBooking(Booking $booking): bool
     {
         $status = $booking->getStatus();
-        return $status == Booking::STATUS_CONFIRMED || $status === Booking::STATUS_ON_HOLD;
+        return $status == Booking::STATUS_CONFIRMED || $status === Booking::STATUS_PENDING;
     }
 
     protected function getCancelBookingXMLRequest(string $bookingId, ?string $reason = null): SimpleXMLElement

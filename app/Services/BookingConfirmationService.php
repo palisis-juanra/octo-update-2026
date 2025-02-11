@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Booking;
 use App\Models\Contact;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class BookingConfirmationService extends BookingService
 {
@@ -53,5 +54,25 @@ class BookingConfirmationService extends BookingService
         
         $booking->setContact($contact);
         return $booking;
+    }
+
+    /**
+     * Unit items must remain the same, so if they are different 
+     * @param \App\Models\Booking $booking
+     * @param array $unitItems
+     * @throws \Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException
+     * @return void
+     */
+    public function checkUnitItemsHaveNotChanged(Booking $booking, array $unitItems): void
+    {
+        $bookingUnitItemsArray = [];
+        $bookingUnitItems = json_decode($booking->unit_items, true);
+        foreach ($bookingUnitItems as $unitItem) {
+            $bookingUnitItemsArray[] = ["unitId" => $unitItem["unitId"]];
+        }
+        if ($bookingUnitItemsArray !== $unitItems) {
+            $this->logger->info(["message" => "Units items has changed from reservation to confirmation, throwing exception", "reservation" => $bookingUnitItems, "confirmation" => $unitItems]);
+            throw new UnprocessableEntityHttpException("Unit items must not change between reservation and confirmation");
+        }
     }
 }
