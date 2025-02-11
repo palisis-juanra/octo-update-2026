@@ -23,7 +23,9 @@ class Booking extends Model
     public const STATUS_CONFIRMED = 'CONFIRMED';
     public const STATUS_CANCELLED = 'CANCELLED';
     public const STATUS_PENDING = 'PENDING';
-    public const TCMS_CONFIRMED_STATUS = 2;
+    public const STATUS_REDEEMED = 'REDEEMED';
+    public const TCMS_STATUS_CONFIRMED= 2;
+    public const TCMS_STATUS_TEMPORARY = '-1';
     public const FIELD_VOUCHER = 'VOUCHER';
     public const FIELD_TICKET = 'TICKET';
     protected bool $testMode;
@@ -407,19 +409,23 @@ class Booking extends Model
             $unitItem->setUtcRedeemedAt($this->getUtcRedeemedAt());
             $unitItem->setContact($this->getContact());
 
-            $ticketValue = self::getTicketValueForUnitItem($unitId, $unitsQuantities[$unitId]);
-            $this->product->setDeliveryMethods([ProductService::DELIVERY_METHOD_TICKET]);
-            $ticket = new Ticket();
-            $ticket->setRedemptionMethod(ProductService::REDEMPTION_METHOD_DIGITAL);
-            if (!empty($ticketValue)) {
-                $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
-                $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
-                $ticket->setDeliveryOptions([
-                    "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
-                    "deliveryValue" => $ticketValue
-                ]);
+            // We only have to create ticket if the TICKET is present in product's delivery methods
+            if (in_array(ProductService::DELIVERY_METHOD_TICKET, $this->product->getDeliveryMethods())) {
+
+                $ticketValue = self::getTicketValueForUnitItem($unitId, $unitsQuantities[$unitId]);
+                $ticket = new Ticket();
+                $ticket->setRedemptionMethod(ProductService::REDEMPTION_METHOD_DIGITAL);
+                if (!empty($ticketValue)) {
+                    $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
+                    $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
+                    $ticket->setDeliveryOptions([
+                        "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
+                        "deliveryValue" => $ticketValue
+                    ]);
+                }
+                $unitItem->setTicket($ticket);
             }
-            $unitItem->setTicket($ticket);
+            
             
 
             $this->units[] = $unitItem;
@@ -477,11 +483,19 @@ class Booking extends Model
 
     protected static function getBookingStatus(SimpleXMLElement $bookingData): string
     {
+        if ((string)$bookingData->status == self::TCMS_STATUS_TEMPORARY) {
+            return Booking::STATUS_ON_HOLD;
+        }
+
         if ((int) $bookingData->cancel_reason !== 0) {
             return Booking::STATUS_CANCELLED;
         }
 
-        return (int) $bookingData->status == self::TCMS_CONFIRMED_STATUS ? Booking::STATUS_CONFIRMED : Booking::STATUS_PENDING;
+        if (self::isBookingRedeemed(XMLService::getArrayFromXmlNode($bookingData->components, 'component'))) {
+            return self::STATUS_REDEEMED;
+        }
+
+        return (int) $bookingData->status == self::TCMS_STATUS_CONFIRMED ? Booking::STATUS_CONFIRMED : Booking::STATUS_PENDING;
 
     }
 
@@ -558,5 +572,16 @@ class Booking extends Model
         $this->bookingData = $bookingData;
 
         return $this;
+    }
+
+    public static function isBookingRedeemed(array $components): bool
+    {
+        foreach ($components as $component) {
+            if (!empty($component->redeemed_at)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
