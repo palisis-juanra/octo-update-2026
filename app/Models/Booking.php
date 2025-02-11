@@ -24,7 +24,9 @@ class Booking extends Model
     public const STATUS_CANCELLED = 'CANCELLED';
     public const STATUS_PENDING = 'PENDING';
     public const STATUS_REDEEMED = 'REDEEMED';
-    public const TCMS_STATUS_CONFIRMED= 2;
+    public const TCMS_STATUS_QUOTATION = 0;
+    public const TCMS_STATUS_PROVISIONAL = 1;
+    public const TCMS_STATUS_CONFIRMED = 2;
     public const TCMS_STATUS_TEMPORARY = '-1';
     public const FIELD_VOUCHER = 'VOUCHER';
     public const FIELD_TICKET = 'TICKET';
