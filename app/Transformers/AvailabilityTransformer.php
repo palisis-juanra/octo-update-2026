@@ -2,6 +2,8 @@
 
 namespace App\Transformers;
 
+use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
 use App\Transformers\BaseTransformer;
 
 class AvailabilityTransformer extends BaseTransformer
@@ -42,12 +44,12 @@ class AvailabilityTransformer extends BaseTransformer
             ]
         ];
         
-        if (true === $availability->getContentEnabled()) {
+        if (true === OctoRequestFacade::isContentRequired()) {
             $data['title'] = $availability->getTitle();
             $data['shortDescription'] = $availability->getShortDescription();
         }
 
-        if (!empty($availability->getPricing())) {
+        if (true === OctoRequestFacade::isPricingRequired()) {
             $pricing = $availability->getPricing();
             $data['pricing'] = [
                 'original' => $pricing->getOriginalPrice(),
@@ -56,6 +58,19 @@ class AvailabilityTransformer extends BaseTransformer
                 'currency' => $availability->getCurrency(),
                 'currencyPrecision' => $pricing->getCurrencyPrecision()
             ];
+
+            $unitPricings = $availability->getUnitPricing();
+            $data['unitPricing'] = [];
+
+            foreach ($unitPricings as $unitPricing) {
+                $data['unitPricing'][] = [
+                    'unitId' => $unitPricing->getUnitId(),
+                    'retail' => $unitPricing->getRetailPrice(),
+                    'net' => $unitPricing->getNetPrice(),
+                    'currency' => $availability->getCurrency(),
+                    'currencyPrecision' => $unitPricing->getCurrencyPrecision()
+                ];
+            }            
         }
 
         return $data;

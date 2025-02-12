@@ -61,7 +61,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     {
         $availabilities = parent::getAvailabilities($tourCMSService);
         $checkAvailcomponents = $this->fetchComponentsFromTourCMS($tourCMSService);
-        $this->validateAvailableComponents($availabilities, $checkAvailcomponents);
+        $this->updateAvailabilitiesWithCheckAvailComponents($availabilities, $checkAvailcomponents);
         return $availabilities;
     }
 
@@ -138,24 +138,33 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         return $availabilities;
     }
 
-    protected function validateAvailableComponents(array $components, array $checkAvailcomponents): void
+    /**
+     * Summary of validateAvailableComponents
+     * @param Availability[] $availabilities
+     * @param array $checkAvailcomponents
+     * @return void
+     */
+    protected function updateAvailabilitiesWithCheckAvailComponents(array $availabilities, array $checkAvailcomponents): void
     {
         $checkAvailcomponentsIndexed = $this->indexCheckAvailComponents($checkAvailcomponents);
-        foreach ($components as $component) {
-            if (!isset($checkAvailcomponentsIndexed[$component->getId()])) {
-                $component->setAvailable(false);
-            } else {
-                $totalPricing = $checkAvailcomponentsIndexed[$component->getId()]->total_price * 100;
-                $netPrice = $checkAvailcomponentsIndexed[$component->getId()]->net_price * 100;
-                
-                $pricing = new AvailabilityPricing(
-                    $totalPricing,
-                    $totalPricing,
-                    $netPrice,
-                    $this->currency
-                );
-                $component->setPricing($pricing);
+        foreach ($availabilities as $availability) {
+
+            if (!isset($checkAvailcomponentsIndexed[$availability->getId()])) {
+                $availability->setAvailable(false);
+                continue;
             }
+
+            $totalPricing = $checkAvailcomponentsIndexed[$availability->getId()]->total_price * 100;
+            $netPrice = $checkAvailcomponentsIndexed[$availability->getId()]->net_price * 100;
+            
+            $pricing = new AvailabilityPricing(
+                $totalPricing,
+                $totalPricing,
+                $netPrice,
+                $this->currency
+            );
+            $availability->setPricing($pricing);
+            
         }
     }
 

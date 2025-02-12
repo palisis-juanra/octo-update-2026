@@ -11,6 +11,8 @@ use App\Services\OptionService;
 use App\Services\TourCMSService;
 use App\Models\Availability\Availability;
 use App\Models\Availability\AvailabilityPricing;
+use App\Models\Availability\AvailabilityUnitPricing;
+use App\Services\XMLService;
 use SimpleXMLElement;
 
 class AvailabilityRequest extends BaseAvailabilityRequest
@@ -26,6 +28,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected string $cutoff;
     protected string $currency;
     protected bool $allDay = false;
+    protected string $productId;
 
     public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false)
     {
@@ -156,7 +159,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         if (!empty($this->availabilityIds)) {
             $departures = $this->filterByAvailabilityIds($departures, $this->availabilityIds);
         }
-        return $this->getAvailabilitiesFromDepartures($departures, $tourCMSService);
+        return $this->getAvailabilitiesFromDepartures($departures);
     }
 
     public function getAvailabilityFromDeparturesById(string $availabilityId, array $departures): Availability
@@ -203,6 +206,26 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return self::OCTO_STATUS_CLOSED;
     }
 
+    /**
+     * Get the value of productId
+     */ 
+    public function getProductId(): string
+    {
+        return $this->productId;
+    }
+
+    /**
+     * Set the value of productId
+     *
+     * @return  self
+     */ 
+    public function setProductId($productId): self
+    {
+        $this->productId = $productId;
+
+        return $this;
+    }
+
 // PRIVATE FUNCTIONS
 
     protected function checkSpacesRemaining(\SimpleXMLElement $departure): bool
@@ -245,7 +268,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $departures;
     }
 
-    protected function getAvailabilitiesFromDepartures(array $departures, TourCMSService $tourCMSService):array
+    protected function getAvailabilitiesFromDepartures(array $departures):array
     {   
         $availabilities = [];
         foreach ($departures as $departure) {
@@ -269,9 +292,11 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setOpeningHoursTo(!empty($departure->end_time) ? (string) $departure->end_time :'23:59');
 
             if (true === OctoRequestFacade::isPricingRequired()) {
-                $pricing = $this->getPricingForMultipleDays($departure, $tourCMSService);
+                $pricing = $this->getPricingForMultipleDays($departure);
+                $unitPricing = $this->getUnitPricing($departure);
                 $availability->setCurrency($this->currency);
                 $availability->setPricing($pricing);
+                $availability->setUnitPricing($unitPricing);
             }
             if (true === OctoRequestFacade::isContentRequired()) {
                 $supplierNote = !empty($departure->supplier_note) ? (string) $departure->supplier_note : '';
@@ -293,7 +318,18 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return "{$startDate}|{$departureId}";
     }
 
-    /**
+    protected function ratesFromShowTourDepartureXML(SimpleXMLElement $departure): array
+    {
+        $ratesArray = [];
+        $ratesArray['r1'] = $departure->main_price;
+        $departureRates = XMLService::getArrayFromXmlNode($departure->extra_rates, 'rate');
+        foreach ($departureRates as $rate) {
+            $ratesArray[(string)$rate->rate_id] = $rate;
+        } 
+        return $ratesArray;
+    }
+
+        /**
      * Summary of saveAvailabilities
      * @param Availability[]
      * @return void
@@ -305,11 +341,11 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         }
     }
 
-    protected function getPricingForMultipleDays(SimpleXMLElement $departure, TourCMSService $tourCMSService): AvailabilityPricing
+    protected function getPricingForMultipleDays(SimpleXMLElement $departure): AvailabilityPricing
     {
         $totalPricing = 0;
         $netPrice = 0;
-        $ratesArray = $this->ratesFromShowTourDepartureXML($departure, $tourCMSService);
+        $ratesArray = $this->ratesFromShowTourDepartureXML($departure);
         foreach ($this->units as $unit) {
             $rateId = explode('|', $unit['id'])[1];
             if(!array_key_exists($rateId, $ratesArray)) {
@@ -329,15 +365,26 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         );
     }
 
-    protected function ratesFromShowTourDepartureXML(SimpleXMLElement $departure, TourCMSService $tourCMSService)
+    /**
+     * Build an array of UnitPricing objects
+     * @param \SimpleXMLElement $departure
+     * @return AvailabilityUnitPricing[]
+     */
+    protected function getUnitPricing(SimpleXMLElement $departure): array
     {
-        $ratesArray = [];
-        $ratesArray['r1'] = $departure->main_price;
-        $departureRates = $tourCMSService->getArrayFromXmlNode($departure->extra_rates, 'rate');
-        foreach ($departureRates as $rate) {
-            $ratesArray[(string)$rate->rate_id] = $rate;
-        } 
-        return $ratesArray;
-    }
+        $unitPricings = [];
 
+        $productIdWithoutChannel = explode('|', $this->productId)[0];
+        $rates = $this->ratesFromShowTourDepartureXML($departure);
+        foreach ($rates as $rateId => $rate) {
+            $unitPricings[] = 
+                (new AvailabilityUnitPricing)
+                    ->setUnitId("{$productIdWithoutChannel}|{$rateId}")
+                    ->setRetailPrice($rate->rate_price * 100)
+                    ->setNetPrice($rate->net_price * 100)
+                    ->setCurrency($this->currency);
+        }
+
+        return $unitPricings;
+    }
 }

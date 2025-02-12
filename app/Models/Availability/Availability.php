@@ -71,6 +71,7 @@ class Availability extends Model
     protected bool $contentEnabled = false;
     protected ?string $title = null;
     protected ?string $shortDescription = null;
+    protected array $unitPricing = [];
 
     /**
      * Get the value of id
@@ -439,6 +440,26 @@ class Availability extends Model
     public function setShortDescription(?string $shortDescription): self
     {
         $this->shortDescription = $shortDescription;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of unitPricing
+     */ 
+    public function getUnitPricing(): array
+    {
+        return $this->unitPricing;
+    }
+
+    /**
+     * Set the value of unitPricing
+     *
+     * @return  self
+     */ 
+    public function setUnitPricing(array $unitPricing): self
+    {
+        $this->unitPricing = $unitPricing;
 
         return $this;
     }

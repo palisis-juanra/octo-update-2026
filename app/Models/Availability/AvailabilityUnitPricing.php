@@ -2,48 +2,30 @@
 
 namespace App\Models\Availability;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class AvailabilityPricing extends Model
+class AvailabilityUnitPricing
 {
-    use HasFactory;
-    public int $originalPrice;
+    public string $unitId;
     public int $retailPrice;
     public int $netPrice;
     public string $currency;
-    public string $currencyPrecision;
-    const CURRENCY_PRECISION = 2;
-
-    public function __construct(
-        int $originalPrice,
-        int $retailPrice,
-        int $netPrice,
-        string $currency)
-    {
-        $this->originalPrice = $originalPrice;
-        $this->retailPrice = $retailPrice;
-        $this->netPrice = $netPrice;
-        $this->currency = $currency;
-        $this->currencyPrecision = self::CURRENCY_PRECISION;
-    }
+    public int $currencyPrecision = 2;
 
     /**
-     * Get the value of originalPrice
+     * Get the value of unitId
      */ 
-    public function getOriginalPrice(): int
+    public function getUnitId(): string
     {
-        return $this->originalPrice;
+        return $this->unitId;
     }
 
     /**
-     * Set the value of originalPrice
+     * Set the value of unitId
      *
      * @return  self
      */ 
-    public function setOriginalPrice($originalPrice): static
+    public function setUnitId($unitId): self
     {
-        $this->originalPrice = $originalPrice;
+        $this->unitId = $unitId;
 
         return $this;
     }
@@ -61,7 +43,7 @@ class AvailabilityPricing extends Model
      *
      * @return  self
      */ 
-    public function setRetailPrice($retailPrice): static
+    public function setRetailPrice($retailPrice): self
     {
         $this->retailPrice = $retailPrice;
 
@@ -81,9 +63,29 @@ class AvailabilityPricing extends Model
      *
      * @return  self
      */ 
-    public function setNetPrice($netPrice): static
+    public function setNetPrice($netPrice): self
     {
         $this->netPrice = $netPrice;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of currency
+     */ 
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
+    /**
+     * Set the value of currency
+     *
+     * @return  self
+     */ 
+    public function setCurrency($currency): self
+    {
+        $this->currency = $currency;
 
         return $this;
     }
@@ -101,7 +103,7 @@ class AvailabilityPricing extends Model
      *
      * @return  self
      */ 
-    public function setCurrencyPrecision($currencyPrecision): static
+    public function setCurrencyPrecision($currencyPrecision): self
     {
         $this->currencyPrecision = $currencyPrecision;
 
