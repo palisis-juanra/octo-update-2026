@@ -322,6 +322,9 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     {
         $ratesArray = [];
         $ratesArray['r1'] = $departure->main_price;
+        if (!isset($departure->extra_rates)) {
+            return $ratesArray;
+        }
         $departureRates = XMLService::getArrayFromXmlNode($departure->extra_rates, 'rate');
         foreach ($departureRates as $rate) {
             $ratesArray[(string)$rate->rate_id] = $rate;

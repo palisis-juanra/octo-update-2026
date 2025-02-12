@@ -93,7 +93,7 @@ class AvailabilityUnitPricing
     /**
      * Get the value of currencyPrecision
      */ 
-    public function getCurrencyPrecision(): string
+    public function getCurrencyPrecision(): int
     {
         return $this->currencyPrecision;
     }
@@ -103,7 +103,7 @@ class AvailabilityUnitPricing
      *
      * @return  self
      */ 
-    public function setCurrencyPrecision($currencyPrecision): self
+    public function setCurrencyPrecision(int $currencyPrecision): self
     {
         $this->currencyPrecision = $currencyPrecision;
 

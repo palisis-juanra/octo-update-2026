@@ -12,7 +12,7 @@ class AvailabilityPricing extends Model
     public int $retailPrice;
     public int $netPrice;
     public string $currency;
-    public string $currencyPrecision;
+    public int $currencyPrecision;
     const CURRENCY_PRECISION = 2;
 
     public function __construct(
@@ -91,7 +91,7 @@ class AvailabilityPricing extends Model
     /**
      * Get the value of currencyPrecision
      */ 
-    public function getCurrencyPrecision(): string
+    public function getCurrencyPrecision(): int
     {
         return $this->currencyPrecision;
     }
