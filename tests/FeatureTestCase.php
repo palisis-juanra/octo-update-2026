@@ -7,9 +7,9 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class FeatureTestCase extends BaseTestCase
 {
-    const AUTH_HEADER_NAME = 'Authorization';
-    const OCTO_INVALID_PATTERN_CREDENTIALS = 'Bearer NOVALIDKEY';
-    const OCTO_VALID_PATTERN_CREDENTIALS = 'Bearer 1|142|abc';
+    public const AUTH_HEADER_NAME = 'Authorization';
+    public const OCTO_INVALID_PATTERN_CREDENTIALS = 'Bearer NOVALIDKEY';
+    public const OCTO_VALID_PATTERN_CREDENTIALS = 'Bearer 1|142|abc';
 
     public function getLoggerMock(): JSONLogService
     {
