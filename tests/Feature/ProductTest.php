@@ -557,8 +557,8 @@ class ProductTest extends FeatureTestCase
 
         foreach (XMLService::getArrayFromXmlNode($this->listToursXML, 'tour') as $tour) {
             $response->assertJsonFragment([
-                "defaultCurrency" => (string) $tour->sale_currency,
-                "availableCurrencies" => [(string) $tour->sale_currency],
+                "defaultCurrency" => (string) $this->showChannelXML->channel->sale_currency,
+                "availableCurrencies" => [(string) $this->showChannelXML->channel->sale_currency],
                 "pricingPer" => ProductPricing::PRICING_PER_BOOKING
             ]);  
         }
