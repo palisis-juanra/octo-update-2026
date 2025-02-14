@@ -401,7 +401,7 @@ class ProductService
 
         if (count($ratesFromXML) > 0) {
             foreach ($ratesFromXML as $rate) {
-                $unitId = $this->buildUnitId($tour, $rate, (string) $tour->channel_id);
+                $unitId = UnitService::buildUnitId((string) $tour->distribution_identifier, (string) $tour->channel_id, (string) $rate->rate_id);
                 $unitInternalName = "";
                 if (isset($rate->rate_id)) {
                     $unitInternalName = (string) $rate->rate_id;
@@ -517,7 +517,7 @@ class ProductService
         $ratesFromXML = $this->getRatesFromXML($tour);
         foreach ($ratesFromXML as $rate) {
             if (isset($rate->agecat) && in_array(self::UNIT_TYPES[(string) $rate->agecat], self::UNIT_TYPES_ADULTS)) {
-                $adultRates[] = $this->buildUnitId($tour,  $rate, (string) $tour->channel_id);
+                $adultRates[] = UnitService::buildUnitId((string) $tour->distribution_identifier, (string) $tour->channel_id, (string) $rate->rate_id);
             }
         }
         return $adultRates;
@@ -599,11 +599,6 @@ class ProductService
     public function buildProductId(SimpleXMLElement $tour): string
     {
         return "{$tour->distribution_identifier}|{$tour->channel_id}";
-    }
-    
-    public function buildUnitId(SimpleXMLElement $tour, SimpleXMLElement $rate, string $channelId): string
-    {
-        return "{$tour->distribution_identifier}|{$channelId}|{$rate->rate_id}";
     }
 
     protected function findTourDataFromAPI(string $productId): SimpleXMLElement

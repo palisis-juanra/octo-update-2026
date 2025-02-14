@@ -17,6 +17,11 @@ class UnitService
     public const PARAM_UNITS = 'units';
     public const SEPARATOR = '|';
 
+    public static function buildUnitId(string $tourDistributionIdentifier, string $channelId, string $rateId): string
+    {
+        return "{$tourDistributionIdentifier}|{$channelId}|{$rateId}";
+    }
+
     /**
      * Get TourCMS Rate ID from OCTO Unit ID
      * @param string $unitId
