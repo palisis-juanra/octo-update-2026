@@ -12,6 +12,7 @@ use App\Services\TourCMSService;
 use App\Models\Availability\Availability;
 use App\Models\Availability\AvailabilityPricing;
 use App\Models\Availability\AvailabilityUnitPricing;
+use App\Services\UnitService;
 use App\Services\XMLService;
 use SimpleXMLElement;
 
@@ -350,15 +351,20 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         $netPrice = 0;
         $ratesArray = $this->ratesFromShowTourDepartureXML($departure);
         foreach ($this->units as $unit) {
-            $rateId = explode('|', $unit['id'])[1];
+            $rateId = UnitService::getTourCMSRateId($unit['id']);
             if(!array_key_exists($rateId, $ratesArray)) {
                 throw new InvalidUnitIdException($unit['id']);
             }
             $totalPricing += (float) $ratesArray[$rateId]->rate_price * $unit['quantity'];
-            $netPrice += (float) $ratesArray[$rateId]->net_price * $unit['quantity'];
+            $netPrice += 
+                (
+                    !empty($ratesArray[$rateId]->net_price) ? 
+                    ((float) $ratesArray[$rateId]->net_price) : 
+                    ((float) $ratesArray[$rateId]->rate_price)
+                ) * $unit['quantity'];
         }
-        $totalPricing = $totalPricing * 100;
-        $netPrice = $netPrice * 100;
+        $totalPricing *= 100;
+        $netPrice *= 100;
 
         return new AvailabilityPricing(
             $totalPricing,
