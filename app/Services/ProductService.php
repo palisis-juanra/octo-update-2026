@@ -401,7 +401,7 @@ class ProductService
 
         if (count($ratesFromXML) > 0) {
             foreach ($ratesFromXML as $rate) {
-                $unitId = $this->buildUnitId($tour, $rate);
+                $unitId = $this->buildUnitId($tour, $rate, (string) $tour->channel_id);
                 $unitInternalName = "";
                 if (isset($rate->rate_id)) {
                     $unitInternalName = (string) $rate->rate_id;
@@ -458,6 +458,7 @@ class ProductService
                 $unit->setType($unitType);
                 $unit->setRequiredContactFields($unitRequiredContactFields);
                 $unit->setRestrictions($unitRestrictions);
+                $unit->setRateId((string) $rate->rate_id);
 
                 if (true === OctoRequestFacade::isContentRequired()) {
                     $unit->setTitle((string) $rate->label_1);
@@ -515,10 +516,8 @@ class ProductService
         $adultRates = [];
         $ratesFromXML = $this->getRatesFromXML($tour);
         foreach ($ratesFromXML as $rate) {
-            if (isset($rate->agecat)) {
-                if (in_array(self::UNIT_TYPES[(string) $rate->agecat], self::UNIT_TYPES_ADULTS)) {
-                    $adultRates[] = $this->buildUnitId($tour, $rate);
-                }
+            if (isset($rate->agecat) && in_array(self::UNIT_TYPES[(string) $rate->agecat], self::UNIT_TYPES_ADULTS)) {
+                $adultRates[] = $this->buildUnitId($tour,  $rate, (string) $tour->channel_id);
             }
         }
         return $adultRates;
@@ -602,9 +601,9 @@ class ProductService
         return "{$tour->distribution_identifier}|{$tour->channel_id}";
     }
     
-    public function buildUnitId(SimpleXMLElement $tour, SimpleXMLElement $rate): string
+    public function buildUnitId(SimpleXMLElement $tour, SimpleXMLElement $rate, string $channelId): string
     {
-        return "{$tour->distribution_identifier}|{$rate->rate_id}";
+        return "{$tour->distribution_identifier}|{$channelId}|{$rate->rate_id}";
     }
 
     protected function findTourDataFromAPI(string $productId): SimpleXMLElement

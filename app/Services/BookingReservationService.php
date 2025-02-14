@@ -17,8 +17,8 @@ class BookingReservationService
         public TourCMSService $tourCMSService,
         public ProductService $productService,
         public AvailabilityService $availabilityService,
-        public JSONLogService $logger)
-    {}
+        public JSONLogService $logger,
+    ) {}
 
     public function reserve(Product $product, Option $option, Availability $availability, array $unitItems, ?string $uuid = null, string $notes = ''): Booking
     {
@@ -73,8 +73,10 @@ class BookingReservationService
         $rates = [];
 
         foreach ($unitItems as $unitObject) {
-            $unitId = $unitObject['unitId'];
-            $rateId = explode('|', $unitId)[1];
+            
+            $unitId = $unitObject[UnitService::UNIT_ID_FIELD];
+            $rateId = UnitService::getTourCMSRateId($unitId);
+
             if (!array_key_exists($rateId, $rates)) {
                 $rates[$rateId] = 1;
             } else {

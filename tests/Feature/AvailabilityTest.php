@@ -29,8 +29,8 @@ class AvailabilityTest extends FeatureTestCase
     public const INVALID_OPTION_ID = 'a';
     public const VALID_LOCAL_DATE = '2024-11-30';
     public const INVALID_LOCAL_DATE = 'aaa';
-    public const UNIT_ID_R1 = 'TE_1_67|r1';
-    public const UNIT_ID_R2 = 'TE_1_67|r2';
+    public const UNIT_ID_R1 = 'TE_1_67|142|r1';
+    public const UNIT_ID_R2 = 'TE_1_67|142|r2';
     public const INVALID_UNIT_ID = 'aaaa';
     public const VALID_LOCAL_DATE_START = '2024-11-18';
     public const VALID_LOCAL_DATE_END = '2024-11-25';

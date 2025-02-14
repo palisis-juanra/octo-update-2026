@@ -377,14 +377,13 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     {
         $unitPricings = [];
 
-        $productIdWithoutChannel = explode('|', $this->productId)[0];
         $rates = $this->ratesFromShowTourDepartureXML($departure);
         foreach ($rates as $rateId => $rate) {
             $unitPricings[] = 
                 (new AvailabilityUnitPricing)
-                    ->setUnitId("{$productIdWithoutChannel}|{$rateId}")
+                    ->setUnitId("{$this->productId}|{$rateId}")
                     ->setRetailPrice($rate->rate_price * 100)
-                    ->setNetPrice($rate->net_price * 100)
+                    ->setNetPrice((!empty($rate->net_price) ? $rate->net_price : $rate->rate_price) * 100)
                     ->setCurrency($this->currency);
         }
 

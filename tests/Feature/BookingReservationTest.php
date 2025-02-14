@@ -35,10 +35,10 @@ class BookingReservationTest extends FeatureTestCase
     const INVALID_OPTION_ID = 'invalidOptionId';
     const VALID_UNIT_ITEMS = [
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|r1"
+            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r1"
         ],
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|r2" 
+            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r2" 
         ]
     ];
 

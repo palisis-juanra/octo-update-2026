@@ -76,7 +76,7 @@ class BookingReservationController extends Controller
         };
 
         $unitItems = $params[OctoRequest::UNIT_ITEMS] ?? [];
-        $this->unitService->validateUnitItems($unitItems);
+        $this->unitService->validateUnitItems($unitItems, $productId);
 
     }
 }

@@ -6,7 +6,6 @@ use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InvalidAvailabilityIdException;
-use App\Exceptions\InvalidBookingUUIDException;
 use App\Features\Availability\AvailabilityRequest;
 use App\Http\Middleware\OctoAuthentication;
 use App\Interfaces\BaseAvailabilityRequest;
@@ -136,7 +135,10 @@ class AvailabilityService
             }
         }
     
-        $this->unitService->validateUnits($requestParams);
+        $this->unitService->validateUnits(
+            $requestParams[UnitService::PARAM_UNITS] ?? [], 
+            $requestParams[AvailabilityService::PARAM_PRODUCT_ID]
+        );
 
     }
 
