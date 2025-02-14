@@ -11,11 +11,11 @@ use App\Models\Option;
 use App\Models\Place;
 use App\Models\Product;
 use App\Models\ProductContent;
+use App\Models\ProductPricing;
 use App\Models\Unit;
 use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
-use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 use stdClass;
 
@@ -284,6 +284,11 @@ class ProductService
             foreach ($product->getOptions() as $option) {
                 $option->setContent($productContent);
             }
+        }
+
+        if (true === OctoRequestFacade::isPricingRequired()) {
+            $productPricing = new ProductPricing((string) $tour->sale_currency);
+            $product->setPricing($productPricing);
         }
 
         return $product;
