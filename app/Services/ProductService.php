@@ -287,7 +287,9 @@ class ProductService
         }
 
         if (true === OctoRequestFacade::isPricingRequired()) {
-            $productPricing = new ProductPricing(!empty($tour->sale_currency) ? (string) $tour->sale_currency : $this->tourCMSService->showChannel()->channel->sale_currency);
+            $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : $this->tourCMSService->showChannel()->channel->sale_currency;
+            $pricingPer = (string) $tour->quantity_rule == '1' ? ProductPricing::PRICING_PER_BOOKING : ProductPricing::PRICING_PER_UNIT;
+            $productPricing = new ProductPricing($saleCurrency, $pricingPer);
             $product->setPricing($productPricing);
         }
 

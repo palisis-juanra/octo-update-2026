@@ -526,7 +526,7 @@ class ProductTest extends FeatureTestCase
             ->assertJsonFragment([
                 "defaultCurrency" => (string) $this->showTourXML->tour->sale_currency,
                 "availableCurrencies" => [(string) $this->showTourXML->tour->sale_currency],
-                "pricingPer" => ProductPricing::PRICING_PER_BOOKING
+                "pricingPer" => ProductPricing::PRICING_PER_UNIT
             ]);
 
     }
@@ -559,9 +559,44 @@ class ProductTest extends FeatureTestCase
             $response->assertJsonFragment([
                 "defaultCurrency" => (string) $this->showChannelXML->channel->sale_currency,
                 "availableCurrencies" => [(string) $this->showChannelXML->channel->sale_currency],
-                "pricingPer" => ProductPricing::PRICING_PER_BOOKING
+                "pricingPer" => ProductPricing::PRICING_PER_UNIT
             ]);  
         }
+
+    }
+
+    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedProductsWithPricingPerBooking(): void
+    {
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+        ->onlyMethods(['showTour', 'showChannel'])
+        ->disableOriginalConstructor()
+        ->getMock();
+
+        $this->showTourXML->tour->quantity_rule = '1';
+
+        $tourCMSService->method('showTour')->willReturn($this->showTourXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        App::instance(TourCMSService::class, $tourCMSService);
+
+        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
+        App::instance(ProductService::class, $productServiceMock);
+
+
+        $response = $this->get(
+            "/products/TE_1_231|142",
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+            ]
+        );
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment([
+                "defaultCurrency" => (string) $this->showTourXML->tour->sale_currency,
+                "availableCurrencies" => [(string) $this->showTourXML->tour->sale_currency],
+                "pricingPer" => ProductPricing::PRICING_PER_BOOKING
+            ]);
 
     }
 
