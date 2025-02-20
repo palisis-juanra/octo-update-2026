@@ -25,8 +25,9 @@ class Product extends Model
     protected string $redemptionMethod;
     protected array $options;
     protected array $cutoff;
-    protected ?ProductContent $content = null;
     protected bool $allDay = false;
+    protected ?ProductContent $content = null;
+    protected ?ProductPricing $pricing = null;
 
     /**
      * Get the value of id
@@ -423,6 +424,18 @@ class Product extends Model
     public function setAllDay(bool $allDay): self
     {
         $this->allDay = $allDay;
+
+        return $this;
+    }
+ 
+    public function getPricing(): ProductPricing|null
+    {
+        return $this->pricing;
+    }
+
+    public function setPricing(ProductPricing $pricing): static
+    {
+        $this->pricing = $pricing;
 
         return $this;
     }

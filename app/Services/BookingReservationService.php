@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\NoAvailabilityException;
+use App\Factories\BookingFactory;
 use App\Models\Availability\Availability;
 use App\Models\Booking;
 use App\Models\Option;
@@ -16,8 +17,8 @@ class BookingReservationService
         public TourCMSService $tourCMSService,
         public ProductService $productService,
         public AvailabilityService $availabilityService,
-        public JSONLogService $logger)
-    { }
+        public JSONLogService $logger,
+    ) {}
 
     public function reserve(Product $product, Option $option, Availability $availability, array $unitItems, ?string $uuid = null, string $notes = ''): Booking
     {
@@ -55,7 +56,7 @@ class BookingReservationService
         $this->logger->info(["message" => "Temporary booking created in TourCMS"]);
 
         // Create Booking object
-        $booking = Booking::createFromStartNewBookingXML(
+        $booking = BookingFactory::createFromStartNewBookingXML(
             $startNewBookingXML, 
             $product, 
             $option, 
@@ -72,8 +73,10 @@ class BookingReservationService
         $rates = [];
 
         foreach ($unitItems as $unitObject) {
-            $unitId = $unitObject['unitId'];
-            $rateId = explode('|', $unitId)[1];
+            
+            $unitId = $unitObject[UnitService::UNIT_ID_FIELD];
+            $rateId = UnitService::getTourCMSRateId($unitId);
+
             if (!array_key_exists($rateId, $rates)) {
                 $rates[$rateId] = 1;
             } else {

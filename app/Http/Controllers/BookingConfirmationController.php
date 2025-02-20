@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Facades\JSONLog;
 use App\Http\Requests\OctoRequest;
+use App\Models\Booking;
 use App\Services\BookingConfirmationService;
 use App\Services\JSONLogService;
 use App\Services\UnitService;
@@ -12,6 +13,7 @@ use App\Transformers\BookingTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class BookingConfirmationController
 {
@@ -36,6 +38,8 @@ class BookingConfirmationController
         $unitItems = $request->post(OctoRequest::UNIT_ITEMS);
         if (!empty($unitItems)) {
             $this->unitService->validateUnitItems($unitItems);
+            // check unit items same as reservation
+            $this->service->checkUnitItemsHaveNotChanged($booking, $unitItems);
         }
 
         $resellerReference = $request->post(OctoRequest::RESELLER_REFERENCE);

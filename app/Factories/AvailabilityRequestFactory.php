@@ -42,14 +42,17 @@ class AvailabilityRequestFactory
         $pricing = OctoRequestFacade::isPricingRequired();
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
-            return new PricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize, $maxBookingSize, $allDay);
+            return (new PricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize, $maxBookingSize, $allDay))
+                ->setProductId($productId);
         }
         if (!$multiDates) {
             $localDateEnd = '';
             $localDateStart = $localDate;
         }
 
-        $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd);
+        $availabilityRequest = (new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd))
+            ->setProductId($productId);
+
         if (true === OctoRequestFacade::isContentRequired()) {
             $availabilityRequest->setContentEnabled(true);
         }

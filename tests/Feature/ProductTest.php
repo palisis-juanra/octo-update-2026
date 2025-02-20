@@ -1,17 +1,21 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Feature;
 
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Http\Middleware\OctoAuthentication;
+use App\Http\Requests\OctoRequest;
 use App\Models\Product;
+use App\Models\ProductPricing;
 use App\Services\JSONLogService;
 use App\Services\LocaleService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
+use App\Services\XMLService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
+use Illuminate\Support\Facades\App;
 use Tests\FeatureTestCase;
 use SimpleXMLElement;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +25,7 @@ class ProductTest extends FeatureTestCase
     public string $showTourString;
     public string $listToursString;
     public string $showTourInvalidString;
+    public SimpleXMLElement $showChannelXML;
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $listToursXML;
     public SimpleXMLElement $showTourInvalidXML;
@@ -30,16 +35,22 @@ class ProductTest extends FeatureTestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        $this->showChannelXML = simplexml_load_file('./tests/TourCMSResponses/showChannel.xml');
         $this->showTourString = file_get_contents('./tests/TourCMSResponses/showTour.xml');
         $this->listToursString = file_get_contents('./tests/TourCMSResponses/listTours.xml');
         $this->showTourInvalidString = file_get_contents('./tests/TourCMSResponses/showTourInvalid.xml');
         $this->showTourXML = simplexml_load_string($this->showTourString);
         $this->listToursXML = simplexml_load_string($this->listToursString);
         $this->showTourInvalidXML = simplexml_load_string($this->showTourInvalidString);
+
         $this->loggerMock = $this->getMockBuilder(JSONLogService::class)
             ->onlyMethods(['info', 'error'])
             ->disableOriginalConstructor()
             ->getMock();
+        App::instance(JSONLogService::class, $this->loggerMock);
+
+        
         $this->tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
         ->disableOriginalConstructor()
         ->getMock();
@@ -59,10 +70,11 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($this->showTourXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
         
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
         // When
@@ -89,10 +101,11 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($this->showTourInvalidXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -120,10 +133,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->account_timezone);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -150,10 +164,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->delivery_formats);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -182,10 +197,11 @@ class ProductTest extends FeatureTestCase
         $apiResponseDeliveryFormats->addChild('delivery_format', $invalidDeliveryFormat);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -212,10 +228,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->delivery_methods);
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -244,10 +261,11 @@ class ProductTest extends FeatureTestCase
         $apiResponseDeliveryMethods->addChild('delivery_method', $invalidDeliveryMethod);
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -274,10 +292,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->redemption_method);
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -305,10 +324,11 @@ class ProductTest extends FeatureTestCase
         $apiResponseXML->tour->redemption_method = $invalidRedemptionMethod;
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -335,10 +355,11 @@ class ProductTest extends FeatureTestCase
         unset($apiResponseXML->tour->tour_departure_structure->type);
         
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -364,10 +385,11 @@ class ProductTest extends FeatureTestCase
         $apiResponseXML = $this->showTourXML;
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-        ->onlyMethods(['showTour'])
-        ->disableOriginalConstructor()
-        ->getMock();
+            ->onlyMethods(['showTour', 'showChannel'])
+            ->disableOriginalConstructor()
+            ->getMock();
         $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
         
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
         
@@ -393,7 +415,7 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour'])
+            ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -421,10 +443,11 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['listTours'])
+            ->onlyMethods(['listTours', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('listTours')->willReturn($this->listToursXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -453,10 +476,11 @@ class ProductTest extends FeatureTestCase
         ]);
 
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['listTours'])
+            ->onlyMethods(['listTours', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('listTours')->willReturn($this->listToursXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
@@ -473,6 +497,107 @@ class ProductTest extends FeatureTestCase
         $this->assertIsArray($productListData);
         $this->assertNotEmpty($productListData);
         $this->assertCount(1, $productListData);
+    }
+
+    public function test_whenWeSendPricingCapability_thenWeReceivedProductWithPricingInfo(): void
+    {
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+        ->onlyMethods(['showTour', 'showChannel'])
+        ->disableOriginalConstructor()
+        ->getMock();
+        $tourCMSService->method('showTour')->willReturn($this->showTourXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        App::instance(TourCMSService::class, $tourCMSService);
+
+        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
+        App::instance(ProductService::class, $productServiceMock);
+
+
+        $response = $this->get(
+            "/products/TE_1_231|142",
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+            ]
+        );
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment([
+                "defaultCurrency" => (string) $this->showTourXML->tour->sale_currency,
+                "availableCurrencies" => [(string) $this->showTourXML->tour->sale_currency],
+                "pricingPer" => ProductPricing::PRICING_PER_UNIT
+            ]);
+
+    }
+
+    public function test_whenWeSendPricingCapability_thenWeReceivedProductsWithPricingInfo(): void
+    {
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+        ->onlyMethods(['listTours', 'showChannel'])
+        ->disableOriginalConstructor()
+        ->getMock();
+        $tourCMSService->method('listTours')->willReturn($this->listToursXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        App::instance(TourCMSService::class, $tourCMSService);
+
+        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
+        App::instance(ProductService::class, $productServiceMock);
+
+
+        $response = $this->get(
+            "/products",
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+            ]
+        );
+
+        $response->assertOk();
+
+        foreach (XMLService::getArrayFromXmlNode($this->listToursXML, 'tour') as $tour) {
+            $response->assertJsonFragment([
+                "defaultCurrency" => (string) $this->showChannelXML->channel->sale_currency,
+                "availableCurrencies" => [(string) $this->showChannelXML->channel->sale_currency],
+                "pricingPer" => ProductPricing::PRICING_PER_UNIT
+            ]);  
+        }
+
+    }
+
+    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedProductsWithPricingPerBooking(): void
+    {
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+        ->onlyMethods(['showTour', 'showChannel'])
+        ->disableOriginalConstructor()
+        ->getMock();
+
+        $this->showTourXML->tour->quantity_rule = '1';
+
+        $tourCMSService->method('showTour')->willReturn($this->showTourXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        App::instance(TourCMSService::class, $tourCMSService);
+
+        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
+        App::instance(ProductService::class, $productServiceMock);
+
+
+        $response = $this->get(
+            "/products/TE_1_231|142",
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+            ]
+        );
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment([
+                "defaultCurrency" => (string) $this->showTourXML->tour->sale_currency,
+                "availableCurrencies" => [(string) $this->showTourXML->tour->sale_currency],
+                "pricingPer" => ProductPricing::PRICING_PER_BOOKING
+            ]);
+
     }
 
     protected function getProductServiceMock(array $properties = [])

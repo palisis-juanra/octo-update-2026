@@ -7,16 +7,18 @@ use League\Fractal\Resource\Collection;
 
 class ProductTransformer extends BaseTransformer
 {
-    const MODE_BOOKING_PRODUCT = 'bookingProduct';
+    public const MODE_BOOKING_PRODUCT = 'bookingProduct';
 
     protected OptionTransformer $optionTransformer;
     protected ProductContentTransformer $productContentTransformer;
+    protected ProductPricingTransformer $productPricingTransformer;
 
     public function __construct(string $mode)
     {
         parent::__construct($mode);
         $this->optionTransformer = new OptionTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->productContentTransformer = new ProductContentTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->productPricingTransformer = new ProductPricingTransformer();
     }
 
     protected function basicTransform($product): array
@@ -33,8 +35,8 @@ class ProductTransformer extends BaseTransformer
         $optionsTransformed = $this->manager->createData($optionsResource)->toArray()['data'];
 
         $data = [
-            'id' => $product->getId(),
-            'internalName' => $product->getInternalName(),
+            "id" => $product->getId(),
+            "internalName" => $product->getInternalName(),
             "reference" => $product->getReference(),
             "locale" => $product->getLocale(),
             "timeZone" => $product->getTimeZone(),
@@ -52,6 +54,11 @@ class ProductTransformer extends BaseTransformer
         if (true === OctoRequestFacade::isContentRequired()){
             $contentData = $this->productContentTransformer->transform($product->getContent());
             $data = array_merge($data, $contentData);
+        }
+    
+        if (true === OctoRequestFacade::isPricingRequired()){
+            $pricingData = $this->productPricingTransformer->transform($product->getPricing());
+            $data = array_merge($data, $pricingData);
         }
 
         return $data;

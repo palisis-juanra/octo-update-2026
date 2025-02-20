@@ -22,6 +22,7 @@ class Unit extends BaseModel
     protected UnitRestrictions $restrictions;
     protected string $title;
     protected ?string $shortDescription = null;
+    protected string $rateId;
     
     public function __construct()
     {
@@ -185,7 +186,16 @@ class Unit extends BaseModel
         return $this;
     }
 
-    /**
-     * Get the value of title
-     */ 
+
+    public function getRateId(): string
+    {
+        return $this->rateId;
+    }
+
+    public function setRateId($rateId): static
+    {
+        $this->rateId = $rateId;
+
+        return $this;
+    }
 }

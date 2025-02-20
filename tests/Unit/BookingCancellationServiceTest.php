@@ -2,14 +2,9 @@
 
 namespace Tests\Unit;
 
-use App\Exceptions\BookingNotCancellableException;
 use App\Exceptions\InvalidBookingUUIDException;
-use App\Models\Availability\Availability;
 use App\Models\Booking;
-use App\Services\AvailabilityService;
 use App\Services\BookingCancellationService;
-use App\Services\OptionService;
-use App\Services\ProductService;
 use App\Services\TourCMSService;
 use Tests\UnitTestCase;
 
@@ -48,6 +43,7 @@ class BookingCancellationServiceTest extends UnitTestCase
         $booking = new Booking();
         $booking->booking_id = self::VALID_BOOKING_ID;
         $booking->uuid = self::VALID_BOOKING_UUID;
+        $booking->status = Booking::STATUS_CONFIRMED;
         $reason = self::EXAMPLE_REASON;
 
         // When

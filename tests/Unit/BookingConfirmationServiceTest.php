@@ -6,7 +6,9 @@ use App\Models\Booking;
 use App\Models\Contact;
 use App\Services\BookingConfirmationService;
 use App\Services\ContactService;
+use App\Services\JSONLogService;
 use App\Services\TourCMSService;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Tests\UnitTestCase;
 
 class BookingConfirmationServiceTest extends UnitTestCase
@@ -50,5 +52,71 @@ class BookingConfirmationServiceTest extends UnitTestCase
         $this->assertEquals($contactDetails['postalCode'], $contact->getPostalCode());
         $this->assertEquals($contactDetails['country'], $contact->getCountry());
         $this->assertEquals($contactDetails['notes'], $contact->getNotes());
+    }
+
+    public function test_whenUnitItemsChanged_thenWeThrowAnException(): void
+    {
+        $reservationUnitItems = [
+            [
+                "unitId" => "TE_1_231|r1"
+            ]
+        ];
+
+        $confirmationUnitItems = [
+            [
+                "unitId" => "TE_1_231|r1",
+            ],
+            [
+                "unitId" => "TE_1_231|r1"
+            ]
+        ];
+
+        $this->expectException(UnprocessableEntityHttpException::class);
+
+        $bookingConfirmationService = $this->getMockBuilder(BookingConfirmationService::class)
+        ->disableOriginalConstructor()
+        ->onlyMethods([])
+        ->getMock();
+        $bookingConfirmationService->logger = $this->getMockBuilder(JSONLogService::class)->disableOriginalConstructor()->getMock();
+
+        $booking = new Booking();
+        $booking->unit_items = json_encode($reservationUnitItems);
+
+        $bookingConfirmationService->checkUnitItemsHaveNotChanged($booking, $confirmationUnitItems);
+    }
+
+    public function test_whenUnitItemsRemainsTheSame_thenWeDontThrowAnException(): void
+    {
+        $reservationUnitItems = [
+            [
+                "unitId" => "TE_1_231|r1"
+            ]
+        ];
+
+        $confirmationUnitItems = [
+            [
+                "unitId" => "TE_1_231|r1"
+            ]
+        ];
+
+        $this->expectNotToPerformAssertions();
+
+        $bookingConfirmationService = $this->getBookingConfirmationService();
+
+        $booking = new Booking();
+        $booking->unit_items = json_encode($reservationUnitItems);
+
+        $bookingConfirmationService->checkUnitItemsHaveNotChanged($booking, $confirmationUnitItems);
+    }
+
+    protected function getBookingConfirmationService()
+    {
+        $bookingConfirmationService = $this->getMockBuilder(BookingConfirmationService::class)
+        ->disableOriginalConstructor()
+        ->onlyMethods([])
+        ->getMock();
+        $bookingConfirmationService->logger = $this->getMockBuilder(JSONLogService::class)->disableOriginalConstructor()->getMock();
+        
+        return $bookingConfirmationService;
     }
 }

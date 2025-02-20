@@ -13,7 +13,6 @@ use App\Services\TourCMSService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 use OpenApi\Attributes as OA;
 
 class ProductController extends Controller

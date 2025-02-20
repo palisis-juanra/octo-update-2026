@@ -3,12 +3,16 @@
 namespace App\Services;
 
 use App\Exceptions\InvalidBookingUUIDException;
+use App\Factories\BookingFactory;
 use App\Models\Availability\Availability;
 use App\Models\Booking;
 use App\Models\Contact;
+use SimpleXMLElement;
 
 class BookingService
 {
+    public const TCMS_BOOKING_STATUS_DELETED = '-1';
+
     public function __construct(
         public TourCMSService $tourCMSService,
         public JSONLogService $logger,
@@ -31,6 +35,9 @@ class BookingService
         $showBookingResponse = $this->tourCMSService->showBooking($booking->getBookingId());
         $this->logger->info(["showBookingResponse" => $showBookingResponse]);
         
+        // Deleted booking have no components, we must chech that components exists
+        $this->checkIfBookingHaveBeenDeleted($showBookingResponse, $booking->getUuid());
+
         $product = $this->productService->find($booking->product_id);
         $option = $product->getOptionById($booking->option_id);
         $availability = new Availability();
@@ -38,7 +45,7 @@ class BookingService
         $unitItems = json_decode($booking->unit_items, 1);
         $contact = Contact::createContactArrayFromXML($showBookingResponse);
 
-        return Booking::createFromShowBookingXML(
+        return BookingFactory::createFromShowBookingXML(
             $booking->getUuid(),
             $showBookingResponse, 
             $product, 
@@ -47,5 +54,18 @@ class BookingService
             $unitItems,
             $contact
         );
+    }
+
+    /**
+     * @throws \App\Exceptions\InvalidBookingUUIDException
+     * @return bool
+     */
+    protected function checkIfBookingHaveBeenDeleted(SimpleXMLElement $showBooking, string $uuid): bool
+    {
+        if (empty($showBooking->booking->components)) {
+            throw new InvalidBookingUUIDException($uuid);
+        }
+
+        return true;
     }
 }

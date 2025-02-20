@@ -2,16 +2,10 @@
 
 namespace App\Services;
 
-use App\Exceptions\BookingNotCancellableException;
 use App\Exceptions\InvalidBookingUUIDException;
-use App\Models\Availability\Availability;
+use App\Exceptions\NoMatchingDataException;
 use App\Models\Booking;
-use App\Models\Option;
-use App\Models\Product;
-use DateTime;
-use DateTimeZone;
 use SimpleXMLElement;
-use stdClass;
 
 class BookingCancellationService extends BookingService
 {
@@ -29,41 +23,78 @@ class BookingCancellationService extends BookingService
         parent::__construct($tourCMSService, $logger, $productService, $availabilityService);
     }
 
-    public function cancelBooking(Booking $booking, ?string $reason = null, ?bool $force = null): void
+    /**
+     * Cancel a booking
+     * @param \App\Models\Booking $booking
+     * @param mixed $reason
+     * @param mixed $force
+     * @throws \App\Exceptions\InvalidBookingUUIDException
+     * @return bool
+     */
+    public function cancelBooking(Booking $booking, ?string $reason = null): bool
     {   
-        // Cancel booking with the corresponding booking_uuid
-        $bookingData = $this->getCancelBookingXMLRequest($booking->booking_id, $reason);
-        
-        $cancelBookingObject = $this->tourCMSService->cancelBooking($bookingData);
-        $this->logger->info(["cancelBookingObject" => $cancelBookingObject]);
-        $error = (string) $cancelBookingObject->error;
-        
-        if ($error == self::ERROR_PREVIOUSLY_CANCELLED) {
-            $this->logger->info("Booking {$booking->getId()} already cancelled, calling show booking to return booking info");
-            return;
-        }
-        if ($error !== TourCMSService::ERROR_OK) {
-            $this->logger->error(self::BOOKING_NOT_FOUND);
+            
+        try {
+            $bookingData = $this->getCancelBookingXMLRequest($booking->booking_id, $reason);
+            $cancelBookingXML = $this->tourCMSService->cancelBooking($bookingData);
+            $this->logger->info(["Cancel Booking XML Response" => $cancelBookingXML]);
+            
+            if ((string) $cancelBookingXML->error == TourCMSService::INVALID_BOOKING_ID) {
+                throw new InvalidBookingUUIDException($booking->getUuid());
+            }
+
+            return true;
+
+        } catch (NoMatchingDataException) {
             throw new InvalidBookingUUIDException($booking->getUuid());
         }
+    }
 
+    /**
+     * Delete a temporary booking
+     * @param \App\Models\Booking $booking
+     * @throws \App\Exceptions\InvalidBookingUUIDException
+     * @return bool
+     */
+    public function deleteBooking(Booking $booking): bool
+    {
+        try {
+            $deleteBookingXML = $this->tourCMSService->deleteBooking(bookingId: $booking->getBookingId());
+            $this->logger->info(["Delete Booking XML Response" => $deleteBookingXML]);
+            
+            if ((string) $deleteBookingXML->error == TourCMSService::INVALID_BOOKING_ID) {
+                throw new InvalidBookingUUIDException($booking->getUuid());
+            }
+
+            return true;
+
+        } catch (NoMatchingDataException) {
+            throw new InvalidBookingUUIDException($booking->getUuid());
+        }
     }
 
     public function updateBookingStatusToCancelled(Booking $booking): void
     {
-        if ($booking->getStatus() == self::STATUS_CANCELLED) {
-            Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
-        }
+        $booking->setStatus(Booking::STATUS_CANCELLED);
+
+        Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
     }
    
-    public function getCancelBookingXMLRequest(string $bookingId, ?string $reason = null): SimpleXMLElement
+    
+    public function shouldWeCancelBooking(Booking $booking): bool
+    {
+        $status = $booking->getStatus();
+        return $status == Booking::STATUS_CONFIRMED || $status === Booking::STATUS_PENDING;
+    }
+
+    protected function getCancelBookingXMLRequest(string $bookingId, ?string $reason = null): SimpleXMLElement
     {
         $booking = new SimpleXMLElement('<booking />');
         $booking->addChild('booking_id', $bookingId);
         if (!is_null($reason)) {
             $booking->addChild('note', $reason);
         }
-
+    
         return $booking;
     }
 }

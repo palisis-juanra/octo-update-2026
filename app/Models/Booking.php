@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
-use stdClass;
 
 class Booking extends Model
 {
@@ -24,10 +23,13 @@ class Booking extends Model
     public const STATUS_CONFIRMED = 'CONFIRMED';
     public const STATUS_CANCELLED = 'CANCELLED';
     public const STATUS_PENDING = 'PENDING';
-    public const TCMS_CONFIRMED_STATUS = 2;
+    public const STATUS_REDEEMED = 'REDEEMED';
+    public const TCMS_STATUS_QUOTATION = 0;
+    public const TCMS_STATUS_PROVISIONAL = 1;
+    public const TCMS_STATUS_CONFIRMED = 2;
+    public const TCMS_STATUS_TEMPORARY = '-1';
     public const FIELD_VOUCHER = 'VOUCHER';
     public const FIELD_TICKET = 'TICKET';
-    public const CANCELLATION_REFUND_FULL = "FULL";
     protected bool $testMode;
     protected ?string $utcCreatedAt;
     protected ?string $utcUpdatedAt;
@@ -111,102 +113,6 @@ class Booking extends Model
         $this->units = [];
         $this->contact = new Contact;
         $this->voucher = null;
-    }
-
-    public static function createFromStartNewBookingXML(
-        SimpleXMLElement $startNewBookingData,
-        Product $product,
-        Option $option,
-        Availability $availability,
-        array $unitItems,
-        ?string $notes = ''
-    ): Booking
-    {
-        $booking = new Booking();
-
-        $bookingData = $startNewBookingData->booking;
-        $booking->bookingData = $bookingData;
-
-        $booking->setBookingId((int) $bookingData->booking_id);
-        $booking->setUuid((string) $bookingData->booking_uuid);
-        $booking->setAccountId((int) $bookingData->account_id);
-        $booking->setChannelId((int) $bookingData->channel_id);
-        $booking->setUtcExpiresAt((int) $bookingData->hold_time_seconds);
-        $booking->setExpirationMinutes((int) $bookingData->hold_time_seconds / 60);
-        $booking->setProduct($product);
-        $booking->setOption($option);
-        $booking->setAvailability($availability);
-        $booking->setUnits($unitItems);
-        
-        if (!is_null($notes)){
-            $booking->setNotes($notes);
-        }
-
-        if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
-            $voucher = Voucher::createWithoutOptions($product->getRedemptionMethod());
-            $booking->setVoucher($voucher);
-        }
-
-
-        return $booking;
-    }
-
-    public static function createFromShowBookingXML(
-        string $bookingUuid,
-        SimpleXMLElement $showBookingXML,
-        Product $product,
-        Option $option,
-        Availability $availability,
-        array $unitItems,
-        Contact $contact
-    ): Booking
-    {
-        $booking = new Booking();
-
-        $bookingData = $showBookingXML->booking;
-        $booking->bookingData = $bookingData;
-
-        $booking->setBookingId((int) $bookingData->booking_id);
-        $booking->setUuid((string) $bookingUuid);
-        $booking->setAccountId((int) $bookingData->account_id);
-        $booking->setChannelId((int) $bookingData->channel_id);
-
-        $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
-        if (isset($bookingData->agent_ref) && !empty((string)$bookingData->agent_ref)) {
-            $booking->setResellerReference((string) $bookingData->agent_ref);
-        }
-        $booking->setContact($contact);
-        $booking->setUtcCreatedAt((int) $bookingData->made_date_time_at_utc_seconds);
-        $booking->setUtcExpiresAt(isset($bookingData->expiry_date_at_utc_seconds) ? (int) $bookingData->expiry_date_at_utc_seconds : null);
-        $booking->setUtcConfirmedAt(isset($bookingData->confirmed_at_utc_seconds) ? (int) $bookingData->confirmed_at_utc_seconds : null);
-        $booking->setUtcRedeemedAt(self::getFirstRedeemed($bookingData));
-
-        $booking->setExpirationMinutes(null);
-
-        $booking->setStatus(self::getBookingStatus($bookingData));
-        $booking->setCancellable((bool) $bookingData->cancellable);
-
-        if ((int) $bookingData->cancel_reason !== 0) {
-            $cancelObject = new stdClass();
-        
-            $cancelObject->refund = self::CANCELLATION_REFUND_FULL;
-            $cancelObject->reason = (string) $bookingData->cancel_text;
-            $cancelObject->utcCancelledAt = self::createUtcCancelledAt((int) $bookingData->cancelled_at_utc_seconds);
-
-            $booking->setCancellation($cancelObject);
-        }
-        
-        $booking->setProduct($product);
-        $booking->setOption($option);
-        $booking->setAvailability($availability);
-        $booking->setUnits($unitItems);
-        
-        if (in_array(self::FIELD_VOUCHER, $product->getDeliveryMethods())) {
-            $voucher = Voucher::create($bookingData, $product->getRedemptionMethod(), $booking->getUtcRedeemedAt());
-            $booking->setVoucher($voucher);
-        }
-
-        return $booking;
     }
 
     public function getId(): string
@@ -505,19 +411,23 @@ class Booking extends Model
             $unitItem->setUtcRedeemedAt($this->getUtcRedeemedAt());
             $unitItem->setContact($this->getContact());
 
-            $ticketValue = self::getTicketValueForUnitItem($unitId, $unitsQuantities[$unitId]);
-            $this->product->setDeliveryMethods([ProductService::DELIVERY_METHOD_TICKET]);
-            $ticket = new Ticket();
-            $ticket->setRedemptionMethod(ProductService::REDEMPTION_METHOD_DIGITAL);
-            if (!empty($ticketValue)) {
-                $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
-                $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
-                $ticket->setDeliveryOptions([
-                    "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
-                    "deliveryValue" => $ticketValue
-                ]);
+            // We only have to create ticket if the TICKET is present in product's delivery methods
+            if (in_array(ProductService::DELIVERY_METHOD_TICKET, $this->product->getDeliveryMethods())) {
+
+                $ticketValue = self::getTicketValueForUnitItem($unitId, $unitsQuantities[$unitId]);
+                $ticket = new Ticket();
+                $ticket->setRedemptionMethod(ProductService::REDEMPTION_METHOD_DIGITAL);
+                if (!empty($ticketValue)) {
+                    $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
+                    $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
+                    $ticket->setDeliveryOptions([
+                        "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
+                        "deliveryValue" => $ticketValue
+                    ]);
+                }
+                $unitItem->setTicket($ticket);
             }
-            $unitItem->setTicket($ticket);
+            
             
 
             $this->units[] = $unitItem;
@@ -573,14 +483,35 @@ class Booking extends Model
         return $this->getCancellable() == 1;
     }
 
-    protected static function getBookingStatus(SimpleXMLElement $bookingData): string
+    public static function createUtcCancelledAt(?int $cancelledAt): ?string
     {
-        if ((int) $bookingData->cancel_reason !== 0) {
-            return Booking::STATUS_CANCELLED;
+        if (is_null($cancelledAt)) {
+            return null;
         }
 
-        return (int) $bookingData->status == self::TCMS_CONFIRMED_STATUS ? Booking::STATUS_CONFIRMED : Booking::STATUS_PENDING;
+        $cancelledDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $cancelledDateTime->setTimestamp($cancelledAt);
+        return DateTimeService::getISO8601DateFormatted($cancelledDateTime);
+    }
 
+    /**
+     * Get the value of bookingData
+     */ 
+    public function getBookingData(): SimpleXMLElement
+    {
+        return $this->bookingData;
+    }
+    
+    /**
+     * Set the value of bookingData
+     *
+     * @return  self
+     */ 
+    public function setBookingData(SimpleXMLElement $bookingData): self
+    {
+        $this->bookingData = $bookingData;
+        
+        return $this;
     }
 
     protected static function getFirstRedeemed(SimpleXMLElement $bookingData): ?string
@@ -604,17 +535,6 @@ class Booking extends Model
 
     }
 
-    protected static function createUtcCancelledAt(?int $cancelledAt): ?string
-    {
-        if (is_null($cancelledAt)) {
-            return null;
-        }
-
-        $cancelledDateTime = new DateTime('now', new DateTimeZone('UTC'));
-        $cancelledDateTime->setTimestamp($cancelledAt);
-        return DateTimeService::getISO8601DateFormatted($cancelledDateTime);
-    }
-
     protected function getTicketValueForUnitItem(string $unitId, int $number): ?string
     {
         $tcmsRateId = UnitService::getTourCMSRateId($unitId);
@@ -624,17 +544,16 @@ class Booking extends Model
             $rateId = explode('|', (string) $component->rate_breakdown)[0];
             return (($rateId == $tcmsRateId) && ((string) $component->date_type === 'departure')); 
         });
-
+    
         if (empty($rateComponent)) {
             return null;
         }
-
+    
         $tickets = reset($rateComponent)->tickets;
         if (empty($tickets)) { return null; } 
-
+    
         $tickets = XMLService::getArrayFromXmlNode($tickets, 'ticket');
         return (string) $tickets[$number-1]->value;
-
+    
     }
-
 }

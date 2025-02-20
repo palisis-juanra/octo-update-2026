@@ -12,6 +12,7 @@ use App\Http\Responses\OctoResponse;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Controllers\ProductController;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 Route::get('/auth', function(): JsonResponse { return OctoResponse::OK('OK'); })->middleware([OctoAuthentication::class]);
 
@@ -34,3 +35,11 @@ Route::post('/bookings/{uuid}/confirm', [BookingConfirmationController::class, '
 Route::post('/bookings/{uuid}/cancel', [BookingCancellationController::class, 'cancel'])->middleware([OctoAuthentication::class]);
 
 Route::post('/availability/calendar', [AvailabilityCalendarController::class, 'index'])->middleware([OctoAuthentication::class]);
+
+// Endpoints not implemented
+
+Route::post('/bookings/{uuid}/extend', function () { throw new NotFoundHttpException; })->middleware([OctoAuthentication::class]);
+
+Route::patch('/bookings/{uuid}', function () { throw new NotFoundHttpException; })->middleware([OctoAuthentication::class]);
+
+Route::get('/bookings', function () { throw new NotFoundHttpException; })->middleware([OctoAuthentication::class]);

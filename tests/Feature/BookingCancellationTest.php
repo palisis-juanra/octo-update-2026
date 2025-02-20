@@ -34,10 +34,12 @@ class BookingCancellationTest extends FeatureTestCase
         ]
     ];
 
+    public SimpleXMLElement $showChannelXML;
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $cancelBookingXML;
     public SimpleXMLElement $showBookingXML;
     public SimpleXMLElement $showBookingCancelledXML;
+    public SimpleXMLElement $deleteBookingXML;
     public MockObject $tourCMSService;
     public MockObject $availabilityService;
     public MockObject $bookingCancellationService;
@@ -47,10 +49,12 @@ class BookingCancellationTest extends FeatureTestCase
     {
         parent::setUp();
 
-        $this->showTourXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTour_67.xml'));
+        $this->showChannelXML = simplexml_load_file('tests/TourCMSResponses/showTour_67.xml');
+        $this->showTourXML = simplexml_load_file('tests/TourCMSResponses/showTour_67.xml');
         $this->cancelBookingXML = simplexml_load_string('<response><request>POST /c/booking/cancel.xml</request><error>OK</error></response>');
         $this->showBookingXML = simplexml_load_file('tests/TourCMSResponses/showBooking.xml');
         $this->showBookingCancelledXML = simplexml_load_file('tests/TourCMSResponses/showBookingCancelled.xml');
+        $this->deleteBookingXML = simplexml_load_file('tests/TourCMSResponses/deleteBooking.xml');
         
         $date = '2024-12-05';
 
@@ -58,10 +62,14 @@ class BookingCancellationTest extends FeatureTestCase
         $expectedChannelId = '142';
 
         $this->tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour', 'cancelBooking', 'showBooking'])
+            ->onlyMethods(['showChannel', 'showTour', 'cancelBooking', 'showBooking', 'deleteBooking'])
             ->disableOriginalConstructor()
             ->getMock();
         
+        $this->tourCMSService
+            ->method('showChannel')
+            ->willReturn($this->showChannelXML);
+            
         $this->tourCMSService
             ->method('showTour')
             ->with($expectedTourId, $expectedChannelId)
@@ -75,6 +83,12 @@ class BookingCancellationTest extends FeatureTestCase
             ->method('showBooking')
             ->with()
             ->willReturn($this->showBookingCancelledXML);
+    
+        $this->tourCMSService
+            ->method('deleteBooking')
+            ->with()
+            ->willReturn($this->deleteBookingXML);
+        
 
         $this->instance(TourCMSService::class, $this->tourCMSService);
 

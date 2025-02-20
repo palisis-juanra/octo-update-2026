@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\BookingNotCancellableException;
+use App\Models\BookingCancellation;
 use App\Services\BookingCancellationService;
 use App\Services\JSONLogService;
 use App\Transformers\BaseTransformer;
@@ -32,22 +33,30 @@ class BookingCancellationController extends Controller
         $this->logger->info(["message" => "Starting to process cancel booking request", "request" => $request->post()]);
 
         $reason = $requestParams[self::FIELD_REASON] ?? null;
-        $force = $requestParams[self::FIELD_FORCE] ?? null;
 
         $booking = $this->bookingCancelService->getBookingByUuid($uuid);
 
-        $bookingObject = $this->bookingCancelService->getBooking($booking);
+        $booking = $this->bookingCancelService->getBooking($booking);
         
-        if (!$bookingObject->isBookingCancellable()) {
-            $this->logger->info("Booking not cancellable: {$bookingObject->getId()}");
+        if (!$booking->isBookingCancellable()) {
+            $this->logger->info("Booking not cancellable: {$booking->getId()}");
             throw new BookingNotCancellableException;
         };
 
-        $this->bookingCancelService->cancelBooking($bookingObject, $reason, $force);
+        if ($this->bookingCancelService->shouldWeCancelBooking($booking)) {
+            $this->logger->info("Booking {$booking->getUuid()} is confirmed, calling cancel booking endpoint");
+            $cancelled = $this->bookingCancelService->cancelBooking($booking, $reason);
 
-        $booking = $this->bookingCancelService->getBooking($booking);
-        
-        $this->bookingCancelService->updateBookingStatusToCancelled($booking);
+        } else {
+            $this->logger->info("Booking {$booking->getUuid()} is temporary, calling delete booking endpoint");
+            $cancelled = $this->bookingCancelService->deleteBooking($booking);
+        }
+
+        if (true === $cancelled) {
+            $this->bookingCancelService->updateBookingStatusToCancelled($booking);
+            $cancellation = new BookingCancellation($reason);
+            $booking->setCancellation($cancellation);
+        }
 
         $bookingData = $this->transformer->transform($booking);
 

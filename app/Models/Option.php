@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\InvalidUnitIdException;
+use App\Services\UnitService;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use stdClass;
@@ -181,8 +182,10 @@ class Option extends Model
      */
     public function getUnitById(string $unitId): Unit
     {
+        $unitIdExploded = explode(UnitService::SEPARATOR, $unitId);
+        $rateId = array_pop($unitIdExploded);
         foreach ($this->units as $unit) {
-            if ($unit->getId() == $unitId) {
+            if ($unit->getRateId() == $rateId) {
                 return $unit;
             }
         }

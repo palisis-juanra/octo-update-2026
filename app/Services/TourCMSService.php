@@ -30,6 +30,8 @@ class TourCMSService
     const SHOW_TOUR_DEPARTURES_CLOSED_PARAM = 'show_closed_departures=true';
     const SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM = 'distinct_start_dates=1';
     const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
+    public const INVALID_BOOKING_ID = 'INVALID BOOKING ID';
+    public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = "&show_temporary_bookings=1";
 
     private TourCMS $tourCMS;
     private TourCMSMulti $tourCMSMulti;
@@ -46,9 +48,9 @@ class TourCMSService
         $this->channelId = Request::get(OctoAuthentication::FIELD_CHANNEL_ID);
     }
 
-    public function showChannel(string $channelId): SimpleXMLElement
+    public function showChannel(string $channelId = null): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_channel($channelId);
+        $response = $this->tourCMS->show_channel(null === $channelId ? $this->channelId : $channelId);
         $response = $this->handleResponse($response);
 
         return $response;
@@ -170,7 +172,7 @@ class TourCMSService
 
     public function showBooking(string $bookingId): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_booking($bookingId, $this->channelId);
+        $response = $this->tourCMS->show_booking($bookingId . self::QUERYSTRING_SHOW_TEMPORARY_BOOKINGS, $this->channelId);
         return $this->handleResponse($response);
     }
 
@@ -183,6 +185,12 @@ class TourCMSService
     public function cancelBooking(SimpleXMLElement $bookingData): SimpleXMLElement
     {
         $response = $this->tourCMS->cancel_booking($bookingData, $this->channelId);
+        return $this->handleResponse($response);
+    }
+
+    public function deleteBooking(string $bookingId): SimpleXMLElement
+    {
+        $response = $this->tourCMS->delete_booking($bookingId, $this->channelId);
         return $this->handleResponse($response);
     }
 

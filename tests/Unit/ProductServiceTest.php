@@ -522,7 +522,7 @@ class ProductServiceTest extends UnitTestCase
         $tourData = $showTourResponseXML->tour;
         $tourData->tour_permit_child_only = 0;
 
-        $expectedAccompaniedBy = ['TE_1_184|r1'];
+        $expectedAccompaniedBy = ["{$this->showTourXML->tour->distribution_identifier}|{$this->showTourXML->tour->channel_id}|r1"];
 
         $optionUnits = $productServiceMock->getOptionUnits($tourData);
         $this->assertNotEmpty($optionUnits);

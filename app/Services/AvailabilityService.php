@@ -135,7 +135,10 @@ class AvailabilityService
             }
         }
     
-        $this->unitService->validateUnits($requestParams);
+        $this->unitService->validateUnits(
+            $requestParams[UnitService::PARAM_UNITS] ?? [], 
+            $requestParams[AvailabilityService::PARAM_PRODUCT_ID]
+        );
 
     }
 
