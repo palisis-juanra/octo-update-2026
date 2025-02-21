@@ -112,7 +112,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     /**
      * Get the value of minBookingSize
      */ 
-    public function getMinBookingSize()
+    public function getMinBookingSize(): int
     {
         return $this->minBookingSize;
     }
@@ -122,7 +122,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
      *
      * @return  self
      */ 
-    public function setMinBookingSize($minBookingSize)
+    public function setMinBookingSize(int $minBookingSize): static
     {
         $this->minBookingSize = $minBookingSize;
         return $this;
@@ -198,10 +198,11 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $filteredDepartures;
     }
 
-    public function getOctoStatusFromTourCMSStatus(string $status): string
+    public function getOctoStatus(string $tcmsStatus, bool $available): string
     {
-        if ($status == self::TCMS_STATUS_OPEN || $status == self::TCMS_STATUS_ASKFIRST) {
-            return self::OCTO_STATUS_AVAILABLE;
+        if ($tcmsStatus == self::TCMS_STATUS_OPEN || $tcmsStatus == self::TCMS_STATUS_ASKFIRST) {
+
+            return $available ? self::OCTO_STATUS_AVAILABLE : self::OCTO_STATUS_SOLD_OUT;
         }
 
         return self::OCTO_STATUS_CLOSED;
@@ -229,27 +230,27 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
 // PRIVATE FUNCTIONS
 
-    protected function checkSpacesRemaining(\SimpleXMLElement $departure): bool
+    protected function howManySpacesAreRequested(): int
     {
-        $spacesRequired = $this->getMinBookingSize();
-        if (!empty($this->getUnits())) {
-            $spacesRequired = 0;
-            foreach ($this->getUnits() as $unit) {
-                $spacesRequired += (int) $unit['quantity'];
-            }
+        if (empty($this->getUnits())) {
+            return $this->getMinBookingSize();
         }
-        return $departure->spaces_remaining >= $spacesRequired;
+
+        $spacesRequired = 0;
+        foreach ($this->getUnits() as $unit) {
+            $spacesRequired += (int) $unit['quantity'];
+        }
+        return $spacesRequired;
     }
 
-    protected function checkMaxUnitsExceeded(\SimpleXMLElement $departure): bool
+    protected function areSufficientSpacesInDeparture(SimpleXMLElement $departure): bool
     {
-        $totalRequestedUnits = 0;
-        if (!empty($this->units)) {
-            foreach ($this->units as $unit) {
-                $totalRequestedUnits += (int) $unit['quantity'];
-            }
-        }
-        return $this->maxBookingSize >= $totalRequestedUnits;
+        return (int) $departure->spaces_remaining >= $this->howManySpacesAreRequested();
+    }
+
+    protected function checkMaxUnitsExceeded(): bool
+    {
+        return $this->getMaxBookingSize() >= $this->howManySpacesAreRequested();
     }
 
     protected function fetchDeparturesFromAPI(TourCMSService $tourCMSService): array
@@ -285,12 +286,15 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
             $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
             $availability->setAllDay($this->allDay);
-            $availability->setAvailable($this->checkSpacesRemaining($departure) && $this->checkMaxUnitsExceeded($departure));
-            $availability->setStatus($this->getOctoStatusFromTourCMSStatus((string) $departure->status));
+            $available = $this->isDepartureAvailable($departure);
+            $availability->setAvailable($available);
+            $availability->setStatus($this->getOctoStatus((string) $departure->status, $available));
             $availability->setMaxUnits($this->maxUnits);
             $availability->setUtcCutoffAt($this->cutoff);
             $availability->setOpeningHoursFrom(!empty($departure->start_time) ? (string) $departure->start_time : '00:00');
             $availability->setOpeningHoursTo(!empty($departure->end_time) ? (string) $departure->end_time :'23:59');
+            $availability->setVacancies((int) $departure->spaces_remaining);
+            $availability->setCapacity((int) $departure->spaces_total);
 
             if (true === OctoRequestFacade::isPricingRequired()) {
                 $pricing = $this->getPricingForMultipleDays($departure);
@@ -309,6 +313,14 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         } 
 
         return $availabilities;
+    }
+
+    protected function isDepartureAvailable(SimpleXMLElement $departure): bool
+    {
+        return 
+            (string) $departure->status === self::TCMS_STATUS_OPEN &&
+            $this->areSufficientSpacesInDeparture($departure) && 
+            $this->checkMaxUnitsExceeded();
     }
 
     protected function generateAvailabilityIdFromDepartureOrComponentObject($departure):string

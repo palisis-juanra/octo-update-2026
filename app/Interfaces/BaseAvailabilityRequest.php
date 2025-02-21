@@ -33,7 +33,7 @@ abstract class BaseAvailabilityRequest
      * Map between TourCMS departure status and Octo availability status
      * @return string
      */
-    abstract public function getOctoStatusFromTourCMSStatus(string $tourCMSStatus): string;
+    abstract public function getOctoStatus(string $tourCMSStatus, bool $available): string;
 
     public function setMaxUnits(int $maxUnits): void
     {
