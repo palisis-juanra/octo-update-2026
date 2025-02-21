@@ -35,39 +35,71 @@ class OctoRequest
     public const CAPABILITIES_CONTENT = 'octo/content';
 
     public const CAPABILITIES_ALLOWED = [
-        self::CAPABILITIES_PRICING => [
-            self::ENDPOINT_PRODUCT_GET,
-            self::ENDPOINT_PRODUCTS_GET,
-            self::ENDPOINT_AVAILABILITY_CHECK
+
+        self::ENDPOINT_SUPPLIER_GET => [
+            self::CAPABILITIES_CONTENT
         ],
-        self::CAPABILITIES_CONTENT => [
-            self::ENDPOINT_SUPPLIER_GET,
-            self::ENDPOINT_SUPPLIERS_GET,
-            self::ENDPOINT_PRODUCT_GET,
-            self::ENDPOINT_PRODUCTS_GET,
-            self::ENDPOINT_AVAILABILITY_CHECK
+        
+        self::ENDPOINT_SUPPLIERS_GET => [
+            self::CAPABILITIES_CONTENT
+        ],
+
+        self::ENDPOINT_PRODUCT_GET => [
+            self::CAPABILITIES_PRICING,
+            self::CAPABILITIES_CONTENT
+        ],
+
+        self::ENDPOINT_PRODUCTS_GET => [
+            self::CAPABILITIES_PRICING,
+            self::CAPABILITIES_CONTENT
+        ],
+
+        self::ENDPOINT_AVAILABILITY_CHECK => [
+            self::CAPABILITIES_PRICING,
+            self::CAPABILITIES_CONTENT
         ]
     ];
 
     protected string $capabilitiesHeader = '';
-    protected bool $pricingCapability = false;
-    protected bool $contentCapability = false;
+    protected array $requestedCapabilities = [];
+    protected array $activeCapabilities = [];
 
     public function __construct(public Request $request)
     {
         $this->capabilitiesHeader = $request->header(self::CAPABILITIES_HEADER) ?? '';
-        $this->pricingCapability = $this->isCapabilityHeaderPresent(self::CAPABILITIES_PRICING) && $this->isCapabilityAllowedForRoute(self::CAPABILITIES_PRICING);
-        $this->contentCapability = $this->isCapabilityHeaderPresent(self::CAPABILITIES_CONTENT) && $this->isCapabilityAllowedForRoute(self::CAPABILITIES_CONTENT);
+        $this->requestedCapabilities = $this->getCapabilitiesRequestedFromHeaderString();
+        $this->activeCapabilities = array_intersect($this->requestedCapabilities, $this->getAllowedCapabilitiesForThisEndpoint());
     }
 
-    public function isPricingRequired(): bool
+    public function isCapabilityActive(string $capability): bool
     {
-        return $this->pricingCapability;
+        return in_array($capability, $this->activeCapabilities);
     }
 
-    public function isContentRequired(): bool
+    public function getActiveCapabilities(): array
     {
-        return $this->contentCapability;
+        return $this->activeCapabilities;
+    }
+
+    public function getActiveCapabilitiesAsString(): string
+    { 
+        return implode(', ', $this->activeCapabilities);
+    }
+
+    protected function getAllowedCapabilitiesForThisEndpoint(): array
+    {
+        $route = $this->request->route();
+        if (is_null($route)) {
+            return [];
+        }
+
+        return self::CAPABILITIES_ALLOWED[$route->getName()] ?? [];
+    }
+
+    protected function getCapabilitiesRequestedFromHeaderString(): array
+    {
+        $capabilitiesArray = explode(',', strtolower($this->capabilitiesHeader));
+        return array_map('trim', $capabilitiesArray);
     }
 
     protected function isCapabilityHeaderPresent(string $header)
@@ -79,6 +111,6 @@ class OctoRequest
 
     protected function isCapabilityAllowedForRoute(string $capability): bool
     {
-        return in_array($this->request->route()->getName(), self::CAPABILITIES_ALLOWED[$capability]);
+        return in_array($capability, self::CAPABILITIES_ALLOWED[$this->request->route()->getName()] ?? []);
     }
 }

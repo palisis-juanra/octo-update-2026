@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
 
 class UnitTransformer extends BaseTransformer
 {
@@ -24,7 +25,7 @@ class UnitTransformer extends BaseTransformer
             'restrictions' => $this->unitRestrictionsTranformer->transform($unit->getRestrictions())
         ];
 
-        if (true === OctoRequestFacade::isContentRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $data['title'] = $unit->getTitle();
             $data['shortDescription'] = $unit->getShortDescription();
         }

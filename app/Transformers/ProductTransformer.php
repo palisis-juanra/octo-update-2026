@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
 use League\Fractal\Resource\Collection;
 
 class ProductTransformer extends BaseTransformer
@@ -51,12 +52,12 @@ class ProductTransformer extends BaseTransformer
             "options" => $optionsTransformed
         ];
 
-        if (true === OctoRequestFacade::isContentRequired()){
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)){
             $contentData = $this->productContentTransformer->transform($product->getContent());
             $data = array_merge($data, $contentData);
         }
     
-        if (true === OctoRequestFacade::isPricingRequired()){
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)){
             $pricingData = $this->productPricingTransformer->transform($product->getPricing());
             $data = array_merge($data, $pricingData);
         }

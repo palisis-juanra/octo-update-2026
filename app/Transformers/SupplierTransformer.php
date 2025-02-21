@@ -34,7 +34,7 @@ class SupplierTransformer extends BaseTransformer
                 "address" => $supplier->getFullAddress()
             ]
         ];
-        if (OctoRequestFacade::isContentRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $data['shortDescription'] = $supplier->getShortDescription();
             $data['media'] = [];
             foreach ($supplier->getMedia() as $media) {

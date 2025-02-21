@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
 use League\Fractal\Resource\Collection;
 
 class OptionTransformer extends BaseTransformer
@@ -45,7 +46,7 @@ class OptionTransformer extends BaseTransformer
             'units' => $unitsTransformed
         ];
 
-        if (true === OctoRequestFacade::isContentRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $contentData = $this->productContentTransformer->transform($option->getContent());
             $data = array_merge($data, $contentData);
         }

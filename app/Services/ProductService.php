@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
 use App\Models\Location;
 use App\Models\Media;
 use App\Models\Option;
@@ -261,7 +262,7 @@ class ProductService
                 ->setMaxBookingSize($maxBookingSize)
                 ->setAllDay($allDay);
         
-        if (true === OctoRequestFacade::isContentRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
 
             $productContent = new ProductContent();
             
@@ -287,7 +288,7 @@ class ProductService
             }
         }
 
-        if (true === OctoRequestFacade::isPricingRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
             $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : $this->tourCMSService->showChannel()->channel->sale_currency;
             $pricingPer = (string) $tour->quantity_rule == '1' ? ProductPricing::PRICING_PER_BOOKING : ProductPricing::PRICING_PER_UNIT;
             $productPricing = new ProductPricing($saleCurrency, $pricingPer);
@@ -463,7 +464,7 @@ class ProductService
                 $unit->setRestrictions($unitRestrictions);
                 $unit->setRateId((string) $rate->rate_id);
 
-                if (true === OctoRequestFacade::isContentRequired()) {
+                if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
                     $unit->setTitle((string) $rate->label_1);
                 }
 

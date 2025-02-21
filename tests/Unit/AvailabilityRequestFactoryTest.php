@@ -65,7 +65,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
 
     public function test_whenRequestHasAOnlyOneDayWithPricingHeader_thenPricingAvailabilityRequestIsCreated()
     {
-        OctoRequestFacade::shouldReceive('isPricingRequired')
+        OctoRequestFacade::shouldReceive('isCapabilityActive')
             ->andReturn(true);
 
         $requestParams = [
@@ -127,7 +127,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
             OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING,
         ]);
 
-        OctoRequestFacade::shouldReceive('isPricingRequired')
+        OctoRequestFacade::shouldReceive('isCapabilityActive')
             ->andReturn(true);
 
         $requestParams = [

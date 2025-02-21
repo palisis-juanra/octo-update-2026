@@ -7,11 +7,8 @@ use App\Providers\JSONLogServiceProvider;
 use App\Providers\TourCMSServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
-use Tests\FakeServices\FakeJSONLogServiceProvider;
-use Tests\FakeServices\FakeTourCMSServiceProvider;
 
 
 class OctoAuthentication

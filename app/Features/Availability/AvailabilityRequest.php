@@ -5,6 +5,7 @@ namespace App\Features\Availability;
 use App\Exceptions\InvalidAvailabilityIdException;
 use App\Exceptions\InvalidUnitIdException;
 use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\DateTimeService;
 use App\Services\OptionService;
@@ -262,7 +263,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         if (!isset($response->tour->dates_and_prices)) {
             return [];
         }
-        if (true === OctoRequestFacade::isPricingRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
             $this->currency = (string)$response->tour->sale_currency;
         }
         $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
@@ -296,14 +297,14 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setVacancies((int) $departure->spaces_remaining);
             $availability->setCapacity((int) $departure->spaces_total);
 
-            if (true === OctoRequestFacade::isPricingRequired()) {
+            if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
                 $pricing = $this->getPricingForMultipleDays($departure);
                 $unitPricing = $this->getUnitPricing($departure);
                 $availability->setCurrency($this->currency);
                 $availability->setPricing($pricing);
                 $availability->setUnitPricing($unitPricing);
             }
-            if (true === OctoRequestFacade::isContentRequired()) {
+            if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
                 $supplierNote = !empty($departure->supplier_note) ? (string) $departure->supplier_note : '';
                 $availability->setTitle("{$this->tourName} {$supplierNote}");
                 $availability->setShortDescription(!empty($departure->note) ? (string) $departure->note : null);
