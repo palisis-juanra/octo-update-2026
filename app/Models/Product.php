@@ -10,6 +10,9 @@ class Product extends Model
 {
     use HasFactory;
 
+    public const PRICING_PER_BOOKING = 'BOOKING';
+    public const PRICING_PER_UNIT = 'UNIT';
+
     protected string $id;
     protected string $internalName;
     protected ?string $reference;
@@ -27,7 +30,10 @@ class Product extends Model
     protected array $cutoff;
     protected bool $allDay = false;
     protected ?ProductContent $content = null;
-    protected ?ProductPricing $pricing = null;
+    protected $defaultCurrency;
+    protected $availableCurrencies = [];
+    protected $pricingPer = self::PRICING_PER_UNIT;
+    protected ?Pricing $pricing = null;
 
     /**
      * Get the value of id
@@ -428,14 +434,50 @@ class Product extends Model
         return $this;
     }
  
-    public function getPricing(): ProductPricing|null
+    public function getPricing(): Pricing|null
     {
         return $this->pricing;
     }
 
-    public function setPricing(ProductPricing $pricing): static
+    public function setPricing(Pricing $pricing): static
     {
         $this->pricing = $pricing;
+
+        return $this;
+    }
+
+    public function getDefaultCurrency(): string
+    {
+        return $this->defaultCurrency;
+    }
+
+    public function setDefaultCurrency(string $defaultCurrency): static
+    {
+        $this->defaultCurrency = $defaultCurrency;
+
+        return $this;
+    }
+
+    public function getAvailableCurrencies(): array
+    {
+        return $this->availableCurrencies;
+    }
+
+    public function setAvailableCurrencies(array $availableCurrencies): static
+    {
+        $this->availableCurrencies = $availableCurrencies;
+
+        return $this;
+    }
+
+    public function getPricingPer(): string
+    {
+        return $this->pricingPer;
+    }
+
+    public function setPricingPer(string $pricingPer): static
+    {
+        $this->pricingPer = $pricingPer;
 
         return $this;
     }

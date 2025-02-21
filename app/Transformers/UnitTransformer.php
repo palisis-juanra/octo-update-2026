@@ -8,10 +8,13 @@ use App\Http\Requests\OctoRequest;
 class UnitTransformer extends BaseTransformer
 {
     protected UnitRestrictionsTransformer $unitRestrictionsTranformer;
+    protected PricingTransformer $pricingTransformer;
+
     public function __construct(string $mode)
     {
         parent::__construct($mode);
         $this->unitRestrictionsTranformer = new UnitRestrictionsTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->pricingTransformer = new PricingTransformer();
     }
 
     public function basicTransform($unit): array
@@ -28,6 +31,12 @@ class UnitTransformer extends BaseTransformer
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $data['title'] = $unit->getTitle();
             $data['shortDescription'] = $unit->getShortDescription();
+        }
+
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
+            $data['fromPricing'] = [
+                $this->pricingTransformer->transform($unit->getPricing())
+            ];
         }
 
         return $data;

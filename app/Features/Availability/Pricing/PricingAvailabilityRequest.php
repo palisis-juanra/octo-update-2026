@@ -5,7 +5,7 @@ namespace App\Features\Availability\Pricing;
 use App\Features\Availability\AvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\Availability;
-use App\Models\Availability\AvailabilityPricing;
+use App\Models\Pricing;
 use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
@@ -109,7 +109,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
             $totalPricing = $component->total_price * 100;
             $netPrice = $component->net_price * 100;
 
-            $pricing = new AvailabilityPricing(
+            $pricing = new Pricing(
                 $totalPricing,
                 $totalPricing,
                 $netPrice,
@@ -157,7 +157,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
             $totalPricing = $checkAvailcomponentsIndexed[$availability->getId()]->total_price * 100;
             $netPrice = $checkAvailcomponentsIndexed[$availability->getId()]->net_price * 100;
             
-            $pricing = new AvailabilityPricing(
+            $pricing = new Pricing(
                 $totalPricing,
                 $totalPricing,
                 $netPrice,

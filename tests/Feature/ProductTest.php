@@ -7,7 +7,6 @@ use App\Exceptions\InvalidProductIdException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Requests\OctoRequest;
 use App\Models\Product;
-use App\Models\ProductPricing;
 use App\Services\JSONLogService;
 use App\Services\LocaleService;
 use App\Services\ProductService;
@@ -526,7 +525,7 @@ class ProductTest extends FeatureTestCase
             ->assertJsonFragment([
                 "defaultCurrency" => (string) $this->showTourXML->tour->sale_currency,
                 "availableCurrencies" => [(string) $this->showTourXML->tour->sale_currency],
-                "pricingPer" => ProductPricing::PRICING_PER_UNIT
+                "pricingPer" => Product::PRICING_PER_UNIT
             ]);
 
     }
@@ -559,7 +558,7 @@ class ProductTest extends FeatureTestCase
             $response->assertJsonFragment([
                 "defaultCurrency" => (string) $this->showChannelXML->channel->sale_currency,
                 "availableCurrencies" => [(string) $this->showChannelXML->channel->sale_currency],
-                "pricingPer" => ProductPricing::PRICING_PER_UNIT
+                "pricingPer" => Product::PRICING_PER_UNIT
             ]);  
         }
 
@@ -595,7 +594,7 @@ class ProductTest extends FeatureTestCase
             ->assertJsonFragment([
                 "defaultCurrency" => (string) $this->showTourXML->tour->sale_currency,
                 "availableCurrencies" => [(string) $this->showTourXML->tour->sale_currency],
-                "pricingPer" => ProductPricing::PRICING_PER_BOOKING
+                "pricingPer" => Product::PRICING_PER_BOOKING
             ]);
 
     }

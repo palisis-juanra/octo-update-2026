@@ -12,14 +12,14 @@ class ProductTransformer extends BaseTransformer
 
     protected OptionTransformer $optionTransformer;
     protected ProductContentTransformer $productContentTransformer;
-    protected ProductPricingTransformer $productPricingTransformer;
+    protected PricingTransformer $pricingTransformer;
 
     public function __construct(string $mode)
     {
         parent::__construct($mode);
         $this->optionTransformer = new OptionTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->productContentTransformer = new ProductContentTransformer(BaseTransformer::FULL_TRANSFORM);
-        $this->productPricingTransformer = new ProductPricingTransformer();
+        $this->pricingTransformer = new PricingTransformer();
     }
 
     protected function basicTransform($product): array
@@ -58,8 +58,12 @@ class ProductTransformer extends BaseTransformer
         }
     
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)){
-            $pricingData = $this->productPricingTransformer->transform($product->getPricing());
-            $data = array_merge($data, $pricingData);
+            
+            $data['defaultCurrency'] = $product->getDefaultCurrency();
+            $data['availableCurrencies'] = $product->getAvailableCurrencies();
+            $data['pricingPer'] = $product->getPricingPer();
+
+            $data['pricingFrom'] = $this->pricingTransformer->transform($product->getPricing());
         }
 
         return $data;

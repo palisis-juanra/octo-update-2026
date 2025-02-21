@@ -10,9 +10,9 @@ use App\Models\Location;
 use App\Models\Media;
 use App\Models\Option;
 use App\Models\Place;
+use App\Models\Pricing;
 use App\Models\Product;
 use App\Models\ProductContent;
-use App\Models\ProductPricing;
 use App\Models\Unit;
 use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
@@ -289,9 +289,20 @@ class ProductService
         }
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
-            $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : $this->tourCMSService->showChannel()->channel->sale_currency;
-            $pricingPer = (string) $tour->quantity_rule == '1' ? ProductPricing::PRICING_PER_BOOKING : ProductPricing::PRICING_PER_UNIT;
-            $productPricing = new ProductPricing($saleCurrency, $pricingPer);
+            $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : (string) $this->tourCMSService->showChannel()->channel->sale_currency;
+            $pricingPer = $this->getPricingPerFromTourXML($tour);
+            
+            $product->setDefaultCurrency($saleCurrency);
+            $product->setAvailableCurrencies([$saleCurrency]);
+            $product->setPricingPer($pricingPer);
+
+            $productPricing = new Pricing(
+                100 * $tour->from_price,
+                100 * $tour->from_price,
+                100 * $tour->from_price,
+                $saleCurrency,
+            );
+
             $product->setPricing($productPricing);
         }
 
@@ -468,6 +479,16 @@ class ProductService
                     $unit->setTitle((string) $rate->label_1);
                 }
 
+                if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
+                    $unitPricing = new Pricing(
+                        100 * $rate->from_price,
+                        100 * $rate->from_price,
+                        100 * $rate->from_price,
+                        (string) $tour->sale_currency
+                    );
+                    $unit->setPricing($unitPricing);
+                }
+
                 $optionUnits[] = $unit;
             }
         }
@@ -603,6 +624,11 @@ class ProductService
     public function buildProductId(SimpleXMLElement $tour): string
     {
         return "{$tour->distribution_identifier}|{$tour->channel_id}";
+    }
+
+    protected function getPricingPerFromTourXML(SimpleXMLElement $tour): string
+    {
+        return (string) $tour->quantity_rule == '1' ? Product::PRICING_PER_BOOKING : Product::PRICING_PER_UNIT;
     }
 
     protected function findTourDataFromAPI(string $productId): SimpleXMLElement

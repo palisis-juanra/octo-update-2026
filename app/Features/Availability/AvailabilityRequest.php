@@ -11,8 +11,8 @@ use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
 use App\Models\Availability\Availability;
-use App\Models\Availability\AvailabilityPricing;
 use App\Models\Availability\AvailabilityUnitPricing;
+use App\Models\Pricing;
 use App\Services\UnitService;
 use App\Services\XMLService;
 use SimpleXMLElement;
@@ -358,7 +358,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         }
     }
 
-    protected function getPricingForMultipleDays(SimpleXMLElement $departure): AvailabilityPricing
+    protected function getPricingForMultipleDays(SimpleXMLElement $departure): Pricing
     {
         $totalPricing = 0;
         $netPrice = 0;
@@ -379,7 +379,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         $totalPricing *= 100;
         $netPrice *= 100;
 
-        return new AvailabilityPricing(
+        return new Pricing(
             $totalPricing,
             $totalPricing,
             $netPrice,

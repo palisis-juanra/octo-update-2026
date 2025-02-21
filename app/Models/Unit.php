@@ -23,6 +23,7 @@ class Unit extends BaseModel
     protected string $title;
     protected ?string $shortDescription = null;
     protected string $rateId;
+    protected ?Pricing $pricing = null;
     
     public function __construct()
     {
@@ -195,6 +196,18 @@ class Unit extends BaseModel
     public function setRateId($rateId): static
     {
         $this->rateId = $rateId;
+
+        return $this;
+    }
+
+    public function getPricing(): ?Pricing
+    {
+        return $this->pricing;
+    }
+
+    public function setPricing(?Pricing $pricing): static
+    {
+        $this->pricing = $pricing;
 
         return $this;
     }
