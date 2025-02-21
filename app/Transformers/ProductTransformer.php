@@ -4,6 +4,7 @@ namespace App\Transformers;
 
 use App\Facades\OctoRequestFacade;
 use App\Http\Requests\OctoRequest;
+use App\Models\Product;
 use League\Fractal\Resource\Collection;
 
 class ProductTransformer extends BaseTransformer
@@ -63,7 +64,9 @@ class ProductTransformer extends BaseTransformer
             $data['availableCurrencies'] = $product->getAvailableCurrencies();
             $data['pricingPer'] = $product->getPricingPer();
 
-            $data['pricingFrom'] = $this->pricingTransformer->transform($product->getPricing());
+            if ($product->getPricingPer() === Product::PRICING_PER_BOOKING) {
+                $data['pricingFrom'] = $this->pricingTransformer->transform($product->getPricing());
+            }
         }
 
         return $data;

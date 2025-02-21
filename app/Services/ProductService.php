@@ -296,14 +296,15 @@ class ProductService
             $product->setAvailableCurrencies([$saleCurrency]);
             $product->setPricingPer($pricingPer);
 
-            $productPricing = new Pricing(
-                100 * $tour->from_price,
-                100 * $tour->from_price,
-                100 * $tour->from_price,
-                $saleCurrency,
-            );
-
-            $product->setPricing($productPricing);
+            if ($pricingPer === Product::PRICING_PER_BOOKING) {
+                $productPricing = new Pricing(
+                    100 * $tour->from_price,
+                    100 * $tour->from_price,
+                    100 * $tour->from_price,
+                    $saleCurrency,
+                );
+                $product->setPricing($productPricing);
+            }
         }
 
         return $product;
@@ -480,13 +481,15 @@ class ProductService
                 }
 
                 if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
-                    $unitPricing = new Pricing(
-                        100 * $rate->from_price,
-                        100 * $rate->from_price,
-                        100 * $rate->from_price,
-                        (string) $tour->sale_currency
-                    );
-                    $unit->setPricing($unitPricing);
+                    if (Product::PRICING_PER_UNIT === $this->getPricingPerFromTourXML($tour)) {
+                        $unitPricing = new Pricing(
+                            100 * $rate->from_price,
+                            100 * $rate->from_price,
+                            100 * $rate->from_price,
+                            (string) $tour->sale_currency
+                        );
+                        $unit->setPricing($unitPricing);
+                    }
                 }
 
                 $optionUnits[] = $unit;
