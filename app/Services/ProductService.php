@@ -271,14 +271,15 @@ class ProductService
             $categoryLabels = CategoryLabelService::getFromTourXML($tour);
             $durationMinutesFrom = $this->getDurationMinutesFrom($tour);
             
-            $productContent->setTitle((string) $tour->tour_name)
-                            ->setShortDescription((string) $tour->shortdesc)
-                            ->setDescription($tour->longdesc)
-                            ->setFeatures($features)
-                            ->setMedia($media)
-                            ->setLocations($locations)
-                            ->setCategoryLabels($categoryLabels)
-                            ->setDurationMinutesFrom($durationMinutesFrom);
+            $productContent
+                ->setTitle((string) $tour->tour_name)
+                ->setShortDescription((string) $tour->shortdesc)
+                ->setDescription($tour->longdesc)
+                ->setFeatures($features)
+                ->setMedia($media)
+                ->setLocations($locations)
+                ->setCategoryLabels($categoryLabels)
+                ->setDurationMinutesFrom($durationMinutesFrom);
             $product->setContent($productContent);
 
             foreach ($product->getOptions() as $option) {
