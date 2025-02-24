@@ -19,6 +19,7 @@ use TourCMS\Utils\TourCMS;
 class TourCMSService
 {
     const ERROR_FAIL_SIG = 'FAIL_SIG';
+    const ERROR_FAIL_KEYNOTFOUND = 'FAIL_KEYNOTFOUND';
     const NO_MATCHING_DATA = 'NO MATCHING DATA';
     const ERROR_PREVIOUSLY_CANCELLED = 'PREVIOUSLY CANCELLED';
     const ERROR_BOOKING_ALREADY_COMMITED = 'BOOKING ALREADY COMMITTED';
@@ -229,6 +230,7 @@ class TourCMSService
                 }
                 return $response;
             case self::ERROR_FAIL_SIG:
+            case self::ERROR_FAIL_KEYNOTFOUND:
                 throw new FailSignatureException();
             case self::NO_MATCHING_DATA:
                 throw new NoMatchingDataException();
