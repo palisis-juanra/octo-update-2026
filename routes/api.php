@@ -12,6 +12,7 @@ use App\Http\Responses\OctoResponse;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Controllers\ProductController;
+use App\Http\Middleware\CapabilitiesHeader;
 use App\Http\Requests\OctoRequest;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -20,57 +21,70 @@ Route::get('/auth', function(): JsonResponse { return OctoResponse::OK('OK'); })
 // Supplier
 Route::get('/supplier', [SupplierController::class, 'index'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_SUPPLIER_GET);
 
 Route::get('/suppliers', [SupplierController::class, 'index'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_SUPPLIERS_GET);
 
 // Products
 Route::get('products', [ProductController::class, 'index'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_PRODUCTS_GET);
 
 Route::get('products/{id}', [ProductController::class, 'show'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_PRODUCT_GET);
 
 // Availability
 
 Route::post('/availability', [AvailabilityController::class, 'index'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_AVAILABILITY_CHECK);
 
 Route::post('/availability/calendar', [AvailabilityCalendarController::class, 'index'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_AVAILABILITY_CALENDAR);
 // Bookings
 Route::get('/bookings/{uuid}', [BookingGetController::class, 'show'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_BOOKING_GET);
 
 Route::post('/bookings', [BookingReservationController::class, 'index'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_BOOKINGS_RESERVATION);
 
 Route::post('/bookings/{uuid}/confirm', [BookingConfirmationController::class, 'index'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_BOOKINGS_CONFIRMATION);
 
 Route::post('/bookings/{uuid}/cancel', [BookingCancellationController::class, 'cancel'])
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_BOOKINGS_CANCELLATION);
 
 // Endpoints not implemented
 
 Route::post('/bookings/{uuid}/extend', function () { throw new NotFoundHttpException; })
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_BOOKINGS_EXTEND);
 
 Route::patch('/bookings/{uuid}', function () { throw new NotFoundHttpException; })
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_BOOKINGS_UPDATE);
 
 Route::get('/bookings', function () { throw new NotFoundHttpException; })
     ->middleware([OctoAuthentication::class])
+    ->middleware(CapabilitiesHeader::class)
     ->name(OctoRequest::ENDPOINT_BOOKINGS_GET);
