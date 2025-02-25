@@ -2,7 +2,7 @@
 
 namespace App\Models\Availability;
 
-use App\Models\Availability\AvailabilityPricing;
+use App\Models\Pricing;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -65,7 +65,7 @@ class Availability extends Model
 
     public string $currency;
     public string $date;
-    public ?AvailabilityPricing $pricing = null;
+    public ?Pricing $pricing = null;
     
     public $timestamps = true;
     protected bool $contentEnabled = false;
@@ -356,7 +356,7 @@ class Availability extends Model
     /**
      * Get the value of pricing
      */ 
-    public function getPricing(): ?AvailabilityPricing
+    public function getPricing(): ?Pricing
     {
         return $this->pricing;
     }
@@ -366,7 +366,7 @@ class Availability extends Model
      *
      * @return  self
      */ 
-    public function setPricing(?AvailabilityPricing $pricing)
+    public function setPricing(?Pricing $pricing)
     {
         $this->pricing = $pricing;
 

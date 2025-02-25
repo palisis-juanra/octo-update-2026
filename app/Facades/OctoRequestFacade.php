@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Facade;
 class OctoRequestFacade extends Facade
 {
     /**
-    * @method static bool isPricingRequired()
-    * @method static bool isContentRequired()  
+    * @method static bool isCapabilityActive($capability)
     */
 
     protected static function getFacadeAccessor(): string

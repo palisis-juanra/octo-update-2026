@@ -5,6 +5,7 @@ namespace App\Factories;
 use App\Facades\OctoRequestFacade;
 use App\Features\Availability\AvailabilityRequest;
 use App\Features\Availability\Pricing\PricingAvailabilityRequest;
+use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Services\AvailabilityService;
 use App\Services\ProductService;
@@ -39,7 +40,7 @@ class AvailabilityRequestFactory
             }
         }
 
-        $pricing = OctoRequestFacade::isPricingRequired();
+        $pricing = OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
             return (new PricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize, $maxBookingSize, $allDay))
@@ -53,7 +54,7 @@ class AvailabilityRequestFactory
         $availabilityRequest = (new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd))
             ->setProductId($productId);
 
-        if (true === OctoRequestFacade::isContentRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $availabilityRequest->setContentEnabled(true);
         }
         $availabilityRequest->setMinBookingSize($minBookingSize);

@@ -22,10 +22,10 @@ class SupplierController extends Controller
     public SupplierService $supplierService;
     public JSONLogService $logger;
 
-    public function __construct(Request $request, SupplierService $supplierService)
+    public function __construct(SupplierService $supplierService, JSONLogService $logger)
     {
         $this->supplierService = $supplierService;
-        $this->logger = $this->loadLogger($request);
+        $this->logger = $logger;
     }
 
     #[OA\Get(
@@ -66,31 +66,10 @@ class SupplierController extends Controller
     )]
     public function index(Request $request): JsonResponse
     {
-        try {
-            $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
-            $supplierData = $this->supplierService->getSupplierData($channelId);
-            if ($this->isSuppliersRequest(request()->getRequestUri())) $supplierData = [$supplierData];
-            return new JsonResponse($supplierData, Response::HTTP_OK);
-        } catch (\App\Exceptions\FailSignatureException) {
-            return OctoResponse::FORBIDDEN();
-        } catch (APICallNotOkException) {
-            return OctoResponse::INTERNAL_SERVER_ERROR();
-        } catch (Throwable) {
-            return OctoResponse::INTERNAL_SERVER_ERROR();
-        }
-        
-    }
-
-    protected function loadLogger(Request $request)
-    {
-        
-        return new JSONLogService(
-            $request->get(OctoAuthentication::FIELD_CHANNEL_ID),
-            $request->get(OctoAuthentication::FIELD_MAID),
-            self::ENDPOINT_NAME,
-            $request->get(OctoAuthentication::FIELD_X_CORRELATION_ID),
-            $request->get(OctoAuthentication::FIELD_X_REQUEST_ID)
-        );
+        $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+        $supplierData = $this->supplierService->getSupplierData($channelId);
+        if ($this->isSuppliersRequest(request()->getRequestUri())) $supplierData = [$supplierData];
+        return new JsonResponse($supplierData, Response::HTTP_OK);
     }
 
     protected function isSuppliersRequest($path):bool

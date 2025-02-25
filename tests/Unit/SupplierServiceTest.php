@@ -40,8 +40,8 @@ class SupplierServiceTest extends UnitTestCase
         // When
         $channelId = (string) $this->showChannelXML->channel->channel_id;
 
-        $supplier = $supplierServiceMock->createSupplierFromChannelData($this->showChannelXML->channel, $capabilities);
-        $supplierData = $supplierServiceMock->getSupplierData($channelId, $capabilities);
+        $supplier = $supplierServiceMock->createSupplierFromChannelData($this->showChannelXML->channel);
+        $supplierData = $supplierServiceMock->getSupplierData($channelId);
 
         //Then
         $this->assertInstanceOf(Supplier::class, $supplier);
@@ -59,7 +59,7 @@ class SupplierServiceTest extends UnitTestCase
         ->getMock();
         $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
         
-        OctoRequestFacade::shouldReceive('isContentRequired')
+        OctoRequestFacade::shouldReceive('isCapabilityActive')
         ->andReturn(true);
 
         $supplierServiceMock = $this->getMockBuilder(SupplierService::class)

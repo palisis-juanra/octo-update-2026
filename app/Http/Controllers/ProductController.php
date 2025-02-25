@@ -171,15 +171,9 @@ class ProductController extends Controller
     )]
     public function index(Request $request): JsonResponse
     {
-        try {
-            $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
-            $productList = $this->productService->getProductList($channelId);
-            return new JsonResponse($this->productService->transformList($productList), Response::HTTP_OK);
-        } catch (\App\Exceptions\FailSignatureException) {
-            return OctoResponse::FORBIDDEN();
-        } catch (APICallNotOKException) {
-            return OctoResponse::INTERNAL_SERVER_ERROR();
-        }
+        $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+        $productList = $this->productService->getProductList($channelId);
+        return new JsonResponse($this->productService->transformList($productList), Response::HTTP_OK);
     }
 
     #[OA\Get(
@@ -342,16 +336,12 @@ class ProductController extends Controller
             }
             $product = $this->productService->find($productId);
             return new JsonResponse($this->productService->transform($product), Response::HTTP_OK);
-        } catch (\App\Exceptions\FailSignatureException) {
-            return OctoResponse::FORBIDDEN();
         } catch (InvalidProductContentException $e) {
             $this->logger->info("INVALID PRODUCT CONTENT: {$e->getFile()} ({$e->getLine()}");
             return OctoResponse::INVALID_PRODUCT_ID($productId, $e->getMessage());
         } catch (NoMatchingDataException $e) {
             $this->logger->info("NO MATCHING DATA: {$e->getFile()} ({$e->getLine()}");
             return OctoResponse::INVALID_PRODUCT_ID($productId);
-        } catch (APICallNotOKException) {
-            return OctoResponse::INTERNAL_SERVER_ERROR();
         }
     }
 }

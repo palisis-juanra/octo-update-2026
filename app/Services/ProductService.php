@@ -5,13 +5,14 @@ namespace App\Services;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
 use App\Models\Location;
 use App\Models\Media;
 use App\Models\Option;
 use App\Models\Place;
+use App\Models\Pricing;
 use App\Models\Product;
 use App\Models\ProductContent;
-use App\Models\ProductPricing;
 use App\Models\Unit;
 use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
@@ -261,7 +262,7 @@ class ProductService
                 ->setMaxBookingSize($maxBookingSize)
                 ->setAllDay($allDay);
         
-        if (true === OctoRequestFacade::isContentRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
 
             $productContent = new ProductContent();
             
@@ -271,14 +272,15 @@ class ProductService
             $categoryLabels = CategoryLabelService::getFromTourXML($tour);
             $durationMinutesFrom = $this->getDurationMinutesFrom($tour);
             
-            $productContent->setTitle((string) $tour->tour_name)
-                            ->setShortDescription((string) $tour->shortdesc)
-                            ->setDescription($tour->longdesc)
-                            ->setFeatures($features)
-                            ->setMedia($media)
-                            ->setLocations($locations)
-                            ->setCategoryLabels($categoryLabels)
-                            ->setDurationMinutesFrom($durationMinutesFrom);
+            $productContent
+                ->setTitle((string) $tour->tour_name)
+                ->setShortDescription((string) $tour->shortdesc)
+                ->setDescription($tour->longdesc)
+                ->setFeatures($features)
+                ->setMedia($media)
+                ->setLocations($locations)
+                ->setCategoryLabels($categoryLabels)
+                ->setDurationMinutesFrom($durationMinutesFrom);
             $product->setContent($productContent);
 
             foreach ($product->getOptions() as $option) {
@@ -286,11 +288,23 @@ class ProductService
             }
         }
 
-        if (true === OctoRequestFacade::isPricingRequired()) {
-            $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : $this->tourCMSService->showChannel()->channel->sale_currency;
-            $pricingPer = (string) $tour->quantity_rule == '1' ? ProductPricing::PRICING_PER_BOOKING : ProductPricing::PRICING_PER_UNIT;
-            $productPricing = new ProductPricing($saleCurrency, $pricingPer);
-            $product->setPricing($productPricing);
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
+            $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : (string) $this->tourCMSService->showChannel()->channel->sale_currency;
+            $pricingPer = $this->getPricingPerFromTourXML($tour);
+            
+            $product->setDefaultCurrency($saleCurrency);
+            $product->setAvailableCurrencies([$saleCurrency]);
+            $product->setPricingPer($pricingPer);
+
+            if ($pricingPer === Product::PRICING_PER_BOOKING) {
+                $productPricing = new Pricing(
+                    100 * $tour->from_price,
+                    100 * $tour->from_price,
+                    100 * $tour->from_price,
+                    $saleCurrency,
+                );
+                $product->setPricing($productPricing);
+            }
         }
 
         return $product;
@@ -462,8 +476,22 @@ class ProductService
                 $unit->setRestrictions($unitRestrictions);
                 $unit->setRateId((string) $rate->rate_id);
 
-                if (true === OctoRequestFacade::isContentRequired()) {
+                if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
                     $unit->setTitle((string) $rate->label_1);
+                }
+
+                if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
+
+                    $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : (string) $this->tourCMSService->showChannel()->channel->sale_currency;
+                    if (Product::PRICING_PER_UNIT === $this->getPricingPerFromTourXML($tour)) {
+                        $unitPricing = new Pricing(
+                            100 * $rate->from_price,
+                            100 * $rate->from_price,
+                            100 * $rate->from_price,
+                            $saleCurrency
+                        );
+                        $unit->setPricing($unitPricing);
+                    }
                 }
 
                 $optionUnits[] = $unit;
@@ -601,6 +629,11 @@ class ProductService
     public function buildProductId(SimpleXMLElement $tour): string
     {
         return "{$tour->distribution_identifier}|{$tour->channel_id}";
+    }
+
+    protected function getPricingPerFromTourXML(SimpleXMLElement $tour): string
+    {
+        return (string) $tour->quantity_rule == '1' ? Product::PRICING_PER_BOOKING : Product::PRICING_PER_UNIT;
     }
 
     protected function findTourDataFromAPI(string $productId): SimpleXMLElement

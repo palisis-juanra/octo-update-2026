@@ -3,6 +3,8 @@
 namespace App\Transformers;
 
 use App\Facades\OctoRequestFacade;
+use App\Http\Requests\OctoRequest;
+use App\Models\Product;
 use League\Fractal\Resource\Collection;
 
 class ProductTransformer extends BaseTransformer
@@ -11,14 +13,14 @@ class ProductTransformer extends BaseTransformer
 
     protected OptionTransformer $optionTransformer;
     protected ProductContentTransformer $productContentTransformer;
-    protected ProductPricingTransformer $productPricingTransformer;
+    protected PricingTransformer $pricingTransformer;
 
     public function __construct(string $mode)
     {
         parent::__construct($mode);
         $this->optionTransformer = new OptionTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->productContentTransformer = new ProductContentTransformer(BaseTransformer::FULL_TRANSFORM);
-        $this->productPricingTransformer = new ProductPricingTransformer();
+        $this->pricingTransformer = new PricingTransformer();
     }
 
     protected function basicTransform($product): array
@@ -51,14 +53,20 @@ class ProductTransformer extends BaseTransformer
             "options" => $optionsTransformed
         ];
 
-        if (true === OctoRequestFacade::isContentRequired()){
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)){
             $contentData = $this->productContentTransformer->transform($product->getContent());
             $data = array_merge($data, $contentData);
         }
     
-        if (true === OctoRequestFacade::isPricingRequired()){
-            $pricingData = $this->productPricingTransformer->transform($product->getPricing());
-            $data = array_merge($data, $pricingData);
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)){
+            
+            $data['defaultCurrency'] = $product->getDefaultCurrency();
+            $data['availableCurrencies'] = $product->getAvailableCurrencies();
+            $data['pricingPer'] = $product->getPricingPer();
+
+            if ($product->getPricingPer() === Product::PRICING_PER_BOOKING) {
+                $data['pricingFrom'] = $this->pricingTransformer->transform($product->getPricing());
+            }
         }
 
         return $data;

@@ -8,11 +8,15 @@ use App\Transformers\BaseTransformer;
 
 class AvailabilityTransformer extends BaseTransformer
 {
-    const MODE_BOOKING_AVAILABILITY = 'bookingAvailability';
+    public const MODE_BOOKING_AVAILABILITY = 'bookingAvailability';
+
+    protected PricingTransformer $pricingTransformer;
 
     public function __construct(string $mode = BaseTransformer::BASIC)
     {
         parent::__construct($mode);
+
+        $this->pricingTransformer = new PricingTransformer();
     }
 
     public function basicTransform($availability): array
@@ -44,20 +48,14 @@ class AvailabilityTransformer extends BaseTransformer
             ]
         ];
         
-        if (true === OctoRequestFacade::isContentRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $data['title'] = $availability->getTitle();
             $data['shortDescription'] = $availability->getShortDescription();
         }
 
-        if (true === OctoRequestFacade::isPricingRequired()) {
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
             $pricing = $availability->getPricing();
-            $data['pricing'] = [
-                'original' => $pricing->getOriginalPrice(),
-                'retail' => $pricing->getRetailPrice(),
-                'net' => $pricing->getNetPrice(),
-                'currency' => $availability->getCurrency(),
-                'currencyPrecision' => $pricing->getCurrencyPrecision()
-            ];
+            $data['pricing'] = $this->pricingTransformer->transform($pricing);
 
             $unitPricings = $availability->getUnitPricing();
             $data['unitPricing'] = [];

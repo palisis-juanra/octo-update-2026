@@ -363,6 +363,7 @@ class AvailabilityTest extends FeatureTestCase
                 "pricing" => [
                     "currency" => "USD",
                     "currencyPrecision" => 2,
+                    'includedTaxes' => [],
                     "net" => $expectedNetPrice,
                     "original" => $expectedOriginalPrice,
                     "retail" => $expectedRetailPrice
