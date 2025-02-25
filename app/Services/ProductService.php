@@ -481,12 +481,14 @@ class ProductService
                 }
 
                 if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
+
+                    $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : (string) $this->tourCMSService->showChannel()->channel->sale_currency;
                     if (Product::PRICING_PER_UNIT === $this->getPricingPerFromTourXML($tour)) {
                         $unitPricing = new Pricing(
                             100 * $rate->from_price,
                             100 * $rate->from_price,
                             100 * $rate->from_price,
-                            (string) $tour->sale_currency
+                            $saleCurrency
                         );
                         $unit->setPricing($unitPricing);
                     }
