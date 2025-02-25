@@ -130,7 +130,7 @@ class AvailabilityService
                 throw new AvailabilityRequestInvalidParamException('localDateStart must be a valid date in format YYYY-MM-DD');
             }
     
-            if (!empty($localeDateEnd) && DateTimeService::validateDate($localDateEnd) === false) {
+            if (!empty($localeDateEnd) || DateTimeService::validateDate($localDateEnd) === false) {
                 throw new AvailabilityRequestInvalidParamException('localDateEnd must be a valid date in format YYYY-MM-DD');
             }
         }
