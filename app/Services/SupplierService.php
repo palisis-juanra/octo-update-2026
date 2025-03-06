@@ -9,7 +9,6 @@ use App\Models\Supplier;
 use App\Services\TourCMSService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\SupplierTransformer;
-use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 
 class SupplierService
