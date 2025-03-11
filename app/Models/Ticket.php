@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Services\DateTimeService;
+use DateTime;
+use DateTimeZone;
+
 class Ticket
 {
     protected string $redemptionMethod;
@@ -46,9 +50,16 @@ class Ticket
      *
      * @return  self
      */ 
-    public function setUtcRedeemedAt($utcRedeemedAt): self
+    public function setUtcRedeemedAt($timestamp): self
     {
-        $this->utcRedeemedAt = $utcRedeemedAt;
+        if (is_null($timestamp)) {
+            $this->utcRedeemedAt = null;
+            return $this;
+        }
+
+        $dateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $dateTime->setTimestamp($timestamp);
+        $this->utcRedeemedAt = DateTimeService::getISO8601DateFormatted($dateTime);
 
         return $this;
     }
