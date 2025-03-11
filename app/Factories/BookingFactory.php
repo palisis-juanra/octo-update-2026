@@ -50,7 +50,7 @@ class BookingFactory
         $booking->setOption($option);
         $booking->setAvailability($availability);
 
-
+        $unitItems = [];
         $unitsCount = [];
 
         foreach ($requestUnitItems as $unitItem) {
@@ -142,8 +142,6 @@ class BookingFactory
 
         // UNITS
         $customers = XMLService::getArrayFromXmlNode($bookingData->customers, 'customer');
-        JSONLog::info(["booking" => print_r($booking, 1)]);
-
         $unitItems = [];
         $unitsQuantities = [];
 

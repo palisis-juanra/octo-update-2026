@@ -64,7 +64,6 @@ class BookingConfirmationService extends BookingService
         try {
             $customerXML = $this->contactService->getCustomerXMLFromContact($customerId, $contact);
             $this->tourCMSService->updateCustomer($customerXML);
-            $this->logger->info(["message" => "Customer {$customerId} updated", "details" => $customerXML]);
             return true;
         } catch (Throwable $e) {
             $this->logger->error(["message" => "Error updating customer {$customerId}"]);

@@ -36,12 +36,10 @@ class BookingConfirmationServiceTest extends UnitTestCase
         $bookingConfirmationService->logger = $this->getLoggerMock();
         $bookingConfirmationService->contactService = new ContactService();
 
-        $fakeBooking = new Booking();
-        $fakeBooking->setLeadCustomerId(self::FAKE_CUSTOMER_ID);
         $contactDetails = json_decode(self::CONTACT_DATA, 1);
 
-        $bookingConfirmationService->addContactToBooking($contactDetails, $fakeBooking);
-        $contact = $fakeBooking->getContact();
+        $contact = Contact::create($contactDetails);
+        $bookingConfirmationService->updateTraveller(self::FAKE_CUSTOMER_ID, $contact);
 
         $this->assertInstanceOf(Contact::class, $contact);
         $this->assertEquals($contactDetails['fullName'], $contact->getFullName());
