@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\NoAvailabilityException;
 use App\Factories\BookingFactory;
+use App\Factories\UnitItemFactory;
 use App\Models\Availability\Availability;
 use App\Models\Booking;
 use App\Models\Option;
