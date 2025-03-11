@@ -18,7 +18,8 @@ class UnitItemFactory
     public static function create(
         Booking $booking,
         Unit $unit,
-        int $number
+        int $number,
+        ?string $uuid = null
     ): UnitItem
     {
         $product = $booking->getProduct();
@@ -26,7 +27,7 @@ class UnitItemFactory
 
         $unitItem = new UnitItem();
         $unitItem
-            ->setUuid(Uuid::uuid4())
+            ->setUuid($uuid ?? Uuid::uuid4())
             ->setResellerReference(null)
             ->setSupplierReference($unit->reference)
             ->setUnitId($unit->getId())

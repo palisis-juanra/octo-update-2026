@@ -61,7 +61,7 @@ class BookingFactory
             }
 
             $unit = $option->getUnitById($unitItem['unitId']);
-            $unitItems[] = UnitItemFactory::create($booking, $unit, $unitsCount[$unitItem['unitId']]);
+            $unitItems[] = UnitItemFactory::create($booking, $unit, $unitsCount[$unitItem['unitId']], $unitItem['uuid'] ?? null);
         }
 
         $booking->setUnits($unitItems);
@@ -157,7 +157,7 @@ class BookingFactory
                 $unitsQuantities[$unitId] = 1;
             }
 
-            $unitItem = UnitItemFactory::create($booking, $unit, $unitsQuantities[$unitId]);
+            $unitItem = UnitItemFactory::create($booking, $unit, $unitsQuantities[$unitId], $emptyUnitItem['uuid'] ?? null);
             
             $unitItems[] = $unitItem;
         }
