@@ -2,6 +2,7 @@
 
 namespace App\Factories;
 
+use App\Exceptions\ComponentNotFoundException;
 use App\Models\Booking;
 use App\Models\Product;
 use App\Models\Ticket;
@@ -47,13 +48,10 @@ class UnitItemFactory
         // We only have to create ticket if the TICKET is present in product's delivery methods
         if (in_array(ProductService::DELIVERY_METHOD_TICKET, $product->getDeliveryMethods())) {
 
-
             $ticket = new Ticket();
             $ticket->setRedemptionMethod($product->getRedemptionMethod());
-            
 
-
-            $ticketValue = self::getTicketValueForUnitItem($components, $unit->getId(), $number);
+            $ticketValue = self::getTicketValueForUnitItem($component,$number);
             if (!empty($ticketValue)) {
                 $ticket->setRedemptionMethod($booking->getProduct()->getRedemptionMethod());
                 $ticket->setUtcRedeemedAt(!empty($component->redeemed_at_utc_seconds) ? (int) $component->redeemed_at_utc_seconds : null);
@@ -68,14 +66,8 @@ class UnitItemFactory
         return $unitItem;
     }
 
-    protected static function getTicketValueForUnitItem(array $tourCMSComponents, string $unitId, int $number): ?string
-    {
-        try {
-            $component = self::getComponentByRateId($tourCMSComponents, $unitId, $number);
-        } catch (ComponentNotFoundException $e) {
-            return null;
-        }
-    
+    protected static function getTicketValueForUnitItem(?SimpleXMLElement $component, int $number): ?string
+    {    
         if (empty($component)) {
             return null;
         }
@@ -108,11 +100,3 @@ class UnitItemFactory
     }
 
 }
-
-class ComponentNotFoundException extends Exception
-{
-    public function __construct(string $message)
-    {
-        parent::__construct($message);
-    }
-}   
