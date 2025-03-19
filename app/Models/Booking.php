@@ -2,17 +2,15 @@
 
 namespace App\Models;
 
+use App\Factories\UnitItemFactory;
 use App\Models\Availability\Availability;
-use App\Models\Ticket;
 use App\Services\DateTimeService;
-use App\Services\ProductService;
 use App\Services\UnitService;
 use App\Services\XMLService;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
 
 class Booking extends Model
@@ -384,54 +382,14 @@ class Booking extends Model
         return $this->expirationMinutes;
     }
 
+    /**
+     * Summary of setUnits
+     * @param UnitItem[] $unitItems
+     * @return Booking
+     */
     public function setUnits(array $unitItems): self
     {
-        $unitsQuantities = [];
-        $option = $this->product->getOptionById(optionId: $this->getOption()->getId());
-
-        foreach ($unitItems as $unitItem) {
-            
-            $unitId = (string) $unitItem['unitId'];
-            $unit = $option->getUnitById($unitId);
-            
-            if (array_key_exists($unitId, $unitsQuantities)) {
-                $unitsQuantities[$unitId]++;
-            } else {
-                $unitsQuantities[$unitId] = 1;
-            }
-
-            $unitItem = new UnitItem();
-            $unitItem->setUuid(Uuid::uuid4());
-            $unitItem->setResellerReference(null);
-            $unitItem->setSupplierReference($unit->reference);
-            $unitItem->setUnitId($unit->getId());
-            $unitItem->setId($unit->getId());
-            $unitItem->setUnit($unit);
-            $unitItem->setStatus(self::STATUS_ON_HOLD);
-            $unitItem->setUtcRedeemedAt($this->getUtcRedeemedAt());
-            $unitItem->setContact($this->getContact());
-
-            // We only have to create ticket if the TICKET is present in product's delivery methods
-            if (in_array(ProductService::DELIVERY_METHOD_TICKET, $this->product->getDeliveryMethods())) {
-
-                $ticketValue = self::getTicketValueForUnitItem($unitId, $unitsQuantities[$unitId]);
-                $ticket = new Ticket();
-                $ticket->setRedemptionMethod(ProductService::REDEMPTION_METHOD_DIGITAL);
-                if (!empty($ticketValue)) {
-                    $ticket->setRedemptionMethod($this->getProduct()->getRedemptionMethod());
-                    $ticket->setUtcRedeemedAt($this->getUtcRedeemedAt());
-                    $ticket->setDeliveryOptions([
-                        "deliveryFormat" => $this->getProduct()->getDeliveryFormats()[0],
-                        "deliveryValue" => $ticketValue
-                    ]);
-                }
-                $unitItem->setTicket($ticket);
-            }
-            
-            
-
-            $this->units[] = $unitItem;
-        }
+        $this->units = $unitItems;
         $this->unit_items = json_encode($this->units);
 
         return $this;
@@ -533,27 +491,5 @@ class Booking extends Model
 
         return $componentsRedeemed[0];
 
-    }
-
-    protected function getTicketValueForUnitItem(string $unitId, int $number): ?string
-    {
-        $tcmsRateId = UnitService::getTourCMSRateId($unitId);
-        $components = XMLService::getArrayFromXmlNode($this->bookingData->components, 'component');
-        $rateComponent = array_filter($components, 
-        function(SimpleXMLElement $component) use ($tcmsRateId) {
-            $rateId = explode('|', (string) $component->rate_breakdown)[0];
-            return (($rateId == $tcmsRateId) && ((string) $component->date_type === 'departure')); 
-        });
-    
-        if (empty($rateComponent)) {
-            return null;
-        }
-    
-        $tickets = reset($rateComponent)->tickets;
-        if (empty($tickets)) { return null; } 
-    
-        $tickets = XMLService::getArrayFromXmlNode($tickets, 'ticket');
-        return (string) $tickets[$number-1]->value;
-    
     }
 }

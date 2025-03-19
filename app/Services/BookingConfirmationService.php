@@ -6,6 +6,7 @@ use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Booking;
 use App\Models\Contact;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Throwable;
 
 class BookingConfirmationService extends BookingService
 {
@@ -25,6 +26,12 @@ class BookingConfirmationService extends BookingService
         parent::__construct($tourCMSService, $logger, $productService, $availabilityService);
     }
 
+    /**
+     * Call TourCMS to confirm booking
+     * @param \App\Models\Booking $booking
+     * @throws \App\Exceptions\InvalidBookingUUIDException
+     * @return Booking
+     */
     public function confirmBooking(Booking $booking): Booking
     {
         $commitBookingResponse = $this->tourCMSService->commitBooking($booking->booking_id, $booking->getResellerReference());
@@ -46,15 +53,23 @@ class BookingConfirmationService extends BookingService
         return $booking;
     }
 
-    public function addContactToBooking(array $contactData, Booking $booking): Booking
+    /**
+     * Update customer information in TourCMS
+     * @param int $customerId TourCMS customer ID
+     * @param \App\Models\Contact $contact
+     * @return bool
+     */
+    public function updateTraveller(int $customerId, Contact $contact): bool
     {
-        $contact = Contact::create($contactData);
-        $customerXML = $this->contactService->getCustomerXMLFromContact($booking->getLeadCustomerId(), $contact);
-        $this->tourCMSService->updateCustomer($customerXML);
-        $this->logger->info(["message" => "updating customer details", "details" => $customerXML]);
-        
-        $booking->setContact($contact);
-        return $booking;
+        try {
+            $customerXML = $this->contactService->getCustomerXMLFromContact($customerId, $contact);
+            $this->tourCMSService->updateCustomer($customerXML);
+            return true;
+        } catch (Throwable $e) {
+            $this->logger->error(["message" => "Error updating customer {$customerId}"]);
+            $this->logger->error($e);
+            return false;
+        }
     }
 
     /**
@@ -69,9 +84,12 @@ class BookingConfirmationService extends BookingService
         $bookingUnitItemsArray = [];
         $bookingUnitItems = json_decode($booking->unit_items, true);
         foreach ($bookingUnitItems as $unitItem) {
-            $bookingUnitItemsArray[] = ["unitId" => $unitItem["unitId"]];
+            $bookingUnitItemsArray[] = $unitItem["unitId"];
         }
-        if ($bookingUnitItemsArray !== $unitItems) {
+
+        $unitIds = array_column($unitItems, "unitId");
+
+        if ($bookingUnitItemsArray !== $unitIds) {
             $this->logger->info(["message" => "Units items has changed from reservation to confirmation, throwing exception", "reservation" => $bookingUnitItems, "confirmation" => $unitItems]);
             throw new UnprocessableEntityHttpException(self::ERROR_MESSAGE_UNIT_ITEMS_CHANGED);
         }

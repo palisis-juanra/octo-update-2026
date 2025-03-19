@@ -11,26 +11,35 @@ use App\Exceptions\NoMatchingDataException;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use SimpleXMLElement;
 use stdClass;
 use TourCMS\Utils\TourCMS;
 
 class TourCMSService
 {
-    const ERROR_FAIL_SIG = 'FAIL_SIG';
-    const ERROR_FAIL_KEYNOTFOUND = 'FAIL_KEYNOTFOUND';
-    const NO_MATCHING_DATA = 'NO MATCHING DATA';
-    const ERROR_PREVIOUSLY_CANCELLED = 'PREVIOUSLY CANCELLED';
-    const ERROR_BOOKING_ALREADY_COMMITED = 'BOOKING ALREADY COMMITTED';
-    const ERROR_NO_DATA_CHANGED = 'NO DATA CHANGED';
-    const ERROR_OK = 'OK';
-    const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
-    const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
-    const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = 'extended_tour_info=1';
-    const SHOW_TOUR_DEPARTURES_CLOSED_PARAM = 'show_closed_departures=true';
-    const SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM = 'distinct_start_dates=1';
-    const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
+    // Cache
+    public const CACHE_REDIS_KEY_SHOW_CHANNEL = 'SHOW_CHANNEL|';
+    public const CACHE_REDIS_KEY_SHOW_TOUR = 'SHOW_TOUR|';
+    public const CACHE_TIME_SHOW_CHANNEL = 600;
+    public const CACHE_TIME_SHOW_TOUR = 300;
+
+    // Errors
+    public const ERROR_FAIL_SIG = 'FAIL_SIG';
+    public const ERROR_FAIL_KEYNOTFOUND = 'FAIL_KEYNOTFOUND';
+    public const NO_MATCHING_DATA = 'NO MATCHING DATA';
+    public const ERROR_PREVIOUSLY_CANCELLED = 'PREVIOUSLY CANCELLED';
+    public const ERROR_BOOKING_ALREADY_COMMITED = 'BOOKING ALREADY COMMITTED';
+    public const ERROR_NO_DATA_CHANGED = 'NO DATA CHANGED';
+    public const ERROR_OK = 'OK';
+    public const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
+    public const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
+    public const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = 'extended_tour_info=1';
+    public const SHOW_TOUR_DEPARTURES_CLOSED_PARAM = 'show_closed_departures=true';
+    public const SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM = 'distinct_start_dates=1';
+    public const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
     public const INVALID_BOOKING_ID = 'INVALID BOOKING ID';
     public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = "&show_temporary_bookings=1";
 
@@ -49,11 +58,27 @@ class TourCMSService
         $this->channelId = Request::get(OctoAuthentication::FIELD_CHANNEL_ID);
     }
 
-    public function showChannel(string $channelId = null): SimpleXMLElement
+    public function showChannel(?string $channelId = null, bool $cached = true): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_channel(null === $channelId ? $this->channelId : $channelId);
-        $response = $this->handleResponse($response);
+        if (is_null($channelId)) {
+            $channelId = $this->channelId;
+        }
 
+        $redisKey = self::CACHE_REDIS_KEY_SHOW_CHANNEL . $channelId;
+        if (true === $cached) {
+
+            $cachedShowChannel = Cache::driver('redis')->get($redisKey);
+            
+            if (!empty($cachedShowChannel)) {
+                return simplexml_load_string($cachedShowChannel);
+            }
+        }
+        
+        $response = $this->tourCMS->show_channel($channelId);
+        $response = $this->handleResponse($response);
+        
+        Cache::driver('redis')->put($redisKey, $response->asXML(), self::CACHE_TIME_SHOW_CHANNEL);
+        
         return $response;
     }
 
@@ -64,11 +89,27 @@ class TourCMSService
         return $response;
     }
 
-    public function showTour(string $tourId, ?string $channelId = null): SimpleXMLElement
+    public function showTour(string $tourId, ?string $channelId = null, bool $cached = false): SimpleXMLElement
     {
-        $response = $this->tourCMS->show_tour($tourId, $channelId ?? $this->channelId);
-        $response = $this->handleResponse($response);
+        if (is_null($channelId)) {
+            $channelId = $this->channelId;
+        }
 
+        $redisKey = self::CACHE_REDIS_KEY_SHOW_TOUR . $tourId . '|' . $channelId;
+        
+        if (true === $cached) {
+            $cachedShowChannel = Cache::driver('redis')->get($redisKey);
+            
+            if (!empty($cachedShowChannel)) {
+                return simplexml_load_string($cachedShowChannel);
+            }
+        }
+
+        $response = $this->tourCMS->show_tour($tourId, $channelId);
+        $response = $this->handleResponse($response);
+        
+        Cache::driver('redis')->put($redisKey, $response->asXML(), self::CACHE_TIME_SHOW_TOUR);
+        
         return $response; 
     }
 

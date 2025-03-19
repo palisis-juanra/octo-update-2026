@@ -72,7 +72,7 @@ class BookingFactoryTest extends FeatureTestCase
             $this->product,
             $this->getOption(),
             $this->getAvailability(),
-            $this->getUnitItems()
+            json_decode($this->getUnitItems(), 1)
         );
 
         $this->assertEquals(Booking::STATUS_ON_HOLD, $booking->getStatus());
@@ -87,7 +87,6 @@ class BookingFactoryTest extends FeatureTestCase
             $this->getOption(),
             $this->getAvailability(),
             $this->getUnitItems(),
-            $this->getContact()
         );
 
         $this->assertEquals(Booking::STATUS_ON_HOLD, $booking->getStatus());
@@ -102,8 +101,7 @@ class BookingFactoryTest extends FeatureTestCase
             $this->product,
             $this->getOption(),
             $this->getAvailability(),
-            $this->getUnitItems(),
-            $this->getContact()
+            $this->getUnitItems()
         );
 
         $this->showConfirmedBookingXML->booking->status = Booking::TCMS_STATUS_PROVISIONAL;
@@ -113,8 +111,7 @@ class BookingFactoryTest extends FeatureTestCase
             $this->product,
             $this->getOption(),
             $this->getAvailability(),
-            $this->getUnitItems(),
-            $this->getContact()
+            $this->getUnitItems()
         );
 
         $this->assertEquals(Booking::STATUS_PENDING, $quotationBooking->getStatus());
@@ -129,8 +126,7 @@ class BookingFactoryTest extends FeatureTestCase
             $this->product,
             $this->getOption(),
             $this->getAvailability(),
-            $this->getUnitItems(),
-            $this->getContact()
+            $this->getUnitItems()
         );
 
         $this->assertEquals(Booking::STATUS_CONFIRMED, $booking->getStatus());
@@ -155,9 +151,9 @@ class BookingFactoryTest extends FeatureTestCase
             ->setId('FAKE_AVAILABILITY_ID');
     }
 
-    protected function getUnitItems(): array
+    protected function getUnitItems(): string
     {
-        return [];
+        return '[]';
     }
 
     protected function getContact(): Contact

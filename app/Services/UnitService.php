@@ -67,7 +67,7 @@ class UnitService
      * @throws \App\Exceptions\BadRequestException
      * @return bool
      */
-    public function validateUnitItems(array $unitItems, string $productId = null): bool
+    public function validateUnitItems(array $unitItems, ?string $productId = null): bool
     {
         if (empty($unitItems)) {
             throw new UnprocessableEntityHttpException(self::ERROR_MESSAGE_INVALID_UNIT_ITEMS);
