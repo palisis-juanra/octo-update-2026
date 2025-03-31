@@ -36,7 +36,7 @@ class UnitTransformer extends BaseTransformer
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
 
             if (!is_null($unit->getPricing())) {
-                $data['fromPricing'] = [
+                $data['pricingFrom'] = [
                     $this->pricingTransformer->transform($unit->getPricing())
                 ];
             }
