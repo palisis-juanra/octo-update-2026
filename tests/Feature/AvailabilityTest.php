@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Facades\JSONLog;
 use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityService;
@@ -398,8 +399,8 @@ class AvailabilityTest extends FeatureTestCase
             ->method('checkAvailability')
             ->willReturn($this->checkAvailXML);
 
+        App::bind(JSONLog::class, function () { return $this->getJsonLogMock();});
         App::instance(TourCMSService::class, $tourCMSServiceMock);
-
 
         $response = $this->post(
             '/availability', 
@@ -453,4 +454,12 @@ class AvailabilityTest extends FeatureTestCase
             ]);
     }
     
+    protected function getJsonLogMock(): JSONLogService
+    {
+        $jsonLog = $this->getMockBuilder(JSONLogService::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['info', 'error', 'getLogId'])
+            ->getMock();
+        return $jsonLog;
+    }
 }

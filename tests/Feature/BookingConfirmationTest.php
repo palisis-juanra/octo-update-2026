@@ -26,10 +26,10 @@ class BookingConfirmationTest extends FeatureTestCase
     const VALID_OPTION_ID = 'START_TIME';
     const VALID_UNIT_ITEMS = [
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|r1"
+            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r1"
         ],
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|r2" 
+            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r2" 
         ]
     ];
 

@@ -30,9 +30,9 @@ class UnitService
      */
     public static function getTourCMSRateId(string $unitId): string
     {
-        $unitIdExploded = explode("|", $unitId);
+        $unitIdExploded = explode(self::SEPARATOR, $unitId);
 
-        if (array_key_exists(1, $unitIdExploded) === false) {
+        if (array_key_exists(2, $unitIdExploded) === false) {
             throw new InvalidUnitIdException($unitId);
         }
 

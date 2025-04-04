@@ -18,34 +18,34 @@ class BookingReservationServiceTest extends UnitTestCase
         
         $singleUnitItemsOneTime = [
             [
-                'unitId' => 'TE_1_67|r1'
+                'unitId' => 'TE_1_67|142|r1'
             ]
         ];
     
         $multipleUnitItemsOneTime = [
             [
-                'unitId' => 'TE_1_67|r1'
+                'unitId' => 'TE_1_67|142|r1'
             ],
             [
-                'unitId' => 'TE_1_67|r2'
+                'unitId' => 'TE_1_67|142|r2'
             ]
         ];
     
         $multipleUnitItemsMultiplesTimes = [
             [
-                'unitId' => 'TE_1_67|r1'
+                'unitId' => 'TE_1_67|142|r1'
             ],
             [
-                'unitId' => 'TE_1_67|r1'
+                'unitId' => 'TE_1_67|142|r1'
             ],
             [
-                'unitId' => 'TE_1_67|r2'
+                'unitId' => 'TE_1_67|142|r2'
             ],
             [
-                'unitId' => 'TE_1_67|r2'
+                'unitId' => 'TE_1_67|142|r2'
             ],
             [
-                'unitId' => 'TE_1_67|r2'
+                'unitId' => 'TE_1_67|142|r2'
             ]
         ];
 
@@ -72,13 +72,13 @@ class BookingReservationServiceTest extends UnitTestCase
         $date = '2024-12-10';
         $unitItems = [
             [
-                'unitId' => 'TE_1_67|r1'
+                'unitId' => 'TE_1_67|142|r1'
             ],
             [
-                'unitId' => 'TE_1_67|r1'
+                'unitId' => 'TE_1_67|142|r1'
             ],
             [
-                'unitId' => 'TE_1_67|r2'
+                'unitId' => 'TE_1_67|142|r2'
             ]
         ];
 
@@ -136,10 +136,10 @@ class BookingReservationServiceTest extends UnitTestCase
 
         $unitItems = [
             [
-                'unitId' => 'TE_1_67|r1'
+                'unitId' => 'TE_1_67|142|r1'
             ],
             [
-                'unitId' => 'TE_1_67|r2'
+                'unitId' => 'TE_1_67|142|r2'
             ]
         ];
         $totalCustomers = 2;
@@ -161,10 +161,10 @@ class BookingReservationServiceTest extends UnitTestCase
         
         $unitItems = [
             [
-                'unitId' => 'TE_1_67|r1'
+                'unitId' => 'TE_1_67|142|r1'
             ],
             [
-                'unitId' => 'TE_1_67|r2'
+                'unitId' => 'TE_1_67|142|r2'
             ]
         ];
         $totalCustomers = 2;

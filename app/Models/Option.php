@@ -182,8 +182,7 @@ class Option extends Model
      */
     public function getUnitById(string $unitId): Unit
     {
-        $unitIdExploded = explode(UnitService::SEPARATOR, $unitId);
-        $rateId = array_pop($unitIdExploded);
+        $rateId = UnitService::getTourCMSRateId($unitId);
         foreach ($this->units as $unit) {
             if ($unit->getRateId() == $rateId) {
                 return $unit;
