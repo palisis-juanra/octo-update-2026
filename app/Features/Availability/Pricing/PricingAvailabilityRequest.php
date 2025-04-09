@@ -2,6 +2,7 @@
 
 namespace App\Features\Availability\Pricing;
 
+use App\Facades\JSONLog;
 use App\Features\Availability\AvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\Availability;
@@ -9,6 +10,7 @@ use App\Models\Pricing;
 use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
+use App\Services\UnitService;
 
 class PricingAvailabilityRequest extends AvailabilityRequest
 {
@@ -61,6 +63,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     {
         $availabilities = parent::getAvailabilities($tourCMSService);
         $checkAvailcomponents = $this->fetchComponentsFromTourCMS($tourCMSService);
+        JSONLog::info(['checkAvailcomponents' => $checkAvailcomponents]);
         $this->updateAvailabilitiesWithCheckAvailComponents($availabilities, $checkAvailcomponents);
         return $availabilities;
     }
@@ -83,8 +86,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
                 $params .= "&";
             }
             
-            $rateIdSplitted = explode('|', $rateData['id']);
-            $tourCMSRate = $rateIdSplitted[1];
+            $tourCMSRate = UnitService::getTourCMSRateId($rateData['id']);
             $params .= "{$tourCMSRate}={$rateData['quantity']}";
         }
 
