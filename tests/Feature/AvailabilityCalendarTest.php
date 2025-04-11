@@ -21,23 +21,30 @@ class AvailabilityCalendarTest extends FeatureTestCase
     const OCTO_INVALID_PATTERN_CREDENTIALS = 'Bearer NOVALIDKEY';
     const OCTO_VALID_PATTERN_CREDENTIALS = 'Bearer 1|142|abc';
     const VALID_PRODUCT_ID = 'TE_1_67|142';
+    const VALID_CHANNEL = '142';
     const INVALID_PRODUCT_ID = 'a';
     const VALID_OPTION_ID = 'START_TIME';
     const INVALID_OPTION_ID = 'a';
     const VALID_LOCAL_DATE = '2024-11-30';
     const INVALID_LOCAL_DATE = 'aaa';
 
-
+    public SimpleXMLElement $showChannelXML;
+    public SimpleXMLElement $tourXML;
     public SimpleXMLElement $datesAndDealsXML;
+
     public function setUp(): void
     {
         parent::setUp();
 
+        $this->showChannelXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showChannel.xml'));
+        $this->tourXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTour.xml'));
         $this->datesAndDealsXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/datesAndDeals.xml'));
 
         App::bind(TourCMSService::class, function ($app) {
 
             $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
+            $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
+            $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->tourXML);
             $tourCMSServiceMock->shouldReceive('showTourDatesAndDeals')->zeroOrMoreTimes()->andReturn($this->datesAndDealsXML);
 
             return $tourCMSServiceMock;

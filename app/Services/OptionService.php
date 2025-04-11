@@ -56,7 +56,7 @@ class OptionService
         }
 
         try {
-            $optionSplitted = explode("|", $optionId);
+            $optionSplitted = explode("|", $optionId, 2);
             $mappingType = $optionSplitted[0];
             $mappingValue = $optionSplitted[1];
         } catch (Throwable) {
