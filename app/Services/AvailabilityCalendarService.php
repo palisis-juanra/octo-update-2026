@@ -86,13 +86,6 @@ class AvailabilityCalendarService
                 throw new AvailabilityRequestMissingParamException(self::ERROR_MESSAGE_EMPTY_REQUIRED_PARAM . ": {$param}");
             }
         }
-
-        $this->productService->validateProductId($requestParams[AvailabilityCalendarService::PARAM_PRODUCT_ID], $requestParams[OctoAuthentication::FIELD_CHANNEL_ID]);
-        
-        $optionId = $requestParams[self::PARAM_OPTION_ID];
-        if (!empty($optionId)) {
-            $this->optionService->validateOptionId($optionId);
-        }
         
         $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START];
 
@@ -109,6 +102,15 @@ class AvailabilityCalendarService
         if ($localDateStart > $localDateEnd) {
             throw new AvailabilityRequestInvalidParamException(self::ERROR_MESSAGE_LOCAL_DATE_INVALID_ORDER);
         }
+
+        $this->productService->validateProductId($requestParams[AvailabilityCalendarService::PARAM_PRODUCT_ID], $requestParams[OctoAuthentication::FIELD_CHANNEL_ID]);
+
+        $productId = $requestParams[self::PARAM_PRODUCT_ID];
+        $product = $this->productService->find($productId);
+        
+        $optionId = $requestParams[self::PARAM_OPTION_ID];
+        $this->optionService->validateOptionId($optionId);
+        $option = $product->getOptionById($optionId);
     }
 
     public function validateDate($date, $format = self::DATE_FORMAT): bool

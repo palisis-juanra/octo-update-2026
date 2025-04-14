@@ -6,10 +6,14 @@ use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Models\Availability\AvailabilityCalendarRequest;
 use App\Services\AvailabilityCalendarService;
+use App\Services\JSONLogService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use SimpleXMLElement;
 use App\Services\OptionService;
+use Illuminate\Support\Facades\App;
+use Mockery;
+use simplexml;
 use Tests\UnitTestCase;
 
 class AvailabilityCalendarServiceTest extends UnitTestCase
@@ -22,6 +26,7 @@ class AvailabilityCalendarServiceTest extends UnitTestCase
     const VALID_LOCAL_DATE_END = '2024-11-30';
     const INVALID_LOCAL_DATE_START = '2024-13-28';
     const INVALID_LOCAL_DATE_END = '2024-11-32';
+    
     public string $datesAndDealsString;
     public SimpleXMLElement $datesAndDealsXML;
 
@@ -114,6 +119,7 @@ class AvailabilityCalendarServiceTest extends UnitTestCase
         $availabilityCalendarServiceMock->productService = $productServiceMock;
         $availabilityCalendarServiceMock->optionService = $optionServiceMock;
         
+
         $requestParams = [
             "productId" => self::VALID_PRODUCT_ID,
             "optionId" => self::VALID_OPTION_ID,
