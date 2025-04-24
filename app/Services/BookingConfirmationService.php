@@ -89,6 +89,9 @@ class BookingConfirmationService extends BookingService
 
         $unitIds = array_column($unitItems, "unitId");
 
+        sort($bookingUnitItemsArray);
+        sort($unitIds);
+
         if ($bookingUnitItemsArray !== $unitIds) {
             $this->logger->info(["message" => "Units items has changed from reservation to confirmation, throwing exception", "reservation" => $bookingUnitItems, "confirmation" => $unitItems]);
             throw new UnprocessableEntityHttpException(self::ERROR_MESSAGE_UNIT_ITEMS_CHANGED);
