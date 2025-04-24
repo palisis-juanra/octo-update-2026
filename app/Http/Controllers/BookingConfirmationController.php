@@ -31,6 +31,7 @@ class BookingConfirmationController
         
         $this->logger->info(["message" => "Getting booking from database", "Booking_uuid" => $uuid]);
         $booking = $this->service->getBookingByUuid($uuid);
+        $booking = $this->service->getBooking($booking);
         
         $unitItems = $request->post(OctoRequest::UNIT_ITEMS) ?? [];
         if (!empty($unitItems)) {
@@ -39,14 +40,13 @@ class BookingConfirmationController
             $this->service->checkUnitItemsHaveNotChanged($booking, $unitItems);
         }
         
+        // Update reseller reference
         $resellerReference = $request->post(OctoRequest::RESELLER_REFERENCE);
         if (!empty($resellerReference)) {
             $booking = $booking->setResellerReference($resellerReference);
         }
-        $this->logger->info(["message" => "Confirming booking", "uuid" => $uuid, "id" => $booking->getId()]);
-        $booking = $this->service->confirmBooking($booking);
         
-
+        // Update customers information
         $leadTravellerContactData = $request->post(OctoRequest::CONTACT);
         if (!empty($leadTravellerContactData)) {
             $contact = Contact::create($leadTravellerContactData);
@@ -54,15 +54,29 @@ class BookingConfirmationController
             $booking->setContact($contact);
         }
         
-        $booking->getUnits();
-
-        foreach ($unitItems as $unitItem) {
-            if (!array_key_exists('contact', $unitItem)) {
-                continue;
+        $unitContacts = [];
+        // We need to remove unit items without contact, as they are not needed
+        foreach ($unitItems as $key => $unitItem) {
+            if (array_key_exists('contact', $unitItem)) {
+                $unitContacts[] = $unitItem;
             }
-            // We dont know the customer id
-            //$this->service->updateTraveller((int) $unitItem['unitId'], Contact::create($unitItem['contact']));
         }
+
+        if (!empty($unitContacts)) {
+            // Update unit items
+            foreach ($booking->getUnits() as $unitItem) {
+                $unitIds = array_column($unitContacts, 'unitId');
+                $key = array_search($unitItem->getId(), $unitIds);
+                $contact = Contact::create($unitContacts[$key]['contact']);
+                $this->service->updateTraveller($unitItem->getCustomerId(), $contact);
+                unset($unitContacts[$key]);
+                sort($unitContacts);
+            }
+        }
+
+        // Commit booking
+        $this->logger->info(["message" => "Confirming booking", "uuid" => $uuid, "id" => $booking->getId()]);
+        $booking = $this->service->confirmBooking($booking);
 
         $bookingData = $this->transformer->transform($booking);
         $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
