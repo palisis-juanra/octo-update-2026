@@ -48,6 +48,7 @@ class AvailabilityTest extends FeatureTestCase
 
         $this->showChannelXML = simplexml_load_file('tests/TourCMSResponses/showChannel.xml');
         $this->showTourXML = simplexml_load_file('tests/TourCMSResponses/showTour.xml');
+        $this->showTourXML->tour->distribution_identifier = 'TE_1_67';
         $this->showTourDeparturesXML = simplexml_load_file('tests/TourCMSResponses/showTourDepartures.xml');
         $this->showTourDeparturesOneDayXML = simplexml_load_file('tests/TourCMSResponses/showTourDeparturesOneDay.xml');
         $this->checkAvailXML = simplexml_load_file('tests/TourCMSResponses/checkAvailability.xml');
@@ -313,7 +314,7 @@ class AvailabilityTest extends FeatureTestCase
         $tourCMSServiceMock
             ->method('showChannel')
             ->willReturn($this->showChannelXML);
-
+        
         $tourCMSServiceMock
             ->method('showTour')
             ->willReturn($this->showTourXML);

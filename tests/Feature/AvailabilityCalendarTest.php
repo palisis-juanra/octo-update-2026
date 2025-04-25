@@ -38,6 +38,7 @@ class AvailabilityCalendarTest extends FeatureTestCase
 
         $this->showChannelXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showChannel.xml'));
         $this->tourXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/showTour.xml'));
+        $this->tourXML->tour->distribution_identifier = 'TE_1_67';
         $this->datesAndDealsXML = simplexml_load_string(file_get_contents('tests/TourCMSResponses/datesAndDeals.xml'));
 
         App::bind(TourCMSService::class, function ($app) {

@@ -500,6 +500,8 @@ class ProductTest extends FeatureTestCase
 
     public function test_whenWeSendPricingCapability_thenWeReceivedProductWithPricingInfo(): void
     {
+        $this->showTourXML->tour->distribution_identifier = 'TE_1_231';
+
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
         ->onlyMethods(['showTour', 'showChannel'])
         ->disableOriginalConstructor()
@@ -572,6 +574,7 @@ class ProductTest extends FeatureTestCase
         ->getMock();
 
         $this->showTourXML->tour->quantity_rule = '1';
+        $this->showTourXML->tour->distribution_identifier = 'TE_1_231';
 
         $tourCMSService->method('showTour')->willReturn($this->showTourXML);
         $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);

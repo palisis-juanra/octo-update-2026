@@ -186,6 +186,11 @@ class ProductService
     {
         $tour = $this->findTourDataFromAPI($productId);
         $this->logger->info(["message" => "Show tour response", "APIResponse" => $tour]);
+
+        if ($this->getTourDistributionIdentifierFromProductId($productId) != (string) $tour->distribution_identifier) {
+            throw new InvalidProductIdException($productId);
+        }
+
         $product = $this->createProductFromTourXML($tour);
 
         return $product;
@@ -842,7 +847,15 @@ class ProductService
     }
 
     /**
-     * Summary of getTourIdFromProductId
+     * @param string $productId in format (ACCOUNT TWO FIRST LETTERS)_(ACCOUNT_ID)_(TOUR_ID). e.g: TE_1_67|142
+     * @return string
+     */
+    public function getTourDistributionIdentifierFromProductId(string $productId): string
+    {
+        return explode('|', $productId)[0];
+    }
+
+    /**
      * @param string $productId in format (ACCOUNT TWO FIRST LETTERS)_(ACCOUNT_ID)_(TOUR_ID). e.g: TE_1_67|142
      * @return string
      */
