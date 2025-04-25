@@ -45,15 +45,12 @@ class BookingConfirmationTest extends FeatureTestCase
     public function setUp(): void
     {
         parent::setUp();
-
-        
     }
 
     public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
     {
         $this->mockServices('tests/TourCMSResponses/showBooking.xml');
         $response = $this->post("/bookings/". self::INVALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
-
         
         $response->assertBadRequest();
         
@@ -89,6 +86,30 @@ class BookingConfirmationTest extends FeatureTestCase
         $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryFormat", "QRCODE");
         $response->assertJsonPath("unitItems.1.ticket.redemptionMethod", "DIGITAL");
         $response->assertJsonPath("unitItems.1.ticket.utcRedeemedAt", null);
+    }
+
+    public function test_whenTravellersInformationIsSent_thenWeGetItOnResponse(): void
+    {
+        $this->mockServices('tests/TourCMSResponses/showBookingWithAssociatedTravellers.xml');
+        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response->assertOk();
+
+        $i = 0;
+        foreach ($this->showBookingXML->booking->customers->customer as $customer) {
+            $response->assertJsonPath("unitItems.". $i .".contact.firstName", (string) $customer->firstname);
+            $response->assertJsonPath("unitItems.". $i .".contact.lastName", (string) $customer->surname);
+            $i++;
+        }
+    }
+
+    public function test_whenBookingContactIsFilled_thenHavePriorityOverUnitContact(): void
+    {
+        $this->mockServices('tests/TourCMSResponses/showBookingWithAssociatedTravellers.xml');
+        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response->assertOk();
+
+        $response->assertJsonPath("unitItems.0.contact.firstName", "John");
+        $response->assertJsonPath("unitItems.0.contact.lastName", "Doe");
     }
 
     protected function mockServices(string $showBookingFile): void
