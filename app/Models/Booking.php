@@ -459,17 +459,17 @@ class Booking extends Model
     {
         return $this->bookingData;
     }
-    
-    /**
-     * Set the value of bookingData
-     *
-     * @return  self
-     */ 
+
     public function setBookingData(SimpleXMLElement $bookingData): self
     {
         $this->bookingData = $bookingData;
         
         return $this;
+    }
+
+    public function isAlreadyConfirmed(): bool
+    {
+        return in_array($this->status, [self::STATUS_CONFIRMED, self::STATUS_REDEEMED, self::STATUS_CANCELLED]);
     }
 
     protected static function getFirstRedeemed(SimpleXMLElement $bookingData): ?string
