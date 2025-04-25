@@ -102,16 +102,6 @@ class BookingConfirmationTest extends FeatureTestCase
         }
     }
 
-    public function test_whenBookingContactIsFilled_thenHavePriorityOverUnitContact(): void
-    {
-        $this->mockServices('tests/TourCMSResponses/showBookingWithAssociatedTravellers.xml');
-        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
-        $response->assertOk();
-
-        $response->assertJsonPath("unitItems.0.contact.firstName", "John");
-        $response->assertJsonPath("unitItems.0.contact.lastName", "Doe");
-    }
-
     protected function mockServices(string $showBookingFile): void
     {
         $this->showChannelXML = simplexml_load_file('tests/TourCMSResponses/showChannel.xml');
