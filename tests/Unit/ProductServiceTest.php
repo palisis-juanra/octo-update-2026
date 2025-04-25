@@ -590,6 +590,29 @@ class ProductServiceTest extends UnitTestCase
         $this->assertSame((string)$this->showTourXML->tour->account_timezone, $timezone);
     }
 
+    public function test_whenProductIdHasInvalidDistributionIdentifier_thenWeThrowException(): void
+    {
+        $this->showTourXML->tour->distribution_identifier = 'TE_1_2';
+
+        $tourcmsService = $this->mockTourCMSService(['showTour']);
+        $tourcmsService->method('showTour')->willReturn($this->showTourXML);
+        
+        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService);
+
+        
+        $this->expectException(InvalidProductIdException::class);
+        $productService->find('AA_1_2|143');
+
+        $this->expectException(InvalidProductIdException::class);
+        $productService->find('AA_12_2|143');
+
+        $this->expectException(InvalidProductIdException::class);
+        $productService->find('AA_1_28|143');
+
+        $this->expectException(InvalidProductIdException::class);
+        $productService->find('AA_1_2|27');
+    }
+
     protected function mockLogger(): JSONLogService|MockObject
     {
         $logger = $this->getMockBuilder(JsonLogService::class)
@@ -599,10 +622,10 @@ class ProductServiceTest extends UnitTestCase
         return $logger;
     }
 
-    protected function mockTourCMSService(): TourCMSService|MockObject
+    protected function mockTourCMSService(array $methodsToMock = []): TourCMSService|MockObject
     {
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods([])
+            ->onlyMethods($methodsToMock)
             ->disableOriginalConstructor()
             ->getMock();
         return $tourCMSService;
