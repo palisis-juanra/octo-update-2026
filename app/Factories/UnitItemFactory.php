@@ -128,7 +128,11 @@ class UnitItemFactory
             return null;
         }
 
-        return (int) $customers[$number-1]->customer_id;
+        if (!array_key_exists($number-1, $customers)) {
+            return null;
+        }
+
+        return (int) $customers[$number-1]->customer_id ?? null;
     }
 
 }
