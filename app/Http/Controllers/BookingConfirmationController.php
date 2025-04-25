@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\OctoRequest;
+use App\Models\Booking;
 use App\Models\Contact;
 use App\Services\BookingConfirmationService;
 use App\Services\JSONLogService;
@@ -27,11 +28,15 @@ class BookingConfirmationController
     public function index(Request $request, string $uuid): JsonResponse
     {
         $this->logger->info(["message" => "Starting to process booking confirmation request", "request" => $request->post()]);
-
-        
         $this->logger->info(["message" => "Getting booking from database", "Booking_uuid" => $uuid]);
+
         $booking = $this->service->getBookingByUuid($uuid);
         $booking = $this->service->getBooking($booking);
+
+        if ($booking->isAlreadyConfirmed()) {
+            $this->logger->info(["message" => "Booking already confirmed", "uuid" => $uuid, "id" => $booking->getId()]);
+            return new JsonResponse($this->transformer->transform($booking), Response::HTTP_OK);
+        }
         
         $unitItems = $request->post(OctoRequest::UNIT_ITEMS) ?? [];
         if (!empty($unitItems)) {
@@ -46,16 +51,8 @@ class BookingConfirmationController
             $booking = $booking->setResellerReference($resellerReference);
         }
         
-        // Update customers information
-        $leadTravellerContactData = $request->post(OctoRequest::CONTACT);
-        if (!empty($leadTravellerContactData)) {
-            $contact = Contact::create($leadTravellerContactData);
-            $this->service->updateTraveller($booking->getLeadCustomerId(), $contact);
-            $booking->setContact($contact);
-        }
-        
-        $unitContacts = [];
         // We need to remove unit items without contact, as they are not needed
+        $unitContacts = [];
         foreach ($unitItems as $key => $unitItem) {
             if (array_key_exists('contact', $unitItem)) {
                 $unitContacts[] = $unitItem;
@@ -72,6 +69,14 @@ class BookingConfirmationController
                 unset($unitContacts[$key]);
                 sort($unitContacts);
             }
+        }
+
+        // Update customers information
+        $leadTravellerContactData = $request->post(OctoRequest::CONTACT);
+        if (!empty($leadTravellerContactData)) {
+            $contact = Contact::create($leadTravellerContactData);
+            $this->service->updateTraveller($booking->getLeadCustomerId(), $contact);
+            $booking->setContact($contact);
         }
 
         // Commit booking

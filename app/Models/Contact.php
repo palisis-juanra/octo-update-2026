@@ -53,8 +53,8 @@ class Contact extends BaseModel
         $contactArray = [];
         $contactArray[self::FIELD_FULL_NAME] = $showBookingResponse->lead_customer_name ? (string) $showBookingResponse->lead_customer_name : null ;
         $contactArray[self::FIELD_EMAIL_ADDRESS] = $showBookingResponse->lead_customer_email ? (string) $showBookingResponse->lead_customer_email : null;
-        $contactArray[self::FIELD_PHONE_NUMBER] = $showBookingResponse->lead_customer_tel_mobile ? $showBookingResponse->lead_customer_tel_mobile : null;
-        $contactArray[self::FIELD_NOTES] = $showBookingResponse->lead_customer_contact_note ? $showBookingResponse->lead_customer_contact_note : null;
+        $contactArray[self::FIELD_PHONE_NUMBER] = $showBookingResponse->lead_customer_tel_mobile ? (string) $showBookingResponse->lead_customer_tel_mobile : null;
+        $contactArray[self::FIELD_NOTES] = $showBookingResponse->lead_customer_contact_note ? (string) $showBookingResponse->lead_customer_contact_note : null;
 
         return self::create($contactArray);     
     }
@@ -65,7 +65,7 @@ class Contact extends BaseModel
         $contactArray[self::FIELD_FULL_NAME] = $customerXML->customer_name ? (string) $customerXML->customer_name : null;
         $contactArray[self::FIELD_FIRST_NAME] = $customerXML->firstname ? (string) $customerXML->firstname : null;
         $contactArray[self::FIELD_LAST_NAME] = $customerXML->surname ? (string) $customerXML->surname : null;
-        $contactArray[self::FIELD_EMAIL_ADDRESS] = $customerXML->email ? (string) $customerXML->email : null;
+        $contactArray[self::FIELD_EMAIL_ADDRESS] = $customerXML->customer_email ? (string) $customerXML->customer_email : null;
         $contactArray[self::FIELD_PHONE_NUMBER] = $customerXML->customer_tel_mobile ? (string) $customerXML->customer_tel_mobile : null;
         $contactArray[self::FIELD_NOTES] = $customerXML->customer_contact_note ? (string) $customerXML->customer_contact_note : null;
         $contactArray[self::FIELD_COUNTRY] = $customerXML->nationality ? (string) $customerXML->nationality : null;

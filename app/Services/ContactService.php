@@ -15,7 +15,7 @@ class ContactService
         $customerXML->addChild('surname', $contact->getLastName());
         $customerXML->addChild('email', $contact->getEmailAddress());
         $customerXML->addChild('country', $contact->getCountry());
-        $customerXML->addChild('tel_home', $contact->getPhoneNumber());
+        $customerXML->addChild('tel_mobile', $contact->getPhoneNumber());
         $customerXML->addChild('postcode', $contact->getPostalCode());
         $customerXML->addChild('contact_note', $contact->getNotes());
 
