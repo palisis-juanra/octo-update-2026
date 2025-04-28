@@ -186,7 +186,7 @@ class AvailabilityService
 
         $departures = $this->tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
 
-        $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $date);
+        $availabilityRequest = new AvailabilityRequest($product, $optionId, $date);
         $availability = $availabilityRequest->getAvailabilityFromDeparturesById($availabilityId, $departures);
 
         return $availability;

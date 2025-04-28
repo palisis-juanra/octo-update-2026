@@ -8,6 +8,7 @@ use App\Features\Availability\AvailabilityRequest;
 use App\Features\Availability\Pricing\PricingAvailabilityRequest;
 use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
+use App\Models\Product;
 use App\Services\ProductService;
 use Tests\FeatureTestCase;
 
@@ -37,7 +38,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
             "localDate" => "2024-11-28",
         ];
         
-        $availabilityRequest = $this->factory->get($requestParams);
+        $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(AvailabilityRequest::class, $availabilityRequest);
@@ -55,7 +56,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
             "localDateEnd" => "2024-11-25",
         ];
 
-        $availabilityRequest = $this->factory->get($requestParams);
+        $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(AvailabilityRequest::class, $availabilityRequest);
@@ -74,7 +75,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
             "localDate" => "2024-11-28",
         ];
 
-        $availabilityRequest = $this->factory->get($requestParams);
+        $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(PricingAvailabilityRequest::class, $availabilityRequest);
@@ -98,7 +99,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
             $availabilityIdsDates[] = explode('|', $availabilityId)[0];
         }
 
-        $availabilityRequest = $this->factory->get($requestParams);
+        $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertEquals(min($availabilityIdsDates), $availabilityRequest->getLocalDateStart());
         $this->assertEquals(max($availabilityIdsDates), $availabilityRequest->getLocalDateEnd());
@@ -116,7 +117,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
 
         $availabilityIdDate = explode('|', $requestParams['availabilityIds'][0])[0];
 
-        $availabilityRequest = $this->factory->get($requestParams);
+        $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertEquals($availabilityIdDate, $availabilityRequest->getLocalDateStart());
     }
@@ -140,7 +141,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
 
         $availabilityIdDate = explode('|', $requestParams['availabilityIds'][0])[0];
 
-        $availabilityRequest = $this->factory->get($requestParams);
+        $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(PricingAvailabilityRequest::class, $availabilityRequest);
@@ -159,10 +160,24 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
 
         $availabilityIdDate = explode('|', $requestParams['availabilityIds'][0])[0];
 
-        $availabilityRequest = $this->factory->get($requestParams);
+        $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(AvailabilityRequest::class, $availabilityRequest);
         $this->assertEquals($availabilityIdDate, $availabilityRequest->getLocalDateStart());
+    }
+
+    public function getProduct(string $productId): Product
+    {
+        $product = new Product();
+
+        $productServiceMock = $this->getMockBuilder(ProductService::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+        
+        $tourId = $productServiceMock->getTourIdFromProductId($productId);
+
+        return $product->setId($productId)->setTourId($tourId);
     }
 }

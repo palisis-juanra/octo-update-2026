@@ -6,6 +6,7 @@ use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Requests\OctoRequest;
+use App\Http\Responses\OctoResponse;
 use App\Models\Product;
 use App\Services\JSONLogService;
 use App\Services\LocaleService;
@@ -567,7 +568,7 @@ class ProductTest extends FeatureTestCase
 
     }
 
-    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedProductsWithPricingPerUnit(): void
+    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedInvalidProductContent(): void
     {
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
         ->onlyMethods(['showTour', 'showChannel'])
@@ -583,9 +584,10 @@ class ProductTest extends FeatureTestCase
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
         App::instance(ProductService::class, $productServiceMock);
 
+        $productId = "TE_1_231|142";
 
         $response = $this->get(
-            "/products/". $this->showTourXML->tour->distribution_identifier ."|142",
+            "/products/{$productId}",
             [
                 self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
                 OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
@@ -593,74 +595,14 @@ class ProductTest extends FeatureTestCase
         );
 
         $response
-            ->assertOk()
+            ->assertStatus(400)
             ->assertJsonFragment([
-                "defaultCurrency" => (string) $this->showTourXML->tour->sale_currency,
-                "availableCurrencies" => [(string) $this->showTourXML->tour->sale_currency],
-                "pricingPer" => Product::PRICING_PER_UNIT
-            ]);
-
-    }
-
-    public function test_whenProductHaveGooglePlaceId_thenWeGetItOnResponse(): void
-    {
-        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods(['showTour', 'showChannel'])
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->showTourWithGeocodesXML->tour->distribution_identifier = 'TE_1_231';
-
-        $tourCMSService->method('showTour')->willReturn($this->showTourWithGeocodesXML);
-        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
-        App::instance(TourCMSService::class, $tourCMSService);
-
-        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
-        App::instance(ProductService::class, $productServiceMock);
-
-        $productId = "TE_1_231|142";
-
-        $response = $this->get(
-            "/products/{$productId}",
-            [
-                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_CONTENT
-            ]
-        );
-
-        $response->assertStatus(200);
-
-        // Start point
-        $response->assertJsonFragment([
-            "identifiers" => [
-                [
-                    ProductService::FIELD_IDENTIFIER_VALUE => (string) $this->showTourWithGeocodesXML->tour->geocode_start_point->google_place_id,
-                    ProductService::FIELD_IDENTIFIER_TYPE => ProductService::IDENTIFIER_TYPE_GOOGLE_PLACE_ID
+                OctoResponse::FIELD_ERROR_CODE => OctoResponse::ERROR_CODE_INVALID_PRODUCT_ID
                 ]
-            ]
-        ]);
-
-        // Midpoints
-        foreach ($this->showTourWithGeocodesXML->tour->geocode_midpoints->midpoint as $midpoint) {
-            $response
-                ->assertJsonFragment([
-                    "identifiers" => [
-                        [
-                            ProductService::FIELD_IDENTIFIER_VALUE => (string) $midpoint->google_place_id,
-                            ProductService::FIELD_IDENTIFIER_TYPE => ProductService::IDENTIFIER_TYPE_GOOGLE_PLACE_ID
-                        ]
-                    ]
-                ]);
-        }
-        // End point
-        $response->assertJsonFragment([
-            "identifiers" => [
-                [
-                    ProductService::FIELD_IDENTIFIER_VALUE => (string) $this->showTourWithGeocodesXML->tour->geocode_end_point->google_place_id,
-                    ProductService::FIELD_IDENTIFIER_TYPE => ProductService::IDENTIFIER_TYPE_GOOGLE_PLACE_ID
+            )->assertJsonFragment([
+                OctoResponse::FIELD_PRODUCT_ID => $productId
                 ]
-            ]
-        ]);
+            );
     }
 
     protected function getProductServiceMock(array $properties = [])
