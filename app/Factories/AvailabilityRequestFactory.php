@@ -7,6 +7,7 @@ use App\Features\Availability\AvailabilityRequest;
 use App\Features\Availability\Pricing\PricingAvailabilityRequest;
 use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
+use App\Models\Product;
 use App\Services\AvailabilityService;
 use App\Services\ProductService;
 use App\Services\UnitService;
@@ -15,7 +16,7 @@ class AvailabilityRequestFactory
 {
     public function __construct(public ProductService $productService) {}
 
-    public function get(array $requestParams, int $minBookingSize = ProductService::MIN_BOOKING_SIZE, int $maxBookingSize = ProductService::MAX_BOOKING_SIZE, bool $allDay = false): BaseAvailabilityRequest
+    public function get(Product $product, array $requestParams, int $minBookingSize = ProductService::MIN_BOOKING_SIZE, int $maxBookingSize = ProductService::MAX_BOOKING_SIZE, bool $allDay = false): BaseAvailabilityRequest
     {
         $productId = $requestParams[AvailabilityService::PARAM_PRODUCT_ID] ?? '';
         $tourId = $this->productService->getTourIdFromProductId($productId) ?? '';
@@ -43,16 +44,15 @@ class AvailabilityRequestFactory
         $pricing = OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
-            return (new PricingAvailabilityRequest($tourId, $optionId, $localDate, $units, $currency, $minBookingSize, $maxBookingSize, $allDay))
-                ->setProductId($productId);
+            return new PricingAvailabilityRequest($product, $optionId, $localDate, $units, $currency, $minBookingSize, $maxBookingSize, $allDay);        
         }
+
         if (!$multiDates) {
             $localDateEnd = '';
             $localDateStart = $localDate;
         }
 
-        $availabilityRequest = (new AvailabilityRequest($tourId, $optionId, $localDateStart, $localDateEnd))
-            ->setProductId($productId);
+        $availabilityRequest = new AvailabilityRequest($product, $optionId, $localDateStart, $localDateEnd);
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $availabilityRequest->setContentEnabled(true);

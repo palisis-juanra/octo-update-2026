@@ -7,6 +7,7 @@ use App\Features\Availability\AvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\Availability;
 use App\Models\Pricing;
+use App\Models\Product;
 use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
@@ -18,16 +19,16 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     protected array $units;
     protected int $minBookingSize;
     protected int $maxBookingSize;
-    protected string $tourId;
+    protected Product $product;
     protected string $optionId;
     protected string $localDateStart;
     protected string $localDateEnd;
     protected bool $allowPricing = true;
     protected bool $allDay = false;
 
-    public function __construct(string $tourId, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize, int $maxBookingSize, bool $allDay = false)
+    public function __construct(Product $product, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize, int $maxBookingSize, bool $allDay = false)
     {
-        $this->tourId = $tourId;
+        $this->product = $product;
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateStart;
@@ -102,7 +103,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         return $checkAvailcomponentsIndexed;
     }
 
-    protected function getAvailabilitiesFromComponents(array $components)
+    protected function getAvailabilitiesFromComponents(array $components): array
     {   
         $availabilities = [];
 
@@ -176,7 +177,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $params = "date={$this->localDateStart}&{$ratesParams}";
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
         $params .= "&{$mappingQueryString}";
-        $response = $tourCMSService->checkAvailability($params, $this->tourId);
+        $response = $tourCMSService->checkAvailability($params, $this->product->getTourId());
         if (empty($response->available_components)) {
             return [];
         }

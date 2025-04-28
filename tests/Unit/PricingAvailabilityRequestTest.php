@@ -2,6 +2,7 @@
 
 use App\Exceptions\InvalidUnitIdException;
 use App\Features\Availability\Pricing\PricingAvailabilityRequest;
+use App\Models\Product;
 use Tests\UnitTestCase;
 
 class PricingAvailabilityRequestTest extends UnitTestCase
@@ -16,7 +17,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
             ]
         ];
 
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest("1", "SINGLE", "2023-10-01", $units, "USD", 1, 5);
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD", 1, 5);
 
         $expectedParams = "r1=3";
         
@@ -39,7 +40,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
             ]
         ];
 
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest("1", "SINGLE", "2023-10-01", $units, "USD", 1, 5);
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD", 1, 5);
 
         $expectedParams = "r1=2&r2=1";
         
@@ -60,7 +61,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
         ];
         $minBookingSize = 1;
         
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest("1", "SINGLE", "2023-10-01", $units, "USD", $minBookingSize, 5);
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD", $minBookingSize, 5);
 
         $this->expectException(InvalidUnitIdException::class);
         
@@ -74,7 +75,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
         $units = [];
         $minBookingSize = 1;
         
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest("1", "SINGLE", "2023-10-01", $units, "USD", $minBookingSize, 5);
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD", $minBookingSize, 5);
 
         // If we dont have units, we set the quantity to the minimum booking size
         $expectedParams = "r1={$minBookingSize}";
@@ -82,5 +83,12 @@ class PricingAvailabilityRequestTest extends UnitTestCase
         $params = $pricingAvailabilityRequest->generateRatesParamsFromUnits($units);
 
         $this->assertEquals($expectedParams, $params);
+    }
+
+    protected function getProduct(int $tourId): Product
+    {
+        $product = new Product();
+        
+        return $product->setId($tourId);
     }
 }

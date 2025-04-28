@@ -265,6 +265,7 @@ class ProductService
 
         $product = new Product();
         $product->setId($id)
+                ->setTourId((string) $tour->tour_id)
                 ->setInternalName($internalName)
                 ->setReference($reference)
                 ->setLocale($locale)
@@ -283,7 +284,11 @@ class ProductService
                 ->setMaxBookingSize($maxBookingSize)
                 ->setAllDay($allDay);
         
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
+        if ((int) $tour->volume_pricing == 1) {
+            $product->setPricingType(Product::PRICING_TYPE_VOLUME);
+        }
+
+        if (true === OctoRequestFacade::isCapabilityActive(capability: OctoRequest::CAPABILITIES_CONTENT)) {
 
             $productContent = new ProductContent();
             
@@ -310,22 +315,9 @@ class ProductService
         }
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
-            $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : (string) $this->tourCMSService->showChannel()->channel->sale_currency;
-            $pricingPer = $this->getPricingPerFromTourXML($tour);
-            
+            $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : (string) $this->tourCMSService->showChannel()->channel->sale_currency;            
             $product->setDefaultCurrency($saleCurrency);
             $product->setAvailableCurrencies([$saleCurrency]);
-            $product->setPricingPer($pricingPer);
-
-            if ($pricingPer === Product::PRICING_PER_BOOKING) {
-                $productPricing = new Pricing(
-                    100 * $tour->from_price,
-                    100 * $tour->from_price,
-                    100 * $tour->from_price,
-                    $saleCurrency,
-                );
-                $product->setPricing($productPricing);
-            }
         }
 
         return $product;
@@ -654,7 +646,7 @@ class ProductService
 
     protected function getPricingPerFromTourXML(SimpleXMLElement $tour): string
     {
-        return (string) $tour->quantity_rule == '1' ? Product::PRICING_PER_BOOKING : Product::PRICING_PER_UNIT;
+        return Product::PRICING_PER_UNIT;
     }
 
     protected function findTourDataFromAPI(string $productId): SimpleXMLElement
