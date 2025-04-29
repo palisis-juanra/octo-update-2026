@@ -151,6 +151,9 @@ class ProductService
     public const TIMEZONE_NOT_SET = 'NOTSET';
     public const DEFAULT_CHANNEL_LANG = 'en';
     public const DEFAULT_CHANNEL_COUNTRY = 'GB';
+    public const FIELD_IDENTIFIER_TYPE = 'identifierType';
+    public const FIELD_IDENTIFIER_VALUE = 'identifierValue';
+    public const IDENTIFIER_TYPE_GOOGLE_PLACE_ID = 'googlePlaceId';
   
     public ProductTransformer $productTransformer;
 
@@ -1050,6 +1053,9 @@ class ProductService
             $place->setLatitude(explode(',', (string) $tour->geocode_start_point->geocode)[0]);
             $place->setLongitude(explode(',', (string) $tour->geocode_start_point->geocode)[1]);
             
+            $identifiers = $this->getLocationIdentifiers($tour->geocode_start_point);
+            $place->setIdentifiers($identifiers);
+
             $location->setPlace($place);
             $locations[] = $location;
         }
@@ -1070,13 +1076,8 @@ class ProductService
                 $place->setLatitude(explode(',', (string) $midpoint->geocode)[0]);
                 $place->setLongitude(explode(',', (string) $midpoint->geocode)[1]);
                 
-                if (!empty($midpoint->google_place_id)) {
-                    $identifiers = [(object) [
-                        'identifierType' => 'googlePlaceId',
-                        'identifierValue' => (string) $midpoint->google_place_id
-                    ]];
-                    $place->setIdentifiers($identifiers);
-                }
+                $identifiers = $this->getLocationIdentifiers($midpoint);
+                $place->setIdentifiers($identifiers);
 
                 $location->setPlace($place);
                 $locations[] = $location;
@@ -1097,19 +1098,26 @@ class ProductService
             $place->setLatitude(explode(',', (string) $tour->geocode_end_point->geocode)[0]);
             $place->setLongitude(explode(',', (string) $tour->geocode_end_point->geocode)[1]);
             
-            if (!empty($tour->geocode_end_point->google_place_id)) {
-                $identifiers = [(object) [
-                    'identifierType' => 'googlePlaceId',
-                    'identifierValue' => (string) $tour->geocode_end_point->google_place_id
-                ]];
-                $place->setIdentifiers($identifiers);
-            }
+            $identifiers = $this->getLocationIdentifiers($tour->geocode_end_point);
+            $place->setIdentifiers($identifiers);
 
             $location->setPlace($place);
             $locations[] = $location;
         }
 
         return $locations;
+    }
+
+    protected function getLocationIdentifiers(SimpleXMLElement $geocode): array
+    {
+        $identifiers = [];
+        if (isset($geocode->google_place_id)) {
+            $identifiers[] = (object) [
+                self::FIELD_IDENTIFIER_TYPE => self::IDENTIFIER_TYPE_GOOGLE_PLACE_ID,
+                self::FIELD_IDENTIFIER_VALUE => (string) $geocode->google_place_id
+            ];
+        }
+        return $identifiers;
     }
 
     protected function getDurationMinutesFrom(SimpleXMLElement $tour): int
