@@ -225,6 +225,19 @@ class ProductService
         $deliveryMethods = $this->getProductDeliveryMethods($tour);
         $redemptionMethod = $this->getProductRedemptionMethod($tour);
 
+        if ((int) $tour->quantity_rule === 1) {
+            $this->errors[] = "Invalid product pricing type: Group pricing";
+        }
+
+        if ((int) $tour->has_h === 1) {
+            $this->errors[] = "Invalid product type: hotel";
+        }
+
+        if ((int) $tour->has_f === 1) {
+            $this->errors[] = "Invalid product type: Freesale";
+        }
+
+
         $options = [];
         if (isset($tour->tour_departure_structure->type)) {
             $options = $this->getProductOptions($tour);
