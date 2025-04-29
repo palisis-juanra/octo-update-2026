@@ -28,6 +28,7 @@ class ProductTest extends FeatureTestCase
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $listToursXML;
     public SimpleXMLElement $showTourInvalidXML;
+    public SimpleXMLElement $showTourWithGeocodesXML;
     public $loggerMock;
     public $tourCMSServiceMock;
 
@@ -43,6 +44,8 @@ class ProductTest extends FeatureTestCase
         $this->listToursXML = simplexml_load_string($this->listToursString);
         $this->showTourInvalidXML = simplexml_load_string($this->showTourInvalidString);
 
+        $this->showTourWithGeocodesXML = simplexml_load_file('./tests/TourCMSResponses/showTourWithGeocodesAndGooglePlaceId.xml');
+
         $this->loggerMock = $this->getMockBuilder(JSONLogService::class)
             ->onlyMethods(['info', 'error'])
             ->disableOriginalConstructor()
@@ -53,8 +56,6 @@ class ProductTest extends FeatureTestCase
         $this->tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
         ->disableOriginalConstructor()
         ->getMock();
-        //$this->loggerMock->method('info')->willReturn();
-        //$this->loggerMock->method('error')->willReturn(null);
     }
 
     public function test_whenCallFindAndTransform_thenWeGetValidStructure()
@@ -573,9 +574,6 @@ class ProductTest extends FeatureTestCase
         ->disableOriginalConstructor()
         ->getMock();
 
-        $this->showTourXML->tour->quantity_rule = '1';
-        $this->showTourXML->tour->distribution_identifier = 'TE_1_231';
-
         $tourCMSService->method('showTour')->willReturn($this->showTourXML);
         $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
         App::instance(TourCMSService::class, $tourCMSService);
@@ -600,6 +598,67 @@ class ProductTest extends FeatureTestCase
                 "pricingPer" => Product::PRICING_PER_BOOKING
             ]);
 
+    }
+
+    public function test_whenProductHaveGooglePlaceId_thenWeGetItOnResponse(): void
+    {
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+            ->onlyMethods(['showTour', 'showChannel'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->showTourWithGeocodesXML->tour->distribution_identifier = 'TE_1_231';
+
+        $tourCMSService->method('showTour')->willReturn($this->showTourWithGeocodesXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        App::instance(TourCMSService::class, $tourCMSService);
+
+        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
+        App::instance(ProductService::class, $productServiceMock);
+
+        $productId = "TE_1_231|142";
+
+        $response = $this->get(
+            "/products/{$productId}",
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_CONTENT
+            ]
+        );
+
+        $response->assertStatus(200);
+
+        // Start point
+        $response->assertJsonFragment([
+            "identifiers" => [
+                [
+                    ProductService::FIELD_IDENTIFIER_VALUE => (string) $this->showTourWithGeocodesXML->tour->geocode_start_point->google_place_id,
+                    ProductService::FIELD_IDENTIFIER_TYPE => ProductService::IDENTIFIER_TYPE_GOOGLE_PLACE_ID
+                ]
+            ]
+        ]);
+
+        // Midpoints
+        foreach ($this->showTourWithGeocodesXML->tour->geocode_midpoints->midpoint as $midpoint) {
+            $response
+                ->assertJsonFragment([
+                    "identifiers" => [
+                        [
+                            ProductService::FIELD_IDENTIFIER_VALUE => (string) $midpoint->google_place_id,
+                            ProductService::FIELD_IDENTIFIER_TYPE => ProductService::IDENTIFIER_TYPE_GOOGLE_PLACE_ID
+                        ]
+                    ]
+                ]);
+        }
+        // End point
+        $response->assertJsonFragment([
+            "identifiers" => [
+                [
+                    ProductService::FIELD_IDENTIFIER_VALUE => (string) $this->showTourWithGeocodesXML->tour->geocode_end_point->google_place_id,
+                    ProductService::FIELD_IDENTIFIER_TYPE => ProductService::IDENTIFIER_TYPE_GOOGLE_PLACE_ID
+                ]
+            ]
+        ]);
     }
 
     protected function getProductServiceMock(array $properties = [])
