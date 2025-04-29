@@ -4,14 +4,13 @@ namespace App\Factories;
 
 use App\Exceptions\ComponentNotFoundException;
 use App\Models\Booking;
-use App\Models\Product;
+use App\Models\Contact;
 use App\Models\Ticket;
 use App\Models\Unit;
 use App\Models\UnitItem;
 use App\Services\ProductService;
 use App\Services\UnitService;
 use App\Services\XMLService;
-use Exception;
 use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
 
@@ -44,6 +43,25 @@ class UnitItemFactory
             ->setStatus($booking->getStatus())
             ->setUtcRedeemedAt(!empty($component->redeemed_at_utc_seconds) ? (int) $component->redeemed_at_utc_seconds : null)
             ->setContact($contact);
+
+        if (!is_null($component)) {
+            $customerId = self::getCustomerIdForUnitItem($component, $number);
+            $unitItem->setCustomerId((int) $customerId);
+
+            $customer = null;
+            $customers = XMLService::getArrayFromXmlNode($booking->getBookingData()->customers, 'customer');
+            foreach ($customers as $customerXML) {
+                if ($customerXML->customer_id == $customerId) {
+                    $customer = $customerXML;
+                    break;
+                }
+            }
+
+            if ($customer) {
+                $unitItem->setContact(Contact::createFromCustomerXML($customer));
+            }
+
+        }
 
         // We only have to create ticket if the TICKET is present in product's delivery methods
         if (in_array(ProductService::DELIVERY_METHOD_TICKET, $product->getDeliveryMethods())) {
@@ -97,6 +115,24 @@ class UnitItemFactory
         $rates = reset($rates);
 
         return $rates[0];
+    }
+
+    protected static function getCustomerIdForUnitItem(SimpleXMLElement $component, int $number): ?int
+    {
+        if (empty($component) || !isset($component->customers)) {
+            return null;
+        }
+
+        $customers = XMLService::getArrayFromXmlNode($component->customers, 'customer');
+        if (empty($customers)) {
+            return null;
+        }
+
+        if (!array_key_exists($number-1, $customers)) {
+            return null;
+        }
+
+        return (int) $customers[$number-1]->customer_id ?? null;
     }
 
 }

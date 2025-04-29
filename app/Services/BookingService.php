@@ -6,7 +6,6 @@ use App\Exceptions\InvalidBookingUUIDException;
 use App\Factories\BookingFactory;
 use App\Models\Availability\Availability;
 use App\Models\Booking;
-use App\Models\Contact;
 use SimpleXMLElement;
 
 class BookingService

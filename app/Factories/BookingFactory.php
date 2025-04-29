@@ -141,7 +141,6 @@ class BookingFactory
         $booking->setAvailability(availability: $availability);
 
         // UNITS
-        $customers = XMLService::getArrayFromXmlNode($bookingData->customers, 'customer');
         $unitItems = [];
         $unitsQuantities = [];
 
