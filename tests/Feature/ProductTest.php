@@ -567,12 +567,14 @@ class ProductTest extends FeatureTestCase
 
     }
 
-    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedProductsWithPricingPerBooking(): void
+    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedProductsWithPricingPerUnit(): void
     {
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
         ->onlyMethods(['showTour', 'showChannel'])
         ->disableOriginalConstructor()
         ->getMock();
+
+        $this->showTourXML->tour->distribution_identifier = 'TE_1_231';
 
         $tourCMSService->method('showTour')->willReturn($this->showTourXML);
         $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
@@ -583,7 +585,7 @@ class ProductTest extends FeatureTestCase
 
 
         $response = $this->get(
-            "/products/TE_1_231|142",
+            "/products/". $this->showTourXML->tour->distribution_identifier ."|142",
             [
                 self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
                 OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
@@ -595,7 +597,7 @@ class ProductTest extends FeatureTestCase
             ->assertJsonFragment([
                 "defaultCurrency" => (string) $this->showTourXML->tour->sale_currency,
                 "availableCurrencies" => [(string) $this->showTourXML->tour->sale_currency],
-                "pricingPer" => Product::PRICING_PER_BOOKING
+                "pricingPer" => Product::PRICING_PER_UNIT
             ]);
 
     }
