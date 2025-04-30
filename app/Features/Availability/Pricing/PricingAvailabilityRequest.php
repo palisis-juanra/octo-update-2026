@@ -37,7 +37,6 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $this->minBookingSize = $minBookingSize;
         $this->maxBookingSize = $maxBookingSize;
         $this->allDay = $allDay;
-
     }
 
     /**
