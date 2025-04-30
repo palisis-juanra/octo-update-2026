@@ -20,4 +20,13 @@ abstract class FeatureTestCase extends BaseTestCase
 
         return $jsonLogServiceMock;
     }
+
+    protected function getJsonLogMock(): JSONLogService
+    {
+        $jsonLog = $this->getMockBuilder(JSONLogService::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['info', 'error', 'getLogId'])
+            ->getMock();
+        return $jsonLog;
+    }
 }
