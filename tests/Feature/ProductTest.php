@@ -570,7 +570,7 @@ class ProductTest extends FeatureTestCase
 
     }
 
-    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedInvalidProductContent(): void
+    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedInvalidId(): void
     {
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
         ->onlyMethods(['showTour', 'showChannel'])
