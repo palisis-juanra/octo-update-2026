@@ -35,6 +35,8 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     public function __construct(protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false)
     {
         $this->tourId = $product->getTourId();
+        $this->minBookingSize = $product->getMinBookingSize();
+        $this->maxBookingSize = $product->getMaxBookingSize();
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
@@ -53,94 +55,44 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $this->localDateEnd;
     }
 
-    public function setProduct(Product $product): static
-    {
-        $this->product = $product;
-        return $this;
-    }
-
-    public function getProduct(): ?Product
+    public function getProduct(): Product
     {
         return $this->product;
     }
 
-    /**
-     * Get the value of optionId
-     */ 
     public function getOptionId()
     {
         return $this->optionId;
     }
 
-    /**
-     * Set the value of optionId
-     *
-     * @return  self
-     */ 
     public function setOptionId($optionId)
     {
         $this->optionId = $optionId;
         return $this;
     }
 
-    /**
-     * Get the value of units
-     */ 
     public function getUnits()
     {
         return $this->units;
     }
 
-    /**
-     * Set the value of units
-     *
-     * @return  self
-     */ 
     public function setUnits($units)
     {
         $this->units = $units;
         return $this;
     }
 
-    /**
-     * Get the value of minBookingSize
-     */ 
     public function getMinBookingSize(): int
     {
         return $this->minBookingSize;
     }
 
-    /**
-     * Set the value of minBookingSize
-     *
-     * @return  self
-     */ 
-    public function setMinBookingSize(int $minBookingSize): static
-    {
-        $this->minBookingSize = $minBookingSize;
-        return $this;
-    }
-
-    /**
-     * Get the value of maxBookingSize
-     */
     public function getMaxBookingSize(): int
     {
         return $this->maxBookingSize;
     }
 
-    /**
-     * Set the value of maxBookingSize
-     *
-     * @return  self
-     */
-    public function setMaxBookingSize(int $maxBookingSize)
-    {
-        $this->maxBookingSize = $maxBookingSize;
-        return $this;
-    }
-
-// PUBLIC FUNCTIONS
+    // PUBLIC FUNCTIONS
 
     /**
      * Fetch departures info from API and return the availabilities

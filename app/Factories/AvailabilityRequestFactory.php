@@ -18,8 +18,6 @@ class AvailabilityRequestFactory
 
     public function get(Product $product, array $requestParams): BaseAvailabilityRequest
     {
-        $productId = $requestParams[AvailabilityService::PARAM_PRODUCT_ID] ?? '';
-        $tourId = $this->productService->getTourIdFromProductId($productId) ?? '';
         $optionId = $requestParams[AvailabilityService::PARAM_OPTION_ID] ?? '';
         $localDate = $requestParams[AvailabilityService::PARAM_LOCAL_DATE] ?? '';
         $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START] ?? '';
@@ -57,10 +55,8 @@ class AvailabilityRequestFactory
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $availabilityRequest->setContentEnabled(true);
         }
-        $availabilityRequest->setMinBookingSize($product->getMinBookingSize());
-        $availabilityRequest->setMaxBookingSize($product->getMaxBookingSize());
+        
         $availabilityRequest->setUnits($units);
-        $availabilityRequest->setAllDay(false);
 
         return $availabilityRequest;
     }
