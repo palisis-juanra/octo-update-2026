@@ -133,6 +133,9 @@ class ProductService
     public const ERROR_TIMEZONE_MISSING = 'timeZone field is missing';
     public const ERROR_TOUR_MAPPING_MISSING = 'the tour mapping is missing';  
     public const ERROR_TOUR_WITH_NO_OPTIONS = 'tour has no option available';
+    public const ERROR_GROUP_PRICING_NOT_SUPPORTED = "Group pricing products are not supported";
+    public const ERROR_FREESALE_NOT_SUPPORTED = "Freesale products are not supported";
+    public const ERROR_HOTELS_NOT_SUPPORTED = "Hotels products are not supported";
     public const FEATURE_TYPE_INCLUSION = 'INCLUSION';
     public const FEATURE_TYPE_EXCLUSION = 'EXCLUSION';
     public const FEATURE_TYPE_HIGHLIGHT = 'HIGHLIGHT';
@@ -226,15 +229,15 @@ class ProductService
         $redemptionMethod = $this->getProductRedemptionMethod($tour);
 
         if ((int) $tour->quantity_rule === 1) {
-            $this->errors[] = "Invalid product pricing type: Group pricing";
+            $this->errors[] = self::ERROR_GROUP_PRICING_NOT_SUPPORTED;
         }
 
         if ((int) $tour->has_h === 1) {
-            $this->errors[] = "Invalid product type: hotel";
+            $this->errors[] = self::ERROR_HOTELS_NOT_SUPPORTED;
         }
 
         if ((int) $tour->has_f === 1) {
-            $this->errors[] = "Invalid product type: Freesale";
+            $this->errors[] = self::ERROR_FREESALE_NOT_SUPPORTED;
         }
 
 

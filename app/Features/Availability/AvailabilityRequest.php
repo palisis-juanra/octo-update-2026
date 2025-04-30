@@ -339,16 +339,16 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         // Volume pricing
         if ($this->getProduct()->getPricingType() === Product::PRICING_TYPE_VOLUME) {
             
-            $unitId = !empty($this->units) ? $this->units[0]['id'] : "{$this->product->getId()}|r1";
+            $unitId = !empty($this->units) ? $this->units[0]['id'] : "{$this->product->getId()}|r{$this->getMinBookingSize()}";
             $rateId = UnitService::getTourCMSRateId($unitId);
             $rate = $ratesArray[$rateId];
 
             $quantity = !empty($this->units) ? $this->units[0]['quantity'] : $this->getMinBookingSize();
 
             return new Pricing(
-                $rate['rate_price'] * $quantity * 100,
-                $rate['rate_price'] * $quantity * 100,
-                $rate['net_price'] * $quantity * 100,
+                $rate->rate_price * $quantity * 100,
+                $rate->rate_price * $quantity * 100,
+                $rate->net_price * $quantity * 100,
                 $this->currency
             );
 
@@ -403,8 +403,9 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $unitPricings[] = 
                 (new AvailabilityUnitPricing)
                     ->setUnitId($unitId)
+                    ->setOriginalPrice($rate->rate_price * 100)
                     ->setRetailPrice($rate->rate_price * 100)
-                    ->setNetPrice($rate->net_price * 100)
+                    ->setNetPrice((!empty($rate->net_price) ? $rate->net_price : $rate->rate_price) * 100)
                     ->setCurrency($this->currency);
            
             return $unitPricings;
@@ -414,6 +415,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $unitPricings[] = 
                 (new AvailabilityUnitPricing)
                     ->setUnitId("{$this->product->getId()}|{$rateId}")
+                    ->setOriginalPrice($rate->rate_price * 100)
                     ->setRetailPrice($rate->rate_price * 100)
                     ->setNetPrice((!empty($rate->net_price) ? $rate->net_price : $rate->rate_price) * 100)
                     ->setCurrency($this->currency);
