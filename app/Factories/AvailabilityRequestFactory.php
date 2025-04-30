@@ -16,7 +16,7 @@ class AvailabilityRequestFactory
 {
     public function __construct(public ProductService $productService) {}
 
-    public function get(Product $product, array $requestParams, int $minBookingSize = ProductService::MIN_BOOKING_SIZE, int $maxBookingSize = ProductService::MAX_BOOKING_SIZE, bool $allDay = false): BaseAvailabilityRequest
+    public function get(Product $product, array $requestParams): BaseAvailabilityRequest
     {
         $productId = $requestParams[AvailabilityService::PARAM_PRODUCT_ID] ?? '';
         $tourId = $this->productService->getTourIdFromProductId($productId) ?? '';
@@ -44,7 +44,7 @@ class AvailabilityRequestFactory
         $pricing = OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
-            return new PricingAvailabilityRequest($product, $optionId, $localDate, $units, $currency, $minBookingSize, $maxBookingSize, $allDay);        
+            return new PricingAvailabilityRequest($product, $optionId, $localDate, $units, $currency, $product->getMinBookingSize(), $product->getMaxBookingSize(), $product->getAllDay());        
         }
 
         if (!$multiDates) {
@@ -57,10 +57,10 @@ class AvailabilityRequestFactory
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $availabilityRequest->setContentEnabled(true);
         }
-        $availabilityRequest->setMinBookingSize($minBookingSize);
-        $availabilityRequest->setMaxBookingSize($maxBookingSize);
+        $availabilityRequest->setMinBookingSize($product->getMinBookingSize());
+        $availabilityRequest->setMaxBookingSize($product->getMaxBookingSize());
         $availabilityRequest->setUnits($units);
-        $availabilityRequest->setAllDay($allDay);
+        $availabilityRequest->setAllDay(false);
 
         return $availabilityRequest;
     }

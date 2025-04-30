@@ -33,6 +33,8 @@ class Product extends Model
     protected array $options;
     protected array $cutoff;
     protected bool $allDay = false;
+    protected int $minBookingSize = 1;
+    protected int $maxBookingSize = 20;
     protected ?ProductContent $content = null;
     protected $defaultCurrency;
     protected $availableCurrencies = [];

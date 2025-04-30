@@ -53,7 +53,7 @@ class PricingAvailabilityTest extends FeatureTestCase
         $this->showTourXML->tour->channel_id = 142;
         $this->showTourXML->tour->distribution_identifier = 'TE_1_67';
         
-        $this->showTourDeparturesXML = simplexml_load_file('tests/TourCMSResponses/showTourDepartures.xml');
+        $this->showTourDeparturesXML = simplexml_load_file(filename: 'tests/TourCMSResponses/showTourDepartures.xml');
 
         $this->showQuantityBasedPricingTourXML = simplexml_load_file('./tests/TourCMSResponses/showQuantityBasedPricingTour.xml');
         $this->showQuantityBasedPricingTourDeparturesXML = simplexml_load_file('tests/TourCMSResponses/showQuantityBasedTourDepartures.xml');
@@ -401,7 +401,7 @@ class PricingAvailabilityTest extends FeatureTestCase
             ]);
     }
 
-    public function test_whenProductHaveQuantityBasedPricingAndIsSingleDay_thenWeReturnCorrectUnitPricing(): void
+    public function test_whenProductHaveQuantityBasedPricingWithUnitsInRequestAndIsSingleDay_thenWeReturnCorrectUnitPricing(): void
     {
         $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
             ->disableOriginalConstructor()
@@ -431,6 +431,8 @@ class PricingAvailabilityTest extends FeatureTestCase
         App::instance(TourCMSService::class, $tourCMSServiceMock);
 
 
+        // If unit quantity is 1, we should return the price for the r1
+
         $response = $this->post(
             '/availability', 
             [
@@ -440,7 +442,7 @@ class PricingAvailabilityTest extends FeatureTestCase
                 'units' => [
                     [
                         "id" => self::QUANTITY_BASED_UNIT_ID,
-                        "quantity" => 1
+                        "quantity" => 2
                     ]
                 ]
             ], 
@@ -450,10 +452,122 @@ class PricingAvailabilityTest extends FeatureTestCase
             ]
         );
 
+        // for quantity 2, we should return the price for the r2...
+
+        $departure = $this->showQuantityBasedPricingTourDeparturesOneDayXML->tour->dates_and_prices->departure[0];
+        $expectedNetPrice = $departure->extra_rates->rate[0]->rate_price * 100;
+        $expectedOriginalPrice  = $departure->extra_rates->rate[0]->rate_price * 100;
+        $expectedRetailPrice  = $departure->extra_rates->rate[0]->rate_price * 100;
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment([
+                "unitPricing" => [
+                    [
+                        "unitId" => self::QUANTITY_BASED_UNIT_ID,
+                        "currency" => (string) $this->showQuantityBasedPricingTourXML->tour->sale_currency,
+                        "currencyPrecision" => 2,
+                        'includedTaxes' => [],
+                        "net" => $expectedNetPrice,
+                        "original" => $expectedOriginalPrice,
+                        "retail" => $expectedRetailPrice
+                    ]
+                ]
+            ]);
+    }
+
+    public function test_whenProductHaveQuantityBasedPricingWithoutUnitsInRequestAndIsSingleDay_thenWeUseMinBookingSizeToGetRatePricing(): void
+    {
+        $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['showChannel', 'showTour', 'showTourDepartures', 'checkAvailability'])
+            ->getMock();
+
+        $tourCMSServiceMock
+            ->method('showChannel')
+            ->willReturn($this->showChannelXML);
+        
+        $tourCMSServiceMock
+            ->method('showTour')
+            ->willReturn($this->showQuantityBasedPricingTourXML);
+
+        $tourCMSServiceMock
+            ->method('showTourDepartures')
+            ->willReturn($this->showQuantityBasedPricingTourDeparturesOneDayXML);
+        
+        $component = $this->checkAvailXML->available_components->component[0];
+        $component->start_date = $this->showQuantityBasedPricingTourDeparturesOneDayXML->tour->dates_and_prices->departure[0]->start_date;
+        $component->date_id = $this->showQuantityBasedPricingTourDeparturesOneDayXML->tour->dates_and_prices->departure[0]->departure_id;
+
+        $tourCMSServiceMock
+            ->method('checkAvailability')
+            ->willReturn($this->checkAvailXML);
+
+        App::instance(TourCMSService::class, $tourCMSServiceMock);
+
+
+        $this->showQuantityBasedPricingTourXML->tour->min_booking_size = 1;
+
+        $response = $this->post(
+            '/availability',
+            [
+                'productId' => self::QUANTITY_BASED_PRODUCT_ID, 
+                'optionId' => self::QUANTITY_BASED_OPTION_ID,
+                'localDate' => self::VALID_LOCAL_DATE
+            ], 
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+            ]
+        );
+
+        
+
         $departure = $this->showQuantityBasedPricingTourDeparturesOneDayXML->tour->dates_and_prices->departure[0];
         $expectedNetPrice = $departure->main_price->rate_price * 100;
         $expectedOriginalPrice  = $departure->main_price->rate_price * 100;
         $expectedRetailPrice  = $departure->main_price->rate_price * 100;
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment([
+                "unitPricing" => [
+                    [
+                        "unitId" => self::QUANTITY_BASED_UNIT_ID,
+                        "currency" => (string) $this->showQuantityBasedPricingTourXML->tour->sale_currency,
+                        "currencyPrecision" => 2,
+                        'includedTaxes' => [],
+                        "net" => $expectedNetPrice,
+                        "original" => $expectedOriginalPrice,
+                        "retail" => $expectedRetailPrice
+                    ]
+                ]
+            ]);
+        
+        // With min booking size 2, we should return the price for the r2...
+        $this->showQuantityBasedPricingTourXML->tour->min_booking_size = 2;
+        $tourCMSServiceMock
+            ->method('showTour')
+            ->willReturn($this->showQuantityBasedPricingTourXML);
+        App::instance(TourCMSService::class, $tourCMSServiceMock);
+
+        $response = $this->post(
+            '/availability',
+            [
+                'productId' => self::QUANTITY_BASED_PRODUCT_ID, 
+                'optionId' => self::QUANTITY_BASED_OPTION_ID,
+                'localDate' => self::VALID_LOCAL_DATE
+            ], 
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+            ]
+        );
+
+        $departure = $this->showQuantityBasedPricingTourDeparturesOneDayXML->tour->dates_and_prices->departure[0];
+        $expectedNetPrice = $departure->extra_rates->rate[0]->rate_price * 100;
+        $expectedOriginalPrice  = $departure->extra_rates->rate[0]->rate_price * 100;
+        $expectedRetailPrice  = $departure->extra_rates->rate[0]->rate_price * 100;
 
         $response
             ->assertOk()
