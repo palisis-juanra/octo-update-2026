@@ -154,8 +154,6 @@ class ProductService
     public const TIMEZONE_NOT_SET = 'NOTSET';
     public const DEFAULT_CHANNEL_LANG = 'en';
     public const DEFAULT_CHANNEL_COUNTRY = 'GB';
-    public const FIELD_IDENTIFIER_TYPE = 'identifierType';
-    public const FIELD_IDENTIFIER_VALUE = 'identifierValue';
     public const IDENTIFIER_TYPE_GOOGLE_PLACE_ID = 'googlePlaceId';
   
     public ProductTransformer $productTransformer;
@@ -1118,10 +1116,9 @@ class ProductService
     protected function getLocationIdentifiers(SimpleXMLElement $geocode): array
     {
         $identifiers = [];
-        if (isset($geocode->google_place_id)) {
+        if (isset($geocode->google_place_id) && !empty($geocode->google_place_id)) {
             $identifiers[] = (object) [
-                self::FIELD_IDENTIFIER_TYPE => self::IDENTIFIER_TYPE_GOOGLE_PLACE_ID,
-                self::FIELD_IDENTIFIER_VALUE => (string) $geocode->google_place_id
+                self::IDENTIFIER_TYPE_GOOGLE_PLACE_ID => (string) $geocode->google_place_id
             ];
         }
         return $identifiers;
