@@ -228,18 +228,17 @@ class ProductService
         $deliveryMethods = $this->getProductDeliveryMethods($tour);
         $redemptionMethod = $this->getProductRedemptionMethod($tour);
 
-        if ((int) $tour->quantity_rule === 1) {
+        if ($this->isGroupPricing($tour)) {
             $this->errors[] = self::ERROR_GROUP_PRICING_NOT_SUPPORTED;
         }
 
-        if ((int) $tour->has_h === 1) {
+        if ($this->isHotel($tour)) {
             $this->errors[] = self::ERROR_HOTELS_NOT_SUPPORTED;
         }
 
-        if ((int) $tour->has_f === 1) {
+        if ($this->isFreesale($tour)) {
             $this->errors[] = self::ERROR_FREESALE_NOT_SUPPORTED;
         }
-
 
         $options = [];
         if (isset($tour->tour_departure_structure->type)) {
@@ -287,7 +286,7 @@ class ProductService
                 ->setMaxBookingSize($maxBookingSize)
                 ->setAllDay($allDay);
         
-        if ((int) $tour->volume_pricing == 1) {
+        if ($this->isVolumePricing($tour)) {
             $product->setPricingType(Product::PRICING_TYPE_VOLUME);
         }
 
@@ -1159,5 +1158,25 @@ class ProductService
     protected function isOpeningHours(SimpleXMLElement $tour): bool
     {
         return ((string) $tour->time_type) === self::TIME_TYPE_OPENING_HOURS;
+    }
+
+    protected function isGroupPricing(SimpleXMLElement $tour): bool
+    {
+        return (int) $tour->quantity_rule === 1;
+    }
+
+    protected function isHotel(SimpleXMLElement $tour): bool
+    {
+        return (int) $tour->has_h === 1;
+    }
+
+    protected function isFreesale(SimpleXMLElement $tour): bool
+    {
+        return (int) $tour->has_f === 1;
+    }
+
+    protected function isVolumePricing(SimpleXMLElement $tour): bool
+    {
+        return (int) $tour->volume_pricing == 1;
     }
 }
