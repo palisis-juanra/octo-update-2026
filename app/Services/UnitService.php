@@ -16,6 +16,7 @@ class UnitService
     public const ERROR_MESSAGE_INVALID_UNIT_ITEMS = 'Invalid or empty unitItems';
     public const PARAM_UNITS = 'units';
     public const SEPARATOR = '|';
+    public const QUANTITY_BASED_ALLOWED_RATE = 'r1';
 
     public static function buildUnitId(string $tourDistributionIdentifier, string $channelId, string $rateId): string
     {
@@ -85,6 +86,23 @@ class UnitService
         }
         
         return true;
+    }
+
+    /**
+     * Summary of validateVolumeUnits
+     * @param array $units
+     * @throws \App\Exceptions\InvalidUnitIdException
+     * @return void
+     */
+    public static function validateQuantityBasedUnits(array $units): void
+    {
+        foreach ($units as $unitObject) {
+            $unitId = $unitObject[UnitService::ID_FIELD];
+            $rateId = self::getTourCMSRateId($unitId);
+            if ($rateId !== self::QUANTITY_BASED_ALLOWED_RATE) {
+                throw new InvalidUnitIdException($unitId);
+            }
+        }
     }
 
     protected function validateIdFormat(string $unitId): bool

@@ -133,6 +133,9 @@ class ProductService
     public const ERROR_TIMEZONE_MISSING = 'timeZone field is missing';
     public const ERROR_TOUR_MAPPING_MISSING = 'the tour mapping is missing';  
     public const ERROR_TOUR_WITH_NO_OPTIONS = 'tour has no option available';
+    public const ERROR_GROUP_PRICING_NOT_SUPPORTED = "Group pricing products are not supported";
+    public const ERROR_FREESALE_NOT_SUPPORTED = "Freesale products are not supported";
+    public const ERROR_HOTELS_NOT_SUPPORTED = "Hotels products are not supported";
     public const FEATURE_TYPE_INCLUSION = 'INCLUSION';
     public const FEATURE_TYPE_EXCLUSION = 'EXCLUSION';
     public const FEATURE_TYPE_HIGHLIGHT = 'HIGHLIGHT';
@@ -151,6 +154,7 @@ class ProductService
     public const TIMEZONE_NOT_SET = 'NOTSET';
     public const DEFAULT_CHANNEL_LANG = 'en';
     public const DEFAULT_CHANNEL_COUNTRY = 'GB';
+    public const IDENTIFIER_TYPE_GOOGLE_PLACE_ID = 'googlePlaceId';
   
     public ProductTransformer $productTransformer;
 
@@ -222,6 +226,18 @@ class ProductService
         $deliveryMethods = $this->getProductDeliveryMethods($tour);
         $redemptionMethod = $this->getProductRedemptionMethod($tour);
 
+        if ($this->isGroupPricing($tour)) {
+            $this->errors[] = self::ERROR_GROUP_PRICING_NOT_SUPPORTED;
+        }
+
+        if ($this->isHotel($tour)) {
+            $this->errors[] = self::ERROR_HOTELS_NOT_SUPPORTED;
+        }
+
+        if ($this->isFreesale($tour)) {
+            $this->errors[] = self::ERROR_FREESALE_NOT_SUPPORTED;
+        }
+
         $options = [];
         if (isset($tour->tour_departure_structure->type)) {
             $options = $this->getProductOptions($tour);
@@ -249,6 +265,7 @@ class ProductService
 
         $product = new Product();
         $product->setId($id)
+                ->setTourId((string) $tour->tour_id)
                 ->setInternalName($internalName)
                 ->setReference($reference)
                 ->setLocale($locale)
@@ -267,7 +284,11 @@ class ProductService
                 ->setMaxBookingSize($maxBookingSize)
                 ->setAllDay($allDay);
         
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
+        if ($this->isVolumePricing($tour)) {
+            $product->setPricingType(Product::PRICING_TYPE_VOLUME);
+        }
+
+        if (true === OctoRequestFacade::isCapabilityActive(capability: OctoRequest::CAPABILITIES_CONTENT)) {
 
             $productContent = new ProductContent();
             
@@ -294,22 +315,9 @@ class ProductService
         }
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
-            $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : (string) $this->tourCMSService->showChannel()->channel->sale_currency;
-            $pricingPer = $this->getPricingPerFromTourXML($tour);
-            
+            $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : (string) $this->tourCMSService->showChannel()->channel->sale_currency;            
             $product->setDefaultCurrency($saleCurrency);
             $product->setAvailableCurrencies([$saleCurrency]);
-            $product->setPricingPer($pricingPer);
-
-            if ($pricingPer === Product::PRICING_PER_BOOKING) {
-                $productPricing = new Pricing(
-                    100 * $tour->from_price,
-                    100 * $tour->from_price,
-                    100 * $tour->from_price,
-                    $saleCurrency,
-                );
-                $product->setPricing($productPricing);
-            }
         }
 
         return $product;
@@ -492,7 +500,7 @@ class ProductService
                         $unitPricing = new Pricing(
                             100 * $rate->from_price,
                             100 * $rate->from_price,
-                            100 * $rate->from_price,
+                            null,
                             $saleCurrency
                         );
                         $unit->setPricing($unitPricing);
@@ -638,7 +646,7 @@ class ProductService
 
     protected function getPricingPerFromTourXML(SimpleXMLElement $tour): string
     {
-        return (string) $tour->quantity_rule == '1' ? Product::PRICING_PER_BOOKING : Product::PRICING_PER_UNIT;
+        return Product::PRICING_PER_UNIT;
     }
 
     protected function findTourDataFromAPI(string $productId): SimpleXMLElement
@@ -1050,6 +1058,9 @@ class ProductService
             $place->setLatitude(explode(',', (string) $tour->geocode_start_point->geocode)[0]);
             $place->setLongitude(explode(',', (string) $tour->geocode_start_point->geocode)[1]);
             
+            $identifiers = $this->getLocationIdentifiers($tour->geocode_start_point);
+            $place->setIdentifiers($identifiers);
+
             $location->setPlace($place);
             $locations[] = $location;
         }
@@ -1070,13 +1081,8 @@ class ProductService
                 $place->setLatitude(explode(',', (string) $midpoint->geocode)[0]);
                 $place->setLongitude(explode(',', (string) $midpoint->geocode)[1]);
                 
-                if (!empty($midpoint->google_place_id)) {
-                    $identifiers = [(object) [
-                        'identifierType' => 'googlePlaceId',
-                        'identifierValue' => (string) $midpoint->google_place_id
-                    ]];
-                    $place->setIdentifiers($identifiers);
-                }
+                $identifiers = $this->getLocationIdentifiers($midpoint);
+                $place->setIdentifiers($identifiers);
 
                 $location->setPlace($place);
                 $locations[] = $location;
@@ -1097,19 +1103,25 @@ class ProductService
             $place->setLatitude(explode(',', (string) $tour->geocode_end_point->geocode)[0]);
             $place->setLongitude(explode(',', (string) $tour->geocode_end_point->geocode)[1]);
             
-            if (!empty($tour->geocode_end_point->google_place_id)) {
-                $identifiers = [(object) [
-                    'identifierType' => 'googlePlaceId',
-                    'identifierValue' => (string) $tour->geocode_end_point->google_place_id
-                ]];
-                $place->setIdentifiers($identifiers);
-            }
+            $identifiers = $this->getLocationIdentifiers($tour->geocode_end_point);
+            $place->setIdentifiers($identifiers);
 
             $location->setPlace($place);
             $locations[] = $location;
         }
 
         return $locations;
+    }
+
+    protected function getLocationIdentifiers(SimpleXMLElement $geocode): array
+    {
+        $identifiers = [];
+        if (isset($geocode->google_place_id) && !empty($geocode->google_place_id)) {
+            $identifiers[] = (object) [
+                self::IDENTIFIER_TYPE_GOOGLE_PLACE_ID => (string) $geocode->google_place_id
+            ];
+        }
+        return $identifiers;
     }
 
     protected function getDurationMinutesFrom(SimpleXMLElement $tour): int
@@ -1143,5 +1155,25 @@ class ProductService
     protected function isOpeningHours(SimpleXMLElement $tour): bool
     {
         return ((string) $tour->time_type) === self::TIME_TYPE_OPENING_HOURS;
+    }
+
+    protected function isGroupPricing(SimpleXMLElement $tour): bool
+    {
+        return (int) $tour->quantity_rule === 1;
+    }
+
+    protected function isHotel(SimpleXMLElement $tour): bool
+    {
+        return (int) $tour->has_h === 1;
+    }
+
+    protected function isFreesale(SimpleXMLElement $tour): bool
+    {
+        return (int) $tour->has_f === 1;
+    }
+
+    protected function isVolumePricing(SimpleXMLElement $tour): bool
+    {
+        return (int) $tour->volume_pricing == 1;
     }
 }

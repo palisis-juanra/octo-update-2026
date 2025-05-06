@@ -63,10 +63,12 @@ class AvailabilityTransformer extends BaseTransformer
             foreach ($unitPricings as $unitPricing) {
                 $data['unitPricing'][] = [
                     'unitId' => $unitPricing->getUnitId(),
+                    'original' => $unitPricing->getOriginalPrice(),
                     'retail' => $unitPricing->getRetailPrice(),
                     'net' => $unitPricing->getNetPrice(),
                     'currency' => $availability->getCurrency(),
-                    'currencyPrecision' => $unitPricing->getCurrencyPrecision()
+                    'currencyPrecision' => $unitPricing->getCurrencyPrecision(),
+                    'includedTaxes' => $unitPricing->getIncludedTaxes()
                 ];
             }            
         }

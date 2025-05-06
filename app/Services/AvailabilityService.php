@@ -6,6 +6,7 @@ use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InvalidAvailabilityIdException;
+use App\Exceptions\InvalidUnitIdException;
 use App\Features\Availability\AvailabilityRequest;
 use App\Http\Middleware\OctoAuthentication;
 use App\Interfaces\BaseAvailabilityRequest;
@@ -186,7 +187,7 @@ class AvailabilityService
 
         $departures = $this->tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
 
-        $availabilityRequest = new AvailabilityRequest($tourId, $optionId, $date);
+        $availabilityRequest = new AvailabilityRequest($product, $optionId, $date);
         $availability = $availabilityRequest->getAvailabilityFromDeparturesById($availabilityId, $departures);
 
         return $availability;

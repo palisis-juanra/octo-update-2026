@@ -13,7 +13,11 @@ class Product extends Model
     public const PRICING_PER_BOOKING = 'BOOKING';
     public const PRICING_PER_UNIT = 'UNIT';
 
+    public const PRICING_TYPE_MULTIPLE_RATES = 'MULTIPLE_RATES';
+    public const PRICING_TYPE_VOLUME = 'VOLUME';
+
     protected string $id;
+    protected string $tourId;
     protected string $internalName;
     protected ?string $reference;
     protected string $locale;
@@ -29,45 +33,33 @@ class Product extends Model
     protected array $options;
     protected array $cutoff;
     protected bool $allDay = false;
+    protected int $minBookingSize = 1;
+    protected int $maxBookingSize = 20;
     protected ?ProductContent $content = null;
     protected $defaultCurrency;
     protected $availableCurrencies = [];
     protected $pricingPer = self::PRICING_PER_UNIT;
     protected ?Pricing $pricing = null;
+    protected string $pricingType = self::PRICING_TYPE_MULTIPLE_RATES;
 
-    /**
-     * Get the value of id
-     */ 
-    public function getId()
+
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * Set the value of id
-     *
-     * @return  self
-     */ 
-    public function setId($id)
+    public function setId($id): static
     {
         $this->id = $id;
 
         return $this;
     }
 
-    /**
-     * Get the value of internalName
-     */ 
     public function getInternalName()
     {
         return $this->internalName;
     }
 
-    /**
-     * Set the value of internalName
-     *
-     * @return  self
-     */ 
     public function setInternalName($internalName)
     {
         $this->internalName = $internalName;
@@ -75,9 +67,6 @@ class Product extends Model
         return $this;
     }
 
-    /**
-     * Get the value of reference
-     */ 
     public function getReference()
     {
         return $this->reference;
@@ -478,6 +467,30 @@ class Product extends Model
     public function setPricingPer(string $pricingPer): static
     {
         $this->pricingPer = $pricingPer;
+
+        return $this;
+    }
+
+    public function getPricingType(): string
+    {
+        return $this->pricingType;
+    }
+
+    public function setPricingType(string $pricingType): static
+    {
+        $this->pricingType = $pricingType;
+
+        return $this;
+    }
+
+    public function getTourId(): string
+    {
+        return $this->tourId;
+    }
+
+    public function setTourId($tourId): self
+    {
+        $this->tourId = $tourId;
 
         return $this;
     }

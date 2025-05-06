@@ -13,9 +13,11 @@ use App\Services\TourCMSService;
 use App\Models\Availability\Availability;
 use App\Models\Availability\AvailabilityUnitPricing;
 use App\Models\Pricing;
+use App\Models\Product;
 use App\Services\UnitService;
 use App\Services\XMLService;
 use SimpleXMLElement;
+use Throwable;
 
 class AvailabilityRequest extends BaseAvailabilityRequest
 {
@@ -30,11 +32,12 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected string $cutoff;
     protected string $currency;
     protected bool $allDay = false;
-    protected string $productId;
 
-    public function __construct(string $tourId, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false)
+    public function __construct(protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false)
     {
-        $this->tourId = $tourId;
+        $this->tourId = $product->getTourId();
+        $this->minBookingSize = $product->getMinBookingSize();
+        $this->maxBookingSize = $product->getMaxBookingSize();
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
@@ -53,102 +56,44 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $this->localDateEnd;
     }
 
-    /**
-     * Get the value of tourId
-     */ 
-    public function getTourId()
+    public function getProduct(): Product
     {
-        return $this->tourId;
+        return $this->product;
     }
 
-    /**
-     * Set the value of tourId
-     *
-     * @return  self
-     */ 
-    public function setTourId($tourId)
-    {
-        $this->tourId = $tourId;
-        return $this;
-    }
-
-    /**
-     * Get the value of optionId
-     */ 
     public function getOptionId()
     {
         return $this->optionId;
     }
 
-    /**
-     * Set the value of optionId
-     *
-     * @return  self
-     */ 
     public function setOptionId($optionId)
     {
         $this->optionId = $optionId;
         return $this;
     }
 
-    /**
-     * Get the value of units
-     */ 
     public function getUnits()
     {
         return $this->units;
     }
 
-    /**
-     * Set the value of units
-     *
-     * @return  self
-     */ 
     public function setUnits($units)
     {
         $this->units = $units;
         return $this;
     }
 
-    /**
-     * Get the value of minBookingSize
-     */ 
     public function getMinBookingSize(): int
     {
         return $this->minBookingSize;
     }
 
-    /**
-     * Set the value of minBookingSize
-     *
-     * @return  self
-     */ 
-    public function setMinBookingSize(int $minBookingSize): static
-    {
-        $this->minBookingSize = $minBookingSize;
-        return $this;
-    }
-
-    /**
-     * Get the value of maxBookingSize
-     */
     public function getMaxBookingSize(): int
     {
         return $this->maxBookingSize;
     }
 
-    /**
-     * Set the value of maxBookingSize
-     *
-     * @return  self
-     */
-    public function setMaxBookingSize(int $maxBookingSize)
-    {
-        $this->maxBookingSize = $maxBookingSize;
-        return $this;
-    }
-
-// PUBLIC FUNCTIONS
+    // PUBLIC FUNCTIONS
 
     /**
      * Fetch departures info from API and return the availabilities
@@ -209,26 +154,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return self::OCTO_STATUS_CLOSED;
     }
 
-    /**
-     * Get the value of productId
-     */ 
-    public function getProductId(): string
-    {
-        return $this->productId;
-    }
-
-    /**
-     * Set the value of productId
-     *
-     * @return  self
-     */ 
-    public function setProductId($productId): self
-    {
-        $this->productId = $productId;
-
-        return $this;
-    }
-
 // PRIVATE FUNCTIONS
 
     protected function howManySpacesAreRequested(): int
@@ -258,7 +183,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     {
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
 
-        $response = $tourCMSService->showTourDepartures($this->tourId,$this->localDateStart, $this->localDateEnd, $mappingQueryString);
+        $response = $tourCMSService->showTourDepartures($this->product->getTourId(),$this->localDateStart, $this->localDateEnd, $mappingQueryString);
 
         if (!isset($response->tour->dates_and_prices)) {
             return [];
@@ -298,8 +223,8 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setCapacity((int) $departure->spaces_total);
 
             if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
-                $pricing = $this->getPricingForMultipleDays($departure);
-                $unitPricing = $this->getUnitPricing($departure);
+                $pricing = $this->getPricingForShowTourDeparture($departure);
+                $unitPricing = $this->getUnitPricingFromShowTourDeparture($departure);
                 $availability->setCurrency($this->currency);
                 $availability->setPricing($pricing);
                 $availability->setUnitPricing($unitPricing);
@@ -358,11 +283,31 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         }
     }
 
-    protected function getPricingForMultipleDays(SimpleXMLElement $departure): Pricing
+    protected function getPricingForShowTourDeparture(SimpleXMLElement $departure): Pricing
     {
         $totalPricing = 0;
         $netPrice = 0;
         $ratesArray = $this->ratesFromShowTourDepartureXML($departure);
+
+        // Volume pricing
+        if ($this->product->getPricingType() === Product::PRICING_TYPE_VOLUME) {
+            
+            $rateNumber = !empty($this->units) ? (int) $this->units[0]['quantity'] : $this->getMinBookingSize();
+            $rateId = "r{$rateNumber}";
+            $rate = isset($ratesArray[$rateId]) ? $ratesArray[$rateId] : $this->getMaxRateForVolumeProduct($departure);
+
+            $quantity = !empty($this->units) ? $this->units[0]['quantity'] : $this->getMinBookingSize();
+
+            return new Pricing(
+                $rate->rate_price * $quantity * 100,
+                $rate->rate_price * $quantity * 100,
+                isset($rate->net_price) ? ($rate->net_price * $quantity * 100) : null,
+                $this->currency
+            );
+
+        }
+
+        // Multiple rates
         foreach ($this->units as $unit) {
             $rateId = UnitService::getTourCMSRateId($unit['id']);
             if(!array_key_exists($rateId, $ratesArray)) {
@@ -376,6 +321,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
                     ((float) $ratesArray[$rateId]->rate_price)
                 ) * $unit['quantity'];
         }
+
         $totalPricing *= 100;
         $netPrice *= 100;
 
@@ -392,20 +338,51 @@ class AvailabilityRequest extends BaseAvailabilityRequest
      * @param \SimpleXMLElement $departure
      * @return AvailabilityUnitPricing[]
      */
-    protected function getUnitPricing(SimpleXMLElement $departure): array
+    protected function getUnitPricingFromShowTourDeparture(SimpleXMLElement $departure): array
     {
         $unitPricings = [];
 
         $rates = $this->ratesFromShowTourDepartureXML($departure);
+
+        if ($this->product->getPricingType() === Product::PRICING_TYPE_VOLUME) {
+            
+            $unitId = !empty($this->units) ? $this->units[0]['id'] : "{$this->product->getId()}|r1";
+
+            $rateNumber = !empty($this->units) ? (int) $this->units[0]['quantity'] : $this->getMinBookingSize();
+            $rateId = "r{$rateNumber}";
+            $rate = isset($rates[$rateId]) ? $rates[$rateId] : $this->getMaxRateForVolumeProduct($departure);
+
+            $unitPricings[] = 
+                (new AvailabilityUnitPricing)
+                    ->setUnitId($unitId)
+                    ->setOriginalPrice($rate->rate_price * 100)
+                    ->setRetailPrice($rate->rate_price * 100)
+                    ->setNetPrice((!empty($rate->net_price) ? $rate->net_price : $rate->rate_price) * 100)
+                    ->setCurrency($this->currency);
+           
+            return $unitPricings;
+        }
+
         foreach ($rates as $rateId => $rate) {
             $unitPricings[] = 
                 (new AvailabilityUnitPricing)
-                    ->setUnitId("{$this->productId}|{$rateId}")
+                    ->setUnitId("{$this->product->getId()}|{$rateId}")
+                    ->setOriginalPrice($rate->rate_price * 100)
                     ->setRetailPrice($rate->rate_price * 100)
                     ->setNetPrice((!empty($rate->net_price) ? $rate->net_price : $rate->rate_price) * 100)
                     ->setCurrency($this->currency);
         }
 
         return $unitPricings;
+    }
+
+    protected function getMaxRateForVolumeProduct(SimpleXMLElement $departure): SimpleXMLElement
+    {
+        if (!isset($departure->extra_rates)) {
+            return $departure->main_price;
+        }
+
+        $rates = XMLService::getArrayFromXmlNode($departure->extra_rates, 'rate');
+        return array_pop($rates);
     }
 }

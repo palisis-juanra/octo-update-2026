@@ -505,7 +505,6 @@ class ProductServiceTest extends UnitTestCase
         ];
 
         $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
-        error_log(print_r($productOptions, 1));
         $this->assertEquals($expectedProductOptions, $productOptions);
     }
 

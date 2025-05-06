@@ -7,9 +7,11 @@ use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Factories\AvailabilityRequestFactory;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Responses\OctoResponse;
+use App\Models\Product;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
 use App\Services\ProductService;
+use App\Services\UnitService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,11 +39,16 @@ class AvailabilityController extends Controller
             $productId = $request->post('productId');
             $product = $this->productService->find($productId);
 
-            $availabilityRequest = $this->availabilityRequestFactory->get($requestParams, $product->getMinBookingSize(), $product->getMaxBookingSize(), $product->getAllDay());
+            if ($product->getPricingType() === Product::PRICING_TYPE_VOLUME && isset($requestParams['units'])) {
+                UnitService::validateQuantityBasedUnits($requestParams['units']);
+            }
+
+            $availabilityRequest = $this->availabilityRequestFactory->get($product, $requestParams);
             $availabilityIds = $request->get(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
+            
             $availabilityRequest->setAvailabilityIds($availabilityIds);
             $availabilityRequest->setTourName($product->getInternalName());
-            
+
             $optionId = $request->get(AvailabilityService::PARAM_OPTION_ID);
             $option = $product->getOptionById($optionId);
 

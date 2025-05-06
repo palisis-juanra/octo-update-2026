@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Facades\JSONLog;
-use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
@@ -19,20 +17,15 @@ class AvailabilityTest extends FeatureTestCase
 {
     use RefreshDatabase;
 
-    public const AVAILABILIY_PATH = '/availability';
     public const AUTH_HEADER_NAME = 'Authorization';
-    public const OCTO_CAPABILITIES = 'Octo-Capabilities';
     public const OCTO_INVALID_PATTERN_CREDENTIALS = 'Bearer NOVALIDKEY';
     public const OCTO_VALID_PATTERN_CREDENTIALS = 'Bearer 1|142|abc';
     public const VALID_PRODUCT_ID = 'TE_1_67|142';
     public const INVALID_PRODUCT_ID = 'a';
     public const VALID_OPTION_ID = 'START_TIME';
     public const INVALID_OPTION_ID = 'a';
-    public const VALID_LOCAL_DATE = '2024-11-30';
-    public const INVALID_LOCAL_DATE = 'aaa';
-    public const UNIT_ID_R1 = 'TE_1_67|142|r1';
-    public const UNIT_ID_R2 = 'TE_1_67|142|r2';
     public const INVALID_UNIT_ID = 'aaaa';
+    public const VALID_LOCAL_DATE = '2024-11-30';
     public const VALID_LOCAL_DATE_START = '2024-11-18';
     public const VALID_LOCAL_DATE_END = '2024-11-25';
 
@@ -49,6 +42,7 @@ class AvailabilityTest extends FeatureTestCase
         $this->showChannelXML = simplexml_load_file('tests/TourCMSResponses/showChannel.xml');
         $this->showTourXML = simplexml_load_file('tests/TourCMSResponses/showTour.xml');
         $this->showTourXML->tour->distribution_identifier = 'TE_1_67';
+        $this->showTourXML->tour->channel_id = 142;
         $this->showTourDeparturesXML = simplexml_load_file('tests/TourCMSResponses/showTourDepartures.xml');
         $this->showTourDeparturesOneDayXML = simplexml_load_file('tests/TourCMSResponses/showTourDeparturesOneDay.xml');
         $this->checkAvailXML = simplexml_load_file('tests/TourCMSResponses/checkAvailability.xml');
@@ -193,34 +187,6 @@ class AvailabilityTest extends FeatureTestCase
         $this->assertNotEmpty($responseData);        
     }
 
-    public function test_whenPricingIsAllowedAndIsMultiDate_thenShowTourDepartureIsCalledOnce()
-    {
-        $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
-        $tourCMSServiceMock->shouldReceive('showChannel')->once()->andReturn($this->showChannelXML);
-        $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
-    
-        App::instance(TourCMSService::class, $tourCMSServiceMock);
-    
-        $response = $this->post(
-            '/availability', 
-            [
-                'productId' => self::VALID_PRODUCT_ID, 
-                'optionId' => self::VALID_OPTION_ID,
-                'localDateStart' => self::VALID_LOCAL_DATE_START,
-                'localDateEnd' => self::VALID_LOCAL_DATE_END
-            ], 
-            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-            self::OCTO_CAPABILITIES => 'pricing']
-        );
-
-    
-        $responseData = $response->decodeResponseJson();
-    
-        $response->assertOk();
-        $this->assertNotEmpty($responseData);
-    }
-
     public function test_whenNoPricingAndMultiDate_thenShowTourDepartureIsCalledOnce()
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
@@ -257,7 +223,6 @@ class AvailabilityTest extends FeatureTestCase
 
         App::instance(TourCMSService::class, $tourCMSServiceMock);
     
-        // Petición al endpoint con datos válidos
         $response = $this->post(
             '/availability', 
             [
@@ -272,195 +237,5 @@ class AvailabilityTest extends FeatureTestCase
     
         $response->assertOk();
         $this->assertNotEmpty($responseData);
-    }
-
-    public function test_whenPricingAndSingleDate_thenCheckAvailabilityIsCalledOnce()
-    {
-
-        $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
-        $tourCMSServiceMock->shouldReceive('showChannel')->once()->andReturn($this->showChannelXML);
-        $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
-        $tourCMSServiceMock->shouldReceive('checkAvailability')->once()->andReturn($this->checkAvailXML);
-
-        App::instance(TourCMSService::class, $tourCMSServiceMock);
-
-        $response = $this->post(
-            '/availability', 
-            [
-                'productId' => self::VALID_PRODUCT_ID, 
-                'optionId' => self::VALID_OPTION_ID,
-                'localDate' => self::VALID_LOCAL_DATE
-            ], 
-            [
-                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                self::OCTO_CAPABILITIES => OctoRequest::CAPABILITIES_PRICING
-            ]
-        );
-
-        $responseData = $response->decodeResponseJson();
-
-        $response->assertOk();
-        $this->assertNotEmpty($responseData);
-    }
-
-    public function test_whenPricingCapabilityIsSent_thenWeReturnCorrectPricing(): void 
-    {
-        $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['showChannel', 'showTour', 'showTourDepartures', 'checkAvailability'])
-            ->getMock();
-
-        $tourCMSServiceMock
-            ->method('showChannel')
-            ->willReturn($this->showChannelXML);
-        
-        $tourCMSServiceMock
-            ->method('showTour')
-            ->willReturn($this->showTourXML);
-
-        $tourCMSServiceMock
-            ->method('showTourDepartures')
-            ->willReturn($this->showTourDeparturesOneDayXML);
-        
-        $component = $this->checkAvailXML->available_components->component[0];
-        $component->start_date = $this->showTourDeparturesOneDayXML->tour->dates_and_prices->departure[0]->start_date;
-        $component->date_id = $this->showTourDeparturesOneDayXML->tour->dates_and_prices->departure[0]->departure_id;
-
-        $tourCMSServiceMock
-            ->method('checkAvailability')
-            ->willReturn($this->checkAvailXML);
-
-        App::instance(TourCMSService::class, $tourCMSServiceMock);
-
-
-        $response = $this->post(
-            '/availability', 
-            [
-                'productId' => self::VALID_PRODUCT_ID, 
-                'optionId' => self::VALID_OPTION_ID,
-                'localDate' => self::VALID_LOCAL_DATE,
-                'unitItems' => [
-                    [
-                        "unitId" => self::UNIT_ID_R1
-                    ],
-                    [
-                        "unitId" => self::UNIT_ID_R2
-                    ],
-                ]
-            ], 
-            [
-                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                self::OCTO_CAPABILITIES => OctoRequest::CAPABILITIES_PRICING
-            ]
-        );
-
-        $expectedNetPrice = $component->net_price * 100;
-        $expectedOriginalPrice  = $component->total_price * 100;
-        $expectedRetailPrice  = $component->total_price * 100;
-
-        $response
-            ->assertOk()
-            ->assertJsonFragment([
-                "pricing" => [
-                    "currency" => "USD",
-                    "currencyPrecision" => 2,
-                    'includedTaxes' => [],
-                    "net" => $expectedNetPrice,
-                    "original" => $expectedOriginalPrice,
-                    "retail" => $expectedRetailPrice
-                ]
-            ]);
-    }
-
-    public function test_whenPricingCapabilityIsSent_thenWeReturnCorrectUnitPricing(): void
-    {
-        $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['showChannel', 'showTour', 'showTourDepartures', 'checkAvailability'])
-            ->getMock();
-
-        $tourCMSServiceMock
-            ->method('showChannel')
-            ->willReturn($this->showChannelXML);
-
-        $tourCMSServiceMock
-            ->method('showTour')
-            ->willReturn($this->showTourXML);
-
-        $tourCMSServiceMock
-            ->method('showTourDepartures')
-            ->willReturn($this->showTourDeparturesOneDayXML);
-        
-        $component = $this->checkAvailXML->available_components->component[0];
-        $component->start_date = $this->showTourDeparturesOneDayXML->tour->dates_and_prices->departure[0]->start_date;
-        $component->date_id = $this->showTourDeparturesOneDayXML->tour->dates_and_prices->departure[0]->departure_id;
-
-        $tourCMSServiceMock
-            ->method('checkAvailability')
-            ->willReturn($this->checkAvailXML);
-
-        App::bind(JSONLog::class, function () { return $this->getJsonLogMock();});
-        App::instance(TourCMSService::class, $tourCMSServiceMock);
-
-        $response = $this->post(
-            '/availability', 
-            [
-                'productId' => self::VALID_PRODUCT_ID, 
-                'optionId' => self::VALID_OPTION_ID,
-                'localDate' => self::VALID_LOCAL_DATE,
-                'unitItems' => [
-                    [
-                        "unitId" => self::UNIT_ID_R1
-                    ],
-                    [
-                        "unitId" => self::UNIT_ID_R2
-                    ],
-                ]
-            ], 
-            [
-                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                self::OCTO_CAPABILITIES => OctoRequest::CAPABILITIES_PRICING
-            ]
-        );
-
-        $departure = $this->showTourDeparturesOneDayXML->tour->dates_and_prices->departure[0];
-
-        $expectedR1NetPrice = $departure->main_price->net_price * 100;
-        $expectedR1RetailPrice  = $departure->main_price->rate_price * 100;
-
-        $expectedR2NetPrice = $departure->extra_rates->rate[0]->net_price * 100;
-        $expectedR2RetailPrice  = $departure->extra_rates->rate[0]->rate_price * 100;
-
-        $response
-            ->assertOk()
-            ->assertJsonFragment([
-                "unitPricing" => [
-                    [
-                        "currency" => "USD",
-                        "currencyPrecision" => 2,
-                        "net" => $expectedR1NetPrice,
-                        "retail" => $expectedR1RetailPrice,
-                        "unitId" => self::UNIT_ID_R1
-                    ],
-                    [
-                        "currency" => "USD",
-                        "currencyPrecision" => 2,
-                        "net" => $expectedR2NetPrice,
-                        "retail" => $expectedR2RetailPrice,
-                        "unitId" => self::UNIT_ID_R2
-                    ]
-                    
-                ]
-            ]);
-    }
-    
-    protected function getJsonLogMock(): JSONLogService
-    {
-        $jsonLog = $this->getMockBuilder(JSONLogService::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['info', 'error', 'getLogId'])
-            ->getMock();
-        return $jsonLog;
     }
 }

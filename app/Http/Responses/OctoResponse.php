@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OctoResponse {
 
+    const FIELD_ID = 'id';
     const FIELD_PRODUCT_ID = 'productId';
     const FIELD_OPTION_ID = 'optionId';
     const FIELD_UNIT_ID = 'unitId';

@@ -6,6 +6,8 @@ use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Requests\OctoRequest;
+use App\Http\Responses\OctoResponse;
+use App\Models\Pricing;
 use App\Models\Product;
 use App\Services\JSONLogService;
 use App\Services\LocaleService;
@@ -28,6 +30,8 @@ class ProductTest extends FeatureTestCase
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $listToursXML;
     public SimpleXMLElement $showTourInvalidXML;
+    public SimpleXMLElement $showTourWithGeocodesXML;
+    public SimpleXMLElement $showQuantityBasedPricingTourXML;
     public $loggerMock;
     public $tourCMSServiceMock;
 
@@ -42,6 +46,8 @@ class ProductTest extends FeatureTestCase
         $this->showTourXML = simplexml_load_string($this->showTourString);
         $this->listToursXML = simplexml_load_string($this->listToursString);
         $this->showTourInvalidXML = simplexml_load_string($this->showTourInvalidString);
+        $this->showTourWithGeocodesXML = simplexml_load_file('./tests/TourCMSResponses/showTourWithGeocodesAndGooglePlaceId.xml');
+        $this->showQuantityBasedPricingTourXML = simplexml_load_file('./tests/TourCMSResponses/showQuantityBasedPricingTour.xml');
 
         $this->loggerMock = $this->getMockBuilder(JSONLogService::class)
             ->onlyMethods(['info', 'error'])
@@ -53,8 +59,6 @@ class ProductTest extends FeatureTestCase
         $this->tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
         ->disableOriginalConstructor()
         ->getMock();
-        //$this->loggerMock->method('info')->willReturn();
-        //$this->loggerMock->method('error')->willReturn(null);
     }
 
     public function test_whenCallFindAndTransform_thenWeGetValidStructure()
@@ -566,15 +570,15 @@ class ProductTest extends FeatureTestCase
 
     }
 
-    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedProductsWithPricingPerBooking(): void
+    public function test_whenWeSendPricingCapabilityAndTourHasGroupPricing_thenWeReceivedInvalidId(): void
     {
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
         ->onlyMethods(['showTour', 'showChannel'])
         ->disableOriginalConstructor()
         ->getMock();
 
-        $this->showTourXML->tour->quantity_rule = '1';
         $this->showTourXML->tour->distribution_identifier = 'TE_1_231';
+        $this->showTourXML->tour->quantity_rule = 1;
 
         $tourCMSService->method('showTour')->willReturn($this->showTourXML);
         $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
@@ -583,9 +587,10 @@ class ProductTest extends FeatureTestCase
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
         App::instance(ProductService::class, $productServiceMock);
 
+        $productId = "TE_1_231|142";
 
         $response = $this->get(
-            "/products/TE_1_231|142",
+            "/products/{$productId}",
             [
                 self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
                 OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
@@ -593,13 +598,94 @@ class ProductTest extends FeatureTestCase
         );
 
         $response
-            ->assertOk()
+            ->assertStatus(400)
             ->assertJsonFragment([
-                "defaultCurrency" => (string) $this->showTourXML->tour->sale_currency,
-                "availableCurrencies" => [(string) $this->showTourXML->tour->sale_currency],
-                "pricingPer" => Product::PRICING_PER_BOOKING
-            ]);
+                OctoResponse::FIELD_ERROR_CODE => OctoResponse::ERROR_CODE_INVALID_PRODUCT_ID
+                ]
+            )->assertJsonFragment([
+                OctoResponse::FIELD_PRODUCT_ID => $productId
+                ]
+            );
+    }
 
+    public function test_whenPricingCapabilityIsSetAndProductHaveQuantityBasedPricing_thenWeOnlyHaveOneUnit(): void
+    {
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+        ->onlyMethods(['showTour', 'showChannel'])
+        ->disableOriginalConstructor()
+        ->getMock();
+
+        $this->showQuantityBasedPricingTourXML->tour->distribution_identifier = 'TE_1_232';
+
+        $tourCMSService->method('showTour')->willReturn($this->showQuantityBasedPricingTourXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        App::instance(TourCMSService::class, $tourCMSService);
+
+        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
+        App::instance(ProductService::class, $productServiceMock);
+
+        $productId = "TE_1_232|142";
+
+        $response = $this->get(
+            "/products/{$productId}",
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+            ]
+        );
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, "options");
+        $response->assertJsonPath("options.0.units.0.id", "TE_1_232|142|r1");
+        $response->assertJsonMissingPath("options.0.units.1");
+    }
+
+    public function test_whenPricingCapabilityIsSetAndProductHaveQuantityBasedPricing_thenWeGetPriceFromRateOne(): void
+    {
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+        ->onlyMethods(['showTour', 'showChannel'])
+        ->disableOriginalConstructor()
+        ->getMock();
+
+        $this->showQuantityBasedPricingTourXML->tour->distribution_identifier = 'TE_1_232';
+
+        $tourCMSService->method('showTour')->willReturn($this->showQuantityBasedPricingTourXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        App::instance(TourCMSService::class, $tourCMSService);
+
+        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
+        App::instance(ProductService::class, $productServiceMock);
+
+        $productId = "TE_1_232|142";
+
+        $response = $this->get(
+            "/products/{$productId}",
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+            ]
+        );
+
+        $expectedCurrency = (string) $this->showQuantityBasedPricingTourXML->tour->sale_currency;
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            "defaultCurrency" => $expectedCurrency,
+            "availableCurrencies" => [$expectedCurrency],
+            "pricingPer" => Product::PRICING_PER_UNIT
+        ]);
+        $response->assertJsonFragment([
+                "pricingFrom" => [
+                    [
+                        "currency" => $expectedCurrency,
+                        "currencyPrecision" => Pricing::CURRENCY_PRECISION,
+                        "includedTaxes" => [],
+                        "retail" => $this->showQuantityBasedPricingTourXML->tour->new_booking->people_selection->rate->from_price * 100,
+                        "original" => $this->showQuantityBasedPricingTourXML->tour->new_booking->people_selection->rate->from_price * 100,
+                        "net" => null
+                    ]
+                ]
+        ]);
     }
 
     protected function getProductServiceMock(array $properties = [])
