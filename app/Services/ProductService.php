@@ -500,7 +500,7 @@ class ProductService
                         $unitPricing = new Pricing(
                             100 * $rate->from_price,
                             100 * $rate->from_price,
-                            100 * $rate->from_price,
+                            null,
                             $saleCurrency
                         );
                         $unit->setPricing($unitPricing);

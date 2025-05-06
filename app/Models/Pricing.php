@@ -10,13 +10,13 @@ class Pricing
     protected int $currencyPrecision = self::CURRENCY_PRECISION;
     protected int $original;
     protected int $retail;
-    protected int $net;
+    protected ?int $net;
     protected array $includedTaxes = [];
 
     public function __construct(
         int $original,
         int $retail,
-        int $net,
+        ?int $net,
         string $currency)
     {
         $this->original = $original;
@@ -50,12 +50,12 @@ class Pricing
         return $this;
     }
 
-    public function getNet(): int
+    public function getNet(): ?int
     {
         return $this->net;
     }
 
-    public function setNet(int $net): static
+    public function setNet(?int $net): static
     {
         $this->net = $net;
 

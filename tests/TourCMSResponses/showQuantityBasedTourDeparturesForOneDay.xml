@@ -182,9 +182,9 @@
               <rate_id>r20</rate_id>
               <rate_name>20</rate_name>
               <agecat>a</agecat>
-              <rate_price>0.00</rate_price>
-              <rate_price_display>&amp;#8364;0</rate_price_display>
-              <net_price>0.00</net_price>
+              <rate_price>20.00</rate_price>
+              <rate_price_display>&amp;#8364;20</rate_price_display>
+              <net_price>20.00</net_price>
             </rate>
           </extra_rates>
         </departure>
@@ -360,9 +360,9 @@
               <rate_id>r20</rate_id>
               <rate_name>20</rate_name>
               <agecat>a</agecat>
-              <rate_price>0.00</rate_price>
-              <rate_price_display>&amp;#8364;0</rate_price_display>
-              <net_price>0.00</net_price>
+              <rate_price>20.00</rate_price>
+              <rate_price_display>&amp;#8364;20</rate_price_display>
+              <net_price>20.00</net_price>
             </rate>
           </extra_rates>
         </departure>

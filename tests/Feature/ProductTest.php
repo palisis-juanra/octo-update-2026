@@ -682,7 +682,7 @@ class ProductTest extends FeatureTestCase
                         "includedTaxes" => [],
                         "retail" => $this->showQuantityBasedPricingTourXML->tour->new_booking->people_selection->rate->from_price * 100,
                         "original" => $this->showQuantityBasedPricingTourXML->tour->new_booking->people_selection->rate->from_price * 100,
-                        "net" => $this->showQuantityBasedPricingTourXML->tour->new_booking->people_selection->rate->from_price * 100
+                        "net" => null
                     ]
                 ]
         ]);

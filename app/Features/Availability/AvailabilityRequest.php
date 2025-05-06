@@ -17,6 +17,7 @@ use App\Models\Product;
 use App\Services\UnitService;
 use App\Services\XMLService;
 use SimpleXMLElement;
+use Throwable;
 
 class AvailabilityRequest extends BaseAvailabilityRequest
 {
@@ -222,8 +223,8 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setCapacity((int) $departure->spaces_total);
 
             if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
-                $pricing = $this->getPricingForMultipleDays($departure);
-                $unitPricing = $this->getUnitPricing($departure);
+                $pricing = $this->getPricingForShowTourDeparture($departure);
+                $unitPricing = $this->getUnitPricingFromShowTourDeparture($departure);
                 $availability->setCurrency($this->currency);
                 $availability->setPricing($pricing);
                 $availability->setUnitPricing($unitPricing);
@@ -282,25 +283,25 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         }
     }
 
-    protected function getPricingForMultipleDays(SimpleXMLElement $departure): Pricing
+    protected function getPricingForShowTourDeparture(SimpleXMLElement $departure): Pricing
     {
         $totalPricing = 0;
         $netPrice = 0;
         $ratesArray = $this->ratesFromShowTourDepartureXML($departure);
 
         // Volume pricing
-        if ($this->getProduct()->getPricingType() === Product::PRICING_TYPE_VOLUME) {
+        if ($this->product->getPricingType() === Product::PRICING_TYPE_VOLUME) {
             
-            $unitId = !empty($this->units) ? $this->units[0]['id'] : "{$this->product->getId()}|r{$this->getMinBookingSize()}";
-            $rateId = UnitService::getTourCMSRateId($unitId);
-            $rate = $ratesArray[$rateId];
+            $rateNumber = !empty($this->units) ? (int) $this->units[0]['quantity'] : $this->getMinBookingSize();
+            $rateId = "r{$rateNumber}";
+            $rate = isset($ratesArray[$rateId]) ? $ratesArray[$rateId] : $this->getMaxRateForVolumeProduct($departure);
 
             $quantity = !empty($this->units) ? $this->units[0]['quantity'] : $this->getMinBookingSize();
 
             return new Pricing(
                 $rate->rate_price * $quantity * 100,
                 $rate->rate_price * $quantity * 100,
-                $rate->net_price * $quantity * 100,
+                isset($rate->net_price) ? ($rate->net_price * $quantity * 100) : null,
                 $this->currency
             );
 
@@ -337,7 +338,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
      * @param \SimpleXMLElement $departure
      * @return AvailabilityUnitPricing[]
      */
-    protected function getUnitPricing(SimpleXMLElement $departure): array
+    protected function getUnitPricingFromShowTourDeparture(SimpleXMLElement $departure): array
     {
         $unitPricings = [];
 
@@ -347,10 +348,9 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             
             $unitId = !empty($this->units) ? $this->units[0]['id'] : "{$this->product->getId()}|r1";
 
-            $rateNumber = !empty($this->units) ? $this->units[0]['quantity'] : $this->getMinBookingSize();
+            $rateNumber = !empty($this->units) ? (int) $this->units[0]['quantity'] : $this->getMinBookingSize();
             $rateId = "r{$rateNumber}";
-
-            $rate = $rates[$rateId];
+            $rate = isset($rates[$rateId]) ? $rates[$rateId] : $this->getMaxRateForVolumeProduct($departure);
 
             $unitPricings[] = 
                 (new AvailabilityUnitPricing)
@@ -374,5 +374,15 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         }
 
         return $unitPricings;
+    }
+
+    protected function getMaxRateForVolumeProduct(SimpleXMLElement $departure): SimpleXMLElement
+    {
+        if (!isset($departure->extra_rates)) {
+            return $departure->main_price;
+        }
+
+        $rates = XMLService::getArrayFromXmlNode($departure->extra_rates, 'rate');
+        return array_pop($rates);
     }
 }
