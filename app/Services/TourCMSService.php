@@ -12,8 +12,6 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 use SimpleXMLElement;
 use stdClass;
 use TourCMS\Utils\TourCMS;
@@ -42,6 +40,7 @@ class TourCMSService
     public const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
     public const INVALID_BOOKING_ID = 'INVALID BOOKING ID';
     public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = "&show_temporary_bookings=1";
+    public const ERROR_PERM = 'FAIL_PERM';
 
     private TourCMS $tourCMS;
     private TourCMSMulti $tourCMSMulti;
@@ -276,6 +275,8 @@ class TourCMSService
                 throw new FailSignatureException();
             case self::NO_MATCHING_DATA:
                 throw new NoMatchingDataException();
+            case self::ERROR_PERM:
+                throw new FailPermissionException();
             default:
                 throw new APICallNotOKException();
         }
