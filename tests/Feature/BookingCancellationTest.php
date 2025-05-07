@@ -49,7 +49,7 @@ class BookingCancellationTest extends FeatureTestCase
     {
         parent::setUp();
 
-        $this->showChannelXML = simplexml_load_file('tests/TourCMSResponses/showTour_67.xml');
+        $this->showChannelXML = simplexml_load_file('tests/TourCMSResponses/showChannel.xml');
         $this->showTourXML = simplexml_load_file('tests/TourCMSResponses/showTour_67.xml');
         $this->cancelBookingXML = simplexml_load_string('<response><request>POST /c/booking/cancel.xml</request><error>OK</error></response>');
         $this->showBookingXML = simplexml_load_file('tests/TourCMSResponses/showBooking.xml');
