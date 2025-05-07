@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
 use App\Exceptions\NoAPIResponseException;
+use App\Exceptions\FailPermissionException;
 use App\Http\Middleware\OctoAuthentication;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
@@ -41,6 +42,7 @@ class TourCMSService
     public const INVALID_BOOKING_ID = 'INVALID BOOKING ID';
     public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = "&show_temporary_bookings=1";
     public const ERROR_PERM = 'FAIL_PERM';
+    public const OCTO_USER_AGENT = 'OCTO TourCMS PHP Wrapper';
 
     private TourCMS $tourCMS;
     private TourCMSMulti $tourCMSMulti;
@@ -50,6 +52,7 @@ class TourCMSService
     {
         $this->tourCMS = new TourCMS($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMS->set_base_url($this->getAPIBaseUrl());
+        $this->tourCMS->set_user_agent(self::OCTO_USER_AGENT);
 
         $this->tourCMSMulti = new TourCMSMulti($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMSMulti->set_base_url($this->getAPIBaseUrl());
