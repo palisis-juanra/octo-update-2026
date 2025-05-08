@@ -7,7 +7,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use SimpleXMLElement;
 use Tests\FeatureTestCase;
 
-class AgentWithPermissionsTest extends FeatureTestCase
+class AgentWithFullBookingPermissionsTest extends FeatureTestCase
 {
     public const BOOKING_UUID = "46c7cf4f-25e7-4abc-ba32-2ba2aa3f3ed2";
     protected TourCMSService|MockObject $tourCMSService;

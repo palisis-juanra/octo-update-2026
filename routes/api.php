@@ -7,7 +7,7 @@ use App\Http\Controllers\BookingReservationController;
 use App\Http\Controllers\BookingConfirmationController;
 use App\Http\Controllers\BookingGetController;
 use App\Http\Controllers\SupplierController;
-use App\Http\Middleware\AgentWithPermissions;
+use App\Http\Middleware\AgentWithFullBookingPermissions;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Responses\OctoResponse;
 use Illuminate\Support\Facades\Route;
@@ -53,7 +53,7 @@ Route::middleware([OctoAuthentication::class, CapabilitiesHeader::class])->group
 
     // Bookings
 
-    Route::middleware(AgentWithPermissions::class)->group(function() {
+    Route::middleware(AgentWithFullBookingPermissions::class)->group(function() {
         
         Route::get('/bookings/{uuid}', [BookingGetController::class, 'show'])
         ->name(OctoRequest::ENDPOINT_BOOKING_GET);

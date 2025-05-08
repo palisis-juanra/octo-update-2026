@@ -8,7 +8,7 @@ use Closure;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AgentWithPermissions
+class AgentWithFullBookingPermissions
 {
     public const ERROR_MESSAGE_NO_ELEVATED_PERMISSIONS = "Your credentials does not give you access to bookings";
 
