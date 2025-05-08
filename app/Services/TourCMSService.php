@@ -42,7 +42,7 @@ class TourCMSService
     public const INVALID_BOOKING_ID = 'INVALID BOOKING ID';
     public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = "&show_temporary_bookings=1";
     public const ERROR_PERM = 'FAIL_PERM';
-    public const OCTO_USER_AGENT = 'OCTO TourCMS PHP Wrapper';
+    public const OCTO_USER_AGENT = 'octo.tourcms.com';
 
     private TourCMS $tourCMS;
     private TourCMSMulti $tourCMSMulti;
