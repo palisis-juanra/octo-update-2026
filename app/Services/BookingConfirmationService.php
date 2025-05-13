@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Booking;
 use App\Models\Contact;
+use FailPermissionException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Throwable;
 
@@ -65,7 +66,7 @@ class BookingConfirmationService extends BookingService
             $customerXML = $this->contactService->getCustomerXMLFromContact($customerId, $contact);
             $this->tourCMSService->updateCustomer($customerXML);
             return true;
-        } catch (Throwable $e) {
+        } catch (FailPermissionException $e) {
             $this->logger->error(["message" => "Error updating customer {$customerId}"]);
             $this->logger->error($e);
             return false;

@@ -7,6 +7,7 @@ use App\Http\Controllers\BookingReservationController;
 use App\Http\Controllers\BookingConfirmationController;
 use App\Http\Controllers\BookingGetController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Middleware\AgentWithFullBookingPermissions;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Responses\OctoResponse;
 use Illuminate\Support\Facades\Route;
@@ -16,75 +17,66 @@ use App\Http\Middleware\CapabilitiesHeader;
 use App\Http\Requests\OctoRequest;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-Route::get('/auth', function(): JsonResponse { return OctoResponse::OK('OK'); })->middleware([OctoAuthentication::class]);
 
-// Supplier
-Route::get('/supplier', [SupplierController::class, 'index'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_SUPPLIER_GET);
+// All routes have authentication and capabilities
 
-Route::get('/suppliers', [SupplierController::class, 'index'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_SUPPLIERS_GET);
+Route::middleware([OctoAuthentication::class, CapabilitiesHeader::class])->group(function() {
 
-// Products
-Route::get('products', [ProductController::class, 'index'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_PRODUCTS_GET);
+    Route::get('/auth', function(): JsonResponse { return OctoResponse::OK('OK'); })->middleware([OctoAuthentication::class]);
 
-Route::get('products/{id}', [ProductController::class, 'show'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_PRODUCT_GET);
+    // Supplier
 
-// Availability
+    Route::get('/supplier', [SupplierController::class, 'index'])
+        ->name(OctoRequest::ENDPOINT_SUPPLIER_GET);
 
-Route::post('/availability', [AvailabilityController::class, 'index'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_AVAILABILITY_CHECK);
+    Route::get('/suppliers', [SupplierController::class, 'index'])
+        ->name(OctoRequest::ENDPOINT_SUPPLIERS_GET);
 
-Route::post('/availability/calendar', [AvailabilityCalendarController::class, 'index'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_AVAILABILITY_CALENDAR);
-// Bookings
-Route::get('/bookings/{uuid}', [BookingGetController::class, 'show'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_BOOKING_GET);
 
-Route::post('/bookings', [BookingReservationController::class, 'index'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_BOOKINGS_RESERVATION);
+    // Products
 
-Route::post('/bookings/{uuid}/confirm', [BookingConfirmationController::class, 'index'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_BOOKINGS_CONFIRMATION);
+    Route::get('products', [ProductController::class, 'index'])
+        ->name(OctoRequest::ENDPOINT_PRODUCTS_GET);
 
-Route::post('/bookings/{uuid}/cancel', [BookingCancellationController::class, 'cancel'])
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_BOOKINGS_CANCELLATION);
+    Route::get('products/{id}', [ProductController::class, 'show'])
+        ->name(OctoRequest::ENDPOINT_PRODUCT_GET);
 
-// Endpoints not implemented
 
-Route::post('/bookings/{uuid}/extend', function () { throw new NotFoundHttpException; })
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_BOOKINGS_EXTEND);
+    // Availability
 
-Route::patch('/bookings/{uuid}', function () { throw new NotFoundHttpException; })
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_BOOKINGS_UPDATE);
+    Route::post('/availability', [AvailabilityController::class, 'index'])
+        ->name(OctoRequest::ENDPOINT_AVAILABILITY_CHECK);
 
-Route::get('/bookings', function () { throw new NotFoundHttpException; })
-    ->middleware([OctoAuthentication::class])
-    ->middleware(CapabilitiesHeader::class)
-    ->name(OctoRequest::ENDPOINT_BOOKINGS_GET);
+    Route::post('/availability/calendar', [AvailabilityCalendarController::class, 'index'])
+        ->name(OctoRequest::ENDPOINT_AVAILABILITY_CALENDAR);
+
+
+    // Bookings
+
+    Route::middleware(AgentWithFullBookingPermissions::class)->group(function() {
+        
+        Route::get('/bookings/{uuid}', [BookingGetController::class, 'show'])
+        ->name(OctoRequest::ENDPOINT_BOOKING_GET);
+
+        Route::post('/bookings', [BookingReservationController::class, 'index'])
+            ->name(OctoRequest::ENDPOINT_BOOKINGS_RESERVATION);
+
+        Route::post('/bookings/{uuid}/confirm', [BookingConfirmationController::class, 'index'])
+            ->name(OctoRequest::ENDPOINT_BOOKINGS_CONFIRMATION);
+
+        Route::post('/bookings/{uuid}/cancel', [BookingCancellationController::class, 'cancel'])
+            ->name(OctoRequest::ENDPOINT_BOOKINGS_CANCELLATION);
+    });
+
+    // Endpoints not implemented
+
+    Route::post('/bookings/{uuid}/extend', function () { throw new NotFoundHttpException; })
+        ->name(OctoRequest::ENDPOINT_BOOKINGS_EXTEND);
+
+    Route::patch('/bookings/{uuid}', function () { throw new NotFoundHttpException; })
+        ->name(OctoRequest::ENDPOINT_BOOKINGS_UPDATE);
+
+    Route::get('/bookings', function () { throw new NotFoundHttpException; })
+        ->name(OctoRequest::ENDPOINT_BOOKINGS_GET);
+
+});

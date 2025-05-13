@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
 use App\Exceptions\NoAPIResponseException;
+use App\Exceptions\FailPermissionException;
 use App\Http\Middleware\OctoAuthentication;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
@@ -12,8 +13,6 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 use SimpleXMLElement;
 use stdClass;
 use TourCMS\Utils\TourCMS;
@@ -42,6 +41,8 @@ class TourCMSService
     public const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
     public const INVALID_BOOKING_ID = 'INVALID BOOKING ID';
     public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = "&show_temporary_bookings=1";
+    public const ERROR_PERM = 'FAIL_PERM';
+    public const OCTO_USER_AGENT = 'octo.tourcms.com';
 
     private TourCMS $tourCMS;
     private TourCMSMulti $tourCMSMulti;
@@ -51,6 +52,7 @@ class TourCMSService
     {
         $this->tourCMS = new TourCMS($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMS->set_base_url($this->getAPIBaseUrl());
+        $this->tourCMS->set_user_agent(self::OCTO_USER_AGENT);
 
         $this->tourCMSMulti = new TourCMSMulti($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMSMulti->set_base_url($this->getAPIBaseUrl());
@@ -276,6 +278,8 @@ class TourCMSService
                 throw new FailSignatureException();
             case self::NO_MATCHING_DATA:
                 throw new NoMatchingDataException();
+            case self::ERROR_PERM:
+                throw new FailPermissionException();
             default:
                 throw new APICallNotOKException();
         }
