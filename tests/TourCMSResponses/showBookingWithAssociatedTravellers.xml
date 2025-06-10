@@ -28,9 +28,13 @@
         <cancel_text>Not cancelled</cancel_text>
         <final_check>0</final_check>
         <lead_customer_id>9371</lead_customer_id>
-        <lead_customer_name>Mrs Test Test</lead_customer_name>
+        <lead_customer_name>Mrs Joe Test</lead_customer_name>
+        <lead_customer_firstname>Joe</lead_customer_firstname>
+        <lead_customer_surname>Test</lead_customer_surname>
+        <lead_customer_country>ES</lead_customer_country>
+        <lead_customer_postcode>27540</lead_customer_postcode>
         <lead_customer_email>armando.garrido@palisis.com</lead_customer_email>
-        <lead_customer_tel_home/>
+        <lead_customer_tel_home>784211254874512</lead_customer_tel_home>
         <lead_customer_tel_mobile/>
         <lead_customer_contact_note/>
         <nationality/>
@@ -70,6 +74,8 @@
                 <middlename/>
                 <surname>1</surname>
                 <agent_customer_ref/>
+                <country>ES</country>
+                <postcode>27540</postcode>
                 <nationality/>
                 <nationality_text/>
                 <pass_num/>
@@ -78,8 +84,8 @@
                 <pass_expiry_date/>
                 <customer_email>armando.garrido@palisis.com</customer_email>
                 <customer_tel_home/>
-                <customer_tel_mobile/>
-                <customer_contact_note/>
+                <customer_tel_mobile>7845874587</customer_tel_mobile>
+                <customer_contact_note>Customer 1 notes</customer_contact_note>
                 <gender/>
                 <agecat>a</agecat>
                 <agecat_text>Adult</agecat_text>
@@ -96,16 +102,18 @@
                 <middlename/>
                 <surname>2</surname>
                 <agent_customer_ref/>
+                <country>EN</country>
+                <postcode>28650</postcode>
                 <nationality/>
                 <nationality_text/>
                 <pass_num/>
                 <pass_issue/>
                 <pass_issue_date/>
                 <pass_expiry_date/>
-                <customer_email/>
+                <customer_email>armando2.garrido@palisis.com</customer_email>
                 <customer_tel_home/>
-                <customer_tel_mobile/>
-                <customer_contact_note/>
+                <customer_tel_mobile>7854485445</customer_tel_mobile>
+                <customer_contact_note>Customer 2 notes</customer_contact_note>
                 <gender/>
                 <agecat>a</agecat>
                 <agecat_text>Adult</agecat_text>
