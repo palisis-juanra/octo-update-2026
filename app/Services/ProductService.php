@@ -150,6 +150,7 @@ class ProductService
         self::FEATURE_TYPE_REDEMPTION_INSTRUCTION => 'redeem',
         self::FEATURE_TYPE_CANCELLATION_TERM => 'cancellation_policy->policy->name'
     ];
+    public const array CONTENT_FIELDS_TO_SPLIT = ['inc', 'ex', 'exp', 'essential'];
     public const DEFAULT_DURATION_MINUTES = 60;
     public const TIMEZONE_NOT_SET = 'NOTSET';
     public const DEFAULT_CHANNEL_LANG = 'en';
@@ -997,13 +998,44 @@ class ProductService
 
         foreach (self::FEATURES_TYPES as $type => $fieldName) {
             if (isset($tour->$fieldName) && !empty($tour->$fieldName)) {
-               $features[] = (object) [
-                    'shortDescription' => (string) $tour->$fieldName,
-                    'type' => $type
-               ]; 
+
+                $shortDescription = (string) $tour->$fieldName;
+
+                if (in_array($fieldName, self::CONTENT_FIELDS_TO_SPLIT) && $this->haveTextFieldSpecialCharacters($shortDescription)) {
+
+                    $array = explode("\n", $shortDescription);
+
+                    foreach ($array as $text) {
+                        if (str_contains($shortDescription,"*")) {
+                            $text = str_replace("* ", "", $text);
+                        } else {
+                            $text = explode("• ", "", $text);
+                        }
+
+                        if (!empty($text)) {
+                            $features[] = (object) [
+                                'shortDescription' => $text,
+                                'type' => $type
+                            ];
+                        }
+                    }
+                } else {
+                    $features[] = (object) [
+                        'shortDescription' => $shortDescription,
+                        'type' => $type
+                    ]; 
+                }
+
+
+               
             }
         }
         return $features;
+    }
+
+    protected function haveTextFieldSpecialCharacters(string $text): bool
+    {
+        return str_contains($text, '*') || str_contains($text, '•');
     }
 
     protected function getProductMedia(SimpleXMLElement $tour): array
