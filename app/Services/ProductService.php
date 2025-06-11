@@ -1000,17 +1000,13 @@ class ProductService
 
                 $shortDescription = (string) $tour->$fieldName;
 
-                if (in_array($fieldName, self::CONTENT_FIELDS_TO_SPLIT) && $this->haveTextFieldSpecialCharacters($shortDescription)) {
+                if (in_array($fieldName, self::CONTENT_FIELDS_TO_SPLIT) && $this->haveTextListCharacters($shortDescription)) {
 
                     $array = explode("\n", $shortDescription);
 
                     foreach ($array as $text) {
 
-                        if (str_starts_with($text, "* ") || 
-                            str_starts_with($text, "• ") || 
-                            str_starts_with($text, "- ") || 
-                            str_starts_with($text, "· ")) {
-                        
+                        if ($this->textStartsWithListCharacters($text)) {
                             $text = str_replace(["* ", "• ", "- ", "· "], "", $text);
                         }
 
@@ -1027,17 +1023,25 @@ class ProductService
                         'type' => $type
                     ]; 
                 }
-
-
-               
             }
         }
         return $features;
     }
 
-    protected function haveTextFieldSpecialCharacters(string $text): bool
+    protected function haveTextListCharacters(string $text): bool
     {
-        return str_contains($text, '*') || str_contains($text, '•');
+        return str_contains($text, '*') || 
+            str_contains($text, '•') || 
+            str_contains($text, '-') || 
+            str_contains($text, '·');
+    }
+
+    protected function textStartsWithListCharacters(string $text): bool
+    {
+        return str_starts_with($text, "* ") || 
+            str_starts_with($text, "• ") || 
+            str_starts_with($text, "- ") || 
+            str_starts_with($text, "· ");
     }
 
     protected function getProductMedia(SimpleXMLElement $tour): array
