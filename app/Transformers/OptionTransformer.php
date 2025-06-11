@@ -45,11 +45,6 @@ class OptionTransformer extends BaseTransformer
             'restrictions' => $option->getRestrictions(),
             'units' => $unitsTransformed
         ];
-
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
-            $contentData = $this->productContentTransformer->transform($option->getContent());
-            $data = array_merge($data, $contentData);
-        }
     
         return $data;
     }

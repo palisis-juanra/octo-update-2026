@@ -308,10 +308,6 @@ class ProductService
                 ->setCategoryLabels($categoryLabels)
                 ->setDurationMinutesFrom($durationMinutesFrom);
             $product->setContent($productContent);
-
-            foreach ($product->getOptions() as $option) {
-                $option->setContent($productContent);
-            }
         }
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
