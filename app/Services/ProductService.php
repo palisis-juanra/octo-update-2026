@@ -145,10 +145,9 @@ class ProductService
     public const FEATURES_TYPES = [
         self::FEATURE_TYPE_INCLUSION => 'inc',
         self::FEATURE_TYPE_EXCLUSION => 'ex',
-        self::FEATURE_TYPE_HIGHLIGHT => 'essential',
-        self::FEATURE_TYPE_PREARRIVAL_INFORMATION => 'summary',
-        self::FEATURE_TYPE_REDEMPTION_INSTRUCTION => 'redeem',
-        self::FEATURE_TYPE_CANCELLATION_TERM => 'cancellation_policy->policy->name'
+        self::FEATURE_TYPE_HIGHLIGHT => 'exp',
+        self::FEATURE_TYPE_PREARRIVAL_INFORMATION => 'essential',
+        self::FEATURE_TYPE_REDEMPTION_INSTRUCTION => 'redeem'
     ];
     public const array CONTENT_FIELDS_TO_SPLIT = ['inc', 'ex', 'exp', 'essential'];
     public const DEFAULT_DURATION_MINUTES = 60;
@@ -1006,10 +1005,13 @@ class ProductService
                     $array = explode("\n", $shortDescription);
 
                     foreach ($array as $text) {
-                        if (str_contains($shortDescription,"*")) {
-                            $text = str_replace("* ", "", $text);
-                        } else {
-                            $text = explode("• ", "", $text);
+
+                        if (str_starts_with($text, "* ") || 
+                            str_starts_with($text, "• ") || 
+                            str_starts_with($text, "- ") || 
+                            str_starts_with($text, "· ")) {
+                        
+                            $text = str_replace(["* ", "• ", "- ", "· "], "", $text);
                         }
 
                         if (!empty($text)) {
