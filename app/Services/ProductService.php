@@ -204,7 +204,7 @@ class ProductService
     {
         $this->clearInfoAndErrors();
         $id = $this->buildProductId($tour);
-        $internalName = (string) $tour->tour_name;
+        $internalName = (string) $tour->tour_name_long;
         $reference = null;
         if (isset($tour->supplier_tour_code)) {
             $reference = $tour->supplier_tour_code;
