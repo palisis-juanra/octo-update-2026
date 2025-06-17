@@ -299,7 +299,7 @@ class ProductService
             $durationMinutesFrom = $this->getDurationMinutesFrom($tour);
             
             $productContent
-                ->setTitle((string) $tour->tour_name)
+                ->setTitle((string) $tour->tour_name_long)
                 ->setShortDescription((string) $tour->shortdesc)
                 ->setDescription($tour->longdesc)
                 ->setFeatures($features)
