@@ -11,8 +11,14 @@ class ContactService
     {
         $customerXML = new SimpleXMLElement('<customer />');
         $customerXML->addChild('customer_id', $customerId);
-        $customerXML->addChild('firstname', $contact->getFirstName());
-        $customerXML->addChild('surname', $contact->getLastName());
+
+        if (!empty($contact->getFirstName()) && !empty($contact->getLastName())) {
+            $customerXML->addChild('firstname', $contact->getFirstName());
+            $customerXML->addChild('surname', $contact->getLastName());
+        } else if (!empty($contact->getFullName())) {
+            $customerXML->addChild('firstname', $contact->getFullName());
+        }
+
         $customerXML->addChild('email', $contact->getEmailAddress());
         $customerXML->addChild('country', $contact->getCountry());
         $customerXML->addChild('tel_mobile', $contact->getPhoneNumber());

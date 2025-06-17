@@ -98,6 +98,11 @@ class BookingConfirmationTest extends FeatureTestCase
         foreach ($this->showBookingXML->booking->customers->customer as $customer) {
             $response->assertJsonPath("unitItems.". $i .".contact.firstName", (string) $customer->firstname);
             $response->assertJsonPath("unitItems.". $i .".contact.lastName", (string) $customer->surname);
+            $response->assertJsonPath("unitItems.". $i .".contact.emailAddress", (string) $customer->customer_email);
+            $response->assertJsonPath("unitItems.". $i .".contact.phoneNumber", (string) $customer->customer_tel_mobile);
+            $response->assertJsonPath("unitItems.". $i .".contact.postalCode", (string) $customer->postcode);
+            $response->assertJsonPath("unitItems.". $i .".contact.country", (string) $customer->country);
+            $response->assertJsonPath("unitItems.". $i .".contact.notes", (string) $customer->customer_contact_note);
             $i++;
         }
     }

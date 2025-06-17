@@ -5,9 +5,8 @@ namespace App\Services;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Booking;
 use App\Models\Contact;
-use FailPermissionException;
+use App\Exceptions\FailPermissionException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
-use Throwable;
 
 class BookingConfirmationService extends BookingService
 {

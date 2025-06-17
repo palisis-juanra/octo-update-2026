@@ -145,11 +145,11 @@ class ProductService
     public const FEATURES_TYPES = [
         self::FEATURE_TYPE_INCLUSION => 'inc',
         self::FEATURE_TYPE_EXCLUSION => 'ex',
-        self::FEATURE_TYPE_HIGHLIGHT => 'essential',
-        self::FEATURE_TYPE_PREARRIVAL_INFORMATION => 'summary',
-        self::FEATURE_TYPE_REDEMPTION_INSTRUCTION => 'redeem',
-        self::FEATURE_TYPE_CANCELLATION_TERM => 'cancellation_policy->policy->name'
+        self::FEATURE_TYPE_HIGHLIGHT => 'exp',
+        self::FEATURE_TYPE_PREARRIVAL_INFORMATION => 'essential',
+        self::FEATURE_TYPE_REDEMPTION_INSTRUCTION => 'redeem'
     ];
+    public const array CONTENT_FIELDS_TO_SPLIT = ['inc', 'ex', 'exp', 'essential'];
     public const DEFAULT_DURATION_MINUTES = 60;
     public const TIMEZONE_NOT_SET = 'NOTSET';
     public const DEFAULT_CHANNEL_LANG = 'en';
@@ -204,7 +204,7 @@ class ProductService
     {
         $this->clearInfoAndErrors();
         $id = $this->buildProductId($tour);
-        $internalName = (string) $tour->tour_name;
+        $internalName = (string) $tour->tour_name_long;
         $reference = null;
         if (isset($tour->supplier_tour_code)) {
             $reference = $tour->supplier_tour_code;
@@ -299,7 +299,7 @@ class ProductService
             $durationMinutesFrom = $this->getDurationMinutesFrom($tour);
             
             $productContent
-                ->setTitle((string) $tour->tour_name)
+                ->setTitle((string) $tour->tour_name_long)
                 ->setShortDescription((string) $tour->shortdesc)
                 ->setDescription($tour->longdesc)
                 ->setFeatures($features)
@@ -308,10 +308,6 @@ class ProductService
                 ->setCategoryLabels($categoryLabels)
                 ->setDurationMinutesFrom($durationMinutesFrom);
             $product->setContent($productContent);
-
-            foreach ($product->getOptions() as $option) {
-                $option->setContent($productContent);
-            }
         }
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
@@ -997,13 +993,51 @@ class ProductService
 
         foreach (self::FEATURES_TYPES as $type => $fieldName) {
             if (isset($tour->$fieldName) && !empty($tour->$fieldName)) {
-               $features[] = (object) [
-                    'shortDescription' => (string) $tour->$fieldName,
-                    'type' => $type
-               ]; 
+
+                $shortDescription = (string) $tour->$fieldName;
+
+                if (in_array($fieldName, self::CONTENT_FIELDS_TO_SPLIT) && $this->haveTextListCharacters($shortDescription)) {
+
+                    $array = explode("\n", $shortDescription);
+
+                    foreach ($array as $text) {
+
+                        if ($this->textStartsWithListCharacters($text)) {
+                            $text = str_replace(["* ", "• ", "- ", "· "], "", $text);
+                        }
+
+                        if (!empty($text)) {
+                            $features[] = (object) [
+                                'shortDescription' => $text,
+                                'type' => $type
+                            ];
+                        }
+                    }
+                } else {
+                    $features[] = (object) [
+                        'shortDescription' => $shortDescription,
+                        'type' => $type
+                    ]; 
+                }
             }
         }
         return $features;
+    }
+
+    protected function haveTextListCharacters(string $text): bool
+    {
+        return str_contains($text, '*') || 
+            str_contains($text, '•') || 
+            str_contains($text, '-') || 
+            str_contains($text, '·');
+    }
+
+    protected function textStartsWithListCharacters(string $text): bool
+    {
+        return str_starts_with($text, "* ") || 
+            str_starts_with($text, "• ") || 
+            str_starts_with($text, "- ") || 
+            str_starts_with($text, "· ");
     }
 
     protected function getProductMedia(SimpleXMLElement $tour): array
