@@ -86,6 +86,7 @@ class TourCMSService
 
     public function listTours(string $channelId, string $params = ""): SimpleXMLElement
     {
+        $params = urlencode($params);
         $response = $this->tourCMS->list_tours($channelId, $params);
         $response = $this->handleResponse($response);
         return $response;
@@ -117,13 +118,14 @@ class TourCMSService
 
     public function checkAvailability(string $params, string $tourId): SimpleXMLElement
     {
+        $params = urlencode($params);
         $response = $this->tourCMS->check_tour_availability($params, $tourId, $this->channelId);
         $response = $this->handleResponse($response);
 
         return $response;
     }
 
-    public function showTourDepartures(string $tourId, string $startDate, string $endDate = '', string $extraParams = null): SimpleXMLElement
+    public function showTourDepartures(string $tourId, string $startDate, string $endDate = '', ?string $extraParams = null): SimpleXMLElement
     {
         $queryString = self::SHOW_TOUR_DEPARTURES_CLOSED_PARAM;
         
@@ -141,14 +143,14 @@ class TourCMSService
             $queryString .= $extraParams;
         }
 
-        
+        $queryString = urlencode($queryString);
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response); 
 
         return $response;
     }
 
-    public function showTourDatesAndDeals(string $tourId, string $startDate, string $endDate = '', string $extraParams = null): SimpleXMLElement
+    public function showTourDatesAndDeals(string $tourId, string $startDate, string $endDate = '', ?string $extraParams = null): SimpleXMLElement
     {
         $queryString = self::SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM;
 
@@ -166,6 +168,7 @@ class TourCMSService
             $queryString .= $extraParams;
         }
 
+        $queryString = urlencode($queryString);
         $response = $this->tourCMS->show_tour_datesanddeals($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response);
 
