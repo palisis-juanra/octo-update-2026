@@ -49,7 +49,8 @@ class ProductMappingFactory
                 $mappings[] = new ProductMapping(
                     ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
                     (string) $mapping->fields->label,
-                    (string) $mapping->fields->field->value
+                    (string) $mapping->fields->field->value,
+                    [(string) $mapping->fields->field->value]
                 );
             }
         }
@@ -122,7 +123,7 @@ class ProductMappingFactory
     protected function getSingleStructureMappings(): array
     {
         $startTimes = [];
-        if (isset($tour->tour_departure_structure->start_times)) {
+        if (isset($this->tour->tour_departure_structure->start_times)) {
             $startTimesFromXML = XMLService::getArrayFromXmlNode($this->tour->tour_departure_structure->start_times, 'time');
             foreach ($startTimesFromXML as $startTime) {
                 $startTimes[] = (string) $startTime;
@@ -133,7 +134,7 @@ class ProductMappingFactory
             $startTimes = ['09:00'];
         }
 
-        $singleMapping = new ProductMapping(ProductService::MAPPING_STRUCTURE_TYPE_SINGLE, (string) $this->tour->tour_name_long, '');
+        $singleMapping = new ProductMapping(ProductService::MAPPING_STRUCTURE_TYPE_SINGLE, (string) $this->tour->tour_name_long, '', $startTimes);
         return [$singleMapping];
     }
 
