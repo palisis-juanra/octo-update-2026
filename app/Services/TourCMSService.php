@@ -117,7 +117,6 @@ class TourCMSService
 
     public function checkAvailability(string $params, string $tourId): SimpleXMLElement
     {
-        $params = urlencode($params);
         $response = $this->tourCMS->check_tour_availability($params, $tourId, $this->channelId);
         $response = $this->handleResponse($response);
 
@@ -166,7 +165,6 @@ class TourCMSService
             $queryString .= $extraParams;
         }
 
-        $queryString = urlencode($queryString);
         $response = $this->tourCMS->show_tour_datesanddeals($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response);
 
