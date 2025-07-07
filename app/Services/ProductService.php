@@ -9,10 +9,12 @@ use App\Http\Requests\OctoRequest;
 use App\Models\Location;
 use App\Models\Media;
 use App\Models\Option;
+use App\Models\OptionContent;
 use App\Models\Place;
 use App\Models\Pricing;
 use App\Models\Product;
 use App\Models\ProductContent;
+use App\Models\ProductMapping;
 use App\Models\Unit;
 use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
@@ -164,7 +166,8 @@ class ProductService
     public function __construct(
         public TourCMSService $tourCMSService, 
         public JSONLogService $logger, 
-        public LocaleService $localeService)
+        public LocaleService $localeService,
+        public ProductMappingFactory $productMappingFactory)
     {
         $this->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
     }
@@ -330,23 +333,23 @@ class ProductService
         }
 
         $options = []; 
-        $mappings = $this->getActiveMappingsFromTour($tour);
+        $mappings = $this->productMappingFactory->create($tour);
 
-        foreach ($mappings as $option => $availabilityStartTimes) {
+        foreach ($mappings as $mapping) {
 
             $optionId = "{$structureType}";
+            $availabilityStartTimes = $mapping->getStartTimes();
 
             if (!in_array($structureType, [self::MAPPING_STRUCTURE_TYPE_SINGLE, self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
-                $optionId .= "|{$option}";
+                $optionId .= "|{$mapping->getValue()}";
             }
 
             $optionDefault = $structureType == self::MAPPING_STRUCTURE_TYPE_SINGLE ? true : false;
             $optionInternalName = "";
 
-            // As of now, we don't add supplier_tour_code since it is operators only.
             $optionInternalName = $tour->tour_name ? (string) $tour->tour_name : '';
-            if (isset($tour->supplier_tour_code)) {
-                $optionInternalName .= (string) $tour->supplier_tour_code;
+            if (!in_array($structureType, [self::MAPPING_STRUCTURE_TYPE_SINGLE, self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
+                $optionInternalName .= " - {$mapping->getValue()}";
             }
 
             if (empty($optionInternalName)){
@@ -410,8 +413,12 @@ class ProductService
             $optionData->restrictions = $optionRestrictions;
             $optionData->units = $optionUnits;
             
-
-            $options[] = Option::create($optionData);
+            $option = Option::create($optionData);
+            
+            $optionContent = new OptionContent(!empty($mapping->getLabel()) ? $mapping->getLabel() : $optionInternalName);
+            $option->setContent($optionContent);
+            
+            $options[] = $option;
         }
 
         return $options;
@@ -875,7 +882,7 @@ class ProductService
      * @param SimpleXMLElement $tour Tour XML Node
      * Get all the active mappings based on its structure type
      * Each element in array contains option and availabilityStartTimes
-     * @return array[]
+     * @return ProductMapping[]
      */
     public function getActiveMappingsFromTour(SimpleXMLElement $tour): array
     {
@@ -887,11 +894,11 @@ class ProductService
 
             case self::MAPPING_STRUCTURE_TYPE_START_TIME:
                 foreach ($types as $mapping) {
-                    if (isset($mapping->active) && $mapping->active == 1) {
-                        if (isset($mapping->fields->field->value)) {
-                            // Mappings key is empty, because we dont add any option specific for start time mapping
-                            $mappings[''][] = (string) $mapping->fields->field->value;
-                        }
+                    if (isset($mapping->active) && $mapping->active == 1 && isset($mapping->fields->field->value)) {
+                        $mappings[] = new ProductMapping(
+                                $structureType, 
+                                (string) $mapping->fields->label,
+                                (string) $mapping->fields->field->value);
                     }
                 }
                 return $mappings;
@@ -899,17 +906,18 @@ class ProductService
             case self::MAPPING_STRUCTURE_TYPE_DEPARTURE_CODE:
             case self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE:
                 foreach ($types as $mapping) {
-                    if (isset($mapping->active) && $mapping->active == 1) {
-                        if (isset($mapping->fields->field->value)) {
+                    if (isset($mapping->active) && $mapping->active == 1 && isset($mapping->fields->field->value)) {
 
-                            if (isset($tour->start_time) && !empty($tour->start_time) && $tour->start_time != self::START_TIME_MULTI) {
-                                $availabilityStartTime = (string) $tour->start_time;
-                            } else {
-                                $availabilityStartTime = self::AVAILABILITY_LOCAL_START_TIMES_DEFAULT;
-                            }
-
-                            $mappings[(string) $mapping->fields->field->value] = [$availabilityStartTime];
+                        $availabilityStartTime = [self::AVAILABILITY_LOCAL_START_TIMES_DEFAULT];
+                        if (isset($tour->start_time) && !empty($tour->start_time) && $tour->start_time != self::START_TIME_MULTI) {
+                            $availabilityStartTime = [(string) $tour->start_time];
                         }
+
+                        $mappings[] = new ProductMapping(
+                            $structureType,
+                            (string) $mapping->fields->field->label,
+                            (string) $mapping->fields->field->value,
+                            $availabilityStartTime);
                     }
                 }
                 
@@ -936,14 +944,7 @@ class ProductService
                         $fieldName = (string) $field->name;
                         $fieldValue = (string) $field->value;
     
-                        if ($fieldName == 'supplier_note') {
-                            $mappingObject['supplier_note'] = $fieldValue;
-                                                  
-                        }
-    
-                        if ($fieldName == 'start_time') {
-                            $mappingObject['start_time'] = $fieldValue;
-                        }
+                        $mappingObject[$fieldName] = $fieldValue;
                     }
     
                     if (!array_key_exists($mappingObject['supplier_note'], $mappings)){
@@ -954,7 +955,12 @@ class ProductService
                         $mappings[$mappingObject['supplier_note']][] = $mappingObject['start_time'];
                     }
                 }
-                return $mappings;
+
+                $productMappings = [];
+                foreach ($mappings as $supplierNote => $startTimes) {
+                    $productMappings[] = new ProductMapping($structureType, '', $supplierNote, $startTimes);
+                }
+                return $productMappings;
             
             default:
 
@@ -971,7 +977,8 @@ class ProductService
                     $startTimes = ['09:00'];
                 }
 
-                return ['' => $startTimes];
+                $singleMapping = new ProductMapping(self::MAPPING_STRUCTURE_TYPE_SINGLE, (string) $tour->tour_name_long, '');
+                return [$singleMapping];
 
         }
         

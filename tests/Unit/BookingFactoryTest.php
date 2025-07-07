@@ -9,14 +9,13 @@ use App\Models\Contact;
 use App\Models\Option;
 use App\Models\Product;
 use App\Services\JSONLogService;
+use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use App\Services\XMLService;
-use Illuminate\Support\Facades\App;
 use PHPUnit\Framework\MockObject\MockObject;
 use SimpleXMLElement;
 use Tests\FeatureTestCase;
-use Tests\UnitTestCase;
 
 class BookingFactoryTest extends FeatureTestCase
 {
@@ -57,6 +56,7 @@ class BookingFactoryTest extends FeatureTestCase
 
         $this->productServiceMock->tourCMSService = $this->tourCMSServiceMock;
         $this->productServiceMock->logger = $this->loggerMock;
+        $this->productServiceMock->productMappingFactory = new ProductMappingFactory;
 
         $this->productServiceMock->method('getProductLocale')->willReturn('en-GB');
 
