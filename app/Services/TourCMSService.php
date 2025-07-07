@@ -86,7 +86,6 @@ class TourCMSService
 
     public function listTours(string $channelId, string $params = ""): SimpleXMLElement
     {
-        $params = urlencode($params);
         $response = $this->tourCMS->list_tours($channelId, $params);
         $response = $this->handleResponse($response);
         return $response;
@@ -143,7 +142,6 @@ class TourCMSService
             $queryString .= $extraParams;
         }
 
-        $queryString = urlencode($queryString);
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response); 
 

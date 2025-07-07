@@ -72,7 +72,7 @@ class OptionService
             throw new InvalidOptionIdException($optionId);
         }
 
-        $queryString = "{$mappingField}={$mappingValue}";
+        $queryString = $mappingField . "=" . urlencode($mappingValue);
 
         return $queryString;
     }

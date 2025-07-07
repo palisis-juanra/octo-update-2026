@@ -415,13 +415,35 @@ class ProductService
             
             $option = Option::create($optionData);
             
-            $optionContent = new OptionContent(!empty($mapping->getLabel()) ? $mapping->getLabel() : $optionInternalName);
+            $optionContent = new OptionContent($this->getOptionTitle($optionInternalName, $mapping));
             $option->setContent($optionContent);
             
             $options[] = $option;
         }
 
         return $options;
+    }
+
+    public function getOptionTitle(string $optionInternalName, ProductMapping $productMapping): string
+    {
+        if (empty($productMapping->getLabel())) {
+            return $optionInternalName;
+        }
+
+        $showChannel = $this->tourCMSService->showChannel();
+        $channelLanguage = (string) $showChannel->channel->lang ?? 'en';
+        $labelAsJson = json_decode($productMapping->getLabel(), true);
+        if (is_array($labelAsJson)) {
+            if (array_key_exists($channelLanguage, $labelAsJson) && !empty($labelAsJson[$channelLanguage])) {
+                return (string) $labelAsJson[$channelLanguage];
+            } elseif (array_key_exists('en', $labelAsJson) && !empty($labelAsJson['en'])) {
+                return (string) $labelAsJson['en'];
+            } else {
+                return $optionInternalName;
+            }
+        }
+
+        return $optionInternalName;
     }
 
     public function getOptionUnits(SimpleXMLElement $tour): array

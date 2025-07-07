@@ -48,6 +48,7 @@ class BookingFactoryTest extends FeatureTestCase
         $this->tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->tourCMSServiceMock->method('showChannel')->willReturn(simplexml_load_file('tests/TourCMSResponses/showChannel.xml'));
 
         $this->productServiceMock = $this->getMockBuilder(ProductService::class)
             ->disableOriginalConstructor()

@@ -44,21 +44,27 @@ class ProductMappingFactory
 
     protected function getStartTimeStructureMappings(): array
     {
+        $startTimes = [];
+
         foreach ($this->mappingAssistantOptions as $mapping) {
             if (isset($mapping->active) && $mapping->active == 1 && isset($mapping->fields->field->value)) {
-                $mappings[] = new ProductMapping(
-                    ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
-                    (string) $mapping->fields->label,
-                    (string) $mapping->fields->field->value,
-                    [(string) $mapping->fields->field->value]
-                );
+                $startTimes[] = (string) $mapping->fields->field->value;
             }
         }
-        return $mappings;
+
+        return [
+            new ProductMapping(
+                ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
+                "",
+                "",
+                $startTimes
+            )
+        ];
     }
 
     protected function getDepartureCodeOrSupplierNoteStructureMappings(): array
     {
+        $mappings = [];
         foreach ($this->mappingAssistantOptions as $mapping) {
             if (isset($mapping->active) && $mapping->active == 1 && isset($mapping->fields->field->value)) {
 
@@ -69,7 +75,7 @@ class ProductMappingFactory
 
                 $mappings[] = new ProductMapping(
                     $this->structureType,
-                    (string) $mapping->fields->field->label,
+                    (string) $mapping->label,
                     (string) $mapping->fields->field->value,
                     $availabilityStartTime
                 );

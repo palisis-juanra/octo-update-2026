@@ -3,10 +3,8 @@
 namespace Tests\Unit;
 
 use App\Models\ProductMapping;
-use App\Services\JSONLogService;
 use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
-use SimpleXMLElement;
 use Tests\UnitTestCase;
 
 class ProductMappingFactoryTest extends UnitTestCase
@@ -65,20 +63,8 @@ class ProductMappingFactoryTest extends UnitTestCase
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
                 "",
-                "13:00",
-                ['13:00']
-            ),
-            new ProductMapping(
-                ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
                 "",
-                "15:00",
-                ['15:00']
-            ),
-            new ProductMapping(
-                ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
-                "",
-                "17:00",
-                ['17:00']
+                ["13:00", "15:00", "17:00"]
             )
         ];
 
@@ -94,19 +80,19 @@ class ProductMappingFactoryTest extends UnitTestCase
         $expectedProductOptions = [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE,
-                "",
+                '{"en":"","es":""}',
                 "",
                 ['00:00']
             ),
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE,
-                "",
+                '{"en":""}',
                 'TEST_NOTE_1',
                 ['00:00']
             ),
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE,
-                "",
+                '{"en":""}',
                 'TEST_NOTE_2',
                 ['00:00']
             ),
@@ -124,19 +110,19 @@ class ProductMappingFactoryTest extends UnitTestCase
         $expectedProductOptions = [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_DEPARTURE_CODE,
-                "",
+                '{"en":"","es":""}',
                 'ABC',
                 ['00:00']
             ),
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_DEPARTURE_CODE,
-                "",
+                '{"en":""}',
                 '123',
                 ['00:00']
             ),
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_DEPARTURE_CODE,
-                "",
+                '{"en":""}',
                 'xyz',
                 ['00:00']
             ),
