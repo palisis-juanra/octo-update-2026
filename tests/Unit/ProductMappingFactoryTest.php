@@ -143,6 +143,12 @@ class ProductMappingFactoryTest extends UnitTestCase
                 "",
                 'SUP_NOTE_TEST',
                 ['17:00', '13:00']
+            ),
+            new ProductMapping(
+                ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
+                "",
+                'PARTIAL_NOTE',
+                ['17:00', '13:00']
             )
         ];
 
