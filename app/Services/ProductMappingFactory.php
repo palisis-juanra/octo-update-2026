@@ -94,12 +94,6 @@ class ProductMappingFactory
                 continue;
             }
 
-            // Skip partials mappings
-            $partialMapping = $mapping->partial;
-            if (!empty($partialMapping) && (int) $partialMapping != 0) {
-                continue;
-            }
-
             $mappingObject = [];
 
             foreach ($mapping->fields->field as $field) {
