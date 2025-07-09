@@ -55,7 +55,7 @@ class ProductMappingFactory
         return [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
-                "",
+                (string) $this->tour->tour_name_long,
                 "",
                 $startTimes
             )
@@ -75,7 +75,7 @@ class ProductMappingFactory
 
                 $mappings[] = new ProductMapping(
                     $this->structureType,
-                    (string) $mapping->label,
+                    !empty($mapping->label) ? (string) $mapping->label : '',
                     (string) $mapping->fields->field->value,
                     $availabilityStartTime
                 );
@@ -105,17 +105,20 @@ class ProductMappingFactory
             }
 
             if (!array_key_exists($mappingObject['supplier_note'], $mappings)) {
-                $mappings[$mappingObject['supplier_note']] = [];
+                $mappings[$mappingObject['supplier_note']] = [
+                    'times' => [],
+                    'label' => !empty($mapping->label) ? (string) $mapping->label : ''
+                ];
             }
 
             if (!in_array($mappingObject['start_time'], $mappings[$mappingObject['supplier_note']])) {
-                $mappings[$mappingObject['supplier_note']][] = $mappingObject['start_time'];
+                $mappings[$mappingObject['supplier_note']]['times'][] = $mappingObject['start_time'];
             }
         }
 
         $productMappings = [];
-        foreach ($mappings as $supplierNote => $startTimes) {
-            $productMappings[] = new ProductMapping($this->structureType, '', $supplierNote, $startTimes);
+        foreach ($mappings as $supplierNote => $data) {
+            $productMappings[] = new ProductMapping($this->structureType, $data['label'], $supplierNote, $data['times']);
         }
         return $productMappings;
     }

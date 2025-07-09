@@ -62,7 +62,7 @@ class ProductMappingFactoryTest extends UnitTestCase
         $expectedProductOptions = [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
-                "",
+                (string) $showTourResponseXML->tour->tour_name_long,
                 "",
                 ["13:00", "15:00", "17:00"]
             )
@@ -140,13 +140,13 @@ class ProductMappingFactoryTest extends UnitTestCase
         $expectedProductOptions = [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
-                "",
+                '{"en":""}',
                 'SUP_NOTE_TEST',
                 ['17:00', '13:00']
             ),
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
-                "",
+                '{"en":"","es":""}',
                 'PARTIAL_NOTE',
                 ['17:00', '13:00']
             )

@@ -66,10 +66,15 @@ class OptionService
         try {
             $mappingField = match($mappingType) {
                 self::OPTION_DEPARTURE_CODE => 'code',
-                self::OPTION_SUPPLIER_NOTE, self::OPTION_SUPPLIER_NOTE_PLUS_START_TIME => 'supplier_note',
+                self::OPTION_SUPPLIER_NOTE, => 'supplier_note',
+                self::OPTION_SUPPLIER_NOTE_PLUS_START_TIME => 'supplier_note_like',
             };
         } catch (UnhandledMatchError) {
             throw new InvalidOptionIdException($optionId);
+        }
+
+        if ($mappingType = self::OPTION_SUPPLIER_NOTE_PLUS_START_TIME) {
+            $mappingValue = '%'.$mappingValue.'%';
         }
 
         $queryString = $mappingField . "=" . urlencode($mappingValue);

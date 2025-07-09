@@ -5,7 +5,6 @@ namespace Tests\Unit;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Models\Product;
-use App\Models\ProductMapping;
 use App\Services\JSONLogService;
 use App\Services\LocaleService;
 use App\Services\ProductMappingFactory;
@@ -20,6 +19,7 @@ class ProductServiceTest extends UnitTestCase
     public string $showTourString;
     public string $listToursString;
     public string $showTourInvalidString;
+    public SimpleXMLElement $showChannelXML;
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $listToursXML;
     public SimpleXMLElement $showTourInvalidXML;
@@ -28,6 +28,7 @@ class ProductServiceTest extends UnitTestCase
     public function setUp(): void
     {
         parent::setUp();
+        $this->showChannelXML = simplexml_load_file('./tests/TourCMSResponses/showChannel.xml');
         $this->showTourString = file_get_contents('./tests/TourCMSResponses/showTour.xml');
         $this->listToursString = file_get_contents('./tests/TourCMSResponses/listTours.xml');
         $this->showTourInvalidString = file_get_contents('./tests/TourCMSResponses/showTourInvalid.xml');
@@ -516,9 +517,10 @@ class ProductServiceTest extends UnitTestCase
     protected function mockTourCMSService(array $methodsToMock = []): TourCMSService|MockObject
     {
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods($methodsToMock)
+            ->onlyMethods([...$methodsToMock, 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
         return $tourCMSService;
     }
 }
