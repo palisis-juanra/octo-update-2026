@@ -73,7 +73,7 @@ class OptionService
             throw new InvalidOptionIdException($optionId);
         }
 
-        if ($mappingType = self::OPTION_SUPPLIER_NOTE_PLUS_START_TIME) {
+        if ($mappingType === self::OPTION_SUPPLIER_NOTE_PLUS_START_TIME) {
             $mappingValue = '%'.$mappingValue.'%';
         }
 
