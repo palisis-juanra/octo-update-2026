@@ -4,9 +4,7 @@ namespace App\Models;
 
 use App\Exceptions\InvalidUnitIdException;
 use App\Services\UnitService;
-use Exception;
 use Illuminate\Database\Eloquent\Model;
-use stdClass;
 
 class Option extends Model
 {
@@ -21,7 +19,7 @@ class Option extends Model
     protected array $requiredContactFields;
     protected object $restrictions;
     protected array $units;
-    protected ?ProductContent $content;
+    protected ?OptionContent $content = null;
 
     public static function create(object $optionData): Option
     {
@@ -195,7 +193,7 @@ class Option extends Model
     /**
      * Get the value of content
      */ 
-    public function getContent(): ProductContent|null
+    public function getContent(): OptionContent|null
     {
         return $this->content;
     }
@@ -205,7 +203,7 @@ class Option extends Model
      *
      * @return  self
      */ 
-    public function setContent(ProductContent $content): self
+    public function setContent(OptionContent $content): self
     {
         $this->content = $content;
 

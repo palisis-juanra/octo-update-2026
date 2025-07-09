@@ -7,6 +7,7 @@ use App\Exceptions\InvalidProductIdException;
 use App\Models\Product;
 use App\Services\JSONLogService;
 use App\Services\LocaleService;
+use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -18,6 +19,7 @@ class ProductServiceTest extends UnitTestCase
     public string $showTourString;
     public string $listToursString;
     public string $showTourInvalidString;
+    public SimpleXMLElement $showChannelXML;
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $listToursXML;
     public SimpleXMLElement $showTourInvalidXML;
@@ -26,6 +28,7 @@ class ProductServiceTest extends UnitTestCase
     public function setUp(): void
     {
         parent::setUp();
+        $this->showChannelXML = simplexml_load_file('./tests/TourCMSResponses/showChannel.xml');
         $this->showTourString = file_get_contents('./tests/TourCMSResponses/showTour.xml');
         $this->listToursString = file_get_contents('./tests/TourCMSResponses/listTours.xml');
         $this->showTourInvalidString = file_get_contents('./tests/TourCMSResponses/showTourInvalid.xml');
@@ -48,6 +51,7 @@ class ProductServiceTest extends UnitTestCase
         $productServiceMock->logger = $this->loggerMock;
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($this->showTourXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -70,6 +74,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($this->showTourInvalidXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -95,6 +100,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($apiResponseXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -119,6 +125,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($apiResponseXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -145,6 +152,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($apiResponseXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -169,6 +177,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($apiResponseXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -195,6 +204,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($apiResponseXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -219,6 +229,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($apiResponseXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -244,6 +255,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($apiResponseXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -268,6 +280,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($apiResponseXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -291,6 +304,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('findTourDataFromAPI')->willReturn($apiResponseXML->tour);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
         
@@ -339,6 +353,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('getTourListData')->willReturn($tourListData);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -369,6 +384,7 @@ class ProductServiceTest extends UnitTestCase
 
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
         $productServiceMock->method('getTourListData')->willReturn($tourListData);
         $productServiceMock->method('getProductLocale')->willReturn('es-ES');
 
@@ -383,131 +399,6 @@ class ProductServiceTest extends UnitTestCase
         $this->assertCount(1, $productList);
     }
 
-    public function test_whenTourIsMappedBySingleDeparturePerDayAndDontHaveStartTime_thenWeGetCorrectMappingWithDefaultStartTime(): void
-    {
-        $productServiceMock = $this->getMockBuilder(ProductService::class)
-            ->onlyMethods([])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $productServiceMock->tourCMSService = $this->mockTourCMSService();
-        $productServiceMock->logger = $this->mockLogger();
-            
-        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SINGLE.xml'));
-        $tourData = $showTourResponseXML->tour;
-        unset($tourData->tour_departure_structure->start_times);
-
-        $expectedProductOptions = [
-            '' => ['09:00']
-        ];
-
-        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
-        $this->assertEquals($expectedProductOptions, $productOptions);
-    }
-
-    public function test_whenTourIsMappedBySingleDeparturePerDay_thenWeGetCorrectMapping(): void
-    {
-        $productServiceMock = $this->getMockBuilder(ProductService::class)
-            ->onlyMethods([])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $productServiceMock->tourCMSService = $this->mockTourCMSService();
-        $productServiceMock->logger = $this->mockLogger();
-            
-        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SINGLE.xml'));
-        $tourData = $showTourResponseXML->tour;
-
-        $expectedProductOptions = [
-            '' => ['11:00', '13:00']
-        ];
-
-        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
-        $this->assertEquals($expectedProductOptions, $productOptions);
-    }
-
-    public function test_whenTourIsMappedByStartTime_thenWeGetCorrectMappings(): void
-    {
-        $productServiceMock = $this->getMockBuilder(ProductService::class)
-            ->onlyMethods([])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $productServiceMock->tourCMSService = $this->mockTourCMSService();
-        $productServiceMock->logger = $this->mockLogger();
-            
-        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/START_TIME.xml'));
-        $tourData = $showTourResponseXML->tour;
-
-        $expectedProductOptions = [
-            '' => ['13:00', '15:00', '17:00'],
-        ];
-
-        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
-        $this->assertEquals($expectedProductOptions, $productOptions);
-    }
-
-    public function test_whenTourIsMappedBySupplierNote_thenWeGetCorrectMappings(): void
-    {
-        $productServiceMock = $this->getMockBuilder(ProductService::class)
-            ->onlyMethods([])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $productServiceMock->tourCMSService = $this->mockTourCMSService();
-        $productServiceMock->logger = $this->mockLogger();
-            
-        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE.xml'));
-        $tourData = $showTourResponseXML->tour;
-
-        $expectedProductOptions = [
-            '' => ['00:00'],
-            'TEST_NOTE_1' => ['00:00'],
-            'TEST_NOTE_2' => ['00:00'],
-        ];
-
-        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
-        $this->assertEquals($expectedProductOptions, $productOptions);
-    }
-
-    public function test_whenTourIsMappedByDepartureCode_thenWeGetCorrectMappings(): void
-    {
-        $productServiceMock = $this->getMockBuilder(ProductService::class)
-            ->onlyMethods([])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $productServiceMock->tourCMSService = $this->mockTourCMSService();
-        $productServiceMock->logger = $this->mockLogger();
-            
-        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/DEPARTURE_CODE.xml'));
-        $tourData = $showTourResponseXML->tour;
-
-        $expectedProductOptions = [
-            'ABC' => ['00:00'],
-            '123' => ['00:00'],
-            'xyz' => ['00:00'],
-        ];
-
-        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
-        $this->assertEquals($expectedProductOptions, $productOptions);
-    }
-
-    public function test_whenTourIsMappedBySupplierNotePlusStartTime_thenWeGetOnlyNonPartialAndCorrectMappings(): void
-    {
-        $productServiceMock = $this->getMockBuilder(ProductService::class)
-            ->onlyMethods([])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $productServiceMock->tourCMSService = $this->mockTourCMSService();
-        $productServiceMock->logger = $this->mockLogger();
-            
-        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE_PLUS_START_TIME.xml'));
-        $tourData = $showTourResponseXML->tour;
-
-        $expectedProductOptions = [
-            'SUP_NOTE_TEST' => ['17:00', '13:00'],
-        ];
-
-        $productOptions = $productServiceMock->getActiveMappingsFromTour($tourData);
-        $this->assertEquals($expectedProductOptions, $productOptions);
-    }
-
     public function test_getOptionUnits_whenTourPermitOnlyChildIsFalseAndTourHasChildRate_thenChildRateUnitRestrictionAccompaniedByContainsAdultUnitId(): void
     {
         $productServiceMock = $this->getMockBuilder(ProductService::class)
@@ -516,6 +407,7 @@ class ProductServiceTest extends UnitTestCase
             ->getMock();
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
             
         $showTourResponseXML = $this->showTourXML;
         $tourData = $showTourResponseXML->tour;
@@ -536,6 +428,7 @@ class ProductServiceTest extends UnitTestCase
             ->getMock();
         $productServiceMock->tourCMSService = $this->mockTourCMSService();
         $productServiceMock->logger = $this->mockLogger();
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
             
         $showTourResponseXML = $this->showTourXML;
         $tourData = $showTourResponseXML->tour;
@@ -547,7 +440,7 @@ class ProductServiceTest extends UnitTestCase
 
     public function test_whenTourHasStartTimezone_thenProductHasTourStartTimezoneAsTimezone(): void
     {
-        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService);
+        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory);
         
         $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
         $this->assertSame((string)$this->showTourXML->tour->start_timezone, $timezone);  
@@ -555,7 +448,7 @@ class ProductServiceTest extends UnitTestCase
 
     public function test_whenTourHasNotStartTimezone_thenProductHasTourEndTimezoneAsTimezone(): void
     {
-        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService);
+        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory);
 
         unset($this->showTourXML->tour->start_timezone);
         $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
@@ -572,7 +465,7 @@ class ProductServiceTest extends UnitTestCase
 
     public function test_whenTourHasNeitherStartNorEndTimezone_thenProductHasAccountTimezoneAsTimezone(): void
     {
-        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService);
+        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory);
 
         unset($this->showTourXML->tour->start_timezone);
         unset($this->showTourXML->tour->end_timezone);
@@ -596,7 +489,7 @@ class ProductServiceTest extends UnitTestCase
         $tourcmsService = $this->mockTourCMSService(['showTour']);
         $tourcmsService->method('showTour')->willReturn($this->showTourXML);
         
-        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService);
+        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService, new ProductMappingFactory);
 
         
         $this->expectException(InvalidProductIdException::class);
@@ -624,9 +517,10 @@ class ProductServiceTest extends UnitTestCase
     protected function mockTourCMSService(array $methodsToMock = []): TourCMSService|MockObject
     {
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
-            ->onlyMethods($methodsToMock)
+            ->onlyMethods([...$methodsToMock, 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
         return $tourCMSService;
     }
 }

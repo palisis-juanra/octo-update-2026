@@ -123,7 +123,7 @@ class TourCMSService
         return $response;
     }
 
-    public function showTourDepartures(string $tourId, string $startDate, string $endDate = '', string $extraParams = null): SimpleXMLElement
+    public function showTourDepartures(string $tourId, string $startDate, string $endDate = '', ?string $extraParams = null): SimpleXMLElement
     {
         $queryString = self::SHOW_TOUR_DEPARTURES_CLOSED_PARAM;
         
@@ -141,14 +141,13 @@ class TourCMSService
             $queryString .= $extraParams;
         }
 
-        
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response); 
 
         return $response;
     }
 
-    public function showTourDatesAndDeals(string $tourId, string $startDate, string $endDate = '', string $extraParams = null): SimpleXMLElement
+    public function showTourDatesAndDeals(string $tourId, string $startDate, string $endDate = '', ?string $extraParams = null): SimpleXMLElement
     {
         $queryString = self::SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM;
 

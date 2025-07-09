@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Services\AvailabilityService;
 use App\Services\BookingCancellationService;
 use App\Services\LocaleService;
+use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
@@ -115,7 +116,7 @@ class BookingCancellationTest extends FeatureTestCase
         
         $this->instance(AvailabilityService::class, $this->availabilityService);
 
-        $this->productService = new ProductService($this->tourCMSService, $this->getLoggerMock(), new LocaleService);
+        $this->productService = new ProductService($this->tourCMSService, $this->getLoggerMock(), new LocaleService, new ProductMappingFactory);
         $this->instance(ProductService::class, $this->productService);
 
 

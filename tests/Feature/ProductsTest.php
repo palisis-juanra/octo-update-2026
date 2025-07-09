@@ -6,6 +6,7 @@ use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Services\JSONLogService;
 use App\Services\LocaleService;
+use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use App\Transformers\BaseTransformer;
@@ -132,6 +133,7 @@ class ProductsTest extends FeatureTestCase
         $productServiceMock->tourCMSService = $properties['tourCMSService'] ?? $this->tourCMSServiceMock;
         $productServiceMock->localeService = new LocaleService;
         $productServiceMock->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
 
         return $productServiceMock;
     }

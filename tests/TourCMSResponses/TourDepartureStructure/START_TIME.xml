@@ -424,7 +424,7 @@
                 <type>
                     <active>1</active>
                     <partial>0</partial>
-                    <label>{"en":"","es":""}</label>
+                    <label>{"en":"13:00 PM","es":"13:00 PM"}</label>
                     <fields>
                         <field>
                             <name>start_time</name>
@@ -435,7 +435,7 @@
                 <type>
                     <active>1</active>
                     <partial>0</partial>
-                    <label>{"en":""}</label>
+                    <label>{"en":"15:00 PM","es":"15:00 PM"}</label>
                     <fields>
                         <field>
                             <name>start_time</name>
@@ -446,7 +446,7 @@
                 <type>
                     <active>1</active>
                     <partial>0</partial>
-                    <label>{"en":""}</label>
+                    <label>{"en":"17:00 PM","es":"17:00 PM"}</label>
                     <fields>
                         <field>
                             <name>start_time</name>

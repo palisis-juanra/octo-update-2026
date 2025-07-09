@@ -11,6 +11,7 @@ use App\Models\Booking;
 use App\Services\AvailabilityService;
 use App\Services\BookingService;
 use App\Services\LocaleService;
+use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
@@ -167,7 +168,7 @@ class BookingGetTest extends FeatureTestCase
         $this->instance(AvailabilityService::class, $this->availabilityServiceMock);
 
         // Mock ProductService
-        $this->productService = new ProductService($this->tourCMSServiceMock, $this->getLoggerMock(), new LocaleService);
+        $this->productService = new ProductService($this->tourCMSServiceMock, $this->getLoggerMock(), new LocaleService, new ProductMappingFactory);
         $this->instance(ProductService::class, $this->productService);
         
         $getBookingResponse = new Booking();

@@ -11,6 +11,7 @@ use App\Services\AvailabilityService;
 use App\Services\BookingReservationService;
 use App\Services\LocaleService;
 use App\Services\OptionService;
+use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
@@ -20,6 +21,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\FeatureTestCase;
 use Illuminate\Testing\TestResponse;
 use SimpleXMLElement;
+use Tests\Unit\ProductServiceTest;
 
 class BookingReservationTest extends FeatureTestCase
 {
@@ -115,7 +117,7 @@ class BookingReservationTest extends FeatureTestCase
         $this->instance(AvailabilityService::class, $availabilityServiceMock);
 
         // Mock ProductService
-        $productService = new ProductService($tourCMSServiceMock, $this->getLoggerMock(), new LocaleService);
+        $productService = new ProductService($tourCMSServiceMock, $this->getLoggerMock(), new LocaleService, new ProductMappingFactory);
         $this->instance(ProductService::class, $productService);
 
         // Mock Controller

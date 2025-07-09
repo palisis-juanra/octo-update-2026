@@ -10,12 +10,14 @@ class OptionTransformer extends BaseTransformer
 {
     protected UnitTransformer $unitTransformer;
     protected ProductContentTransformer $productContentTransformer;
+    protected OptionContentTransformer $optionContentTransformer;
 
     public function __construct(string $mode)
     {
         parent::__construct($mode);
         $this->unitTransformer = new UnitTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->productContentTransformer = new ProductContentTransformer(BaseTransformer::FULL_TRANSFORM);
+        $this->optionContentTransformer = new OptionContentTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     protected function basicTransform($option): array
@@ -45,6 +47,11 @@ class OptionTransformer extends BaseTransformer
             'restrictions' => $option->getRestrictions(),
             'units' => $unitsTransformed
         ];
+
+        if (!empty($option->getContent())) {
+            $optionContent = $this->optionContentTransformer->transform($option->getContent());
+            $data = array_merge($data, $optionContent);
+        }
     
         return $data;
     }

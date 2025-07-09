@@ -9,10 +9,12 @@ use App\Http\Requests\OctoRequest;
 use App\Models\Location;
 use App\Models\Media;
 use App\Models\Option;
+use App\Models\OptionContent;
 use App\Models\Place;
 use App\Models\Pricing;
 use App\Models\Product;
 use App\Models\ProductContent;
+use App\Models\ProductMapping;
 use App\Models\Unit;
 use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
@@ -164,7 +166,8 @@ class ProductService
     public function __construct(
         public TourCMSService $tourCMSService, 
         public JSONLogService $logger, 
-        public LocaleService $localeService)
+        public LocaleService $localeService,
+        public ProductMappingFactory $productMappingFactory)
     {
         $this->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
     }
@@ -330,23 +333,23 @@ class ProductService
         }
 
         $options = []; 
-        $mappings = $this->getActiveMappingsFromTour($tour);
+        $mappings = $this->productMappingFactory->create($tour);
 
-        foreach ($mappings as $option => $availabilityStartTimes) {
+        foreach ($mappings as $mapping) {
 
             $optionId = "{$structureType}";
+            $availabilityStartTimes = $mapping->getStartTimes();
 
             if (!in_array($structureType, [self::MAPPING_STRUCTURE_TYPE_SINGLE, self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
-                $optionId .= "|{$option}";
+                $optionId .= "|{$mapping->getValue()}";
             }
 
             $optionDefault = $structureType == self::MAPPING_STRUCTURE_TYPE_SINGLE ? true : false;
             $optionInternalName = "";
 
-            // As of now, we don't add supplier_tour_code since it is operators only.
             $optionInternalName = $tour->tour_name ? (string) $tour->tour_name : '';
-            if (isset($tour->supplier_tour_code)) {
-                $optionInternalName .= (string) $tour->supplier_tour_code;
+            if (!in_array($structureType, [self::MAPPING_STRUCTURE_TYPE_SINGLE, self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
+                $optionInternalName .= " - {$mapping->getValue()}";
             }
 
             if (empty($optionInternalName)){
@@ -410,11 +413,37 @@ class ProductService
             $optionData->restrictions = $optionRestrictions;
             $optionData->units = $optionUnits;
             
-
-            $options[] = Option::create($optionData);
+            $option = Option::create($optionData);
+            
+            $optionContent = new OptionContent($this->getOptionTitle($optionInternalName, $mapping));
+            $option->setContent($optionContent);
+            
+            $options[] = $option;
         }
 
         return $options;
+    }
+
+    public function getOptionTitle(string $optionInternalName, ProductMapping $productMapping): string
+    {
+        if (empty($productMapping->getLabel())) {
+            return $optionInternalName;
+        }
+
+        $showChannel = $this->tourCMSService->showChannel();
+        $channelLanguage = (string) $showChannel->channel->lang ?? 'en';
+        $labelAsJson = json_decode($productMapping->getLabel(), true);
+        if (is_array($labelAsJson)) {
+            if (array_key_exists($channelLanguage, $labelAsJson) && !empty($labelAsJson[$channelLanguage])) {
+                return (string) $labelAsJson[$channelLanguage];
+            } elseif (array_key_exists('en', $labelAsJson) && !empty($labelAsJson['en'])) {
+                return (string) $labelAsJson['en'];
+            } else {
+                return $optionInternalName;
+            }
+        }
+
+        return $optionInternalName;
     }
 
     public function getOptionUnits(SimpleXMLElement $tour): array
@@ -869,112 +898,6 @@ class ProductService
         $distributionIdentifierSplitted = explode('_', $distributionIdentifier);
         
         return $distributionIdentifierSplitted[2];
-    }
-
-    /**
-     * @param SimpleXMLElement $tour Tour XML Node
-     * Get all the active mappings based on its structure type
-     * Each element in array contains option and availabilityStartTimes
-     * @return array[]
-     */
-    public function getActiveMappingsFromTour(SimpleXMLElement $tour): array
-    {
-        $structureType = (string) $tour->tour_departure_structure->type;
-        $types = XMLService::getArrayFromXmlNode($tour->tour_departure_structure->departure_types, 'type');
-        $mappings = [];
-
-        switch ($structureType) {
-
-            case self::MAPPING_STRUCTURE_TYPE_START_TIME:
-                foreach ($types as $mapping) {
-                    if (isset($mapping->active) && $mapping->active == 1) {
-                        if (isset($mapping->fields->field->value)) {
-                            // Mappings key is empty, because we dont add any option specific for start time mapping
-                            $mappings[''][] = (string) $mapping->fields->field->value;
-                        }
-                    }
-                }
-                return $mappings;
-
-            case self::MAPPING_STRUCTURE_TYPE_DEPARTURE_CODE:
-            case self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE:
-                foreach ($types as $mapping) {
-                    if (isset($mapping->active) && $mapping->active == 1) {
-                        if (isset($mapping->fields->field->value)) {
-
-                            if (isset($tour->start_time) && !empty($tour->start_time) && $tour->start_time != self::START_TIME_MULTI) {
-                                $availabilityStartTime = (string) $tour->start_time;
-                            } else {
-                                $availabilityStartTime = self::AVAILABILITY_LOCAL_START_TIMES_DEFAULT;
-                            }
-
-                            $mappings[(string) $mapping->fields->field->value] = [$availabilityStartTime];
-                        }
-                    }
-                }
-                
-                return $mappings;
-
-            case self::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME:
-
-                foreach ($types as $mapping) {
-
-                    if ($mapping->active == 0) {
-                        continue;
-                    }
-
-                    // Skip partials mappings
-                    $partialMapping = $mapping->partial;
-                    if (!empty($partialMapping) && (int) $partialMapping != 0) {
-                        continue;
-                    }
-    
-                    $mappingObject = [];
-    
-                    foreach ($mapping->fields->field as $field) {
-                        
-                        $fieldName = (string) $field->name;
-                        $fieldValue = (string) $field->value;
-    
-                        if ($fieldName == 'supplier_note') {
-                            $mappingObject['supplier_note'] = $fieldValue;
-                                                  
-                        }
-    
-                        if ($fieldName == 'start_time') {
-                            $mappingObject['start_time'] = $fieldValue;
-                        }
-                    }
-    
-                    if (!array_key_exists($mappingObject['supplier_note'], $mappings)){
-                        $mappings[$mappingObject['supplier_note']] = [];
-                    }
-    
-                    if (!in_array($mappingObject['start_time'], $mappings[$mappingObject['supplier_note']])) {
-                        $mappings[$mappingObject['supplier_note']][] = $mappingObject['start_time'];
-                    }
-                }
-                return $mappings;
-            
-            default:
-
-                $startTimes = [];
-
-                if (isset($tour->tour_departure_structure->start_times)) {
-                    $startTimesFromXML = XMLService::getArrayFromXmlNode($tour->tour_departure_structure->start_times, 'time');
-                    foreach ($startTimesFromXML as $startTime) {
-                        $startTimes[] = (string) $startTime;
-                    }
-                }
-
-                if (empty($startTimes)) {
-                    $startTimes = ['09:00'];
-                }
-
-                return ['' => $startTimes];
-
-        }
-        
     }
 
     protected function getOctoDeliveryMethodFromTourCMS(string $tcmsDeliveryMethod): string

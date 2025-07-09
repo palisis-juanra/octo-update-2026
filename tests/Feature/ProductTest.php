@@ -11,6 +11,7 @@ use App\Models\Pricing;
 use App\Models\Product;
 use App\Services\JSONLogService;
 use App\Services\LocaleService;
+use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use App\Services\XMLService;
@@ -699,6 +700,7 @@ class ProductTest extends FeatureTestCase
         $productServiceMock->tourCMSService = $properties['tourCMSService'] ?? $this->tourCMSServiceMock;
         $productServiceMock->localeService = new LocaleService;
         $productServiceMock->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
+        $productServiceMock->productMappingFactory = new ProductMappingFactory;
 
         return $productServiceMock;
     }
