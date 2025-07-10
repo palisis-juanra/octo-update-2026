@@ -6,9 +6,11 @@ use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
 use App\Exceptions\NoAPIResponseException;
 use App\Exceptions\FailPermissionException;
+use App\Exceptions\SupplierSubsystemError;
 use App\Http\Middleware\OctoAuthentication;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
+use App\Facades\JSONLog;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -43,6 +45,9 @@ class TourCMSService
     public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = "&show_temporary_bookings=1";
     public const ERROR_PERM = 'FAIL_PERM';
     public const OCTO_USER_AGENT = 'octo.tourcms.com';
+    public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR = 'SUPPLIER_SUBSYSTEM_ERROR';
+
+    public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
 
     private TourCMS $tourCMS;
     private TourCMSMulti $tourCMSMulti;
@@ -76,6 +81,7 @@ class TourCMSService
             }
         }
         
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->show_channel($channelId);
         $response = $this->handleResponse($response);
         
@@ -86,6 +92,7 @@ class TourCMSService
 
     public function listTours(string $channelId, string $params = ""): SimpleXMLElement
     {
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->list_tours($channelId, $params);
         $response = $this->handleResponse($response);
         return $response;
@@ -107,6 +114,7 @@ class TourCMSService
             }
         }
 
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->show_tour($tourId, $channelId);
         $response = $this->handleResponse($response);
         
@@ -117,6 +125,7 @@ class TourCMSService
 
     public function checkAvailability(string $params, string $tourId): SimpleXMLElement
     {
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->check_tour_availability($params, $tourId, $this->channelId);
         $response = $this->handleResponse($response);
 
@@ -141,6 +150,7 @@ class TourCMSService
             $queryString .= $extraParams;
         }
 
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response); 
 
@@ -165,6 +175,7 @@ class TourCMSService
             $queryString .= $extraParams;
         }
 
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->show_tour_datesanddeals($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response);
 
@@ -199,6 +210,7 @@ class TourCMSService
     public function startNewBooking(SimpleXMLElement $bookingData): SimpleXMLElement
     {
         $bookingData->associate_customers = 1;
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->start_new_booking($bookingData, $this->channelId);
         return $this->handleResponse($response); 
     }
@@ -210,30 +222,36 @@ class TourCMSService
         if (!empty($agentRef)) {
             $bookingData->addChild('agent_ref', $agentRef);
         }
+
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->commit_new_booking($bookingData, $this->channelId);
         return $this->handleResponse($response);
     }
 
     public function showBooking(string $bookingId): SimpleXMLElement
     {
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->show_booking($bookingId . self::QUERYSTRING_SHOW_TEMPORARY_BOOKINGS, $this->channelId);
         return $this->handleResponse($response);
     }
 
     public function updateCustomer(SimpleXMLElement $customerXML): SimpleXMLElement
     {
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->update_customer($customerXML, $this->channelId);
         return $this->handleResponse($response);
     }
 
     public function cancelBooking(SimpleXMLElement $bookingData): SimpleXMLElement
     {
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->cancel_booking($bookingData, $this->channelId);
         return $this->handleResponse($response);
     }
 
     public function deleteBooking(string $bookingId): SimpleXMLElement
     {
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->delete_booking($bookingId, $this->channelId);
         return $this->handleResponse($response);
     }
@@ -279,6 +297,8 @@ class TourCMSService
                 throw new NoMatchingDataException();
             case self::ERROR_PERM:
                 throw new FailPermissionException();
+            case self::ERROR_SUPPLIER_SUBSYSTEM_ERROR:
+                throw new SupplierSubsystemError((string) $response->supplier_subsystem_error ?? '');
             default:
                 throw new APICallNotOKException();
         }

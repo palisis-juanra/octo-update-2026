@@ -331,7 +331,7 @@ class PricingAvailabilityTest extends FeatureTestCase
 
         $response->assertStatus(400);
         $response->assertJsonFragment([
-            OctoResponse::FIELD_ERROR_CODE => OctoResponse::ERROR_CODE_INVALID_UNIT_ID
+            OctoResponse::FIELD_ERROR => OctoResponse::ERROR_CODE_INVALID_UNIT_ID
         ]);
     }
 
