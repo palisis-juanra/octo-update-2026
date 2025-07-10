@@ -416,7 +416,7 @@ class ProductService
             
             $option = Option::create($optionData);
             
-            $optionContent = new OptionContent($this->getOptionTitle($optionInternalName, $mapping));
+            $optionContent = new OptionContent($this->getOptionTitle($optionInternalName, $mapping, (string) $tour->tour_name_long));
             $option->setContent($optionContent);
             
             $options[] = $option;
@@ -425,7 +425,7 @@ class ProductService
         return $options;
     }
 
-    public function getOptionTitle(string $optionInternalName, ProductMapping $productMapping): string
+    public function getOptionTitle(string $optionInternalName, ProductMapping $productMapping, string $tourName): string
     {
         if (empty($productMapping->getLabel())) {
             return $optionInternalName;
@@ -438,15 +438,15 @@ class ProductService
             $labelAsJson = json_decode($productMapping->getLabel(), true, flags: JSON_THROW_ON_ERROR);
             if (is_array($labelAsJson)) {
                 if (array_key_exists($channelLanguage, $labelAsJson) && !empty($labelAsJson[$channelLanguage])) {
-                    return (string) $labelAsJson[$channelLanguage];
+                    return $tourName . ' - ' . (string) $labelAsJson[$channelLanguage];
                 } elseif (array_key_exists('en', $labelAsJson) && !empty($labelAsJson['en'])) {
-                    return (string) $labelAsJson['en'];
+                    return $tourName . ' - ' . (string) $labelAsJson['en'];
                 } else {
                     return $optionInternalName;
                 }
             }
         } catch (JsonException $e) {
-            return $productMapping->getLabel();
+            return $tourName . ' - ' . $productMapping->getLabel();
         }
         
 
