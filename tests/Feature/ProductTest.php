@@ -601,7 +601,7 @@ class ProductTest extends FeatureTestCase
         $response
             ->assertStatus(400)
             ->assertJsonFragment([
-                OctoResponse::FIELD_ERROR_CODE => OctoResponse::ERROR_CODE_INVALID_PRODUCT_ID
+                OctoResponse::FIELD_ERROR => OctoResponse::ERROR_CODE_INVALID_PRODUCT_ID
                 ]
             )->assertJsonFragment([
                 OctoResponse::FIELD_PRODUCT_ID => $productId

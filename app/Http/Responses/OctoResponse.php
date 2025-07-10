@@ -12,7 +12,8 @@ class OctoResponse {
     public const string FIELD_PRODUCT_ID = 'productId';
     public const string FIELD_OPTION_ID = 'optionId';
     public const string FIELD_UNIT_ID = 'unitId';
-    public const string FIELD_ERROR_CODE = 'error';
+    public const string FIELD_ERROR = 'error';
+    public const string FIELD_ERROR_CODE = 'errorCode';
     public const string FIELD_ERROR_MESSAGE = 'errorMessage';
     public const string FIELD_ERROR_LOG_ID = 'errorLogId';
     public const string FIELD_AVAILABILITY_ID = 'availabilityId';
@@ -40,11 +41,12 @@ class OctoResponse {
     public const string ERROR_MESSAGE_INVALID_UNIT_ID = 'Invalid UnitId. Must be a valid unit id in the scope of the product';
     public const string ERROR_MESSAGE_INVALID_AVAILABILITY_ID = 'Invalid AvailabilityId. Must be a valid one';
     public const string ERROR_MESSAGE_INVALID_BOOKING_UUID = 'The Booking UUID was invalid or missing';
+    public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR_DEFAULT = 'Invalid subsystem response';
 
     public static function UNAUTHORIZED(string $errorMessage = self::ERROR_MESSAGE_UNAUTHORIZED): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_UNAUTHORIZED,
+            self::FIELD_ERROR => self::ERROR_CODE_UNAUTHORIZED,
             self::FIELD_ERROR_MESSAGE => $errorMessage
         ];
 
@@ -54,7 +56,7 @@ class OctoResponse {
     public static function FORBIDDEN(string $errorMessage = self::ERROR_MESSAGE_FORBIDDEN): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_FORBIDDEN,
+            self::FIELD_ERROR => self::ERROR_CODE_FORBIDDEN,
             self::FIELD_ERROR_MESSAGE => $errorMessage
         ];
 
@@ -69,7 +71,7 @@ class OctoResponse {
     public static function INVALID_PRODUCT_ID(string $productId, string $errorMessage = self::ERROR_MESSAGE_INVALID_PRODUCT_ID): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_INVALID_PRODUCT_ID,
+            self::FIELD_ERROR => self::ERROR_CODE_INVALID_PRODUCT_ID,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
             self::FIELD_PRODUCT_ID => $productId
         ];
@@ -80,7 +82,7 @@ class OctoResponse {
     public static function INVALID_OPTION_ID(string $optionId, string $errorMessage = self::ERROR_MESSAGE_INVALID_OPTION_ID): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_INVALID_OPTION_ID,
+            self::FIELD_ERROR => self::ERROR_CODE_INVALID_OPTION_ID,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
             self::FIELD_OPTION_ID => $optionId
         ];
@@ -91,7 +93,7 @@ class OctoResponse {
     public static function INVALID_UNIT_ID(string $unitId, string $errorMessage = self::ERROR_MESSAGE_INVALID_UNIT_ID): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_INVALID_UNIT_ID,
+            self::FIELD_ERROR => self::ERROR_CODE_INVALID_UNIT_ID,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
             self::FIELD_UNIT_ID => $unitId
         ];
@@ -102,7 +104,7 @@ class OctoResponse {
     public static function BAD_REQUEST(string $errorMessage): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_BAD_REQUEST,
+            self::FIELD_ERROR => self::ERROR_CODE_BAD_REQUEST,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
         ];
 
@@ -112,7 +114,7 @@ class OctoResponse {
     public static function NOT_IMPLEMENTED(string $errorMessage = self::ERROR_MESSAGE_NOT_IMPLEMENTED): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_NOT_IMPLEMENTED,
+            self::FIELD_ERROR => self::ERROR_CODE_NOT_IMPLEMENTED,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
         ];
 
@@ -122,7 +124,7 @@ class OctoResponse {
     public static function INVALID_AVAILABILITY_ID(string $availabilityId, $errorMessage = self::ERROR_MESSAGE_INVALID_AVAILABILITY_ID): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_INVALID_AVAILABILITY_ID,
+            self::FIELD_ERROR => self::ERROR_CODE_INVALID_AVAILABILITY_ID,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
             self::FIELD_AVAILABILITY_ID => $availabilityId
         ];
@@ -133,7 +135,7 @@ class OctoResponse {
     public static function UNPROCESSABLE_ENTITY(string $errorMessage): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_UNPROCESSABLE_ENTITY,
+            self::FIELD_ERROR => self::ERROR_CODE_UNPROCESSABLE_ENTITY,
             self::FIELD_ERROR_MESSAGE => $errorMessage 
         ];
 
@@ -143,7 +145,7 @@ class OctoResponse {
     public static function INVALID_BOOKING_UUID(string $bookingUuid, string $errorMessage = self::ERROR_MESSAGE_INVALID_BOOKING_UUID): Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_INVALID_BOOKING_UUID,
+            self::FIELD_ERROR => self::ERROR_CODE_INVALID_BOOKING_UUID,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
             self::FIELD_BOOKING_UUID => $bookingUuid
         ];
@@ -155,7 +157,7 @@ class OctoResponse {
     public static function INTERNAL_SERVER_ERROR(string $errorMessage = self::ERROR_MESSAGE_SERVER) : Response
     {
         $data = [
-            self::FIELD_ERROR_CODE => self::ERROR_CODE_INTERNAL_SERVER_ERROR,
+            self::FIELD_ERROR => self::ERROR_CODE_INTERNAL_SERVER_ERROR,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
             self::FIELD_ERROR_LOG_ID => JSONLog::getLogId(),
             self::FIELD_TIMESTAMP => time()
@@ -167,12 +169,13 @@ class OctoResponse {
     public static function SUBSYSTEM_ERROR(?string $errorMessage): Response
     {
         $data = [
+            self::FIELD_ERROR => self::ERROR_CODE_UNPROCESSABLE_ENTITY,
             self::FIELD_ERROR_CODE => self::ERROR_SUPPLIER_SUBSYSTEM_ERROR,
-            self::FIELD_ERROR_MESSAGE => $errorMessage ?? 'Invalid subsystem response',
+            self::FIELD_ERROR_MESSAGE => $errorMessage ?? self::ERROR_SUPPLIER_SUBSYSTEM_ERROR_DEFAULT,
             self::FIELD_ERROR_LOG_ID => JSONLog::getLogId(),
             self::FIELD_TIMESTAMP => time()
         ];
 
-        return new JsonResponse($data, Response::HTTP_BAD_GATEWAY);  
+        return new JsonResponse($data, Response::HTTP_BAD_REQUEST);  
     }
 }
