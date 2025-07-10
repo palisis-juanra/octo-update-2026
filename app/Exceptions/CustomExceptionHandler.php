@@ -91,6 +91,10 @@ class CustomExceptionHandler extends Handler
                 $response = OctoResponse::BAD_REQUEST($exception->getMessage());
                 break;
 
+            case (SupplierSubsystemError::class):
+                $response = OctoResponse::SUBSYSTEM_ERROR($exception->getErrorMessage());
+                break;
+            
             case (APICallNotOKException::class):
 
                 try {
@@ -122,7 +126,7 @@ class CustomExceptionHandler extends Handler
         }
 
         try {
-            JSONLog::info(["message" => "Request processed by custom exception handler, returning response", "response" => json_decode($response->getContent())]);
+            JSONLog::info(["message" => "Exception captured by custom exception handler, returning response", "response" => json_decode($response->getContent())]);
         } catch (BindingResolutionException) {}
 
         return $response;
