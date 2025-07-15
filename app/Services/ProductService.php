@@ -345,9 +345,9 @@ class ProductService
                 $optionId .= "|{$mapping->getValue()}";
             }
 
-            $optionDefault = $structureType == self::MAPPING_STRUCTURE_TYPE_SINGLE ? true : false;
+            $optionDefault = in_array($structureType, [self::MAPPING_STRUCTURE_TYPE_SINGLE, self::MAPPING_STRUCTURE_TYPE_START_TIME]) ? true : false;
+            
             $optionInternalName = "";
-
             $optionInternalName = $tour->tour_name ? (string) $tour->tour_name : '';
             if (!in_array($structureType, [self::MAPPING_STRUCTURE_TYPE_SINGLE, self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
                 $optionInternalName .= " - {$mapping->getValue()}";
@@ -416,7 +416,7 @@ class ProductService
             
             $option = Option::create($optionData);
             
-            $optionContent = new OptionContent($this->getOptionTitle($optionInternalName, $mapping, (string) $tour->tour_name_long));
+            $optionContent = new OptionContent($this->getOptionTitle((string) $tour->tour_name_long, $mapping));
             $option->setContent($optionContent);
             
             $options[] = $option;
@@ -425,10 +425,14 @@ class ProductService
         return $options;
     }
 
-    public function getOptionTitle(string $optionInternalName, ProductMapping $productMapping, string $tourName): string
+    public function getOptionTitle(string $tourName, ProductMapping $productMapping): string
     {
+        if (in_array($productMapping->getType(), [self::MAPPING_STRUCTURE_TYPE_SINGLE, self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
+            return "DEFAULT";
+        }
+
         if (empty($productMapping->getLabel())) {
-            return $optionInternalName;
+            return $tourName;
         }
 
         $showChannel = $this->tourCMSService->showChannel();
@@ -438,19 +442,17 @@ class ProductService
             $labelAsJson = json_decode($productMapping->getLabel(), true, flags: JSON_THROW_ON_ERROR);
             if (is_array($labelAsJson)) {
                 if (array_key_exists($channelLanguage, $labelAsJson) && !empty($labelAsJson[$channelLanguage])) {
-                    return $tourName . ' - ' . (string) $labelAsJson[$channelLanguage];
+                    return (string) $labelAsJson[$channelLanguage];
                 } elseif (array_key_exists('en', $labelAsJson) && !empty($labelAsJson['en'])) {
-                    return $tourName . ' - ' . (string) $labelAsJson['en'];
-                } else {
-                    return $optionInternalName;
+                    return (string) $labelAsJson['en'];
                 }
             }
-        } catch (JsonException $e) {
-            return $tourName . ' - ' . $productMapping->getLabel();
+        } catch (JsonException) {
+            return $productMapping->getLabel();
         }
         
 
-        return $optionInternalName;
+        return $tourName;
     }
 
     public function getOptionUnits(SimpleXMLElement $tour): array
