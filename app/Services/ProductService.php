@@ -158,6 +158,7 @@ class ProductService
     public const DEFAULT_CHANNEL_LANG = 'en';
     public const DEFAULT_CHANNEL_COUNTRY = 'GB';
     public const IDENTIFIER_TYPE_GOOGLE_PLACE_ID = 'googlePlaceId';
+    public const string OPTION_TITLE_DEFAULT = "DEFAULT";
   
     public ProductTransformer $productTransformer;
 
@@ -428,7 +429,7 @@ class ProductService
     public function getOptionTitle(string $tourName, ProductMapping $productMapping): string
     {
         if (in_array($productMapping->getType(), [self::MAPPING_STRUCTURE_TYPE_SINGLE, self::MAPPING_STRUCTURE_TYPE_START_TIME])) {
-            return "DEFAULT";
+            return self::OPTION_TITLE_DEFAULT;
         }
 
         if (empty($productMapping->getLabel())) {
