@@ -55,7 +55,7 @@ class ProductMappingFactory
         return [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
-                (string) $this->tour->tour_name_long,
+                "",
                 "",
                 $startTimes
             )
@@ -137,7 +137,7 @@ class ProductMappingFactory
             $startTimes = ['09:00'];
         }
 
-        $singleMapping = new ProductMapping(ProductService::MAPPING_STRUCTURE_TYPE_SINGLE, (string) $this->tour->tour_name_long, '', $startTimes);
+        $singleMapping = new ProductMapping(ProductService::MAPPING_STRUCTURE_TYPE_SINGLE, "", '', $startTimes);
         return [$singleMapping];
     }
 
