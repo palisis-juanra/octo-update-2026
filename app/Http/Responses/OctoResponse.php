@@ -153,6 +153,16 @@ class OctoResponse {
         return new JsonResponse($data, Response::HTTP_BAD_REQUEST);  
     }
 
+    public static function TOO_MANY_DEPARTURES(): Response
+    {
+        $data = [
+            self::FIELD_ERROR => self::ERROR_CODE_UNPROCESSABLE_ENTITY,
+            self::FIELD_ERROR_MESSAGE => "Too many departures found. Please refine your search criteria.",
+        ];
+
+        return new JsonResponse($data, Response::HTTP_TOO_MANY_REQUESTS); 
+    }
+
     // Error response, we add logId and timestamp in order to track/search logs
     public static function INTERNAL_SERVER_ERROR(string $errorMessage = self::ERROR_MESSAGE_SERVER) : Response
     {

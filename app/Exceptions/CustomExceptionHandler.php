@@ -95,6 +95,10 @@ class CustomExceptionHandler extends Handler
                 $response = OctoResponse::SUBSYSTEM_ERROR($exception->getErrorMessage());
                 break;
             
+            case (TooManyDeparturesException::class):
+                $response = OctoResponse::TOO_MANY_DEPARTURES();
+                break;
+            
             case (APICallNotOKException::class):
 
                 try {
