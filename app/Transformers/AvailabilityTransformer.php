@@ -42,8 +42,8 @@ class AvailabilityTransformer extends BaseTransformer
             'utcCutoffAt' => $availability->getUtcCutoffAt(),
             'openingHours' => [
                 [
-                    'to' => $availability->getOpeningHoursFrom(),
-                    'from' => $availability->getOpeningHoursTo()
+                    'to' => $availability->getOpeningHoursTo(),
+                    'from' => $availability->getOpeningHoursFrom()
                 ]
             ]
         ];
