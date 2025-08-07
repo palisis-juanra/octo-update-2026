@@ -7,6 +7,7 @@ use App\Exceptions\FailSignatureException;
 use App\Exceptions\NoAPIResponseException;
 use App\Exceptions\FailPermissionException;
 use App\Exceptions\SupplierSubsystemError;
+use App\Exceptions\TooManyDeparturesException;
 use App\Http\Middleware\OctoAuthentication;
 use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
@@ -141,6 +142,7 @@ class TourCMSService
         } else {
             $queryString .= "&start_date_start={$startDate}&start_date_end={$startDate}";
         }
+        $queryString .= '&per_page=100';
 
         if (!empty($extraParams)) {
             if (substr($extraParams, 0, 1) != '&') {
@@ -151,8 +153,13 @@ class TourCMSService
         }
 
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
+        error_log(JSONLog::getLogId());
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
-        $response = $this->handleResponse($response); 
+        $response = $this->handleResponse($response);
+        $departureCount = (int) $response->tour->dates_and_prices->total_departure_count ?? 0;
+        if ($departureCount > 100) {
+            throw new TooManyDeparturesException($departureCount);
+        }
 
         return $response;
     }
