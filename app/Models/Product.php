@@ -375,7 +375,7 @@ class Product extends Model
     public function getOptionById(string $optionId)
     {
         foreach ($this->getOptions() as $option) {
-            if ($option->getId() == $optionId) {
+            if ($option->getId() == $optionId || str_replace('[*]', '', $option->getId()) == $optionId) {
                 return Option::create($option);
             }
         }

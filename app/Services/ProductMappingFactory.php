@@ -87,39 +87,34 @@ class ProductMappingFactory
 
     protected function getSupplierNotePlusStartTimeStructureMappings(): array
     {
-        $mappings = [];
+        $productMappings = [];
         foreach ($this->mappingAssistantOptions as $mapping) {
 
-            if ($mapping->active == 0) {
+            if ($mapping->partial == 0 || $mapping->active == 0) {
                 continue;
             }
 
-            $mappingObject = [];
+            $supplierNote = (string) $mapping->fields->field->value;
 
-            foreach ($mapping->fields->field as $field) {
-
-                $fieldName = (string) $field->name;
-                $fieldValue = (string) $field->value;
-
-                $mappingObject[$fieldName] = $fieldValue;
+            if ($mapping->partial == 1) {
+                $supplierNote .= "[*]";
+            } else {
+                $supplierNote = "[*]{$supplierNote}";
             }
 
-            if (!array_key_exists($mappingObject['supplier_note'], $mappings)) {
-                $mappings[$mappingObject['supplier_note']] = [
-                    'times' => [],
-                    'label' => !empty($mapping->label) ? (string) $mapping->label : ''
-                ];
+
+            $label = !empty($mapping->label) ? (string) $mapping->label : '';
+
+            $startTimes = [];
+            $startTimesXML = XMLService::getArrayFromXmlNode($mapping->start_times, 'start_time');
+            foreach ($startTimesXML as $startTime) {
+                $startTimes[] = (string) $startTime;
             }
 
-            if (!in_array($mappingObject['start_time'], $mappings[$mappingObject['supplier_note']])) {
-                $mappings[$mappingObject['supplier_note']]['times'][] = $mappingObject['start_time'];
-            }
+            $productMappings[] = new ProductMapping($this->structureType, $label, $supplierNote, $startTimes);
+            
         }
 
-        $productMappings = [];
-        foreach ($mappings as $supplierNote => $data) {
-            $productMappings[] = new ProductMapping($this->structureType, $data['label'], $supplierNote, $data['times']);
-        }
         return $productMappings;
     }
 
