@@ -74,7 +74,7 @@ class OptionService
         }
 
         if ($mappingType === self::OPTION_SUPPLIER_NOTE_PLUS_START_TIME) {
-            $mappingValue = '%'.$mappingValue.'%';
+            $mappingValue = str_replace('[*]', '%', $mappingValue);
         }
 
         $queryString = $mappingField . "=" . urlencode($mappingValue);
