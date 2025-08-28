@@ -91,11 +91,21 @@ class UnitItemFactory
         }
     
         $tickets = $component->tickets;
-        if (empty($tickets)) { return null; } 
+        $urls = $component->urls;
+
+        if (empty($tickets) && empty($urls)) { return null; } 
     
-        $tickets = XMLService::getArrayFromXmlNode($tickets, 'ticket');
-        return (string) $tickets[$number-1]->value;
-    
+        if (!empty($tickets)) {
+            $tickets = XMLService::getArrayFromXmlNode($tickets, 'ticket');
+            return !empty($tickets[$number-1]) ? (string) $tickets[$number-1]->value : null;
+        }
+
+        if (!empty($urls)) {
+            $urls = XMLService::getArrayFromXmlNode($urls, 'url');
+            return !empty($urls[$number-1]) ? (string) $urls[$number-1]->link : null;
+        }
+
+        return null;
     }
 
     protected static function getComponentByRateId(array $tourCMSComponents, string $unitId, string $number): ?SimpleXMLElement

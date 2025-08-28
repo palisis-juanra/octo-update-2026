@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use App\Factories\UnitItemFactory;
 use App\Models\Availability\Availability;
 use App\Services\DateTimeService;
-use App\Services\UnitService;
 use App\Services\XMLService;
 use DateTime;
 use DateTimeZone;
