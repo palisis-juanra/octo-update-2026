@@ -69,7 +69,7 @@ class UnitItemFactory
             $ticket = new Ticket();
             $ticket->setRedemptionMethod($product->getRedemptionMethod());
 
-            $ticketValue = self::getTicketValueForUnitItem($component,$number);
+            $ticketValue = self::getTicketValueForUnitItem($component,$number, $product->getDeliveryFormats()[0]);
             if (!empty($ticketValue)) {
                 $ticket->setRedemptionMethod($booking->getProduct()->getRedemptionMethod());
                 $ticket->setUtcRedeemedAt(!empty($component->redeemed_at_utc_seconds) ? (int) $component->redeemed_at_utc_seconds : null);
@@ -84,7 +84,7 @@ class UnitItemFactory
         return $unitItem;
     }
 
-    protected static function getTicketValueForUnitItem(?SimpleXMLElement $component, int $number): ?string
+    protected static function getTicketValueForUnitItem(?SimpleXMLElement $component, int $number, string $deliveryFormat): ?string
     {    
         if (empty($component)) {
             return null;
@@ -100,9 +100,15 @@ class UnitItemFactory
             return !empty($tickets[$number-1]) ? (string) $tickets[$number-1]->value : null;
         }
 
-        if (!empty($urls)) {
+        if (!empty($urls) && $deliveryFormat === ProductService::DELIVERY_FORMAT_PDF_URL) {
             $urls = XMLService::getArrayFromXmlNode($urls, 'url');
-            return !empty($urls[$number-1]) ? (string) $urls[$number-1]->link : null;
+            $url = $urls[$number-1];
+
+            if (empty($url) || empty($url->link) || (string) $url->mime_type !== 'application/pdf') {
+                return null;
+            }
+
+            return (string) $url->link;
         }
 
         return null;
