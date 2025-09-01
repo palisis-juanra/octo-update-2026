@@ -151,6 +151,7 @@
                 <urls>
                     <url>
                         <link>https://example.com/4213/1</link>
+                        <mime_type>application/pdf</mime_type>
                     </url>
                 </urls>
                 <linked_component_id>6575</linked_component_id>

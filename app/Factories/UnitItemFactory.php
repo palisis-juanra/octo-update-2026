@@ -16,6 +16,8 @@ use SimpleXMLElement;
 
 class UnitItemFactory
 {
+    public const string MIME_TYPE_PDF = 'application/pdf';
+
     public static function create(
         Booking $booking,
         Unit $unit,
@@ -104,7 +106,7 @@ class UnitItemFactory
             $urls = XMLService::getArrayFromXmlNode($urls, 'url');
             $url = $urls[$number-1];
 
-            if (empty($url) || empty($url->link) || (string) $url->mime_type !== 'application/pdf') {
+            if (empty($url) || empty($url->link) || (string) $url->mime_type !== self::MIME_TYPE_PDF) {
                 return null;
             }
 

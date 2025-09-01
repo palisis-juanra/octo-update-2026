@@ -33,7 +33,7 @@ class UnitItemFactoryTest extends UnitTestCase
         );
 
         $ticketValue = (string) $this->bookingWithTicketsXML->components->component[0]->tickets->ticket->value;
-        $this->assertEquals($unitItem->getTicket()->getDeliveryOptions()['deliveryValue'], $ticketValue);
+        $this->assertEquals($ticketValue, $unitItem->getTicket()->getDeliveryOptions()['deliveryValue']);
     }
 
     public function test_create_whenComponentHaveUrls_thenWeGetUrlLink(): void
@@ -46,7 +46,7 @@ class UnitItemFactoryTest extends UnitTestCase
         );
 
         $urlLink = (string) $this->bookingWithUrlsXML->components->component[0]->urls->url->link;
-        $this->assertEquals($unitItem->getTicket()->getDeliveryOptions()['deliveryValue'], $urlLink);
+        $this->assertEquals($urlLink, $unitItem->getTicket()->getDeliveryOptions()['deliveryValue']);
     }
 
     protected function getFakeBooking(SimpleXMLElement $showBooking): Booking
