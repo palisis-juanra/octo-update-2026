@@ -209,8 +209,8 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setContentEnabled($this->contentEnabled);
             $availability->setId($this->generateAvailabilityIdFromDepartureOrComponentObject($departure));
             $availability->setDepartureId((int) $departure->departure_id);
-            $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
-            $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
+            $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes, $this->product->getTimeZone()));
+            $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes, $this->product->getTimeZone()));
             $availability->setAllDay($this->allDay);
             $available = $this->isDepartureAvailable($departure);
             $availability->setAvailable($available);

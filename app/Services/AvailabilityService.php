@@ -11,6 +11,7 @@ use App\Features\Availability\AvailabilityRequest;
 use App\Http\Middleware\OctoAuthentication;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\Availability;
+use App\Models\Product;
 use App\Transformers\AvailabilityTransformer;
 use App\Transformers\BaseTransformer;
 use DateInterval;
@@ -193,14 +194,14 @@ class AvailabilityService
         return $availability;
     }
 
-    public function generateAvailabilityFromBookingXML(SimpleXMLElement $showBookingXML): Availability
+    public function generateAvailabilityFromBookingXML(Product $product, SimpleXMLElement $showBookingXML): Availability
     {
         $components = $this->tourCMSService->getArrayFromXmlNode($showBookingXML->booking->components, 'component');
         $component = $components[0];
-        return $this->generateAvailabilityObjectFromComponent($component);
+        return $this->generateAvailabilityObjectFromComponent($component, $product);
     }
 
-    public function generateAvailabilityObjectFromComponent(SimpleXMLElement $component): Availability
+    public function generateAvailabilityObjectFromComponent(SimpleXMLElement $component, Product $product): Availability
     {
         $departureId = $this->getDepartureIdFromAPIResponse($component);
         list($startTimeHours, $startTimeMinutes) = explode(":", !empty($component->start_time) ? (string) $component->start_time : self::DEFAULT_START_TIME);
@@ -210,8 +211,8 @@ class AvailabilityService
 
         $availability->setId($this->generateAvailabilityIdFromComponent($component));
         $availability->setDepartureId($departureId);
-        $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $component->start_date, $startTimeHours, $startTimeMinutes));
-        $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $component->end_date, $endTimeHours, $endTimeMinutes));
+        $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $component->start_date, $startTimeHours, $startTimeMinutes, $product->getTimeZone()));
+        $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $component->end_date, $endTimeHours, $endTimeMinutes, $product->getTimeZone()));
         $availability->setAllDay((string) $component->availability_type === ProductService::AVAILABILITY_TYPE_OPENING_HOURS);
         $availability->setOpeningHoursFrom(!empty($component->start_time) ? (string) $component->start_time : self::DEFAULT_START_TIME);
         $availability->setOpeningHoursTo(!empty($component->end_time) ? (string) $component->end_time : self::DEFAULT_END_TIME);
