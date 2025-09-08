@@ -39,6 +39,7 @@ class BookingGetController extends Controller
 
             $bookingJSONFromDB = $this->bookingService->getBookingObjectFromJSON(json_decode($bookingByUUID->complete_booking_json, true));
             $transformedBooking = $this->bookingService->updateStoredJsonWithNewInformation($bookingJSONFromDB, (object)$transformedBooking);
+            $bookingByUUID->update(['complete_booking_json' => json_encode($transformedBooking)]);
             $this->logger->info(["message" => "Request processed, returning response", "response" => $transformedBooking]);
             return new JsonResponse($transformedBooking, Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
