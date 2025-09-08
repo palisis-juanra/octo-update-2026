@@ -40,8 +40,18 @@ class BookingTransformer extends BaseTransformer
         $option = $booking->getOption();
         $availability = $booking->getAvailability();
 
-        $unitItemsResource = new Collection($booking->getUnits(), $this->unitItemTransformer);
-        $unitItemsTransformed = $this->manager->createData($unitItemsResource)->toArray()['data'];
+        if (is_null($booking->getUnits())) {
+            $unitItemsTransformed = null;
+        } else {
+            $unitItemsResource = new Collection($booking->getUnits(), $this->unitItemTransformer);
+            $unitItemsTransformed = $this->manager->createData($unitItemsResource)->toArray()['data'];
+        }
+
+        $optionId = null;
+        if (!is_null($option)) {
+            $optionId = $option->getId();
+            $option = $this->optionTransformer->transform($option);
+        }
 
         return [
             'id' => $booking->getId(),
@@ -57,8 +67,8 @@ class BookingTransformer extends BaseTransformer
             'utcConfirmedAt' => $booking->getUtcConfirmedAt(),
             'productId' => $product->getId(),
             'product' => $this->productTransformer->transform($product),
-            'optionId' => $option->getId(),
-            'option' => $this->optionTransformer->transform($option),
+            'optionId' => $optionId,
+            'option' => $option,
             'cancellable' => $booking->getCancellable(),
             'cancellation' => null !== $booking->getCancellation() ? $this->bookingCancellationTransformer->transform($booking->getCancellation()) : null,
             'freesale' => $product->getAllowFreesale(),

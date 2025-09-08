@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\BookingNotCancellableException;
+use App\Models\Booking;
 use App\Models\BookingCancellation;
 use App\Services\BookingCancellationService;
 use App\Services\JSONLogService;
@@ -34,11 +35,12 @@ class BookingCancellationController extends Controller
 
         $reason = $requestParams[self::FIELD_REASON] ?? null;
 
-        $booking = $this->bookingCancelService->getBookingByUuid($uuid);
+        $bookingByUUID = $this->bookingCancelService->getBookingByUuid($uuid);
 
-        $booking = $this->bookingCancelService->getBooking($booking);
-        
-        if (!$booking->isBookingCancellable()) {
+        $booking = $this->bookingCancelService->getBooking($bookingByUUID, false);
+        $bookingJSONFromDB = $this->bookingCancelService->getBookingObjectFromJSON(json_decode($bookingByUUID->complete_booking_json, true));
+
+        if (!$booking->isBookingCancellable()) { 
             $this->logger->info("Booking not cancellable: {$booking->getId()}");
             throw new BookingNotCancellableException;
         };
@@ -59,8 +61,9 @@ class BookingCancellationController extends Controller
         }
 
         $bookingData = $this->transformer->transform($booking);
+        $transformedBooking = $this->bookingCancelService->updateStoredJsonWithNewInformation($bookingJSONFromDB, (object)$bookingData);
+        $bookingByUUID->update(['complete_booking_json' => json_encode($transformedBooking), 'status' => Booking::STATUS_CANCELLED]);
 
-        return new JsonResponse($bookingData, Response::HTTP_OK);
+        return new JsonResponse($transformedBooking, Response::HTTP_OK);
     }
-
 }

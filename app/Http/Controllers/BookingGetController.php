@@ -6,6 +6,7 @@ use App\Exceptions\APICallNotOKException;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Exceptions\NoMatchingDataException;
 use App\Http\Responses\OctoResponse;
+use App\Models\Booking;
 use App\Services\BookingService;
 use App\Services\JSONLogService;
 use App\Transformers\BaseTransformer;
@@ -33,8 +34,11 @@ class BookingGetController extends Controller
         try {
             $this->logger->info(["message" => "Starting to process get booking request", "uuid" => $bookingUUID]);
             $bookingByUUID = $this->bookingService->getBookingByUuid($bookingUUID);
-            $bookingXMLResponse = $this->bookingService->getBooking($bookingByUUID);
+            $bookingXMLResponse = $this->bookingService->getBooking($bookingByUUID, false);
             $transformedBooking = $this->transformer->transform($bookingXMLResponse);
+
+            $bookingJSONFromDB = $this->bookingService->getBookingObjectFromJSON(json_decode($bookingByUUID->complete_booking_json, true));
+            $transformedBooking = $this->bookingService->updateStoredJsonWithNewInformation($bookingJSONFromDB, (object)$transformedBooking);
             $this->logger->info(["message" => "Request processed, returning response", "response" => $transformedBooking]);
             return new JsonResponse($transformedBooking, Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {

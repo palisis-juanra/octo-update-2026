@@ -21,7 +21,7 @@ class BookingReservationService
         public JSONLogService $logger,
     ) {}
 
-    public function reserve(Product $product, Option $option, Availability $availability, array $unitItems, ?string $uuid = null, string $notes = ''): Booking
+    public function reserve(Product $product, Option $option, Availability $availability, array $unitItems, ?string $uuid = null, ?string $notes = null): Booking
     {
         $date = $availability->getDate();
         $departureId = $availability->getAttributes()['departure_id'];

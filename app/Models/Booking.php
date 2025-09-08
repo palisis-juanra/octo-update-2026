@@ -41,11 +41,12 @@ class Booking extends Model
     protected ?string $utcExpiresAt;
     protected ?int $expirationMinutes;
     protected Product $product;
-    protected Option $option;
+    protected ?Option $option;
     protected Availability $availability;
-    protected array $units;
+    protected ?array $units;
     protected int $leadCustomerId;
     protected SimpleXMLElement $bookingData;
+    protected array $completeBookingJson;
 
     /**
      * The table associated with the model.
@@ -87,7 +88,9 @@ class Booking extends Model
         'availability_id',
         'product_id',
         'option_id',
-        'unit_items'
+        'unit_items',
+        'complete_booking_json',
+        'status',
     ];
 
     public static $snakeAttributes = true;
@@ -107,6 +110,7 @@ class Booking extends Model
         $this->cancellation = null;
         $this->notes = null;
         $this->units = [];
+        $this->completeBookingJson = [];
         $this->contact = new Contact;
         $this->voucher = null;
     }
@@ -282,10 +286,17 @@ class Booking extends Model
         return $this->product;
     }
 
-    public function setOption(Option $option): self
+    public function setOption(Option|null $option): self
     {
-        $this->option_id = $option->getId();
+        $this->option_id = $option?->getId();
         $this->option = $option;
+
+        return $this;
+    }
+
+    public function setOptionId(string|null $optionId): self
+    {
+        $this->option_id = $optionId;
 
         return $this;
     }
@@ -385,10 +396,16 @@ class Booking extends Model
      * @param UnitItem[] $unitItems
      * @return Booking
      */
-    public function setUnits(array $unitItems): self
+    public function setUnits(array|null $unitItems): self
     {
         $this->units = $unitItems;
-        $this->unit_items = json_encode($this->units);
+
+        return $this;
+    }
+
+    public function setUnitItems(array|null $unitItems): self
+    {
+        $this->unit_items = json_encode($unitItems);
 
         return $this;
     }
@@ -396,6 +413,18 @@ class Booking extends Model
     public function getUnits(): ?array
     {
         return $this->units;
+    }
+
+    public function getCompleteBookingJson(): ?array
+    {
+        return $this->completeBookingJson;
+    }
+
+    public function setCompleteBookingJson(string $completeBookingJson): self
+    {
+        $this->completeBookingJson = json_decode($completeBookingJson);
+
+        return $this;
     }
 
     public function setContact(Contact $contact): self

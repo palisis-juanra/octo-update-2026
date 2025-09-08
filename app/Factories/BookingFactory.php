@@ -32,7 +32,7 @@ class BookingFactory
         Option $option,
         Availability $availability,
         array $requestUnitItems,
-        ?string $notes = ''
+        ?string $notes = null
     ): Booking
     {
         $booking = new Booking();
@@ -65,6 +65,7 @@ class BookingFactory
         }
 
         $booking->setUnits($unitItems);
+        $booking->setUnitItems($unitItems);
         
         if (!is_null($notes)){
             $booking->setNotes($notes);
@@ -92,9 +93,9 @@ class BookingFactory
         string $bookingUuid,
         SimpleXMLElement $showBookingXML,
         Product $product,
-        Option $option,
         Availability $availability,
-        string $savedUnitItems
+        string $savedUnitItems,
+        ?Option $option = null,
     ): Booking
     {
         $booking = new Booking();
@@ -137,32 +138,43 @@ class BookingFactory
         }
         
         $booking->setProduct($product);
-        $booking->setOption($option);
+        if (!is_null($option)) {
+            $booking->setOption($option);
+            $booking->setOptionId($option->getId());
+        } else {
+            $booking->setOptionId(null);
+            $booking->setOption(null);
+        }
+        
         $booking->setAvailability(availability: $availability);
 
-        // UNITS
-        $unitItems = [];
-        $unitsQuantities = [];
+        if (!is_null($option)) {
+            // UNITS
+            $unitItems = [];
+            $unitsQuantities = [];
 
-        $storedUnitItems = json_decode($savedUnitItems, 1);
-        foreach ($storedUnitItems as $emptyUnitItem) {
-            
-            $unitId = (string) $emptyUnitItem['unitId'];
-            $unit = $option->getUnitById($unitId);
-            
-            if (array_key_exists($unitId, $unitsQuantities)) {
-                $unitsQuantities[$unitId]++;
-            } else {
-                $unitsQuantities[$unitId] = 1;
+            $storedUnitItems = json_decode($savedUnitItems, 1);
+            foreach ($storedUnitItems as $emptyUnitItem) {
+                
+                $unitId = (string) $emptyUnitItem['unitId'];
+                $unit = $option->getUnitById($unitId);
+                
+                if (array_key_exists($unitId, $unitsQuantities)) {
+                    $unitsQuantities[$unitId]++;
+                } else {
+                    $unitsQuantities[$unitId] = 1;
+                }
+
+                $unitItem = UnitItemFactory::create($booking, $unit, $unitsQuantities[$unitId], $emptyUnitItem['uuid'] ?? null);
+                
+                $unitItems[] = $unitItem;
             }
 
-            $unitItem = UnitItemFactory::create($booking, $unit, $unitsQuantities[$unitId], $emptyUnitItem['uuid'] ?? null);
-            
-            $unitItems[] = $unitItem;
+            $booking->setUnits($unitItems);
+            $booking->setUnitItems($unitItems);
+        } else {
+            $booking->setUnits(null);
         }
-
-        $booking->setUnits($unitItems);
-        
         if (in_array(Booking::FIELD_VOUCHER, $product->getDeliveryMethods())) {
             $voucher = Voucher::create($bookingData, $product->getRedemptionMethod(), $booking->getUtcRedeemedAt());
             $booking->setVoucher($voucher);
