@@ -47,9 +47,17 @@ class BookingService
         $this->checkIfBookingHaveBeenDeleted($showBookingResponse, $booking->getUuid());
 
         $product = $this->productService->find($booking->product_id);
-        $option = null;
-        if ($mandatoryOptions) {
-            $option = $product->getOptionById($booking->option_id);
+        $option = $product->getOptionById($booking->option_id, !$mandatoryOptions);
+        if (!$mandatoryOptions) {
+            $option->setId($booking->option_id);
+            foreach (json_decode($booking->complete_booking_json,true)['unitItems'] as $unitItem) {
+                try {
+                    $option->getUnitById($unitItem['unitId']);
+                } catch (\App\Exceptions\InvalidUnitIdException) {
+                    $unit = $this->bookingBuilder->buildUnitItemFromJSON($unitItem);
+                    $option->addUnit($unit);
+                }
+            }
         }
         $availability = new Availability();
         $availability = $this->availabilityService->generateAvailabilityFromBookingXML($product, $showBookingResponse);

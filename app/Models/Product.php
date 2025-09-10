@@ -372,10 +372,10 @@ class Product extends Model
     /**
      * @throws InvalidOptionIdException
      */
-    public function getOptionById(string $optionId)
+    public function getOptionById(string $optionId, bool $looseSearch = false): Option
     {
         foreach ($this->getOptions() as $option) {
-            if ($option->getId() == $optionId || str_replace('[*]', '', $option->getId()) == $optionId) {
+            if ($looseSearch || ($option->getId() == $optionId || str_replace('[*]', '', $option->getId()) == $optionId)) {
                 return Option::create($option);
             }
         }

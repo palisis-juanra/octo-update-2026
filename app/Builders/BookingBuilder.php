@@ -1,6 +1,8 @@
 <?php
 namespace App\Builders;
 
+use App\Models\Unit;
+use App\Services\UnitService;
 use ReflectionClass;
 use stdClass;
 
@@ -50,5 +52,31 @@ class BookingBuilder
             }
         }
         return $object;
+    }
+
+    public function buildUnitItemFromJSON(array $data): Unit
+    {
+        $unit = new Unit();
+        $unit->setId($data['unit']['id']);
+        $unit->setType($data['unit']['type'] ?? null);
+        $unit->setInternalName(UnitService::getTourCMSRateId($data['unit']['id']));
+        $unit->setRateId(UnitService::getTourCMSRateId($data['unit']['id']));
+        $unit->setReference($data['unit']['reference'] ?? null);
+        $unit->setRequiredContactFields($data['unit']['requiredContactFields'] ?? []);
+        $unit->setRestrictions($this->buildUnitRestriction($data['unit']['restrictions'] ?? []));
+        return $unit;
+    }
+
+    
+    public function buildUnitRestriction(array $data)
+    {
+        $unitRestriction = new \App\Models\UnitRestrictions();
+        foreach ($data as $key => $value) {
+            $method = 'set' . $key;
+            if (method_exists($unitRestriction, $method)) {
+                $unitRestriction->$method($value);
+            }
+        }
+        return $unitRestriction;
     }
 }
