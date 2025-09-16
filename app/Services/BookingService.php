@@ -40,7 +40,7 @@ class BookingService
         $product = $this->productService->find($booking->product_id);
         $option = $product->getOptionById($booking->option_id);
         $availability = new Availability();
-        $availability = $this->availabilityService->generateAvailabilityFromBookingXML($showBookingResponse);
+        $availability = $this->availabilityService->generateAvailabilityFromBookingXML($product, $showBookingResponse);
 
         return BookingFactory::createFromShowBookingXML(
             $booking->getUuid(),

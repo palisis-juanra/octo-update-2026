@@ -3,16 +3,22 @@
 namespace App\Services;
 
 use DateTime;
+use DateTimeZone;
 
 class DateTimeService
 {
-    const FORMAT_ISO8601 = 'Y-m-d\TH:i:s\Z';
+    public const string FORMAT_ISO8601 = 'Y-m-d\TH:i:s\Z';
 
-    public static function getISODateTimeString(string $day = 'now', string $hour = '00', string $minutes = '00'): string
+    public static function getISODateTimeString(string $day = 'now', string $hour = '00', string $minutes = '00', string $timezone = ""): string
     {
-        $dateTime = new DateTime($day);
+        $dateTimeZone = new DateTimeZone('UTC');
+        if (!empty($timezone)) {
+            $dateTimeZone = new DateTimeZone($timezone);
+        }
+
+        $dateTime = new DateTime($day, $dateTimeZone);
         $dateTime->setTime($hour, $minutes);
-        
+    
         return $dateTime->format(DateTime::ATOM);
     }
 
