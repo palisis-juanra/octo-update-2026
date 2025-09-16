@@ -142,7 +142,7 @@ class TourCMSService
         } else {
             $queryString .= "&start_date_start={$startDate}&start_date_end={$startDate}";
         }
-        $queryString .= '&per_page=100';
+        $queryString .= '&per_page=500';
 
         if (!empty($extraParams)) {
             if (substr($extraParams, 0, 1) != '&') {
@@ -157,7 +157,7 @@ class TourCMSService
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response);
         $departureCount = (int) $response->tour->dates_and_prices->total_departure_count ?? 0;
-        if ($departureCount > 100) {
+        if ($departureCount > 500) {
             throw new TooManyDeparturesException($departureCount);
         }
 
