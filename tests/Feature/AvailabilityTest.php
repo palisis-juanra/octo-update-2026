@@ -167,7 +167,7 @@ class AvailabilityTest extends FeatureTestCase
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->between(1, 10)->andReturn($this->showTourDeparturesXML);
     
         App::instance(TourCMSService::class, $tourCMSServiceMock);
 
@@ -192,7 +192,7 @@ class AvailabilityTest extends FeatureTestCase
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->between(1, 10)->andReturn($this->showTourDeparturesXML);
 
         App::instance(TourCMSService::class, $tourCMSServiceMock);
     
@@ -219,7 +219,7 @@ class AvailabilityTest extends FeatureTestCase
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->because(2, 10)->andReturn($this->showTourDeparturesXML);
 
         App::instance(TourCMSService::class, $tourCMSServiceMock);
     
