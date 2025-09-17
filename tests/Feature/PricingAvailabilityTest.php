@@ -63,12 +63,12 @@ class PricingAvailabilityTest extends FeatureTestCase
         $this->checkAvailXML = simplexml_load_file('tests/TourCMSResponses/checkAvailability.xml');
     }
 
-    public function test_whenPricingIsAllowedAndIsMultiDate_thenShowTourDepartureIsCalledOnce()
+    public function test_whenPricingIsAllowedAndIsMultiDate_thenShowTourDepartureIsCalledFrom1To5Times()
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->between(1, 10)->andReturn($this->showTourDeparturesXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->between(1, 5)->andReturn($this->showTourDeparturesXML);
     
         App::instance(TourCMSService::class, $tourCMSServiceMock);
     
@@ -91,13 +91,13 @@ class PricingAvailabilityTest extends FeatureTestCase
         $this->assertNotEmpty($responseData);
     }
 
-    public function test_whenPricingAndSingleDate_thenCheckAvailabilityIsCalledOnce(): void
+    public function test_whenPricingAndSingleDate_thenCheckAvailabilityIsCalledFrom1To5Times(): void
     {
 
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->between(1, 10)->andReturn($this->showTourDeparturesXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->between(1, 5)->andReturn($this->showTourDeparturesXML);
         $tourCMSServiceMock->shouldReceive('checkAvailability')->once()->andReturn($this->checkAvailXML);
 
         App::instance(TourCMSService::class, $tourCMSServiceMock);
