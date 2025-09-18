@@ -40,9 +40,8 @@ class BookingTransformer extends BaseTransformer
         $option = $booking->getOption();
         $availability = $booking->getAvailability();
 
-        if (is_null($booking->getUnits())) {
-            $unitItemsTransformed = null;
-        } else {
+        $unitItemsTransformed = null;
+        if (!is_null($booking->getUnits())) {
             $unitItemsResource = new Collection($booking->getUnits(), $this->unitItemTransformer);
             $unitItemsTransformed = $this->manager->createData($unitItemsResource)->toArray()['data'];
         }

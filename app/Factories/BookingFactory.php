@@ -148,6 +148,7 @@ class BookingFactory
         
         $booking->setAvailability(availability: $availability);
 
+        $booking->setUnits(null);
         if (!is_null($option)) {
             // UNITS
             $unitItems = [];
@@ -172,9 +173,8 @@ class BookingFactory
 
             $booking->setUnits($unitItems);
             $booking->setUnitItems($unitItems);
-        } else {
-            $booking->setUnits(null);
         }
+
         if (in_array(Booking::FIELD_VOUCHER, $product->getDeliveryMethods())) {
             $voucher = Voucher::create($bookingData, $product->getRedemptionMethod(), $booking->getUtcRedeemedAt());
             $booking->setVoucher($voucher);

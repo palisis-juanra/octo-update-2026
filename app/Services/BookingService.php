@@ -50,7 +50,8 @@ class BookingService
         $option = $product->getOptionById($booking->option_id, !$mandatoryOptions);
         if (!$mandatoryOptions) {
             $option->setId($booking->option_id);
-            foreach (json_decode($booking->complete_booking_json,true)['unitItems'] as $unitItem) {
+            $storeBookingUnitItemsArray = empty($booking->complete_booking_json) ? [] : json_decode($booking->complete_booking_json,true)['unitItems'];
+            foreach ($storeBookingUnitItemsArray as $unitItem) {
                 try {
                     $option->getUnitById($unitItem['unitId']);
                 } catch (\App\Exceptions\InvalidUnitIdException) {

@@ -34,7 +34,7 @@ class BookingChecker
     public function updateStoredJsonWithNewInformation(stdClass $storedBooking, stdClass $updatedBooking): stdClass {
         $status = $updatedBooking->status;
         foreach (self::UPDATABLE_PROPERTIES as $property) {
-            if ($updatedBooking->$property !== null) {
+            if (!is_null($updatedBooking->$property)) {
                 $storedBooking->$property = $updatedBooking->$property;
             }
         }
@@ -107,7 +107,7 @@ class BookingChecker
             
             foreach ($parts as $i => $part) {
                 // If current is null and not the last part, stop processing
-                if ($i < count($parts) - 1 && $current === null) {
+                if ($i < count($parts) - 1 && is_null($current)) {
                     return;
                 }
                 
@@ -118,7 +118,7 @@ class BookingChecker
                     // Check if the array and index exist and are not null
                     if (!isset($current->$arrayName) || 
                         !isset($current->$arrayName[$index]) || 
-                        $current->$arrayName[$index] === null) {
+                        is_null($current->$arrayName[$index])) {
                         return;
                     }
                     
@@ -132,7 +132,7 @@ class BookingChecker
                 } else {
                     if ($i === count($parts) - 1) {
                         // Assign value if it's the last part and current is not null
-                        if ($current === null) {
+                        if (is_null($current)) {
                             return; 
                         }
                         
@@ -144,12 +144,12 @@ class BookingChecker
                     } else {
                         // Navigate deeper if not the last part
                         if (is_object($current)) {
-                            if (isset($current->$part) && $current->$part === null) {
+                            if (isset($current->$part) && is_null($current->$part)) {
                                 return;
                             }
                             $current = &$current->$part;
                         } elseif (is_array($current)) {
-                            if (isset($current[$part]) && $current[$part] === null) {
+                            if (isset($current[$part]) && is_null($current[$part])) {
                                 return;
                             }
                             $current = &$current[$part];
