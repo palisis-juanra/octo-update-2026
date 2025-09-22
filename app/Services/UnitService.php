@@ -105,16 +105,6 @@ class UnitService
         }
     }
 
-    public static function createUnitStub(string $unitId): \App\Models\Unit
-    {
-        $unitExploded = explode('|', $unitId);
-        $unit = new \App\Models\Unit();
-        $unit->setRateId(array_pop($unitExploded));
-        $unit->setChannelId(array_pop($unitExploded));
-        $unit->setTourDistributionIdentifier(implode('|', $unitExploded));
-        return $unit;
-    }
-
     protected function validateIdFormat(string $unitId): bool
     {   
         if (preg_match(self::UNIT_ID_REGEX, $unitId) == false) {
