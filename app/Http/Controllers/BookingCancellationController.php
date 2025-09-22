@@ -60,7 +60,7 @@ class BookingCancellationController extends Controller
         }
 
         $transformedBooking = $this->transformer->transform($booking);
-        $bookingByUUID->update(['complete_booking_json' => json_encode($transformedBooking), 'status' => Booking::STATUS_CANCELLED]);
+        $bookingByUUID->update(['complete_booking_json' => json_encode($transformedBooking)]);
 
         return new JsonResponse($transformedBooking, Response::HTTP_OK);
     }

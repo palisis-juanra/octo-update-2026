@@ -81,6 +81,9 @@ class BookingCancellationService extends BookingService
     public function updateBookingStatusToCancelled(Booking $booking): void
     {
         $booking->setStatus(Booking::STATUS_CANCELLED);
+        foreach($booking->getUnits() as $unit) {
+            $unit->setStatus(Booking::STATUS_CANCELLED);
+        }
 
         Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
     }
