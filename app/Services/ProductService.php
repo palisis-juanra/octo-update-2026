@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Builders\BookingBuilder;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Facades\OctoRequestFacade;
@@ -191,7 +192,7 @@ class ProductService
         return $productList;
     }
 
-    public function find(string $productId): Product
+    public function find(string $productId, array $optionsArrayFromDB = []): Product
     {
         $tour = $this->findTourDataFromAPI($productId);
         $this->logger->info(["message" => "Show tour response", "APIResponse" => $tour]);
@@ -201,6 +202,10 @@ class ProductService
         }
 
         $product = $this->createProductFromTourXML($tour);
+        
+        if (!empty($optionsArrayFromDB)) {
+            $product->setOptions(BookingBuilder::buildOptionsFromJSON($optionsArrayFromDB));
+        }
 
         return $product;
     }

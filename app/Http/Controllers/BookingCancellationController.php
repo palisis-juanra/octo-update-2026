@@ -37,7 +37,7 @@ class BookingCancellationController extends Controller
 
         $bookingByUUID = $this->bookingCancelService->getBookingByUuid($uuid);
 
-        $booking = $this->bookingCancelService->getBooking($bookingByUUID, false);
+        $booking = $this->bookingCancelService->getBooking($bookingByUUID, true);
 
         if (!$booking->isBookingCancellable()) { 
             $this->logger->info("Booking not cancellable: {$booking->getId()}");
@@ -60,10 +60,6 @@ class BookingCancellationController extends Controller
         }
 
         $transformedBooking = $this->transformer->transform($booking);
-        if (!empty($bookingByUUID->complete_booking_json)) {
-            $bookingJSONFromDB = $this->bookingCancelService->getBookingObjectFromJSON(json_decode($bookingByUUID->complete_booking_json, true));
-            $transformedBooking = $this->bookingCancelService->updateStoredJsonWithNewInformation($bookingJSONFromDB, (object)$transformedBooking);
-        }
         $bookingByUUID->update(['complete_booking_json' => json_encode($transformedBooking), 'status' => Booking::STATUS_CANCELLED]);
 
         return new JsonResponse($transformedBooking, Response::HTTP_OK);

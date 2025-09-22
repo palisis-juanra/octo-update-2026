@@ -1,6 +1,7 @@
 <?php
 namespace App\Builders;
 
+use App\Models\Option;
 use App\Models\Unit;
 use App\Services\UnitService;
 use ReflectionClass;
@@ -54,21 +55,48 @@ class BookingBuilder
         return $object;
     }
 
-    public function buildUnitItemFromJSON(array $data): Unit
+    public static function buildUnitItemFromJSON(array $data): Unit
     {
         $unit = new Unit();
-        $unit->setId($data['unit']['id']);
-        $unit->setType($data['unit']['type'] ?? null);
-        $unit->setInternalName(UnitService::getTourCMSRateId($data['unit']['id']));
-        $unit->setRateId(UnitService::getTourCMSRateId($data['unit']['id']));
-        $unit->setReference($data['unit']['reference'] ?? null);
-        $unit->setRequiredContactFields($data['unit']['requiredContactFields'] ?? []);
-        $unit->setRestrictions($this->buildUnitRestriction($data['unit']['restrictions'] ?? []));
+        $unit->setId($data['id']);
+        $unit->setType($data['type'] ?? null);
+        $unit->setInternalName(UnitService::getTourCMSRateId($data['id']));
+        $unit->setRateId(UnitService::getTourCMSRateId($data['id']));
+        $unit->setReference($data['reference'] ?? null);
+        $unit->setRequiredContactFields($data['requiredContactFields'] ?? []);
+        $unit->setRestrictions(self::buildUnitRestriction($data['restrictions'] ?? []));
         return $unit;
     }
 
-    
-    public function buildUnitRestriction(array $data)
+    public static function buildOptionsFromJSON(array $optionsArray): array
+    {
+        $options = [];
+        foreach ($optionsArray as $option) {
+            $optionData = new stdClass();
+            $optionData->id = $option['id'];
+            $optionData->default = $option['default'];
+            $optionData->internalName = $option['internalName'];
+            $optionData->reference = $option['reference'];
+            $optionData->availabilityLocalStartTimes = $option['availabilityLocalStartTimes'];
+            $optionData->cancellationCutoff = $option['cancellationCutoff'];
+            $optionData->cancellationCutoffAmount = $option['cancellationCutoffAmount'];
+            $optionData->cancellationCutoffUnit = $option['cancellationCutoffUnit'];
+            $optionData->requiredContactFields = $option['requiredContactFields'];
+            $optionData->restrictions = (object)$option['restrictions'];
+            $units = [];
+            foreach ($option['units'] as $unitArray) {
+                $unitObject = self::buildUnitItemFromJSON($unitArray);
+                $units[] = $unitObject;
+            }
+            $optionData->units = $units;
+
+            $option = Option::create($optionData);
+            $options[] = $option;
+        }
+        return $options;
+    }
+
+    public static function buildUnitRestriction(array $data)
     {
         $unitRestriction = new \App\Models\UnitRestrictions();
         foreach ($data as $key => $value) {

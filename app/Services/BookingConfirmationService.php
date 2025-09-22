@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Builders\BookingBuilder;
+use App\Builders\BookingChecker;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Booking;
 use App\Models\Contact;
@@ -20,10 +22,12 @@ class BookingConfirmationService extends BookingService
         public ProductService $productService,
         public AvailabilityService $availabilityService,
         public OptionService $optionService,
-        public ContactService $contactService
+        public ContactService $contactService,
+        public BookingBuilder $bookingBuilder,
+        public BookingChecker $checker
     )
     {
-        parent::__construct($tourCMSService, $logger, $productService, $availabilityService);
+        parent::__construct($tourCMSService, $logger, $productService, $availabilityService, $bookingBuilder, $checker);
     }
 
     /**

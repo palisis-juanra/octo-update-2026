@@ -41,9 +41,9 @@ class Booking extends Model
     protected ?string $utcExpiresAt;
     protected ?int $expirationMinutes;
     protected Product $product;
-    protected ?Option $option;
+    protected Option $option;
     protected Availability $availability;
-    protected ?array $units;
+    protected array $units;
     protected int $leadCustomerId;
     protected SimpleXMLElement $bookingData;
     protected array $completeBookingJson;
@@ -286,15 +286,15 @@ class Booking extends Model
         return $this->product;
     }
 
-    public function setOption(Option|null $option): self
+    public function setOption(Option $option): self
     {
-        $this->option_id = $option?->getId();
+        $this->option_id = $option->getId();
         $this->option = $option;
 
         return $this;
     }
 
-    public function setOptionId(string|null $optionId): self
+    public function setOptionId(string $optionId): self
     {
         $this->option_id = $optionId;
 
@@ -396,14 +396,14 @@ class Booking extends Model
      * @param UnitItem[] $unitItems
      * @return Booking
      */
-    public function setUnits(array|null $unitItems): self
+    public function setUnits(array $unitItems): self
     {
         $this->units = $unitItems;
 
         return $this;
     }
 
-    public function setUnitItems(array|null $unitItems): self
+    public function setUnitItems(array $unitItems): self
     {
         $this->unit_items = json_encode($unitItems);
 

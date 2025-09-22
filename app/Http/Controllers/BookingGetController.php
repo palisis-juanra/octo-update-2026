@@ -34,13 +34,9 @@ class BookingGetController extends Controller
         try {
             $this->logger->info(["message" => "Starting to process get booking request", "uuid" => $bookingUUID]);
             $bookingByUUID = $this->bookingService->getBookingByUuid($bookingUUID);
-            $bookingXMLResponse = $this->bookingService->getBooking($bookingByUUID, false);
+            $bookingXMLResponse = $this->bookingService->getBooking($bookingByUUID, true);
             $transformedBooking = $this->transformer->transform($bookingXMLResponse);
 
-            if (!empty($bookingByUUID->complete_booking_json)) {
-                $bookingJSONFromDB = $this->bookingService->getBookingObjectFromJSON(json_decode($bookingByUUID->complete_booking_json,true));
-                $transformedBooking = $this->bookingService->updateStoredJsonWithNewInformation($bookingJSONFromDB, (object)$transformedBooking);
-            }
             $bookingByUUID->update(['complete_booking_json' => json_encode($transformedBooking)]);
             $this->logger->info(["message" => "Request processed, returning response", "response" => $transformedBooking]);
             return new JsonResponse($transformedBooking, Response::HTTP_OK);

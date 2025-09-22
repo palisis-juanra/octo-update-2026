@@ -95,7 +95,7 @@ class BookingFactory
         Product $product,
         Availability $availability,
         string $savedUnitItems,
-        ?Option $option = null,
+        Option $option,
     ): Booking
     {
         $booking = new Booking();
@@ -138,42 +138,34 @@ class BookingFactory
         }
         
         $booking->setProduct($product);
-        if (!is_null($option)) {
-            $booking->setOption($option);
-            $booking->setOptionId($option->getId());
-        } else {
-            $booking->setOptionId(null);
-            $booking->setOption(null);
-        }
+        $booking->setOption($option);
+        $booking->setOptionId($option->getId());
         
         $booking->setAvailability(availability: $availability);
 
-        $booking->setUnits(null);
-        if (!is_null($option)) {
-            // UNITS
-            $unitItems = [];
-            $unitsQuantities = [];
+        // UNITS
+        $unitItems = [];
+        $unitsQuantities = [];
 
-            $storedUnitItems = json_decode($savedUnitItems, 1);
-            foreach ($storedUnitItems as $emptyUnitItem) {
-                
-                $unitId = (string) $emptyUnitItem['unitId'];
-                $unit = $option->getUnitById($unitId);
-                
-                if (array_key_exists($unitId, $unitsQuantities)) {
-                    $unitsQuantities[$unitId]++;
-                } else {
-                    $unitsQuantities[$unitId] = 1;
-                }
-
-                $unitItem = UnitItemFactory::create($booking, $unit, $unitsQuantities[$unitId], $emptyUnitItem['uuid'] ?? null);
-                
-                $unitItems[] = $unitItem;
+        $storedUnitItems = json_decode($savedUnitItems, 1);
+        foreach ($storedUnitItems as $emptyUnitItem) {
+            
+            $unitId = (string) $emptyUnitItem['unitId'];
+            $unit = $option->getUnitById($unitId);
+            
+            if (array_key_exists($unitId, $unitsQuantities)) {
+                $unitsQuantities[$unitId]++;
+            } else {
+                $unitsQuantities[$unitId] = 1;
             }
 
-            $booking->setUnits($unitItems);
-            $booking->setUnitItems($unitItems);
+            $unitItem = UnitItemFactory::create($booking, $unit, $unitsQuantities[$unitId], $emptyUnitItem['uuid'] ?? null);
+            
+            $unitItems[] = $unitItem;
         }
+
+        $booking->setUnits($unitItems);
+        $booking->setUnitItems($unitItems);
 
         if (in_array(Booking::FIELD_VOUCHER, $product->getDeliveryMethods())) {
             $voucher = Voucher::create($bookingData, $product->getRedemptionMethod(), $booking->getUtcRedeemedAt());
