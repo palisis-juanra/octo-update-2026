@@ -2,16 +2,19 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\TooManyDeparturesException;
 use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
+use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\App;
 use Mockery;
 use SimpleXMLElement;
 use Tests\FeatureTestCase;
+use TourCMS\Utils\TourCMS;
 
 class AvailabilityTest extends FeatureTestCase
 {
@@ -33,6 +36,7 @@ class AvailabilityTest extends FeatureTestCase
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $showTourDeparturesXML;
     public SimpleXMLElement $showTourDeparturesOneDayXML;
+    public SimpleXMLElement $showTourDepartureOver500;
     public SimpleXMLElement $checkAvailXML;
 
     public function setUp(): void
@@ -45,6 +49,7 @@ class AvailabilityTest extends FeatureTestCase
         $this->showTourXML->tour->channel_id = 142;
         $this->showTourDeparturesXML = simplexml_load_file('tests/TourCMSResponses/showTourDepartures.xml');
         $this->showTourDeparturesOneDayXML = simplexml_load_file('tests/TourCMSResponses/showTourDeparturesOneDay.xml');
+        $this->showTourDepartureOver500 = simplexml_load_file('tests/TourCMSResponses/showTourDepartureOver500.xml');
         $this->checkAvailXML = simplexml_load_file('tests/TourCMSResponses/checkAvailability.xml');
 
         App::bind(TourCMSService::class, function ($app) {
@@ -167,7 +172,7 @@ class AvailabilityTest extends FeatureTestCase
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->between(1, 5)->andReturn($this->showTourDeparturesXML);
     
         App::instance(TourCMSService::class, $tourCMSServiceMock);
 
@@ -187,12 +192,12 @@ class AvailabilityTest extends FeatureTestCase
         $this->assertNotEmpty($responseData);        
     }
 
-    public function test_whenNoPricingAndMultiDate_thenShowTourDepartureIsCalledOnce()
+    public function test_whenNoPricingAndMultiDate_thenShowTourDepartureIsCalledFrom1To5Times()
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->between(1, 5)->andReturn($this->showTourDeparturesXML);
 
         App::instance(TourCMSService::class, $tourCMSServiceMock);
     
@@ -214,12 +219,12 @@ class AvailabilityTest extends FeatureTestCase
         $this->assertNotEmpty($responseData);
     }
 
-    public function test_whenNoPricingAndSingleDate_thenShowTourDepartureIsCalledOnce()
+    public function test_whenNoPricingAndSingleDate_thenShowTourDepartureIsCalledFrom1To5Times()
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
         $tourCMSServiceMock->shouldReceive('showTour')->zeroOrMoreTimes()->andReturn($this->showTourXML);
-        $tourCMSServiceMock->shouldReceive('showTourDepartures')->once()->andReturn($this->showTourDeparturesXML);
+        $tourCMSServiceMock->shouldReceive('showTourDepartures')->between(1, 5)->andReturn($this->showTourDeparturesXML);
 
         App::instance(TourCMSService::class, $tourCMSServiceMock);
     
@@ -237,5 +242,53 @@ class AvailabilityTest extends FeatureTestCase
     
         $response->assertOk();
         $this->assertNotEmpty($responseData);
+    }
+
+    public function test_whenNoPricingAndTooManyDepartures_thenResponseSaysUnprocessableEntity()
+    {
+        $tourCMSMock = $this->getMockBuilder(TourCMS::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['show_tour_departures', 'add_header'])
+            ->getMock();
+
+        $tourCMSMock->method('show_tour_departures')
+            ->willReturn($this->showTourDepartureOver500);
+        $tourCMSMock->method('add_header')
+            ->willReturn(true);
+
+        $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['showChannel', 'showTour'])
+            ->getMock();
+
+        $tourCMSServiceMock->method('showChannel')
+            ->willReturn($this->showChannelXML);
+        $tourCMSServiceMock->method('showTour')
+            ->willReturn($this->showTourXML);
+
+        $reflection = new \ReflectionClass($tourCMSServiceMock);
+        
+        $tourCMSProperty = $reflection->getProperty('tourCMS');
+        $tourCMSProperty->setAccessible(true);
+        $tourCMSProperty->setValue($tourCMSServiceMock, $tourCMSMock);
+        
+        $channelIdProperty = $reflection->getProperty('channelId');
+        $channelIdProperty->setAccessible(true);
+        $channelIdProperty->setValue($tourCMSServiceMock, 'some_channel_id');
+
+        App::instance(TourCMSService::class, $tourCMSServiceMock);
+
+        $response = $this->post(
+            '/availability', 
+            [
+                'productId' => self::VALID_PRODUCT_ID, 
+                'optionId' => self::VALID_OPTION_ID,
+                'localDate' => self::VALID_LOCAL_DATE
+            ], 
+            [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
+        );
+        $responseArray = json_decode($response->baseResponse->getContent(), true);
+        $this->assertEquals($responseArray['error'], 'UNPROCESSABLE_ENTITY');
+        $this->assertEquals($responseArray['errorMessage'], 'Too many departures found. Please refine your search criteria.');
     }
 }

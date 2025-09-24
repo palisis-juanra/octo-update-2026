@@ -47,11 +47,12 @@ class TourCMSService
     public const ERROR_PERM = 'FAIL_PERM';
     public const OCTO_USER_AGENT = 'octo.tourcms.com';
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR = 'SUPPLIER_SUBSYSTEM_ERROR';
+    public const int MAX_SHOW_TOUR_DEPARTURES_COUNT = 500;
 
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
 
-    private TourCMS $tourCMS;
-    private TourCMSMulti $tourCMSMulti;
+    protected TourCMS $tourCMS;
+    protected TourCMSMulti $tourCMSMulti;
     protected string $channelId;
 
     public function __construct(string $maid, string $APIKey)
@@ -142,7 +143,7 @@ class TourCMSService
         } else {
             $queryString .= "&start_date_start={$startDate}&start_date_end={$startDate}";
         }
-        $queryString .= '&per_page=100';
+        $queryString .= '&per_page='.self::MAX_SHOW_TOUR_DEPARTURES_COUNT;
 
         if (!empty($extraParams)) {
             if (substr($extraParams, 0, 1) != '&') {
@@ -157,7 +158,7 @@ class TourCMSService
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response);
         $departureCount = (int) $response->tour->dates_and_prices->total_departure_count ?? 0;
-        if ($departureCount > 100) {
+        if ($departureCount > self::MAX_SHOW_TOUR_DEPARTURES_COUNT) {
             throw new TooManyDeparturesException($departureCount);
         }
 

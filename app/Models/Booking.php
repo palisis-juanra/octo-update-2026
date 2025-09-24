@@ -46,6 +46,7 @@ class Booking extends Model
     protected array $units;
     protected int $leadCustomerId;
     protected SimpleXMLElement $bookingData;
+    protected array $completeBookingJson;
 
     /**
      * The table associated with the model.
@@ -87,7 +88,9 @@ class Booking extends Model
         'availability_id',
         'product_id',
         'option_id',
-        'unit_items'
+        'unit_items',
+        'complete_booking_json',
+        'status',
     ];
 
     public static $snakeAttributes = true;
@@ -107,6 +110,7 @@ class Booking extends Model
         $this->cancellation = null;
         $this->notes = null;
         $this->units = [];
+        $this->completeBookingJson = [];
         $this->contact = new Contact;
         $this->voucher = null;
     }
@@ -290,6 +294,13 @@ class Booking extends Model
         return $this;
     }
 
+    public function setOptionId(string $optionId): self
+    {
+        $this->option_id = $optionId;
+
+        return $this;
+    }
+
     public function getOption(): ?Option
     {
         return $this->option;
@@ -388,7 +399,13 @@ class Booking extends Model
     public function setUnits(array $unitItems): self
     {
         $this->units = $unitItems;
-        $this->unit_items = json_encode($this->units);
+
+        return $this;
+    }
+
+    public function setUnitItems(array $unitItems): self
+    {
+        $this->unit_items = json_encode($unitItems);
 
         return $this;
     }
@@ -396,6 +413,18 @@ class Booking extends Model
     public function getUnits(): ?array
     {
         return $this->units;
+    }
+
+    public function getCompleteBookingJson(): ?array
+    {
+        return $this->completeBookingJson;
+    }
+
+    public function setCompleteBookingJson(string $completeBookingJson): self
+    {
+        $this->completeBookingJson = json_decode($completeBookingJson);
+
+        return $this;
     }
 
     public function setContact(Contact $contact): self

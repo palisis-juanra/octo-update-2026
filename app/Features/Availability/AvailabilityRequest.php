@@ -181,18 +181,27 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
     protected function fetchDeparturesFromAPI(TourCMSService $tourCMSService): array
     {
+        $needsPricing = OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING);
         $mappingQueryString = OptionService::getMappingQueryString($this->optionId);
-
+        if (!$needsPricing) {
+            $mappingQueryString .= '&hide_prices=1';
+        }
         $response = $tourCMSService->showTourDepartures($this->product->getTourId(),$this->localDateStart, $this->localDateEnd, $mappingQueryString);
 
         if (!isset($response->tour->dates_and_prices)) {
             return [];
         }
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
+        if ($needsPricing) {
             $this->currency = (string)$response->tour->sale_currency;
         }
         $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
-
+        $page = 2;
+        while (count($departures) < $response->tour->dates_and_prices->total_departure_count) {
+            $pagedMappingQueryString = $mappingQueryString . "&page=$page";
+            $response = $tourCMSService->showTourDepartures($this->product->getTourId(),$this->localDateStart, $this->localDateEnd, $pagedMappingQueryString);
+            $departures = array_merge($departures, $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure'));
+            $page++;
+        }
         return $departures;
     }
 

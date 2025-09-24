@@ -32,7 +32,7 @@ class BookingFactory
         Option $option,
         Availability $availability,
         array $requestUnitItems,
-        ?string $notes = ''
+        ?string $notes = null
     ): Booking
     {
         $booking = new Booking();
@@ -65,6 +65,7 @@ class BookingFactory
         }
 
         $booking->setUnits($unitItems);
+        $booking->setUnitItems($unitItems);
         
         if (!is_null($notes)){
             $booking->setNotes($notes);
@@ -92,9 +93,9 @@ class BookingFactory
         string $bookingUuid,
         SimpleXMLElement $showBookingXML,
         Product $product,
-        Option $option,
         Availability $availability,
-        string $savedUnitItems
+        string $savedUnitItems,
+        Option $option,
     ): Booking
     {
         $booking = new Booking();
@@ -138,6 +139,8 @@ class BookingFactory
         
         $booking->setProduct($product);
         $booking->setOption($option);
+        $booking->setOptionId($option->getId());
+        
         $booking->setAvailability(availability: $availability);
 
         // UNITS
@@ -162,7 +165,8 @@ class BookingFactory
         }
 
         $booking->setUnits($unitItems);
-        
+        $booking->setUnitItems($unitItems);
+
         if (in_array(Booking::FIELD_VOUCHER, $product->getDeliveryMethods())) {
             $voucher = Voucher::create($bookingData, $product->getRedemptionMethod(), $booking->getUtcRedeemedAt());
             $booking->setVoucher($voucher);

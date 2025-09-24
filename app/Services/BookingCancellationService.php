@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Builders\BookingBuilder;
+use App\Builders\BookingChecker;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Exceptions\NoMatchingDataException;
 use App\Models\Booking;
@@ -18,9 +20,12 @@ class BookingCancellationService extends BookingService
         public TourCMSService $tourCMSService,
         public ProductService $productService,
         public AvailabilityService $availabilityService,
-        public JSONLogService $logger)
+        public JSONLogService $logger,
+        public BookingBuilder $bookingBuilder,
+        public BookingChecker $checker
+    )
     {
-        parent::__construct($tourCMSService, $logger, $productService, $availabilityService);
+        parent::__construct($tourCMSService, $logger, $productService, $availabilityService, $bookingBuilder, $checker);
     }
 
     /**
@@ -76,6 +81,9 @@ class BookingCancellationService extends BookingService
     public function updateBookingStatusToCancelled(Booking $booking): void
     {
         $booking->setStatus(Booking::STATUS_CANCELLED);
+        foreach($booking->getUnits() as $unit) {
+            $unit->setStatus(Booking::STATUS_CANCELLED);
+        }
 
         Booking::where('uuid', $booking->getUuid())->update(['status' => self::STATUS_CANCELLED]);
     }

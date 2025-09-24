@@ -49,13 +49,14 @@ class BookingReservationController extends Controller
 
         $unitItems = $requestParams[OctoRequest::UNIT_ITEMS] ?? null;
         $uuid = $requestParams[OctoRequest::UUID] ?? null;
-        $notes = $requestParams[self::FIELD_NOTES] ?? '';
+        $notes = $requestParams[self::FIELD_NOTES] ?? null;
 
         $availabilityId = $requestParams[OctoRequest::AVAILABILITY_ID];
         $availability = $this->availabilityService->getAvailabilityObjectFromAvailabilityId($availabilityId);
 
         $booking = $this->bookingService->reserve($product, $option, $availability, $unitItems, $uuid, $notes);
         $bookingData = $this->transformer->transform($booking);
+        $booking->update(['complete_booking_json' => json_encode($bookingData)]);
         $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
 
         return new JsonResponse($bookingData, Response::HTTP_OK);

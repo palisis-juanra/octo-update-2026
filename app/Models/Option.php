@@ -209,4 +209,10 @@ class Option extends Model
 
         return $this;
     }
+
+    public function addUnit(Unit $unit): self
+    {
+        $this->units[] = $unit;
+        return $this;
+    }
 }

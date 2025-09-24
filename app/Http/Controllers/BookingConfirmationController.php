@@ -30,12 +30,13 @@ class BookingConfirmationController
         $this->logger->info(["message" => "Starting to process booking confirmation request", "request" => $request->post()]);
         $this->logger->info(["message" => "Getting booking from database", "Booking_uuid" => $uuid]);
 
-        $booking = $this->service->getBookingByUuid($uuid);
-        $booking = $this->service->getBooking($booking);
+        $bookingByUUID = $this->service->getBookingByUuid($uuid);
+        $booking = $this->service->getBooking($bookingByUUID);
 
         if ($booking->isAlreadyConfirmed()) {
+            $bookingData = $this->transformer->transform($booking);
             $this->logger->info(["message" => "Booking already confirmed", "uuid" => $uuid, "id" => $booking->getId()]);
-            return new JsonResponse($this->transformer->transform($booking), Response::HTTP_OK);
+            return new JsonResponse($bookingData, Response::HTTP_OK);
         }
         
         $unitItems = $request->post(OctoRequest::UNIT_ITEMS) ?? [];
@@ -84,6 +85,7 @@ class BookingConfirmationController
         $booking = $this->service->confirmBooking($booking);
 
         $bookingData = $this->transformer->transform($booking);
+        $bookingByUUID->update(['status' => Booking::STATUS_CONFIRMED, 'complete_booking_json' => json_encode($bookingData)]);
         $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
 
         return new JsonResponse($bookingData, Response::HTTP_OK);

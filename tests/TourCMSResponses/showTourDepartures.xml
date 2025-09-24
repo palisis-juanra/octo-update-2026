@@ -9,7 +9,7 @@
       <min_booking_size>1</min_booking_size>
       <max_booking_size>10</max_booking_size>
       <dates_and_prices>
-        <total_departure_count>536</total_departure_count>
+        <total_departure_count>456</total_departure_count>
         <departure>
           <departure_id>32284</departure_id>
           <code>13:00-15:00</code>

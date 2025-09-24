@@ -85,9 +85,9 @@ class BookingFactoryTest extends FeatureTestCase
             $this->showTemporaryBookingXML->booking->booking_uuid,
             $this->showTemporaryBookingXML,
             $this->product,
-            $this->getOption(),
             $this->getAvailability(),
             $this->getUnitItems(),
+            $this->getOption()
         );
 
         $this->assertEquals(Booking::STATUS_ON_HOLD, $booking->getStatus());
@@ -100,9 +100,9 @@ class BookingFactoryTest extends FeatureTestCase
             $this->showConfirmedBookingXML->booking->booking_uuid,
             $this->showConfirmedBookingXML,
             $this->product,
-            $this->getOption(),
             $this->getAvailability(),
-            $this->getUnitItems()
+            $this->getUnitItems(),
+            $this->getOption()
         );
 
         $this->showConfirmedBookingXML->booking->status = Booking::TCMS_STATUS_PROVISIONAL;
@@ -110,9 +110,9 @@ class BookingFactoryTest extends FeatureTestCase
             $this->showConfirmedBookingXML->booking->booking_uuid,
             $this->showConfirmedBookingXML,
             $this->product,
-            $this->getOption(),
             $this->getAvailability(),
-            $this->getUnitItems()
+            $this->getUnitItems(),
+            $this->getOption()
         );
 
         $this->assertEquals(Booking::STATUS_PENDING, $quotationBooking->getStatus());
@@ -125,9 +125,9 @@ class BookingFactoryTest extends FeatureTestCase
             $this->showConfirmedBookingXML->booking->booking_uuid,
             $this->showConfirmedBookingXML,
             $this->product,
-            $this->getOption(),
             $this->getAvailability(),
-            $this->getUnitItems()
+            $this->getUnitItems(),
+            $this->getOption()
         );
 
         $this->assertEquals(Booking::STATUS_CONFIRMED, $booking->getStatus());
