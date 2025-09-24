@@ -2,6 +2,7 @@
 namespace App\Builders;
 
 use App\Models\Option;
+use App\Models\OptionContent;
 use App\Models\Unit;
 use App\Services\UnitService;
 use ReflectionClass;
@@ -90,8 +91,12 @@ class BookingBuilder
             }
             $optionData->units = $units;
 
-            $option = Option::create($optionData);
-            $options[] = $option;
+            $optionObject = Option::create($optionData);
+            if (isset($option['title'])){
+                $optionContent = new OptionContent($option['title']);
+                $optionObject->setContent($optionContent);
+            }
+            $options[] = $optionObject;
         }
         return $options;
     }
