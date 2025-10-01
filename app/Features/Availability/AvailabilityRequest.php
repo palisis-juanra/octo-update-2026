@@ -14,10 +14,10 @@ use App\Models\Availability\Availability;
 use App\Models\Availability\AvailabilityUnitPricing;
 use App\Models\Pricing;
 use App\Models\Product;
+use App\Services\CutoffService;
 use App\Services\UnitService;
 use App\Services\XMLService;
 use SimpleXMLElement;
-use Throwable;
 
 class AvailabilityRequest extends BaseAvailabilityRequest
 {
@@ -29,7 +29,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected int $minBookingSize;
     protected int $maxBookingSize;
     protected int $maxUnits;
-    protected string $cutoff;
+    protected array $cutoff;
     protected string $currency;
     protected bool $allDay = false;
 
@@ -225,7 +225,10 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $availability->setAvailable($available);
             $availability->setStatus($this->getOctoStatus((string) $departure->status, $available));
             $availability->setMaxUnits($this->maxUnits);
-            $availability->setUtcCutoffAt($this->cutoff);
+
+            $departureCutoff = CutoffService::calculateCutoffForDeparture($this->product, $departure);
+            $availability->setUtcCutoffAt($departureCutoff);
+
             $availability->setOpeningHoursFrom(!empty($departure->start_time) ? (string) $departure->start_time : '00:00');
             $availability->setOpeningHoursTo(!empty($departure->end_time) ? (string) $departure->end_time :'23:59');
             $availability->setVacancies((int) $departure->spaces_remaining);

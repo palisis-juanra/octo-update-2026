@@ -2,7 +2,13 @@
 
 namespace App\Interfaces;
 
+use App\Models\Product;
+use App\Services\AvailabilityService;
 use App\Services\TourCMSService;
+use DateInterval;
+use DateTime;
+use DateTimeZone;
+use SimpleXMLElement;
 
 abstract class BaseAvailabilityRequest
 {
@@ -17,7 +23,7 @@ abstract class BaseAvailabilityRequest
     const TCMS_STATUS_CLOSED = 'CLOSED';
 
     protected int $maxUnits;
-    protected string $cutoff;
+    protected array $cutoff;
     protected array $availabilityIds;
     protected bool $contentEnabled = false;
     protected ?string $tourName = null;
@@ -43,16 +49,6 @@ abstract class BaseAvailabilityRequest
     public function getMaxUnits(): int
     {
         return $this->maxUnits;
-    }
-
-    public function setCutoff(string $cutoff): void
-    {
-        $this->cutoff = $cutoff;
-    }
-
-    public function getCutoff(): string
-    {
-        return $this->cutoff;
     }
 
     /**

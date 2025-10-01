@@ -53,9 +53,6 @@ class AvailabilityController extends Controller
             $option = $product->getOptionById($optionId);
 
             $availabilityRequest->setMaxUnits($option->getRestrictions()->maxUnits ?? self::DEFAULT_MAX_UNITS);
-            $tourCMSCutoff = $product->getCutoff();
-            $octoCutoff = $this->availabilityService->getCutoffFromTourCMSCutoff($tourCMSCutoff, $availabilityRequest->getLocalDateStart());
-            $availabilityRequest->setCutoff($octoCutoff);
 
             $availabilities = $this->availabilityService->getAvailabilities($availabilityRequest);
             $availabilitiesData = $this->availabilityService->getAvailabilitiesTransformed($availabilities);
