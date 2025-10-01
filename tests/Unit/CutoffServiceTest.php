@@ -30,7 +30,7 @@ class CutoffServiceTest extends UnitTestCase
 
     // BEFORE START SECONDS
     
-    public function test_calculateCutoffForDeparture_withTypeBeforeStartSecondsInUtc(): void
+    public function test_calculateCutoffForDeparture_whenCutoffTypeIsBeforeStartSecondsInUtc_thenWeGetCorrectUtcCutoff(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_BEFORE_START_SECONDS, 3600);
 
@@ -41,7 +41,7 @@ class CutoffServiceTest extends UnitTestCase
         $this->assertEquals('2025-01-01T10:20:00Z', $cutoff);
     }
 
-    public function test_calculateCutoffForDeparture_withTypeBeforeStartSecondsInWestOfUtc(): void
+    public function test_calculateCutoffForDeparture_whenCutoffTypeIsBeforeStartSecondsInWestOfUtc_thenWeGetCorrectUtcCutoff(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_BEFORE_START_SECONDS, 3600, 'America/New_York');
 
@@ -52,7 +52,7 @@ class CutoffServiceTest extends UnitTestCase
         $this->assertEquals('2025-01-01T10:20:00Z', $cutoff);
     }
 
-    public function test_calculateCutoffForDeparture_withTypeBeforeStartSecondsInEastOfUtc(): void
+    public function test_calculateCutoffForDeparture_whenCutoffTypeIsBeforeStartSecondsInEastOfUtc_thenWeGetCorrectUtcCutoff(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_BEFORE_START_SECONDS, 3600, 'Asia/Japan');
 
@@ -65,7 +65,7 @@ class CutoffServiceTest extends UnitTestCase
 
     // DAY BEFORE FIXED TIME
 
-    public function test_calculateCutoffForDeparture_withTypeDayBeforeAndFixedTimeInUtc(): void
+    public function test_calculateCutoffForDeparture_whenCutoffTypeIsDayBeforeAndFixedTimeInUtc_thenWeGetCorrectUtcCutoff(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_DAY_BEFORE_TIME, '18:00');
 
@@ -76,7 +76,7 @@ class CutoffServiceTest extends UnitTestCase
         $this->assertEquals('2024-12-31T18:00:00Z', $cutoff);
     }
 
-    public function test_calculateCutoffForDeparture_withTypeDayBeforeAndFixedTimeInWestOfUtc(): void
+    public function test_calculateCutoffForDeparture_whenCutoffTypeIsDayBeforeAndFixedTimeInWestOfUtc_thenWeGetCorrectUtcCutoff(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_DAY_BEFORE_TIME, '18:00', 'America/New_York');
 
@@ -87,7 +87,7 @@ class CutoffServiceTest extends UnitTestCase
         $this->assertEquals('2024-12-31T23:00:00Z', $cutoff);
     }
 
-    public function test_calculateCutoffForDeparture_withTypeDayBeforeAndFixedTimeInEastOfUtc(): void
+    public function test_calculateCutoffForDeparture_whenCutoffTypeIsDayBeforeAndFixedTimeInEastOfUtc_thenWeGetCorrectUtcCutoff(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_DAY_BEFORE_TIME, '18:00', 'Asia/Tokyo');
 
@@ -99,7 +99,7 @@ class CutoffServiceTest extends UnitTestCase
     }
 
     // SAME DAY FIXED TIME
-    public function test_calculateCutoffForDeparture_withTypeSameDayFixedTimeInUtc(): void
+    public function test_calculateCutoffForDeparture_whenCutoffTypeIsSameDayFixedTimeInUtc_thenWeGetCorrectUtcCutoff(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_SAME_DAY_TIME, '18:00');
 
@@ -110,7 +110,7 @@ class CutoffServiceTest extends UnitTestCase
         $this->assertEquals('2025-01-01T18:00:00Z', $cutoff);
     }
 
-    public function test_calculateCutoffForDeparture_withTypeSameDayFixedTimeInWestOfUtc(): void
+    public function test_calculateCutoffForDeparture_whenCutoffTypeIsSameDayFixedTimeInWestOfUtc_thenWeGetCorrectUtcCutoff(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_SAME_DAY_TIME, '18:00', 'America/New_York');
 
@@ -121,7 +121,7 @@ class CutoffServiceTest extends UnitTestCase
         $this->assertEquals('2025-01-01T23:00:00Z', $cutoff);
     }
 
-    public function test_calculateCutoffForDeparture_withTypeSameDayFixedTimeInEastOfUtc(): void
+    public function test_calculateCutoffForDeparture_whenCutoffTypeIsSameDayFixedTimeInEastOfUtc_thenWeGetCorrectUtcCutoff(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_SAME_DAY_TIME, '18:00', 'Asia/Tokyo');
 

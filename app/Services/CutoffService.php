@@ -14,6 +14,9 @@ class CutoffService
     public const string TCMS_CUTOFF_DAY_BEFORE_TIME = 'day_before_time';
     public const string TCMS_CUTOFF_SAME_DAY_TIME = 'same_day_time';
     public const string CUTOFF_FORMAT = 'Y-m-d\TH:i:s\Z';
+    public const string UNIX_TIMESTAMP_FORMAT = 'U';    
+    public const string DATE_MODIFIER_ONE_DAY_LESS = '-1 day';
+    public const string TIMEZONE_UTC = 'UTC';
 
     /**
      * Calculate the cutoff date time in UTC for a given product and departure
@@ -23,10 +26,10 @@ class CutoffService
      */
     public static function calculateCutoffForDeparture(Product $product, SimpleXMLElement $departure): string
     {
-        $startDate = $date = DateTime::createFromFormat('U', $departure->start_time_utcseconds);
+        $startDate = $date = DateTime::createFromFormat(self::UNIX_TIMESTAMP_FORMAT, $departure->start_time_utcseconds);
 
-        $cutoffType = $product->getCutoff()['type'];
-        $cutoffValue = $product->getCutoff()['value'];
+        $cutoffType = $product->getCutoff()['type'] ?? self::TCMS_CUTOFF_BEFORE_START_SECONDS;
+        $cutoffValue = $product->getCutoff()['value'] ?? 0;
 
         if ($cutoffValue == '0') {
             return $startDate->format(self::CUTOFF_FORMAT);
@@ -39,29 +42,34 @@ class CutoffService
             
             case self::TCMS_CUTOFF_DAY_BEFORE_TIME:
                 $startDate->setTimezone(new DateTimeZone($product->getTimeZone()));
-                $date->modify('-1 day');
+                $date->modify(self::DATE_MODIFIER_ONE_DAY_LESS);
 
-                $valueSplitted = explode(':', $cutoffValue);
-                $hour = $valueSplitted[0] ? (int) $valueSplitted[0] : 0;
-                $minutes = $valueSplitted[1] ? (int) $valueSplitted[1] : 0;
+                [$hour, $minutes] = self::getHourAndMinutesFromCutoffValue($cutoffValue);
 
                 $date->setTime($hour, $minutes);
-                $date->setTimezone(new DateTimeZone('UTC'));
+                $date->setTimezone(new DateTimeZone(self::TIMEZONE_UTC));
                 break;
 
             case self::TCMS_CUTOFF_SAME_DAY_TIME:
                 $startDate->setTimezone(new DateTimeZone($product->getTimeZone()));
 
-                $valueSplitted = explode(':', $cutoffValue);
-                $hour = $valueSplitted[0] ? (int) $valueSplitted[0] : 0;
-                $minutes = $valueSplitted[1] ? (int) $valueSplitted[1] : 0;
+                [$hour, $minutes] = self::getHourAndMinutesFromCutoffValue($cutoffValue);
 
                 $date->setTime($hour, $minutes);
-                $date->setTimezone(new DateTimeZone('UTC'));
+                $date->setTimezone(new DateTimeZone(self::TIMEZONE_UTC));
                 break;
 
         }
 
         return $startDate->format(self::CUTOFF_FORMAT);
+    }
+
+    public static function getHourAndMinutesFromCutoffValue(string $cutoffValue): array
+    {
+        $valueSplitted = explode(':', $cutoffValue);
+        $hour = $valueSplitted[0] ? (int) $valueSplitted[0] : 0;
+        $minutes = $valueSplitted[1] ? (int) $valueSplitted[1] : 0;
+
+        return [$hour, $minutes];
     }
 }
