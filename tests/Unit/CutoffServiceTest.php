@@ -17,7 +17,7 @@ class CutoffServiceTest extends UnitTestCase
 
     // NO CUTOFF
 
-    public function test_calculateCutoffForDeparture_withValueZeroReturnsStartDate(): void
+    public function test_calculateCutoffForDeparture_whenCutoffValueIsZero_thenWeReturnsStartDate(): void
     {
         $product = $this->mockProduct(CutoffService::TCMS_CUTOFF_BEFORE_START_SECONDS, 0);
 
