@@ -58,7 +58,7 @@ class BookingService
                 try {
                     $option->getUnitById($unitItem['unitId']);
                 } catch (\App\Exceptions\InvalidUnitIdException) {
-                    $unit = $this->bookingBuilder->buildUnitItemFromJSON($unitItem['unit']);
+                    $unit = $this->bookingBuilder->buildUnitFromJSON($unitItem['unit']);
                     $option->addUnit($unit);
                 }
             }
@@ -67,7 +67,7 @@ class BookingService
         $availability = new Availability();
         $availability = $this->availabilityService->generateAvailabilityFromBookingXML($product, $showBookingResponse);
 
-        return BookingFactory::createFromShowBookingXML(
+        $booking =  BookingFactory::createFromShowBookingXML(
             $booking->getUuid(),
             $showBookingResponse, 
             $product, 
@@ -75,6 +75,7 @@ class BookingService
             $booking->unit_items,
             $option
         );
+        return $booking;
     }
 
     /**

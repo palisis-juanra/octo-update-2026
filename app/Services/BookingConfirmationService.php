@@ -40,6 +40,7 @@ class BookingConfirmationService extends BookingService
     {
         $commitBookingResponse = $this->tourCMSService->commitBooking($booking->booking_id, $booking->getResellerReference());
         $this->logger->info(["commitBookingResponse" => $commitBookingResponse]);
+
         $error = (string) $commitBookingResponse->error;
 
         if ($error == self::ERROR_BOOKING_ALREADY_COMITTED) {
@@ -50,10 +51,9 @@ class BookingConfirmationService extends BookingService
         if ($error !== TourCMSService::ERROR_OK) {
             $this->logger->error(self::ERROR_BOOKING_NOT_FOUND);
             throw new InvalidBookingUUIDException($booking->uuid);
-        } 
+        }
 
         $booking = $this->getBooking($booking);
-
         return $booking;
     }
 

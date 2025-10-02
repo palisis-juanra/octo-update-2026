@@ -83,9 +83,10 @@ class BookingConfirmationController
         // Commit booking
         $this->logger->info(["message" => "Confirming booking", "uuid" => $uuid, "id" => $booking->getId()]);
         $booking = $this->service->confirmBooking($booking);
+        $unitItems = $booking->getUnits();
 
         $bookingData = $this->transformer->transform($booking);
-        $bookingByUUID->update(['status' => Booking::STATUS_CONFIRMED, 'complete_booking_json' => json_encode($bookingData)]);
+        $bookingByUUID->update(['status' => Booking::STATUS_CONFIRMED, 'complete_booking_json' => json_encode($bookingData), 'unit_items' => json_encode($unitItems)]);
         $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
 
         return new JsonResponse($bookingData, Response::HTTP_OK);

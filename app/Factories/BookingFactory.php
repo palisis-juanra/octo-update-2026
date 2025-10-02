@@ -172,6 +172,7 @@ class BookingFactory
             $booking->setVoucher($voucher);
         }
 
+        $booking->setSupplierReference();
         return $booking;
     }
 

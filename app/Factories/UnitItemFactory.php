@@ -38,7 +38,7 @@ class UnitItemFactory
         $unitItem
             ->setUuid($uuid ?? Uuid::uuid4())
             ->setResellerReference(null)
-            ->setSupplierReference($unit->reference)
+            ->setSupplierReference(null)
             ->setUnitId($unit->getId())
             ->setId($unit->getId())
             ->setUnit($unit)
@@ -48,7 +48,8 @@ class UnitItemFactory
 
         if (!is_null($component)) {
             $customerId = self::getCustomerIdForUnitItem($component, $number);
-            $unitItem->setCustomerId((int) $customerId);
+            $unitItem->setCustomerId((int) $customerId)
+                     ->setSupplierReference($component->operator_reference ?? null);
 
             $customer = null;
             $customers = XMLService::getArrayFromXmlNode($booking->getBookingData()->customers, 'customer');

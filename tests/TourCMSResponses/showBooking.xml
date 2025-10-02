@@ -148,6 +148,7 @@
                 <redeemed_at/>
                 <redeemed_at_utc_seconds/>
                 <linked_component_id>6292</linked_component_id>
+                <operator_reference>thisanoperatorRef</operator_reference>
                 <product_id>67</product_id>
                 <date_id>32310</date_id>
                 <date_type>departure</date_type>
@@ -196,6 +197,7 @@
                 <redeemed_at/>
                 <redeemed_at_utc_seconds/>
                 <linked_component_id>6293</linked_component_id>
+                <operator_reference>thisanoperatorRef</operator_reference>
                 <product_id>67</product_id>
                 <date_id>32310</date_id>
                 <date_type>departure</date_type>

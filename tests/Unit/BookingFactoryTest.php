@@ -19,6 +19,8 @@ use Tests\FeatureTestCase;
 
 class BookingFactoryTest extends FeatureTestCase
 {
+    public const SUPPLIER_REF = 'thisanoperatorRef';
+
     public BookingFactory $factory;
     public SimpleXMLElement $showTourXML;
     public SimpleXMLElement $startNewBookingXML;
@@ -141,6 +143,37 @@ class BookingFactoryTest extends FeatureTestCase
         $this->assertTrue(BookingFactory::isBookingRedeemed($components));
     }
 
+    public function test_createFromShowBookingXML_whenOperatorReferenceIsTheSameAcrossComponents_thenBookingHasSupplierReference(): void
+    {
+        $booking = $this->factory->createFromShowBookingXML(
+            $this->showTemporaryBookingXML->booking->booking_uuid,
+            $this->showConfirmedBookingXML,
+            $this->product,
+            $this->getAvailability(),
+            $this->getNotEmptyUnitItems(),
+            $this->getOption()
+        );
+
+        $this->assertEquals(self::SUPPLIER_REF, $booking->getSupplierReference());
+    }
+
+    public function test_createFromShowBookingXML_whenOperatorReferenceIsDifferentAcrossComponents_thenBookingDoesNotHaveSupplierReference(): void
+    {
+        $this->showConfirmedBookingXML->booking->components->component[0]->operator_reference = 'something';
+        $this->showConfirmedBookingXML->booking->components->component[1]->operator_reference = 'somethingElse';
+
+        $booking = $this->factory->createFromShowBookingXML(
+            $this->showTemporaryBookingXML->booking->booking_uuid,
+            $this->showConfirmedBookingXML,
+            $this->product,
+            $this->getAvailability(),
+            $this->getNotEmptyUnitItems(),
+            $this->getOption()
+        );
+
+        $this->assertEquals(null, $booking->getSupplierReference());
+    }
+
     protected function getOption(): Option
     {
         return $this->options[0];
@@ -152,6 +185,10 @@ class BookingFactoryTest extends FeatureTestCase
             ->setId('FAKE_AVAILABILITY_ID');
     }
 
+    protected function getNotEmptyUnitItems(): string
+    {
+        return '[{"id": "TE_1_67|142|r1","unit": [],"uuid": "369d1c8c-e9fd-47b5-8969-7d066fd44f41","status": "CONFIRMED","ticket": null,"unitId": "TE_1_67|142|r1","contact": [],"customerId": 12571,"utcRedeemedAt": null,"resellerReference": null,"supplierReference": "thisanoperatorRef"},{"id": "TE_1_67|142|r2","unit": [],"uuid": "228a6d6c-cb91-4ba6-a55d-d175805fa7c9","status": "CONFIRMED","ticket": null,"unitId": "TE_1_67|142|r2","contact": [],"customerId": 12572,"utcRedeemedAt": null,"resellerReference": null,"supplierReference": "thisanoperatorRef"}]';
+    }
     protected function getUnitItems(): string
     {
         return '[]';
