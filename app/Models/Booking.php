@@ -333,10 +333,17 @@ class Booking extends Model
 
     public function setSupplierReference(?string $supplierReference = null): self
     {
-        if (!empty($supplierReference)) {
-            $this->supplierReference = $supplierReference;
-            return $this;
-        }
+        $this->supplierReference = $supplierReference;
+        return $this;
+    }
+
+    public function getSupplierReference(): ?string
+    {
+        return $this->supplierReference;
+    }
+
+    public function getSupplierReferenceFromUnitItems(): ?string
+    {
         $supplierRef = null;
         $supplierRefSet = false;
         foreach ($this->units as $unit) {
@@ -350,13 +357,7 @@ class Booking extends Model
                 break;
             }
         }
-        $this->supplierReference = $supplierRef;
-        return $this;
-    }
-
-    public function getSupplierReference(): ?string
-    {
-        return $this->supplierReference;
+        return $supplierRef;
     }
 
     public function setCancellable(bool $cancellable): self
