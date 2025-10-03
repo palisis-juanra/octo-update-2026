@@ -125,6 +125,39 @@ class UnitItemFactoryTest extends UnitTestCase
         $this->assertEquals($urlLink, $unitItemRate2Person1->getTicket()->getDeliveryOptions()['deliveryValue']);
     }
 
+    public function test_create_whenComponentDoesNotHaveUrl_thenWeGetNull(): void
+    {
+        $showBooking = $this->bookingWithOneUrlPerComponentXML;
+        unset($showBooking->components->component[0]->urls->url);
+        unset($showBooking->components->component[1]->urls->url);
+
+        $unitItemFactory = new UnitItemFactory();
+        
+        // r1 - 1
+        $unitItemRate1Person1 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(),
+            1
+        );
+        // r1 - 2
+        $unitItemRate1Person2 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(),
+            2
+        );
+
+        // r2 - 1
+        $unitItemRate2Person1 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(2),
+            1
+        );
+
+        $this->assertEmpty($unitItemRate1Person1->getTicket()->getDeliveryOptions(), "DeliveryOptions should be empty");
+        $this->assertEmpty($unitItemRate1Person2->getTicket()->getDeliveryOptions(), "DeliveryOptions should be empty");
+        $this->assertEmpty($unitItemRate2Person1->getTicket()->getDeliveryOptions(), "DeliveryOptions should be empty");
+    }
+
     // PROTECTED METHODS
 
     protected function getFakeBooking(SimpleXMLElement $showBooking): Booking
