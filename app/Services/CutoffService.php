@@ -26,7 +26,14 @@ class CutoffService
      */
     public static function calculateCutoffForDeparture(Product $product, SimpleXMLElement $departure): string
     {
-        $startDate = $date = DateTime::createFromFormat(self::UNIX_TIMESTAMP_FORMAT, $departure->start_time_utcseconds);
+        if (!empty($departure->start_time_utcseconds)) {
+            $startDate = $date = DateTime::createFromFormat(self::UNIX_TIMESTAMP_FORMAT, $departure->start_time_utcseconds);
+        } else {
+            // If departure has not time we assume start time is 09:00
+            $startDateTime = $departure->start_date . " 09:00";
+            $startDate = $date = new DateTime($startDateTime, new DateTimeZone($product->getTimeZone()));
+            $startDate->setTimezone(new DateTimeZone('UTC'));
+        }
 
         $cutoffType = $product->getCutoff()['type'] ?? self::TCMS_CUTOFF_BEFORE_START_SECONDS;
         $cutoffValue = $product->getCutoff()['value'] ?? 0;
