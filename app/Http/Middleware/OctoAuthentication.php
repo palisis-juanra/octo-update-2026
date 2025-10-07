@@ -79,32 +79,12 @@ class OctoAuthentication
     public static function getCorrelationIdFromHeaders(Request $request): string | null
     {
         
-        $headers = $request->header();
-
-        if (isset($headers['X-Correlation-Id'])) {
-            return (string)$headers['X-Correlation-Id'];
-        }
-
-        if (isset($headers['x-correlation-id'])) {
-            return (string) $headers['x-correlation-id'];
-        }
-
-        return null;
+        return $request->header('X-Correlation-Id');
     }
 
     public static function getRequestIdFromHeaders(Request $request): string
     {
-        $headers = $request->header();
-
-        if (isset($headers['X-Request-Id'])) {
-            return (string)$headers['X-Request-Id'];
-        }
-
-        if (isset($headers['x-request-id'])) {
-            return (string) $headers['x-request-id'];
-        }
-
-        return '';
+        return $request->header('X-Request-Id') ?? '';
     }
 
 }

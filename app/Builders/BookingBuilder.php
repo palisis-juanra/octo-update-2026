@@ -56,7 +56,7 @@ class BookingBuilder
         return $object;
     }
 
-    public static function buildUnitItemFromJSON(array $data): Unit
+    public static function buildUnitFromJSON(array $data): Unit
     {
         $unit = new Unit();
         $unit->setId($data['id']);
@@ -86,7 +86,7 @@ class BookingBuilder
             $optionData->restrictions = (object)$option['restrictions'];
             $units = [];
             foreach ($option['units'] as $unitArray) {
-                $unitObject = self::buildUnitItemFromJSON($unitArray);
+                $unitObject = self::buildUnitFromJSON($unitArray);
                 $units[] = $unitObject;
             }
             $optionData->units = $units;

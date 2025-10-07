@@ -331,16 +331,33 @@ class Booking extends Model
         return $this;
     }
 
-    public function setSupplierReference(string $supplierReference): self
+    public function setSupplierReference(?string $supplierReference = null): self
     {
         $this->supplierReference = $supplierReference;
-
         return $this;
     }
 
     public function getSupplierReference(): ?string
     {
         return $this->supplierReference;
+    }
+
+    public function getSupplierReferenceFromUnitItems(): ?string
+    {
+        $supplierRef = null;
+        $supplierRefSet = false;
+        foreach ($this->units as $unit) {
+            if (!$supplierRefSet && $unit->getSupplierReference() != null) {
+                 $supplierRef = $unit->getSupplierReference();
+                 $supplierRefSet = true;
+                 continue;
+            }
+            if ($supplierRefSet && $unit->getSupplierReference() != $supplierRef) {
+                $supplierRef = null;
+                break;
+            }
+        }
+        return $supplierRef;
     }
 
     public function setCancellable(bool $cancellable): self

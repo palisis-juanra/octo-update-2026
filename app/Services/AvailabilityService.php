@@ -6,17 +6,12 @@ use App\Exceptions\AvailabilityRequestMissingParamException;
 use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InvalidAvailabilityIdException;
-use App\Exceptions\InvalidUnitIdException;
-use App\Features\Availability\AvailabilityRequest;
 use App\Http\Middleware\OctoAuthentication;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Availability\Availability;
 use App\Models\Product;
 use App\Transformers\AvailabilityTransformer;
 use App\Transformers\BaseTransformer;
-use DateInterval;
-use DateTime;
-use DateTimeZone;
 use SimpleXMLElement;
 
 class AvailabilityService
@@ -43,11 +38,6 @@ class AvailabilityService
     const DEFAULT_END_TIME = '23:59';
 
     const ERROR_MESSAGE_AVAILABILITY_NEED_DATE = 'Request body must have localDate param or localDateStart + localDateEnd param(s)';
-
-    const TCMS_CUTOFF_BEFORE_START_SECONDS = 'before_start_sec';
-    const TCMS_CUTOFF_DAY_BEFORE_TIME = 'day_before_time';
-    const TCMS_CUTOFF_SAME_DAY_TIME = 'same_day_time';
-    const CUTOFF_FORMAT = 'Y-m-d\TH:i:s\Z';
     const AVAILABILITY_ID_REGEX = '/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])\|\d+$/';
 
     public function __construct(
@@ -142,56 +132,6 @@ class AvailabilityService
             $requestParams[AvailabilityService::PARAM_PRODUCT_ID]
         );
 
-    }
-
-    public function getCutoffFromTourCMSCutoff(array $cutoffData, string $startDay): string
-    {
-        $type = (string) $cutoffData['type'];
-        $value = (string) $cutoffData['value'];
-
-        $startDate = new DateTime($startDay, new DateTimeZone('UTC'));
-
-        if ($value == '0') {
-            return $startDate->format(self::CUTOFF_FORMAT);
-        }
-
-        if ($type == self::TCMS_CUTOFF_BEFORE_START_SECONDS) {
-            $interval = new DateInterval("PT{$value}S");
-            $startDate->sub($interval);
-            return $startDate->format(self::CUTOFF_FORMAT);
-        }
-
-        $valueSplitted = explode(':', $value);
-        $hour = $valueSplitted[0] ? (int) $valueSplitted[0] : 0;
-        $minutes = $valueSplitted[1] ? (int) $valueSplitted[1] : 0;
-
-        if ($type == self::TCMS_CUTOFF_DAY_BEFORE_TIME) {
-            $startDate->modify('-1 day');
-            $startDate->setTime($hour, $minutes);
-        }
-        
-        if ($type == self::TCMS_CUTOFF_SAME_DAY_TIME) {
-            $startDate->setTime($hour, $minutes);
-        }
-
-        return $startDate->format(self::CUTOFF_FORMAT);
-    }
-
-    public function find(string $availabilityId, string $tourId, string $optionId): Availability
-    {
-        $this->validateAvailabilityIds([$availabilityId]);
-
-        $date = explode('|', $availabilityId)[0];
-        $mappingQueryString = OptionService::getMappingQueryString($optionId);
-
-        $response = $this->tourCMSService->showTourDepartures($tourId,$date, extraParams: $mappingQueryString);
-
-        $departures = $this->tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
-
-        $availabilityRequest = new AvailabilityRequest($product, $optionId, $date);
-        $availability = $availabilityRequest->getAvailabilityFromDeparturesById($availabilityId, $departures);
-
-        return $availability;
     }
 
     public function generateAvailabilityFromBookingXML(Product $product, SimpleXMLElement $showBookingXML): Availability

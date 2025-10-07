@@ -13,14 +13,18 @@ use Tests\UnitTestCase;
 class UnitItemFactoryTest extends UnitTestCase
 {
     protected SimpleXMLElement $bookingWithTicketsXML;
-    protected SimpleXMLElement $bookingWithUrlsXML;
+    protected SimpleXMLElement $bookingWithUrlPerPerson;
+    protected SimpleXMLElement $bookingWithOneUrlPerComponentXML;
+    protected SimpleXMLElement $bookingWithSameUrlPerPersonInComponent;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->bookingWithTicketsXML = simplexml_load_file('./tests/TourCMSResponses/showBookingWithTickets.xml')->booking;
-        $this->bookingWithUrlsXML = simplexml_load_file('./tests/TourCMSResponses/showBookingWithUrls.xml')->booking;
 
+        $this->bookingWithUrlPerPerson = simplexml_load_file('./tests/TourCMSResponses/showBookingWithUrlPerPerson.xml')->booking;
+        $this->bookingWithOneUrlPerComponentXML = simplexml_load_file('./tests/TourCMSResponses/showBookingWithOneUrlPerComponent.xml')->booking;
+        $this->bookingWithSameUrlPerPersonInComponent = simplexml_load_file('./tests/TourCMSResponses/showBookingWithSameUrlPerPersonInComponent.xml')->booking;
     }
 
     public function test_create_whenComponentHaveTicket_thenWeGetTicketValue(): void
@@ -40,14 +44,121 @@ class UnitItemFactoryTest extends UnitTestCase
     {
         $unitItemFactory = new UnitItemFactory();
         $unitItem = $unitItemFactory->create(
-            $this->getFakeBooking($this->bookingWithUrlsXML),
+            $this->getFakeBooking($this->bookingWithUrlPerPerson),
             $this->getFakeUnit(),
             1
         );
 
-        $urlLink = (string) $this->bookingWithUrlsXML->components->component[0]->urls->url->link;
+        $urlLink = (string) $this->bookingWithUrlPerPerson->components->component[0]->urls->url->link;
         $this->assertEquals($urlLink, $unitItem->getTicket()->getDeliveryOptions()['deliveryValue']);
     }
+
+    public function test_create_whenComponentHaveUrlsPerPersonInBooking_thenWeGetTheCorrectUrlForEachPerson(): void
+    {
+        $showBooking = $this->bookingWithUrlPerPerson;
+
+        $unitItemFactory = new UnitItemFactory();
+        
+        // r1 - 1
+        $unitItemRate1Person1 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(),
+            1
+        );
+        // r1 - 2
+        $unitItemRate1Person2 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(),
+            2
+        );
+
+        // r2 - 1
+        $unitItemRate2Person1 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(2),
+            1
+        );
+
+        $urlLink = (string) $showBooking->components->component[0]->urls->url[0]->link;
+        $this->assertEquals($urlLink, $unitItemRate1Person1->getTicket()->getDeliveryOptions()['deliveryValue']);
+
+        $urlLink = (string) $showBooking->components->component[0]->urls->url[1]->link;
+        $this->assertEquals($urlLink, $unitItemRate1Person2->getTicket()->getDeliveryOptions()['deliveryValue']);
+
+        $urlLink = (string) $showBooking->components->component[1]->urls->url[0]->link;
+        $this->assertEquals($urlLink, $unitItemRate2Person1->getTicket()->getDeliveryOptions()['deliveryValue']);
+    }
+
+    public function test_create_whenComponentHaveOneUrlPerComponent_thenWeGetTheSameUrlForEachPersonInComponent(): void
+    {
+        $showBooking = $this->bookingWithOneUrlPerComponentXML;
+
+        $unitItemFactory = new UnitItemFactory();
+        
+        // r1 - 1
+        $unitItemRate1Person1 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(),
+            1
+        );
+        // r1 - 2
+        $unitItemRate1Person2 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(),
+            2
+        );
+
+        // r2 - 1
+        $unitItemRate2Person1 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(2),
+            1
+        );
+
+        $urlLink = (string) $showBooking->components->component[0]->urls->url[0]->link;
+        $this->assertEquals($urlLink, $unitItemRate1Person1->getTicket()->getDeliveryOptions()['deliveryValue']);
+
+        $urlLink = (string) $showBooking->components->component[0]->urls->url[0]->link;
+        $this->assertEquals($urlLink, $unitItemRate1Person2->getTicket()->getDeliveryOptions()['deliveryValue']);
+
+        $urlLink = (string) $showBooking->components->component[1]->urls->url[0]->link;
+        $this->assertEquals($urlLink, $unitItemRate2Person1->getTicket()->getDeliveryOptions()['deliveryValue']);
+    }
+
+    public function test_create_whenComponentDoesNotHaveUrl_thenWeGetNull(): void
+    {
+        $showBooking = $this->bookingWithOneUrlPerComponentXML;
+        unset($showBooking->components->component[0]->urls->url);
+        unset($showBooking->components->component[1]->urls->url);
+
+        $unitItemFactory = new UnitItemFactory();
+        
+        // r1 - 1
+        $unitItemRate1Person1 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(),
+            1
+        );
+        // r1 - 2
+        $unitItemRate1Person2 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(),
+            2
+        );
+
+        // r2 - 1
+        $unitItemRate2Person1 = $unitItemFactory->create(
+            $this->getFakeBooking($showBooking),
+            $this->getFakeUnit(2),
+            1
+        );
+
+        $this->assertEmpty($unitItemRate1Person1->getTicket()->getDeliveryOptions(), "DeliveryOptions should be empty");
+        $this->assertEmpty($unitItemRate1Person2->getTicket()->getDeliveryOptions(), "DeliveryOptions should be empty");
+        $this->assertEmpty($unitItemRate2Person1->getTicket()->getDeliveryOptions(), "DeliveryOptions should be empty");
+    }
+
+    // PROTECTED METHODS
 
     protected function getFakeBooking(SimpleXMLElement $showBooking): Booking
     {
@@ -74,10 +185,10 @@ class UnitItemFactoryTest extends UnitTestCase
         return $product;
     }
 
-    protected function getFakeUnit(): Unit
+    protected function getFakeUnit(int $id = 1): Unit
     {
         $unit = new Unit();
-        $unit->setId('TE_1_67|142|r1');
+        $unit->setId('TE_1_67|142|r' . $id);
 
         return $unit;
     }

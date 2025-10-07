@@ -105,14 +105,10 @@ class BookingReservationTest extends FeatureTestCase
 
         $availabilityServiceMock = $this->getMockBuilder(AvailabilityService::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['find'])
+            ->onlyMethods([])
             ->getMock();
 
         $availabilityServiceMock->tourCMSService = $tourCMSServiceMock;
-
-        $availabilityServiceMock
-            ->method('find')
-            ->willReturn($availability);
         
         $this->instance(AvailabilityService::class, $availabilityServiceMock);
 

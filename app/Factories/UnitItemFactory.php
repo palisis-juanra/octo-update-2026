@@ -11,6 +11,7 @@ use App\Models\UnitItem;
 use App\Services\ProductService;
 use App\Services\UnitService;
 use App\Services\XMLService;
+use Exception;
 use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
 
@@ -38,7 +39,7 @@ class UnitItemFactory
         $unitItem
             ->setUuid($uuid ?? Uuid::uuid4())
             ->setResellerReference(null)
-            ->setSupplierReference($unit->reference)
+            ->setSupplierReference(null)
             ->setUnitId($unit->getId())
             ->setId($unit->getId())
             ->setUnit($unit)
@@ -48,7 +49,8 @@ class UnitItemFactory
 
         if (!is_null($component)) {
             $customerId = self::getCustomerIdForUnitItem($component, $number);
-            $unitItem->setCustomerId((int) $customerId);
+            $unitItem->setCustomerId((int) $customerId)
+                     ->setSupplierReference($component->operator_reference ?? null);
 
             $customer = null;
             $customers = XMLService::getArrayFromXmlNode($booking->getBookingData()->customers, 'customer');
@@ -69,7 +71,7 @@ class UnitItemFactory
         if (in_array(ProductService::DELIVERY_METHOD_TICKET, $product->getDeliveryMethods())) {
 
             $ticket = new Ticket();
-            $ticket->setRedemptionMethod($product->getRedemptionMethod());
+            $ticket->setRedemptionMethod(redemptionMethod: $product->getRedemptionMethod());
 
             $ticketValue = self::getTicketValueForUnitItem($component,$number, $product->getDeliveryFormats()[0]);
             if (!empty($ticketValue)) {
@@ -95,16 +97,23 @@ class UnitItemFactory
         $tickets = $component->tickets;
         $urls = $component->urls;
 
-        if (empty($tickets) && empty($urls)) { return null; } 
+        if (empty($tickets) && !isset($urls->url)) { return null; }
     
         if (!empty($tickets)) {
             $tickets = XMLService::getArrayFromXmlNode($tickets, 'ticket');
             return !empty($tickets[$number-1]) ? (string) $tickets[$number-1]->value : null;
         }
 
-        if (!empty($urls) && $deliveryFormat === ProductService::DELIVERY_FORMAT_PDF_URL) {
+        if (isset($urls->url)  && $deliveryFormat === ProductService::DELIVERY_FORMAT_PDF_URL) {
             $urls = XMLService::getArrayFromXmlNode($urls, 'url');
-            $url = $urls[$number-1];
+
+            // Try to set the url for the person $number
+            $url = $urls[$number-1] ?? null;
+
+            // If not, try to use the same url for every person in component
+            if (empty($url)) {
+                $url = $urls[0] ?? null;
+            }
 
             if (empty($url) || empty($url->link) || (string) $url->mime_type !== self::MIME_TYPE_PDF) {
                 return null;
