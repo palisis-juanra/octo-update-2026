@@ -3,6 +3,7 @@ namespace App\Builders;
 
 use App\Models\Option;
 use App\Models\OptionContent;
+use App\Models\Product;
 use App\Models\Unit;
 use App\Services\UnitService;
 use ReflectionClass;
@@ -67,6 +68,34 @@ class BookingBuilder
         $unit->setRequiredContactFields($data['requiredContactFields'] ?? []);
         $unit->setRestrictions(self::buildUnitRestriction($data['restrictions'] ?? []));
         return $unit;
+    }
+
+    public static function buildProductFromJSON(array $data, bool $isVolumePricing): Product
+    {
+        $product = new Product();
+        $product->setId($data['id']);
+        $product->setInternalName($data['internalName'] ?? null);
+        $product->setReference($data['reference'] ?? null);
+        $product->setLocale($data['locale'] ?? null);
+        $product->setTimeZone($data['timeZone'] ?? null);
+        $product->setAllowFreesale($data['allowFreesale'] ?? null);
+        $product->setInstantConfirmation($data['instantConfirmation'] ?? null);
+        $product->setInstantDelivery($data['instantDelivery'] ?? null);
+        $product->setAvailabilityRequired($data['availabilityRequired'] ?? null);
+        $product->setAvailabilityType($data['availabilityType'] ?? null);
+        $product->setOptions(self::buildOptionsFromJSON($data['options'] ?? []));
+        $product->setDeliveryFormats($data['deliveryFormats'] ?? []);
+        $product->setDeliveryMethods($data['deliveryMethods'] ?? []);
+        $product->setRedemptionMethod($data['redemptionMethod'] ?? []);
+        $product->setCutoff($data['cutoff'] ?? []);
+        $product->setMinBookingSize($data['options'][0]['restrictions']['minUnits'] ?? []);
+        $product->setMaxBookingSize($data['options'][0]['restrictions']['maxUnits'] ?? []);
+        $product->setAllDay($data['allDay'] ?? []);
+        if ($isVolumePricing) {
+            $product->setPricingType(Product::PRICING_TYPE_VOLUME);
+        }
+
+        return $product;
     }
 
     public static function buildOptionsFromJSON(array $optionsArray): array
