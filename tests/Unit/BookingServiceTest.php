@@ -45,7 +45,6 @@ class BookingServiceTest extends FeatureTestCase
         ->getMock();
         $tourCMSServiceMock->method('showTour')->willReturn($this->showTourXML);
         $tourCMSServiceMock->method('showBooking')->willReturn($this->showBookingXML);
-        // $tourCMSServiceMock->method('showChannel')->willReturn($this->showChannelXML);
 
         $jsonLogServiceMock = $this->getMockBuilder(\App\Services\JSONLogService::class)
             ->disableOriginalConstructor()
