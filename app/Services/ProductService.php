@@ -192,7 +192,7 @@ class ProductService
         return $productList;
     }
 
-    public function find(string $productId, array $optionsArrayFromDB = []): Product
+    public function find(string $productId, array $productArrayFromDB = []): Product
     {
         $tour = $this->findTourDataFromAPI($productId);
         $this->logger->info(["message" => "Show tour response", "APIResponse" => $tour]);
@@ -201,12 +201,12 @@ class ProductService
             throw new InvalidProductIdException($productId);
         }
 
-        $product = $this->createProductFromTourXML($tour);
-        
-        if (!empty($optionsArrayFromDB)) {
-            $product->setOptions(BookingBuilder::buildOptionsFromJSON($optionsArrayFromDB));
+        if (!empty($productArrayFromDB)) {
+            $product = BookingBuilder::buildProductFromJSON($productArrayFromDB, $this->isVolumePricing($tour));
+        } else {
+            $product = $this->createProductFromTourXML($tour);
         }
-
+        
         return $product;
     }
 

@@ -1,0 +1,286 @@
+{
+    "id": "1|142|5074",
+    "uuid": "a3fe8cf1-d9fb-4bde-b638-91464c8cc72c",
+    "notes": null,
+    "option": {
+        "id": "SUPPLIER_NOTE|ejemplo1_algo",
+        "units": [
+            {
+                "id": "TE_1_67|142|r1",
+                "type": "ADULT",
+                "reference": null,
+                "internalName": "r1",
+                "restrictions": {
+                    "maxAge": 95,
+                    "minAge": 18,
+                    "paxCount": 1,
+                    "idRequired": false,
+                    "maxQuantity": 10,
+                    "minQuantity": 1,
+                    "accompaniedBy": []
+                },
+                "requiredContactFields": []
+            },
+            {
+                "id": "TE_1_67|142|r2",
+                "type": "CHILD",
+                "reference": null,
+                "internalName": "r2",
+                "restrictions": {
+                    "maxAge": 11,
+                    "minAge": 1,
+                    "paxCount": 1,
+                    "idRequired": false,
+                    "maxQuantity": 10,
+                    "minQuantity": 1,
+                    "accompaniedBy": []
+                },
+                "requiredContactFields": []
+            },
+            {
+                "id": "TE_1_67|142|r3",
+                "type": "YOUTH",
+                "reference": null,
+                "internalName": "r3",
+                "restrictions": {
+                    "maxAge": 18,
+                    "minAge": 11,
+                    "paxCount": 1,
+                    "idRequired": false,
+                    "maxQuantity": 10,
+                    "minQuantity": 1,
+                    "accompaniedBy": []
+                },
+                "requiredContactFields": []
+            }
+        ],
+        "default": false,
+        "reference": null,
+        "internalName": "Camp Nou Tour: F.C. Barcelona - Open Date Ticket - ejemplo1_algo",
+        "restrictions": {
+            "maxUnits": 10,
+            "minUnits": 1
+        },
+        "cancellationCutoff": "45 minutes",
+        "requiredContactFields": [],
+        "cancellationCutoffUnit": "minute",
+        "cancellationCutoffAmount": 45,
+        "availabilityLocalStartTimes": [
+            "00:00"
+        ]
+    },
+    "status": "CONFIRMED",
+    "contact": {
+        "notes": "Test note",
+        "country": null,
+        "locales": [],
+        "fullName": "John Doe",
+        "lastName": "Doe",
+        "firstName": "John",
+        "postalCode": null,
+        "phoneNumber": null,
+        "emailAddress": "johndoe@mail.com"
+    },
+    "product": {
+        "id": "TE_1_67|142",
+        "locale": "pt-PT",
+        "options": [
+            {
+                "id": "SUPPLIER_NOTE|ejemplo1_algo",
+                "title": "Camp Nou Tour: F.C. Barcelona - Open Date Ticket",
+                "units": [
+                    {
+                        "id": "TE_1_67|142|r1",
+                        "type": "ADULT",
+                        "reference": null,
+                        "internalName": "r1",
+                        "restrictions": {
+                            "maxAge": 95,
+                            "minAge": 18,
+                            "paxCount": 1,
+                            "idRequired": false,
+                            "maxQuantity": 10,
+                            "minQuantity": 1,
+                            "accompaniedBy": []
+                        },
+                        "requiredContactFields": []
+                    },
+                    {
+                        "id": "TE_1_67|142|r2",
+                        "type": "CHILD",
+                        "reference": null,
+                        "internalName": "r2",
+                        "restrictions": {
+                            "maxAge": 11,
+                            "minAge": 1,
+                            "paxCount": 1,
+                            "idRequired": false,
+                            "maxQuantity": 10,
+                            "minQuantity": 1,
+                            "accompaniedBy": []
+                        },
+                        "requiredContactFields": []
+                    },
+                    {
+                        "id": "TE_1_67|142|r3",
+                        "type": "YOUTH",
+                        "reference": null,
+                        "internalName": "r3",
+                        "restrictions": {
+                            "maxAge": 18,
+                            "minAge": 11,
+                            "paxCount": 1,
+                            "idRequired": false,
+                            "maxQuantity": 10,
+                            "minQuantity": 1,
+                            "accompaniedBy": []
+                        },
+                        "requiredContactFields": []
+                    }
+                ],
+                "default": false,
+                "reference": null,
+                "internalName": "Camp Nou Tour: F.C. Barcelona - Open Date Ticket - ejemplo1_algo",
+                "restrictions": {
+                    "maxUnits": 10,
+                    "minUnits": 1
+                },
+                "cancellationCutoff": "45 minutes",
+                "requiredContactFields": [],
+                "cancellationCutoffUnit": "minute",
+                "cancellationCutoffAmount": 45,
+                "availabilityLocalStartTimes": [
+                    "00:00"
+                ]
+            }
+        ],
+        "timeZone": "America/Aruba",
+        "reference": null,
+        "internalName": "Camp Nou Tour: F.C. Barcelona - Open Date Ticket",
+        "allowFreesale": false,
+        "deliveryFormats": [
+            "QRCODE"
+        ],
+        "deliveryMethods": [
+            "VOUCHER"
+        ],
+        "instantDelivery": true,
+        "availabilityType": "START_TIME",
+        "redemptionMethod": "DIGITAL",
+        "instantConfirmation": true,
+        "availabilityRequired": true
+    },
+    "voucher": {
+        "utcRedeemedAt": null,
+        "deliveryOptions": [
+            {
+                "deliveryValue": "TOURCMS|1|5074",
+                "deliveryFormat": "QRCODE"
+            }
+        ],
+        "redemptionMethod": "DIGITAL"
+    },
+    "freesale": false,
+    "optionId": "SUPPLIER_NOTE|ejemplo1_algo",
+    "testMode": false,
+    "productId": "TE_1_67|142",
+    "unitItems": [
+        {
+            "unit": {
+                "id": "TE_1_67|142|r1",
+                "type": "ADULT",
+                "reference": null,
+                "internalName": "r1",
+                "restrictions": {
+                    "maxAge": 95,
+                    "minAge": 18,
+                    "paxCount": 1,
+                    "idRequired": false,
+                    "maxQuantity": 10,
+                    "minQuantity": 1,
+                    "accompaniedBy": []
+                },
+                "requiredContactFields": []
+            },
+            "uuid": "7f44f437-6d81-43e0-9187-5ddd97419794",
+            "status": "CONFIRMED",
+            "ticket": null,
+            "unitId": "TE_1_67|142|r1",
+            "contact": {
+                "notes": "Test note",
+                "country": null,
+                "locales": [],
+                "fullName": "John Doe",
+                "lastName": "Doe",
+                "firstName": "John",
+                "postalCode": null,
+                "phoneNumber": null,
+                "emailAddress": "johndoe@mail.com"
+            },
+            "utcRedeemedAt": null,
+            "resellerReference": null,
+            "supplierReference": ")M=bloa|Qi_O=MDPF+G#ya+Ri%-SfR"
+        },
+        {
+            "unit": {
+                "id": "TE_1_67|142|r2",
+                "type": "CHILD",
+                "reference": null,
+                "internalName": "r2",
+                "restrictions": {
+                    "maxAge": 11,
+                    "minAge": 1,
+                    "paxCount": 1,
+                    "idRequired": false,
+                    "maxQuantity": 10,
+                    "minQuantity": 1,
+                    "accompaniedBy": []
+                },
+                "requiredContactFields": []
+            },
+            "uuid": "2f8efe9d-beab-4b19-89ad-2ea2cc58c8a9",
+            "status": "CONFIRMED",
+            "ticket": null,
+            "unitId": "TE_1_67|142|r2",
+            "contact": {
+                "notes": "Test note",
+                "country": null,
+                "locales": [],
+                "fullName": "Rebecca Doe McMuffin",
+                "lastName": "Doe McMuffin",
+                "firstName": "Rebecca",
+                "postalCode": "9876",
+                "phoneNumber": null,
+                "emailAddress": "rebeccadoe@mail.com"
+            },
+            "utcRedeemedAt": null,
+            "resellerReference": null,
+            "supplierReference": ")M=bloa|Qi_O=MDPF+G#ya+Ri%-SfR"
+        }
+    ],
+    "cancellable": true,
+    "availability": {
+        "id": "2026-09-23|36188",
+        "allDay": false,
+        "openingHours": [
+            {
+                "to": "22:14",
+                "from": "15:20"
+            }
+        ],
+        "localDateTimeEnd": "2026-09-23T22:14:00-04:00",
+        "localDateTimeStart": "2026-09-23T15:20:00-04:00"
+    },
+    "cancellation": null,
+    "utcCreatedAt": "2025-10-02T19:48:00Z",
+    "utcExpiresAt": null,
+    "utcUpdatedAt": "2025-10-24T14:02:04Z",
+    "utcRedeemedAt": null,
+    "availabilityId": "2026-09-23|36188",
+    "utcConfirmedAt": "2025-10-02T19:48:00Z",
+    "deliveryMethods": [
+        "VOUCHER"
+    ],
+    "resellerReference": "Xi9kIS3P",
+    "supplierReference": ")M=bloa|Qi_O=MDPF+G#ya+Ri%-SfR"
+}

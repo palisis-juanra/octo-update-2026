@@ -153,6 +153,18 @@ class Booking extends Model
         return $this;
     }
 
+    public function setProductId(string $productId): self
+    {
+        $this->product_id = $productId;
+        return $this;
+    }
+
+    public function setCompleteJSONFromDB(string $completeBookingJson): self
+    {
+        $this->complete_booking_json = $completeBookingJson;
+        return $this;
+    }
+
     public function setAccountId(int $accountId): self
     {
         $this->account_id = $accountId;

@@ -1,0 +1,404 @@
+<response>
+  <request>GET /c/booking/show.xml?booking_id=a3fe8cf1-d9fb-4bde-b638-91464c8cc72c</request>
+  <error>OK</error>
+  <booking>
+    <booking_id>5074</booking_id>
+    <booking_uuid>a3fe8cf1-d9fb-4bde-b638-91464c8cc72c</booking_uuid>
+    <channel_id>142</channel_id>
+    <account_id>1</account_id>
+    <channel_name>PORTUGAL CHANNEL</channel_name>
+    <made_date_time>2025-10-02 20:48:13</made_date_time>
+    <made_username>webapimp</made_username>
+    <made_type>W</made_type>
+    <made_name>WEB API</made_name>
+    <start_date>2026-09-23</start_date>
+    <end_date>2026-09-23</end_date>
+    <booking_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</booking_name>
+    <booking_name_custom/>
+    <status>2</status>
+    <status_text>Confirmed</status_text>
+    <withheld>0</withheld>
+    <voucher_url>http://voucher.tourcms.local/print.php?id=gBFaYQdwzELiQhUc7qCmC56XPVqsme2usfSCBV3a87U%3D</voucher_url>
+    <barcode_data>TOURCMS|1|5074</barcode_data>
+    <barcode_priority>tourcms_barcode</barcode_priority>
+    <made_date_time_at_utc_seconds>1759434480</made_date_time_at_utc_seconds>
+    <confirmed_at_utc_seconds>1759434480</confirmed_at_utc_seconds>
+    <updated_at_utc_seconds>1759434480</updated_at_utc_seconds>
+    <non_refundable>0</non_refundable>
+    <cancellable>1</cancellable>
+    <cancel_reason>0</cancel_reason>
+    <cancel_text>Not cancelled</cancel_text>
+    <final_check>0</final_check>
+    <lead_customer_id>12613</lead_customer_id>
+    <lead_customer_name>John Doe</lead_customer_name>
+    <lead_customer_firstname>John</lead_customer_firstname>
+    <lead_customer_surname>Doe</lead_customer_surname>
+    <lead_customer_country/>
+    <lead_customer_postcode/>
+    <lead_customer_email>johndoe@mail.com</lead_customer_email>
+    <lead_customer_tel_home/>
+    <lead_customer_tel_mobile/>
+    <lead_customer_contact_note>Test note</lead_customer_contact_note>
+    <lead_customer_birth_place/>
+    <nationality/>
+    <nationality_text/>
+    <pass_num/>
+    <pass_issue/>
+    <pass_issue_date/>
+    <pass_expiry_date/>
+    <lead_customer_agent_ref/>
+    <lead_customer_travelling>1</lead_customer_travelling>
+    <customer_count>2</customer_count>
+    <sale_currency>GBP</sale_currency>
+    <sales_revenue>10.00</sales_revenue>
+    <sales_revenue_display>&amp;#163;10.00</sales_revenue_display>
+    <deposit>0.00</deposit>
+    <deposit_display>&amp;#163;0.00</deposit_display>
+    <agent_type>TRUSTED</agent_type>
+    <agent_id>4</agent_id>
+    <marketplace_agent_id>12345</marketplace_agent_id>
+    <agent_name>POS Agent</agent_name>
+    <agent_code>TOURCMS12345</agent_code>
+    <agent_credentials/>
+    <agent_ref>Xi9kIS3P</agent_ref>
+    <agent_ref_components/>
+    <tracking_miscid>0</tracking_miscid>
+    <commission>2.00</commission>
+    <commission_tax>0.00</commission_tax>
+    <commission_currency>USD</commission_currency>
+    <commission_display>US&amp;#36;2.00</commission_display>
+    <commission_tax_display>US&amp;#36;0.00</commission_tax_display>
+    <booking_has_net_price>0</booking_has_net_price>
+    <payment_status>0</payment_status>
+    <payment_status_text>No payment made</payment_status_text>
+    <balance_owed_by>A</balance_owed_by>
+    <balance>8.00</balance>
+    <balance_display>&amp;#163;8.00</balance_display>
+    <balance_due>2026-08-12</balance_due>
+    <customer_special_request/>
+    <customers_agecat_breakdown>1 Adult, 1 Child</customers_agecat_breakdown>
+    <payments>
+      <payment>
+        <payment_date_time>2025-10-02 20:48:13</payment_date_time>
+        <payment_value>2.00</payment_value>
+        <payment_currency>GBP</payment_currency>
+        <payment_value_display>&amp;#163;2.00</payment_value_display>
+        <payment_type>Agent commission (Automatic)</payment_type>
+        <payment_reference/>
+        <payment_note>Commission value: 2.00 USD
+E-rate: 1
+Payment value: 2.00 GBP
+Automatically calculated by TourCMS equal to agent commission</payment_note>
+        <payment_by>A</payment_by>
+        <payment_by_id>4</payment_by_id>
+        <payment_transaction_reference/>
+        <gateway_mode/>
+      </payment>
+    </payments>
+    <important_note/>
+    <workflow_note/>
+    <palisis_marketpay>
+      <account_id/>
+    </palisis_marketpay>
+    <customers>
+      <customer>
+        <customer_id>12613</customer_id>
+        <customer_name>John Doe</customer_name>
+        <title/>
+        <firstname>John</firstname>
+        <middlename/>
+        <surname>Doe</surname>
+        <agent_customer_ref/>
+        <birth_place/>
+        <country/>
+        <postcode/>
+        <nationality/>
+        <nationality_text/>
+        <pass_num/>
+        <pass_issue/>
+        <pass_issue_date/>
+        <pass_expiry_date/>
+        <customer_email>johndoe@mail.com</customer_email>
+        <customer_tel_home/>
+        <customer_tel_mobile/>
+        <customer_contact_note>Test note</customer_contact_note>
+        <gender/>
+        <agecat>a</agecat>
+        <agecat_text>Adult</agecat_text>
+        <insurance_number/>
+        <insurance_supplier_name/>
+        <insurance_note/>
+        <insurance_supplier_id/>
+      </customer>
+      <customer>
+        <customer_id>12614</customer_id>
+        <customer_name>Rebecca Doe McMuffin</customer_name>
+        <title/>
+        <firstname>Rebecca</firstname>
+        <middlename/>
+        <surname>Doe McMuffin</surname>
+        <agent_customer_ref/>
+        <birth_place/>
+        <country/>
+        <postcode>9876</postcode>
+        <nationality/>
+        <nationality_text/>
+        <pass_num/>
+        <pass_issue/>
+        <pass_issue_date/>
+        <pass_expiry_date/>
+        <customer_email>rebeccadoe@mail.com</customer_email>
+        <customer_tel_home/>
+        <customer_tel_mobile/>
+        <customer_contact_note>Test note</customer_contact_note>
+        <gender/>
+        <agecat>c</agecat>
+        <agecat_text>Child</agecat_text>
+        <insurance_number/>
+        <insurance_supplier_name/>
+        <insurance_note/>
+        <insurance_supplier_id/>
+      </customer>
+    </customers>
+    <components>
+      <component>
+        <component_id>7466</component_id>
+        <redeemed_at/>
+        <redeemed_at_utc_seconds/>
+        <barcode_symbology>QR_CODE</barcode_symbology>
+        <operator_reference>)M=bloa|Qi_O=MDPF+G#ya+Ri%-SfR</operator_reference>
+        <linked_component_id>7466</linked_component_id>
+        <product_id>67</product_id>
+        <date_id>36188</date_id>
+        <date_type>departure</date_type>
+        <product_code>BCNFCBAR</product_code>
+        <date_code>15:20-22:14</date_code>
+        <start_date>2026-09-23</start_date>
+        <end_date>2026-09-23</end_date>
+        <local_payment>0</local_payment>
+        <customer_payment>0</customer_payment>
+        <upsell_username/>
+        <component_added_datetime>2025-10-02 20:48:13</component_added_datetime>
+        <start_time>15:20</start_time>
+        <end_time>22:14</end_time>
+        <component_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</component_name>
+        <product_note/>
+        <component_note/>
+        <rate_breakdown>r1|a</rate_breakdown>
+        <customers>
+          <customer>
+            <customer_id>12613</customer_id>
+          </customer>
+        </customers>
+        <rate_description/>
+        <rate_code/>
+        <supplier_id>-1</supplier_id>
+        <supplier_name/>
+        <supplier_ref/>
+        <supplier_subsystem_credentials/>
+        <supplier_tour_code>SS:TICKET,QR,30,TOUR</supplier_tour_code>
+        <operational_note/>
+        <supplier_note>ejemplo1_algo</supplier_note>
+        <redeem>Meeting Points 
+Fist Part: Gaudi Houses
+Meeting Time:08:45hrs
+Departure Time: 09:00hrs
+
+At Casa Batllò, Passeig de Gracia, 43. Facing Casa Batllò, your meeting point in on the left side of Casa Batllò, in front of the historical Bagues jewelry.
+
+Second Part: Sagrada Familia &amp; Park Guell
+Meeting Time:13:45hrs
+Departure Time: 14:00hrs
+
+Just across the road of the group entrance to the main façade of the Sagrada Familia (Nativity Façade), your meeting point is in Carrer de La Marina, next to the lake in Parco de Plaza de Gaudi, under the big spotlights
+
+It is the responsibility of all visitors to be at the meeting point 15 minutes before departure. Guests arriving after departure cannot be accommodated &amp; missed tours or tickets cannot be refunded</redeem>
+        <receipt_info/>
+        <product_type>4</product_type>
+        <sale_quantity>1</sale_quantity>
+        <sale_quantity_rule>PERSON</sale_quantity_rule>
+        <sale_tax_percentage>0.00</sale_tax_percentage>
+        <sale_tax_inclusive>0</sale_tax_inclusive>
+        <sale_currency>GBP</sale_currency>
+        <sale_price>7.00</sale_price>
+        <tax_total>0.00</tax_total>
+        <sale_price_inc_tax_total>7.00</sale_price_inc_tax_total>
+        <sale_exchange_rate>1.0000000000</sale_exchange_rate>
+        <currency_base>USD</currency_base>
+        <sale_price_base>7.00</sale_price_base>
+        <tax_total_base>0.00</tax_total_base>
+        <sale_price_inc_tax_total_base>7.00</sale_price_inc_tax_total_base>
+        <cost_quantity>1</cost_quantity>
+        <cost_quantity_rule>PERSON</cost_quantity_rule>
+        <cost_tax_percentage>0.00</cost_tax_percentage>
+        <cost_tax_inclusive>0</cost_tax_inclusive>
+        <cost_currency>EUR</cost_currency>
+        <cost_price>0.00</cost_price>
+        <cost_tax_total>0.00</cost_tax_total>
+        <cost_price_inc_tax_total>0.00</cost_price_inc_tax_total>
+        <cost_exchange_rate>1.0000000000</cost_exchange_rate>
+        <cost_price_base>0.00</cost_price_base>
+        <cost_tax_total_base>0.00</cost_tax_total_base>
+        <cost_price_inc_tax_total_base>0.00</cost_price_inc_tax_total_base>
+        <promo_apply>0</promo_apply>
+        <voucher_redemption_status>0</voucher_redemption_status>
+        <voucher_redemption_username/>
+        <questions/>
+        <urls/>
+      </component>
+      <component>
+        <component_id>7467</component_id>
+        <redeemed_at/>
+        <redeemed_at_utc_seconds/>
+        <barcode_symbology>QR_CODE</barcode_symbology>
+        <operator_reference>)M=bloa|Qi_O=MDPF+G#ya+Ri%-SfR</operator_reference>
+        <linked_component_id>7467</linked_component_id>
+        <product_id>67</product_id>
+        <date_id>36188</date_id>
+        <date_type>departure</date_type>
+        <product_code>BCNFCBAR</product_code>
+        <date_code>15:20-22:14</date_code>
+        <start_date>2026-09-23</start_date>
+        <end_date>2026-09-23</end_date>
+        <local_payment>0</local_payment>
+        <customer_payment>0</customer_payment>
+        <upsell_username/>
+        <component_added_datetime>2025-10-02 20:48:13</component_added_datetime>
+        <start_time>15:20</start_time>
+        <end_time>22:14</end_time>
+        <component_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</component_name>
+        <product_note/>
+        <component_note/>
+        <rate_breakdown>r2|c</rate_breakdown>
+        <customers>
+          <customer>
+            <customer_id>12614</customer_id>
+          </customer>
+        </customers>
+        <rate_description/>
+        <rate_code/>
+        <supplier_id>-1</supplier_id>
+        <supplier_name/>
+        <supplier_ref/>
+        <supplier_subsystem_credentials/>
+        <supplier_tour_code>SS:TICKET,QR,30,TOUR</supplier_tour_code>
+        <operational_note/>
+        <supplier_note>ejemplo1_algo</supplier_note>
+        <redeem>Meeting Points 
+Fist Part: Gaudi Houses
+Meeting Time:08:45hrs
+Departure Time: 09:00hrs
+
+At Casa Batllò, Passeig de Gracia, 43. Facing Casa Batllò, your meeting point in on the left side of Casa Batllò, in front of the historical Bagues jewelry.
+
+Second Part: Sagrada Familia &amp; Park Guell
+Meeting Time:13:45hrs
+Departure Time: 14:00hrs
+
+Just across the road of the group entrance to the main façade of the Sagrada Familia (Nativity Façade), your meeting point is in Carrer de La Marina, next to the lake in Parco de Plaza de Gaudi, under the big spotlights
+
+It is the responsibility of all visitors to be at the meeting point 15 minutes before departure. Guests arriving after departure cannot be accommodated &amp; missed tours or tickets cannot be refunded</redeem>
+        <receipt_info/>
+        <product_type>4</product_type>
+        <sale_quantity>1</sale_quantity>
+        <sale_quantity_rule>PERSON</sale_quantity_rule>
+        <sale_tax_percentage>0.00</sale_tax_percentage>
+        <sale_tax_inclusive>0</sale_tax_inclusive>
+        <sale_currency>GBP</sale_currency>
+        <sale_price>3.00</sale_price>
+        <tax_total>0.00</tax_total>
+        <sale_price_inc_tax_total>3.00</sale_price_inc_tax_total>
+        <sale_exchange_rate>1.0000000000</sale_exchange_rate>
+        <currency_base>USD</currency_base>
+        <sale_price_base>3.00</sale_price_base>
+        <tax_total_base>0.00</tax_total_base>
+        <sale_price_inc_tax_total_base>3.00</sale_price_inc_tax_total_base>
+        <cost_quantity>1</cost_quantity>
+        <cost_quantity_rule>PERSON</cost_quantity_rule>
+        <cost_tax_percentage>0.00</cost_tax_percentage>
+        <cost_tax_inclusive>0</cost_tax_inclusive>
+        <cost_currency>EUR</cost_currency>
+        <cost_price>0.00</cost_price>
+        <cost_tax_total>0.00</cost_tax_total>
+        <cost_price_inc_tax_total>0.00</cost_price_inc_tax_total>
+        <cost_exchange_rate>1.0000000000</cost_exchange_rate>
+        <cost_price_base>0.00</cost_price_base>
+        <cost_tax_total_base>0.00</cost_tax_total_base>
+        <cost_price_inc_tax_total_base>0.00</cost_price_inc_tax_total_base>
+        <promo_apply>0</promo_apply>
+        <voucher_redemption_status>0</voucher_redemption_status>
+        <voucher_redemption_username/>
+        <questions/>
+        <urls/>
+      </component>
+      <component>
+        <component_id>7468</component_id>
+        <redeemed_at/>
+        <redeemed_at_utc_seconds/>
+        <linked_component_id/>
+        <product_id>0</product_id>
+        <date_id>0</date_id>
+        <date_type>fee</date_type>
+        <product_code/>
+        <date_code/>
+        <start_date>0000-00-00</start_date>
+        <end_date>0000-00-00</end_date>
+        <local_payment>0</local_payment>
+        <customer_payment>0</customer_payment>
+        <upsell_username/>
+        <component_added_datetime>2025-10-02 20:48:13</component_added_datetime>
+        <component_name>Booking fee</component_name>
+        <product_note/>
+        <component_note/>
+        <rate_breakdown/>
+        <rate_description/>
+        <supplier_id>0</supplier_id>
+        <supplier_name/>
+        <supplier_ref/>
+        <supplier_subsystem_credentials/>
+        <operational_note/>
+        <sale_quantity>1</sale_quantity>
+        <sale_quantity_rule>PERSON</sale_quantity_rule>
+        <sale_tax_percentage>0.00</sale_tax_percentage>
+        <sale_tax_inclusive>0</sale_tax_inclusive>
+        <sale_currency>GBP</sale_currency>
+        <sale_price>0.00</sale_price>
+        <tax_total>0.00</tax_total>
+        <sale_price_inc_tax_total>0.00</sale_price_inc_tax_total>
+        <sale_exchange_rate>1.0000000000</sale_exchange_rate>
+        <currency_base>USD</currency_base>
+        <sale_price_base>0.00</sale_price_base>
+        <tax_total_base>0.00</tax_total_base>
+        <sale_price_inc_tax_total_base>0.00</sale_price_inc_tax_total_base>
+        <cost_quantity>1</cost_quantity>
+        <cost_quantity_rule>PERSON</cost_quantity_rule>
+        <cost_tax_percentage>0.00</cost_tax_percentage>
+        <cost_tax_inclusive>0</cost_tax_inclusive>
+        <cost_currency>GBP</cost_currency>
+        <cost_price>0.00</cost_price>
+        <cost_tax_total>0.00</cost_tax_total>
+        <cost_price_inc_tax_total>0.00</cost_price_inc_tax_total>
+        <cost_exchange_rate>1.0000000000</cost_exchange_rate>
+        <cost_price_base>0.00</cost_price_base>
+        <cost_tax_total_base>0.00</cost_tax_total_base>
+        <cost_price_inc_tax_total_base>0.00</cost_price_inc_tax_total_base>
+        <promo_apply>0</promo_apply>
+        <urls/>
+      </component>
+    </components>
+    <custom_fields>
+      <field>
+        <name>SyncIDs</name>
+        <value/>
+      </field>
+      <field>
+        <name>financials</name>
+        <value/>
+      </field>
+      <field>
+        <name>TemSyncIDs</name>
+        <value/>
+      </field>
+    </custom_fields>
+  </booking>
+</response>

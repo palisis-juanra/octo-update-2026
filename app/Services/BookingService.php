@@ -41,16 +41,17 @@ class BookingService
         
         // Deleted booking have no components, we must check that components exists
         $this->checkIfBookingHaveBeenDeleted($showBookingResponse, $booking->getUuid());
-        $existingOptions = [];
+        $existingProduct = [];
         if($fillableFromDB) {
             $storeBookingUnitItemsArray = [];
             if (!empty($booking->complete_booking_json)) {
                 $storeBooking = json_decode($booking->complete_booking_json, true);
                 $storeBookingUnitItemsArray = $storeBooking['unitItems'];
-                $existingOptions = $storeBooking['product']['options'];
+                $existingProduct = $storeBooking['product'];
+                $existingProduct['allDay'] = $storeBooking['availability']['allDay'] ?? false;
             }
         }
-        $product = $this->productService->find($booking->product_id, $existingOptions);
+        $product = $this->productService->find($booking->product_id, $existingProduct);
         $option = $product->getOptionById($booking->option_id, $fillableFromDB);
         if ($fillableFromDB) {
             $option->setId($booking->option_id);
