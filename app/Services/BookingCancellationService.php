@@ -92,7 +92,7 @@ class BookingCancellationService extends BookingService
     public function shouldWeCancelBooking(Booking $booking): bool
     {
         $status = $booking->getStatus();
-        if($status === Booking::STATUS_REDEEMED) {
+        if ($status === Booking::STATUS_REDEEMED) {
             throw new \App\Exceptions\BookingAlreadyRedeemedException();
         }
         return $status == Booking::STATUS_CONFIRMED || $status === Booking::STATUS_PENDING;

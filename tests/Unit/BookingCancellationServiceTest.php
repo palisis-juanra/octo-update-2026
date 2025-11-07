@@ -2,11 +2,17 @@
 
 namespace Tests\Unit;
 
+use App\Builders\BookingBuilder;
+use App\Builders\BookingChecker;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Booking;
 use App\Services\BookingCancellationService;
+use App\Services\JSONLogService;
+use App\Services\ProductService;
 use App\Services\TourCMSService;
 use Tests\UnitTestCase;
+use TourCMS;
+use App\Services\AvailabilityService;
 
 class BookingCancellationServiceTest extends UnitTestCase
 {
@@ -50,5 +56,39 @@ class BookingCancellationServiceTest extends UnitTestCase
         $this->expectException(InvalidBookingUUIDException::class);
 
         $bookingCancellationService->cancelBooking($booking, $reason);
+    }
+
+    public function test_whenCallingShowBookingAndAlreadyRedeemed_thenThrowsBookingAlreadyRedeemedException():void
+    {
+        // Given
+        $bookingCancellationService = new BookingCancellationService(
+            $this->getMockBuilder(TourCMSService::class)
+                ->disableOriginalConstructor()
+                ->getMock(),
+            $this->getMockBuilder(ProductService::class)
+                ->disableOriginalConstructor()
+                ->getMock(),
+            $this->getMockBuilder(AvailabilityService::class)
+                ->disableOriginalConstructor()
+                ->getMock(),
+            $this->getMockBuilder(JSONLogService::class)
+                ->disableOriginalConstructor()
+                ->getMock(),
+            $this->getMockBuilder(BookingBuilder::class)
+                ->disableOriginalConstructor()
+                ->getMock(),
+            $this->getMockBuilder(BookingChecker::class)
+                ->disableOriginalConstructor()
+                ->getMock() 
+
+        );
+        
+        $booking = new Booking();
+        $booking->status = Booking::STATUS_REDEEMED;
+
+        // When
+        $this->expectException(\App\Exceptions\BookingAlreadyRedeemedException::class);
+
+        $bookingCancellationService->shouldWeCancelBooking($booking);
     }
 }
