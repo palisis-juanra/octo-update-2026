@@ -70,6 +70,7 @@ class CustomExceptionHandler extends Handler
                 $response = OctoResponse::INVALID_AVAILABILITY_ID($exception->availabilityId);
                 break;
 
+            case (BookingAlreadyRedeemedException::class):
             case (NoAvailabilityException::class):
             case (UnprocessableEntityHttpException::class):
                 $response = OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
