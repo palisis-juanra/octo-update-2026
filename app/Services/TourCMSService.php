@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\APICallNotOKException;
+use App\Exceptions\BookingAlreadyRedeemedException;
 use App\Exceptions\FailSignatureException;
 use App\Exceptions\NoAPIResponseException;
 use App\Exceptions\FailPermissionException;
@@ -33,6 +34,7 @@ class TourCMSService
     public const ERROR_FAIL_KEYNOTFOUND = 'FAIL_KEYNOTFOUND';
     public const NO_MATCHING_DATA = 'NO MATCHING DATA';
     public const ERROR_PREVIOUSLY_CANCELLED = 'PREVIOUSLY CANCELLED';
+    public const ERROR_BOOKING_ALREADY_REDEEMED = 'BOOKING_ALREADY_REDEEMED';
     public const ERROR_BOOKING_ALREADY_COMMITED = 'BOOKING ALREADY COMMITTED';
     public const ERROR_NO_DATA_CHANGED = 'NO DATA CHANGED';
     public const ERROR_OK = 'OK';
@@ -301,6 +303,8 @@ class TourCMSService
             case self::ERROR_FAIL_SIG:
             case self::ERROR_FAIL_KEYNOTFOUND:
                 throw new FailSignatureException();
+            case self::ERROR_BOOKING_ALREADY_REDEEMED:
+                throw new BookingAlreadyRedeemedException();
             case self::NO_MATCHING_DATA:
                 throw new NoMatchingDataException();
             case self::ERROR_PERM:
