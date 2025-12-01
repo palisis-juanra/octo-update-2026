@@ -12,6 +12,7 @@ use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
 use App\Services\ProductService;
 use App\Services\UnitService;
+use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

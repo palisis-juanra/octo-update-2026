@@ -13,6 +13,7 @@ use App\Http\Responses\OctoResponse;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Controllers\ProductController;
+use App\Http\Middleware\APIJsonLogger;
 use App\Http\Middleware\CapabilitiesHeader;
 use App\Http\Requests\OctoRequest;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -20,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 // All routes have authentication and capabilities
 
-Route::middleware([OctoAuthentication::class, CapabilitiesHeader::class])->group(function() {
+Route::middleware([OctoAuthentication::class, CapabilitiesHeader::class, APIJsonLogger::class])->group(function() {
 
     Route::get('/auth', function(): JsonResponse { return OctoResponse::OK('OK'); })->middleware([OctoAuthentication::class]);
 
