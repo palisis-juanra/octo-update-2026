@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\APIJsonLog;
+use App\Services\TourCMSService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,8 @@ use Throwable;
  */
 class APIJsonLogger
 {
+    public function __construct(protected TourCMSService $tourCMSService) {}
+
     /**
      * This method fills APIJsonLog data before and after the request is processed
      * @return void
@@ -46,7 +49,7 @@ class APIJsonLogger
     /* PROTECTED METHODS */
     protected function fillBeforeResponse(Request $request, APIJsonLog $log): APIJsonLog
     {
-        $log->timestamp = microtime(true);
+        $log->timestamp = round(microtime(true) * 1000);
         $log->message          = '';
         $log->xRequestId       = $request->headers->get(OctoAuthentication::FIELD_X_REQUEST_ID);
         $log->xCorrelationId   = $request->headers->get(OctoAuthentication::FIELD_X_CORRELATION_ID);
@@ -57,27 +60,32 @@ class APIJsonLogger
         $log->requestHeaders   = $request->headers->all();
         $log->requestBody      = $this->getRequestBody($request);
         $log->queryString      = $request->getQueryString() ?? '';
-        $log->username         = optional($request->user())->name ?? null;
+        $log->capabilities     = $request->headers->get('Octo-Capabilities', "");
+
+        $channelId = (int) $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
+        $showChannel = $this->tourCMSService->showChannel($channelId);
+        $accountId = $showChannel->channel->account_id ?? 0;
+        $log->accountIds       = [(int)$accountId];
+        $log->channelIds       = [$channelId];
+
         return $log;
     }
 
     protected function fillAfterResponse(APIJsonLog $apiJsonLog, JsonResponse $response): void
     {
-        $executionTimeMs = (int) ((microtime(true) - $apiJsonLog->timestamp) * 1000);
+        $executionTimeMs = (int) round(microtime(true) * 1000) - $apiJsonLog->timestamp;
 
-        $apiJsonLog->capabilities    = $response->headers->get('Octo-Capabilities', ""); 
         $apiJsonLog->executionTime   = $executionTimeMs;
         $apiJsonLog->responseBody    = $this->getResponseBody($response);
         $apiJsonLog->responseHeaders = $response->headers->all();
         $apiJsonLog->success         = $response->isSuccessful() ? '1' : '0';
         $apiJsonLog->errorLog        = !$response->isSuccessful();
         $apiJsonLog->error           = $response->isSuccessful() ? '' : 'HTTP ' . $response->getStatusCode();
-        $apiJsonLog->timestamp       = time();
     }
 
     protected function fillAfterException(APIJsonLog $apiJsonLog, Throwable $e): void
     {
-        $executionTimeMs = (int) ((microtime(true) - $apiJsonLog->timestamp) * 1000);
+        $executionTimeMs = (int) round(microtime(true) * 1000) - $apiJsonLog->timestamp;
 
         $apiJsonLog->executionTime = $executionTimeMs;
         $apiJsonLog->success       = 0;
@@ -95,11 +103,9 @@ class APIJsonLogger
     protected function writeLog(APIJsonLog $APIJsonLog): void
     {
         $encodedJSONLog = json_encode($APIJsonLog, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        Log::info($encodedJSONLog);
-        // TODO replace when ready
-        //$APIJsonLogFile = env('API_JSON_LOG_FILE');
-        //error_log($encodedJSONLog, 3, $APIJsonLogFile);
-        //error_log(PHP_EOL, 3, $APIJsonLogFile);
+        $APIJsonLogFile = env('API_JSON_LOGS_FILE');
+        error_log($encodedJSONLog, 3, $APIJsonLogFile);
+        error_log(PHP_EOL, 3, $APIJsonLogFile);
     }
 
     private function getRequestBody(Request $request): mixed
@@ -125,6 +131,7 @@ class APIJsonLogger
             return null;
         }
 
-        return $content;
+        $json = json_decode($content, true);
+        return $json !== null ? $json : $content;
     }
 }

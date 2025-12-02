@@ -13,21 +13,21 @@ class APIJsonLog
     public string $ipAddress;
     public array $accountIds;
     public array $channelIds;
+    public array $tourIds;
     public mixed $maid;
     public string $action;
     public string $url;
     public string $capabilities = "";
-    public string $responseBody;
     public int $executionTime;
-    public mixed $requestBody;
-    public array $apiSpecificData;
-    public mixed $responseHeaders;
+    // Request
     public mixed $requestHeaders;
-    public mixed $username;
+    public mixed $requestBody;
+    public array $apiSpecificData = [];
+    // Response
+    public mixed $responseHeaders;
+    public ?array $responseBody;
     public bool $errorLog;
-    public int $blocked;
     public string $verb;
-    public int $continueResult;
     public int $timestamp;
     public string $success;
     public string $time;
@@ -36,7 +36,7 @@ class APIJsonLog
     public string $error;
     public string $queryString;
 
-    public function setApiSpecificData(array $apiSpecificData): self
+    public function addApiSpecificData(array $apiSpecificData): self
     {
         if (empty($this->apiSpecificData)) {
             $this->apiSpecificData = $apiSpecificData;
