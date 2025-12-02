@@ -15,7 +15,7 @@ use Throwable;
  */
 class APIJsonLogger
 {
-    public function __construct(protected TourCMSService $tourCMSService) {}
+    protected TourCMSService $tourCMSService;
 
     /**
      * This method fills APIJsonLog data before and after the request is processed
@@ -23,10 +23,16 @@ class APIJsonLogger
      */
     public function handle(Request $request, Closure $next): JsonResponse
     {
+        if (env('APP_ENV') == 'testing') {
+            return $next($request);
+        }
+
+        $this->tourCMSService = app(TourCMSService::class);
+
         $apiJsonLog = new APIJsonLog();
 
         // Before the request is processed
-        $this->fillBeforeResponse($request, $apiJsonLog);
+        $this->fillBeforeRequestIsProcessed($request, $apiJsonLog);
 
         // We save the log in the request in order to be accesible in controllers to fill specific data
         $request->attributes->set('apiJsonLog', $apiJsonLog);
@@ -39,7 +45,7 @@ class APIJsonLogger
         }
 
         // After the request is processed
-        $this->fillAfterResponse($apiJsonLog, $response);
+        $this->fillAfterRequestIsProcessed($apiJsonLog, $response);
 
         $this->writeLog($apiJsonLog);
 
@@ -47,7 +53,7 @@ class APIJsonLogger
     }
 
     /* PROTECTED METHODS */
-    protected function fillBeforeResponse(Request $request, APIJsonLog $log): APIJsonLog
+    protected function fillBeforeRequestIsProcessed(Request $request, APIJsonLog $log): APIJsonLog
     {
         $log->timestamp = round(microtime(true) * 1000);
         $log->message          = '';
@@ -71,7 +77,7 @@ class APIJsonLogger
         return $log;
     }
 
-    protected function fillAfterResponse(APIJsonLog $apiJsonLog, JsonResponse $response): void
+    protected function fillAfterRequestIsProcessed(APIJsonLog $apiJsonLog, JsonResponse $response): void
     {
         $executionTimeMs = (int) round(microtime(true) * 1000) - $apiJsonLog->timestamp;
 
