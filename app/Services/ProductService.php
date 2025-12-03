@@ -195,6 +195,7 @@ class ProductService
     public function find(string $productId, array $productArrayFromDB = []): Product
     {
         $tour = $this->findTourDataFromAPI($productId);
+        // TODO Uncomment if needed
         //$this->logger->info(["message" => "Show tour response", "APIResponse" => $tour]);
 
         if ($this->getTourDistributionIdentifierFromProductId($productId) != (string) $tour->distribution_identifier) {
