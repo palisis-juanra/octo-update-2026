@@ -21,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 // All routes have authentication and capabilities
 
-Route::middleware([OctoAuthentication::class, CapabilitiesHeader::class, APIJsonLogger::class])->group(function() {
+Route::middleware([OctoAuthentication::class, CapabilitiesHeader::class])->group(function() {
 
     Route::get('/auth', function(): JsonResponse { return OctoResponse::OK('OK'); })->middleware([OctoAuthentication::class]);
 
@@ -46,7 +46,8 @@ Route::middleware([OctoAuthentication::class, CapabilitiesHeader::class, APIJson
     // Availability
 
     Route::post('/availability', [AvailabilityController::class, 'index'])
-        ->name(OctoRequest::ENDPOINT_AVAILABILITY_CHECK);
+        ->name(OctoRequest::ENDPOINT_AVAILABILITY_CHECK)
+        ->middleware([APIJsonLogger::class]);
 
     Route::post('/availability/calendar', [AvailabilityCalendarController::class, 'index'])
         ->name(OctoRequest::ENDPOINT_AVAILABILITY_CALENDAR);
@@ -57,16 +58,19 @@ Route::middleware([OctoAuthentication::class, CapabilitiesHeader::class, APIJson
     Route::middleware(AgentWithFullBookingPermissions::class)->group(function() {
         
         Route::get('/bookings/{uuid}', [BookingGetController::class, 'show'])
-        ->name(OctoRequest::ENDPOINT_BOOKING_GET);
+            ->name(OctoRequest::ENDPOINT_BOOKING_GET);
 
         Route::post('/bookings', [BookingReservationController::class, 'index'])
-            ->name(OctoRequest::ENDPOINT_BOOKINGS_RESERVATION);
+            ->name(OctoRequest::ENDPOINT_BOOKINGS_RESERVATION)
+            ->middleware([APIJsonLogger::class]);
 
         Route::post('/bookings/{uuid}/confirm', [BookingConfirmationController::class, 'index'])
-            ->name(OctoRequest::ENDPOINT_BOOKINGS_CONFIRMATION);
+            ->name(OctoRequest::ENDPOINT_BOOKINGS_CONFIRMATION)
+            ->middleware([APIJsonLogger::class]);
 
         Route::post('/bookings/{uuid}/cancel', [BookingCancellationController::class, 'cancel'])
-            ->name(OctoRequest::ENDPOINT_BOOKINGS_CANCELLATION);
+            ->name(OctoRequest::ENDPOINT_BOOKINGS_CANCELLATION)
+            ->middleware([APIJsonLogger::class]);
     });
 
     // Endpoints not implemented
