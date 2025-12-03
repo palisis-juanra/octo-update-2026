@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Requests\OctoRequest;
 use App\Models\APIJsonLog;
 use App\Services\TourCMSService;
 use Illuminate\Http\Request;
@@ -67,13 +68,9 @@ class APIJsonLogger
         $log->queryString      = $request->getQueryString() ?? '';
         $log->action           = $request->route()->getName();
         $log->maid             = $request->input(OctoAuthentication::FIELD_MAID);
-        $log->addApiSpecificData(['capabilities' => $request->headers->get('Octo-Capabilities', "")]);
 
-        $channelId = (int) $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
-        $showChannel = $this->tourCMSService->showChannel($channelId);
-        $accountId = $showChannel->channel->account_id ?? 0;
-        $log->accountIds       = [(int)$accountId];
-        $log->channelIds       = [$channelId];
+        $this->setSpecificData($log, $request);
+        $this->setTourCMSData($log, $request);
 
         return $log;
     }
@@ -140,5 +137,71 @@ class APIJsonLogger
 
         $json = json_decode($content, true);
         return $json !== null ? $json : $content;
+    }
+
+    /**
+     * Set TourCMS data: account ID and channel ID
+     * @param APIJsonLog $log
+     * @param Request $request
+     * @return APIJsonLog
+     */
+    private function setTourCMSData(APIJsonLog $log, Request $request): APIJsonLog
+    {
+
+        try {
+            $channelId = (int) $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
+            $showChannel = $this->tourCMSService->showChannel($channelId);
+            $accountId = !empty($showChannel->channel->account_id) ? (int) $showChannel->channel->account_id : 0;
+        } catch (Throwable) {
+            $channelId = $accountId = null;
+        }
+
+        $log->accountIds = [$accountId];
+        $log->channelIds = [$channelId];
+
+        return $log;
+    }
+
+    private function setSpecificData(APIJsonLog $log, Request $request): APIJsonLog
+    {
+        $routeName = $request->route()->getName();
+
+        switch ($routeName) {
+            case OctoRequest::ENDPOINT_AVAILABILITY_CHECK:
+                $specificData = [
+                    'product_id' => $request->input(OctoRequest::PRODUCT_ID),
+                    'option_id' => $request->input(OctoRequest::OPTION_ID),
+                    'availability_id' => $request->input(OctoRequest::AVAILABILITY_ID),
+                    'unit_items' => $request->input(OctoRequest::UNITS)
+                ];
+                break;
+            case OctoRequest::ENDPOINT_BOOKINGS_RESERVATION:
+                $specificData = [
+                    'product_id' => $request->input(OctoRequest::PRODUCT_ID),
+                    'option_id' => $request->input(OctoRequest::OPTION_ID),
+                    'availability_id' => $request->input(OctoRequest::AVAILABILITY_ID),
+                    'unit_items' => $request->input(OctoRequest::UNIT_ITEMS),
+                ];
+                break;
+            case OctoRequest::ENDPOINT_BOOKINGS_CONFIRMATION:
+                $specificData = [
+                    'booking_uuid' => $request->input(OctoRequest::UUID)
+                ];
+                break;
+            case OctoRequest::ENDPOINT_BOOKINGS_CANCELLATION:
+                $specificData = [
+                    'booking_uuid' => $request->input(OctoRequest::UUID)
+                ];
+                break;
+            default:
+                break;
+        }
+
+        $log->addApiSpecificData([
+            ... $specificData,
+            'capabilities' => $request->headers->get('Octo-Capabilities', "")
+        ]);
+
+        return $log;
     }
 }
