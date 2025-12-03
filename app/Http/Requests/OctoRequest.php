@@ -24,7 +24,7 @@ class OctoRequest
     public const ENDPOINT_BOOKINGS_RESERVATION = 'booking-reservation';
     public const ENDPOINT_BOOKINGS_CONFIRMATION = 'booking-confirmation';
     public const ENDPOINT_BOOKING_GET = 'booking-get';
-    public const ENDPOINT_BOOKINGS_CANCELLATION = 'bookings-get';
+    public const ENDPOINT_BOOKINGS_CANCELLATION = 'booking-cancel';
     public const ENDPOINT_BOOKINGS_EXTEND = 'bookings-extend';
     public const ENDPOINT_BOOKINGS_GET = 'bookings-get';
     public const ENDPOINT_BOOKINGS_UPDATE = 'bookings-get';

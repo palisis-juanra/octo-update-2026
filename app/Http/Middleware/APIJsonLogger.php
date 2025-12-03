@@ -4,10 +4,9 @@ namespace App\Http\Middleware;
 
 use App\Models\APIJsonLog;
 use App\Services\TourCMSService;
-use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Closure;
 use Throwable;
 
 /**
@@ -66,7 +65,9 @@ class APIJsonLogger
         $log->requestHeaders   = $request->headers->all();
         $log->requestBody      = $this->getRequestBody($request);
         $log->queryString      = $request->getQueryString() ?? '';
-        $log->capabilities     = $request->headers->get('Octo-Capabilities', "");
+        $log->action           = $request->route()->getName();
+        $log->maid             = $request->input(OctoAuthentication::FIELD_MAID);
+        $log->addApiSpecificData(['capabilities' => $request->headers->get('Octo-Capabilities', "")]);
 
         $channelId = (int) $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
         $showChannel = $this->tourCMSService->showChannel($channelId);

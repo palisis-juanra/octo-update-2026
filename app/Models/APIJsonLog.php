@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use JsonSerializable;
 use stdClass;
 
-class APIJsonLog
+class APIJsonLog implements JsonSerializable
 {
     public string $service = 'OCTO';
     public mixed $xRequestId;
@@ -45,5 +46,40 @@ class APIJsonLog
         }
     
         return $this;
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        $msg = [
+            'request_id' => $this->xRequestId,
+            'correlation_id' => $this->xCorrelationId,
+            'user_agent' => $this->userAgent,
+            'action' => $this->action,
+            'ipaddress' => $this->ipAddress,
+            'response_headers' => $this->responseHeaders,
+            'response' => $this->responseBody,
+            'path' => $this->url,
+            'request_headers' => $this->requestHeaders,
+            'request_body' => $this->requestBody,
+            'request_querystring' => $this->queryString,
+            'api_specific_data' => $this->apiSpecificData,
+            'maid' => $this->maid,
+            'accounts' => $this->accountIds,
+            'channels' => $this->channelIds,
+            'execution_time' => $this->executionTime,
+            'error_log' => $this->errorLog,
+            'verb' => $this->verb,
+            'timestamp' => $this->timestamp,
+            'success' => $this->success,
+            'error' => $this->error,
+            'message' => $this->message,
+        ];
+
+        if ($this->exception) {
+            $msg['exception'] = $this->exception;
+        }
+
+        return $msg;
+    
     }
 }
