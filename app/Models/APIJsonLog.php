@@ -66,6 +66,7 @@ class APIJsonLog implements JsonSerializable
             'maid' => $this->maid,
             'accounts' => $this->accountIds,
             'channels' => $this->channelIds,
+            'tours' => $this->tourIds,
             'execution_time' => $this->executionTime,
             'error_log' => $this->errorLog,
             'verb' => $this->verb,

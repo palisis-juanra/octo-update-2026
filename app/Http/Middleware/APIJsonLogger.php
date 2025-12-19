@@ -146,16 +146,28 @@ class APIJsonLogger
     private function setTourCMSData(APIJsonLog $log, Request $request): APIJsonLog
     {
 
+        $tourId = null;
+
         try {
             $channelId = (int) $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
             $showChannel = $this->tourCMSService->showChannel($channelId);
             $accountId = !empty($showChannel->channel->account_id) ? (int) $showChannel->channel->account_id : 0;
+            
+            $productId = $request->input('productId');
+            if (!empty($productId)) {
+                $productIdExploded = explode('|', $productId)[0];
+                $distributionIdentifierSplitted = explode('_', $productIdExploded);
+                $tourId = !empty($distributionIdentifierSplitted[2]) ? (int)$distributionIdentifierSplitted[2] : "";
+            }
         } catch (Throwable) {
-            $channelId = $accountId = null;
+            $channelId = $accountId = $tourId = null;
         }
 
         $log->accountIds = [$accountId];
         $log->channelIds = [$channelId];
+        if (!empty($tourId)) {
+            $log->tourIds = [$tourId];
+        }
 
         return $log;
     }
