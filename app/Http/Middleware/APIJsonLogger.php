@@ -83,7 +83,6 @@ class APIJsonLogger
         $apiJsonLog->responseBody    = $this->getResponseBody($response);
         $apiJsonLog->responseHeaders = $response->headers->all();
         $apiJsonLog->success         = $response->isSuccessful() ? '1' : '0';
-        $apiJsonLog->errorLog        = !$response->isSuccessful();
         $apiJsonLog->error           = $response->isSuccessful() ? '' : 'HTTP ' . $response->getStatusCode();
     }
 
@@ -93,7 +92,6 @@ class APIJsonLogger
 
         $apiJsonLog->executionTime = $executionTimeMs;
         $apiJsonLog->success       = 0;
-        $apiJsonLog->errorLog      = true;
         $apiJsonLog->error         = $e->getMessage();
         $apiJsonLog->exception     = (object) [
             'message' => $e->getMessage(),

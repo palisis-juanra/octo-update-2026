@@ -27,7 +27,7 @@ class APIJsonLog implements JsonSerializable
     // Response
     public mixed $responseHeaders;
     public ?array $responseBody;
-    public bool $errorLog;
+    public bool $errorLog = false;
     public string $verb;
     public int $timestamp;
     public string $success;
