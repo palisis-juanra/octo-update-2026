@@ -40,16 +40,14 @@ class APIJsonLogger
         // We let others middlewares/controller handle the request
         try {
             $response = $next($request);
+            $this->fillAfterRequestIsProcessed($apiJsonLog, $response);
+            $this->writeLog($apiJsonLog);
+            return $response;
         } catch (Throwable $e) {
             $this->fillAfterException($apiJsonLog, $e);
+            $this->writeLog($apiJsonLog);
+            return $next($request);
         }
-
-        // After the request is processed
-        $this->fillAfterRequestIsProcessed($apiJsonLog, $response);
-
-        $this->writeLog($apiJsonLog);
-
-        return $response;
     }
 
     /* PROTECTED METHODS */
