@@ -159,6 +159,7 @@ class ProductService
     public const array CONTENT_FIELDS_TO_SPLIT = ['inc', 'ex', 'exp', 'essential'];
     public const DEFAULT_DURATION_MINUTES = 60;
     public const TIMEZONE_NOT_SET = 'NOTSET';
+    public const TIME_NOT_SET = 'NOTSET';
     public const DEFAULT_CHANNEL_LANG = 'en';
     public const DEFAULT_CHANNEL_COUNTRY = 'GB';
     public const IDENTIFIER_TYPE_GOOGLE_PLACE_ID = 'googlePlaceId';
@@ -736,6 +737,13 @@ class ProductService
         $this->errors[] = self::ERROR_TIMEZONE_MISSING;
         
         return "";
+    }
+
+    public static function checkFieldsSet(object $object, string $field): bool
+    {
+        $b = $object->{$field};
+        $a = !empty($object->{$field}) && (string)$object->{$field} !== self::TIME_NOT_SET;
+        return !empty($object->{$field}) && (string)$object->{$field} !== self::TIME_NOT_SET;
     }
 
     protected function getProductAvailabilityType(SimpleXMLElement $tour): string
