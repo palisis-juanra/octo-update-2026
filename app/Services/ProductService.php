@@ -20,6 +20,7 @@ use App\Models\Unit;
 use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
+use Exception;
 use JsonException;
 use SimpleXMLElement;
 use stdClass;
@@ -82,6 +83,8 @@ class ProductService
     ];
     public const CANCELLATION_CUTOFF_UNIT_DEFAULT = self::CANCELLATION_CUTOFF_UNIT_MINUTE;
     public const CANCELLATION_CUTOFF_AMOUNT_DEFAULT = 45;
+    public const CANCELLATION_CUTOFF_NON_REFUNDABLE = 'Non refundable';
+    public const CANCELLATION_CUTOFF_AMOUNT_NON_REFUNDABLE = 3650; // 10 years
     public const AVAILABILITY_LOCAL_START_TIMES_DEFAULT = '00:00';
     public const TIME_TYPE_STRICT = 'strict';
     public const TIME_TYPE_STRICT_START = 'strict_start';
@@ -330,6 +333,10 @@ class ProductService
         return $product;
     }
 
+    /**
+     * @param SimpleXMLElement $tour
+     * @return Option[]
+     */
     public function getProductOptions(SimpleXMLElement $tour): array
     {
 
@@ -375,7 +382,11 @@ class ProductService
             $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
             $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_DEFAULT;
             $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
-            if (isset($tour->cancellation_policy) && isset($tour->cancellation_policy->policy)) {
+            if (isset($tour->non_refundable) && (int) $tour->non_refundable == 1) {
+                $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_NON_REFUNDABLE;
+                $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DAY;
+                $optionCancellationCutoff = self::CANCELLATION_CUTOFF_NON_REFUNDABLE;
+            } else if (isset($tour->cancellation_policy) && isset($tour->cancellation_policy->policy)) {
                 $cancellationPoliciesFromXML = XMLService::getArrayFromXmlNode($tour->cancellation_policy, 'policy');
                 $policy = $cancellationPoliciesFromXML[0] ?? null;
                 if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
