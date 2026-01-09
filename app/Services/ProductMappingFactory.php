@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\ProductMapping;
-use Google\Service\AdExchangeBuyer\Resource\Products;
 use SimpleXMLElement;
 
 class ProductMappingFactory
@@ -70,7 +69,7 @@ class ProductMappingFactory
             if (isset($mapping->active) && $mapping->active == 1 && isset($mapping->fields->field->value)) {
 
                 $availabilityStartTime = [ProductService::AVAILABILITY_LOCAL_START_TIMES_DEFAULT];
-                if (isset($this->tour->start_time) && !empty($this->tour->start_time) && $this->tour->start_time !== ProductService::TIME_NOT_SET && $this->tour->start_time != ProductService::START_TIME_MULTI) {
+                if (isset($this->tour->start_time) && DateTimeService::validateTime((string) $this->tour->start_time) && $this->tour->start_time != ProductService::START_TIME_MULTI) {
                     $availabilityStartTime = [(string) $this->tour->start_time];
                 }
 

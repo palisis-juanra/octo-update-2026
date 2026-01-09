@@ -12,9 +12,9 @@ class APIJsonLog implements JsonSerializable
     public mixed $xCorrelationId;
     public string $userAgent;
     public string $ipAddress;
-    public array $accountIds;
-    public array $channelIds;
-    public array $tourIds;
+    public array $accountIds = [];
+    public array $channelIds = [];
+    public array $tourIds = [];
     public mixed $maid;
     public string $action;
     public string $url;
@@ -23,10 +23,10 @@ class APIJsonLog implements JsonSerializable
     // Request
     public mixed $requestHeaders;
     public mixed $requestBody;
-    public array $apiSpecificData = [];
+    public array $apiSpecificData = [] ;
     // Response
     public mixed $responseHeaders;
-    public ?array $responseBody;
+    public ?array $responseBody = [];
     public bool $errorLog = false;
     public string $verb;
     public int $timestamp;

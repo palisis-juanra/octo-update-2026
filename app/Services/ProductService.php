@@ -739,13 +739,6 @@ class ProductService
         return "";
     }
 
-    public static function checkFieldsSet(object $object, string $field): bool
-    {
-        $b = $object->{$field};
-        $a = !empty($object->{$field}) && (string)$object->{$field} !== self::TIME_NOT_SET;
-        return !empty($object->{$field}) && (string)$object->{$field} !== self::TIME_NOT_SET;
-    }
-
     protected function getProductAvailabilityType(SimpleXMLElement $tour): string
     {
         $availabilityType = "";

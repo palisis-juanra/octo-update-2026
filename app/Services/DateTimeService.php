@@ -42,5 +42,10 @@ class DateTimeService
         return $date->format(self::FORMAT_ISO8601);
     }
 
+    public static function validateTime(string $time, $format = 'H:i'): bool
+    {
+        $dateTime = DateTime::createFromFormat($format, $time);
 
+        return $dateTime && strtolower($dateTime->format($format)) === strtolower($time);
+    }
 }
