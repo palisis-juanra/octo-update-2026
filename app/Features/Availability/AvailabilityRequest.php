@@ -15,7 +15,6 @@ use App\Models\Availability\AvailabilityUnitPricing;
 use App\Models\Pricing;
 use App\Models\Product;
 use App\Services\CutoffService;
-use App\Services\ProductService;
 use App\Services\UnitService;
 use App\Services\XMLService;
 use SimpleXMLElement;
