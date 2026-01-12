@@ -41,12 +41,13 @@ class ProductService
         self::AVAILABILITY_TYPE_OPENING_HOURS
     ];
 
-    public const DELIVERY_FORMAT_QRCODE = 'QRCODE';
-    public const DELIVERY_FORMAT_CODE128A = 'CODE128A';
-    public const DELIVERY_FORMAT_PDF_URL = 'PDF_URL';
-    public const DELIVERY_FORMATS = [
+    public const string DELIVERY_FORMAT_QRCODE = 'QRCODE';
+    public const string DELIVERY_FORMAT_CODE128 = 'CODE128';
+    public const string DELIVERY_FORMAT_PDF_URL = 'PDF_URL';
+    public const array DELIVERY_FORMATS = [
         'QR_CODE' => self::DELIVERY_FORMAT_QRCODE,
-        'PDF_URL' => self::DELIVERY_FORMAT_PDF_URL
+        'PDF_URL' => self::DELIVERY_FORMAT_PDF_URL,
+        'CODE128' => self::DELIVERY_FORMAT_CODE128
     ];
     public const DELIVERY_METHOD_VOUCHER = 'VOUCHER';
     public const DELIVERY_METHOD_TICKET = 'TICKET';
@@ -767,12 +768,16 @@ class ProductService
             return [self::DELIVERY_FORMAT_QRCODE];
         }
 
-        foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-            if (array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
-                $deliveryFormats[] = self::DELIVERY_FORMATS[(string) $deliveryFormat];
-            } else {
+        $tourValidDeliveryFormats = array_intersect($deliveryFormatsFromXML, array_keys(self::DELIVERY_FORMATS));
+        if (empty($tourValidDeliveryFormats)) {
+            foreach ($deliveryFormatsFromXML as $deliveryFormat) {
                 $this->errors[] = "invalid delivery format: {$deliveryFormat}";
+                return [];
             }
+        }
+
+        foreach ($tourValidDeliveryFormats as $deliveryFormat) {
+            $deliveryFormats[] = self::DELIVERY_FORMATS[(string) $deliveryFormat];
         }
         return $deliveryFormats;
     }
@@ -879,11 +884,10 @@ class ProductService
         if (isset($tour->delivery_formats)) {
             $deliveryFormatsFromXML = XMLService::getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
             if (!empty($deliveryFormatsFromXML)) {
-                foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-                    if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
-                        $this->logInfo("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
-                        return false;
-                    }
+                $tourValidDeliveryFormats = array_intersect($deliveryFormatsFromXML, array_keys(self::DELIVERY_FORMATS));
+                if (empty($tourValidDeliveryFormats)) {
+                    $this->logInfo("skipped product {$id}: invalid delivery format: " . implode(", ", $deliveryFormatsFromXML));
+                    return false;
                 }
             }
         }

@@ -142,8 +142,8 @@ class ProductServiceTest extends UnitTestCase
         // Given
         $invalidDeliveryFormat = 'XML';
         $apiResponseXML = $this->showTourXML;
-        $apiResponseDeliveryFormats = $apiResponseXML->tour->delivery_formats;
-        $apiResponseDeliveryFormats->addChild('delivery_format', $invalidDeliveryFormat);
+        unset($apiResponseXML->tour->delivery_formats);
+        $apiResponseXML->tour->delivery_formats->delivery_format = $invalidDeliveryFormat;
 
         $productServiceMock = $this->getMockBuilder(ProductService::class)
             ->onlyMethods(['findTourDataFromAPI', 'getProductLocale'])

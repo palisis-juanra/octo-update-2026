@@ -195,16 +195,12 @@ class ProductTest extends FeatureTestCase
             'X-Request-Id' => ''
         ]);
 
-        $invalidDeliveryFormat = 'XML';
-        $apiResponseXML = $this->showTourXML;
-        $apiResponseDeliveryFormats = $apiResponseXML->tour->delivery_formats;
-        $apiResponseDeliveryFormats->addChild('delivery_format', $invalidDeliveryFormat);
-
+        $invalidDeliveryFormat = (string) $this->showTourInvalidXML->tour->delivery_formats->delivery_format;
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
             ->onlyMethods(['showTour', 'showChannel'])
             ->disableOriginalConstructor()
             ->getMock();
-        $tourCMSService->method('showTour')->willReturn($apiResponseXML);
+        $tourCMSService->method('showTour')->willReturn($this->showTourInvalidXML);
         $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
