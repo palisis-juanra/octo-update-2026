@@ -84,7 +84,7 @@ class BookingConfirmationTest extends FeatureTestCase
         $response->assertOk();
 
         $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryValue", "10246817");
-        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryFormat", "QRCODE");
+        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryFormat", "CODE128");
         $response->assertJsonPath("unitItems.1.ticket.redemptionMethod", "DIGITAL");
         $response->assertJsonPath("unitItems.1.ticket.utcRedeemedAt", null);
     }
@@ -107,6 +107,18 @@ class BookingConfirmationTest extends FeatureTestCase
             $i++;
         }
     }
+
+    public function test_whenComponentDoesNotHaveTicketOrUrl_thenWeDefaultTourcmsBarcodeValue(): void
+    {
+        $this->mockServices('tests/TourCMSResponses/showBookingWithOneUrlPerComponent.xml');
+        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response->assertOk();
+
+        $response->assertJsonPath("unitItems.0.ticket.deliveryOptions.0.deliveryValue", (string) $this->showBookingXML->booking->barcode_data);
+        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryValue", (string) $this->showBookingXML->booking->barcode_data);
+    }
+
+    // PROTECTED METHODS
 
     protected function mockServices(string $showBookingFile): void
     {
