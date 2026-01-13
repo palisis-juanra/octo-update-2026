@@ -20,12 +20,12 @@ class OctoRequest
     public const string ENDPOINT_SUPPLIERS_GET = 'suppliers-get';
     public const string ENDPOINT_PRODUCTS_GET = 'products-get';
     public const string ENDPOINT_PRODUCT_GET = 'product-get';
-    public const string ENDPOINT_AVAILABILITY_CHECK = 'availability-check';
+    public const string ENDPOINT_AVAILABILITY_CHECK = 'Check availability';
     public const string ENDPOINT_AVAILABILITY_CALENDAR = 'availability-calendar';
-    public const string ENDPOINT_BOOKINGS_RESERVATION = 'booking-reservation';
-    public const string ENDPOINT_BOOKINGS_CONFIRMATION = 'booking-confirmation';
+    public const string ENDPOINT_BOOKINGS_RESERVATION = 'Create temporary booking';
+    public const string ENDPOINT_BOOKINGS_CONFIRMATION = 'Commit booking';
     public const string ENDPOINT_BOOKING_GET = 'booking-get';
-    public const string ENDPOINT_BOOKINGS_CANCELLATION = 'booking-cancel';
+    public const string ENDPOINT_BOOKINGS_CANCELLATION = 'Cancel booking';
     public const string ENDPOINT_BOOKINGS_EXTEND = 'bookings-extend';
     public const string ENDPOINT_BOOKINGS_GET = 'bookings-get';
     public const string ENDPOINT_BOOKINGS_UPDATE = 'bookings-get';

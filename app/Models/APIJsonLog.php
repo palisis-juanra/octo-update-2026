@@ -25,7 +25,7 @@ class APIJsonLog implements JsonSerializable
     public mixed $requestBody;
     public array $apiSpecificData = [] ;
     // Response
-    public mixed $responseHeaders;
+    public mixed $responseHeaders = [];
     public ?array $responseBody = [];
     public bool $errorLog = false;
     public string $verb;

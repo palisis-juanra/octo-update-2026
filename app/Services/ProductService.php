@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Builders\BookingBuilder;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
+use App\Exceptions\NoMatchingDataException;
 use App\Facades\OctoRequestFacade;
 use App\Http\Requests\OctoRequest;
 use App\Models\Location;
@@ -707,7 +708,11 @@ class ProductService
     protected function findTourDataFromAPI(string $productId): SimpleXMLElement
     {
         $apiCallParameters = $this->parseProductId($productId);
-        $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId, $apiCallParameters->channelId);
+        try {
+            $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId, $apiCallParameters->channelId);
+        } catch (NoMatchingDataException $e) {
+            throw new InvalidProductIdException($productId);
+        }
         $tour = $apiResponse->tour;
         return $tour;
     }

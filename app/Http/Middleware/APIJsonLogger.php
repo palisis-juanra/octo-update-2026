@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Requests\OctoRequest;
+use App\Http\Responses\OctoResponse;
 use App\Models\APIJsonLog;
 use App\Services\TourCMSService;
 use Illuminate\Http\Request;
@@ -81,7 +82,8 @@ class APIJsonLogger
         $apiJsonLog->responseBody    = $this->getResponseBody($response);
         $apiJsonLog->responseHeaders = $response->headers->all();
         $apiJsonLog->success         = $response->isSuccessful() ? '1' : '0';
-        $apiJsonLog->error           = $response->isSuccessful() ? '' : 'HTTP ' . $response->getStatusCode();
+        $responseData = json_decode($response->getContent(), true);
+        $apiJsonLog->error           = $response->isSuccessful() ? 'OK' : $responseData['error'] ?? OctoResponse::ERROR_CODE_INTERNAL_SERVER_ERROR;
     }
 
     protected function fillAfterException(APIJsonLog $apiJsonLog, Throwable $e): void
@@ -90,7 +92,7 @@ class APIJsonLogger
 
         $apiJsonLog->executionTime = $executionTimeMs;
         $apiJsonLog->success       = 0;
-        $apiJsonLog->error         = $e->getMessage();
+        $apiJsonLog->error         = OctoResponse::ERROR_CODE_INTERNAL_SERVER_ERROR;
         $apiJsonLog->exception     = (object) [
             'message' => $e->getMessage(),
             'code'    => $e->getCode(),
