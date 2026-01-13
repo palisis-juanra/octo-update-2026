@@ -202,12 +202,12 @@ class APIJsonLogger
                 break;
             case OctoRequest::ENDPOINT_BOOKINGS_CONFIRMATION:
                 $specificData = [
-                    'booking_uuid' => $request->input(OctoRequest::UUID)
+                    'booking_uuid' => $request->route(OctoRequest::UUID)
                 ];
                 break;
             case OctoRequest::ENDPOINT_BOOKINGS_CANCELLATION:
                 $specificData = [
-                    'booking_uuid' => $request->input(OctoRequest::UUID)
+                    'booking_uuid' => $request->route(OctoRequest::UUID)
                 ];
                 break;
             default:
