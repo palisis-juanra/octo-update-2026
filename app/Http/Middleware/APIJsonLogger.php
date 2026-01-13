@@ -18,6 +18,13 @@ class APIJsonLogger
 {
     protected TourCMSService $tourCMSService;
 
+    /** @var string[] */
+    private array $sensitiveHeaders = [
+        'authorization',
+        'php-auth-pw',
+        'x-api-key',
+    ];
+
     /**
      * This method fills APIJsonLog data before and after the request is processed
      * @return void
@@ -62,7 +69,7 @@ class APIJsonLogger
         $log->ipAddress        = $request->ip() ?? '';
         $log->url              = $request->path();
         $log->verb             = $request->method();
-        $log->requestHeaders   = $request->headers->all();
+        $log->requestHeaders   = $this->maskSensitiveHeaders($request->headers->all());
         $log->requestBody      = $this->getRequestBody($request);
         $log->queryString      = $request->getQueryString() ?? '';
         $log->action           = $request->route()->getName();
@@ -80,7 +87,7 @@ class APIJsonLogger
 
         $apiJsonLog->executionTime   = $executionTimeMs;
         $apiJsonLog->responseBody    = $this->getResponseBody($response);
-        $apiJsonLog->responseHeaders = $response->headers->all();
+        $apiJsonLog->responseHeaders = $this->maskSensitiveHeaders($response->headers->all());
         $apiJsonLog->success         = $response->isSuccessful() ? '1' : '0';
         $responseData = json_decode($response->getContent(), true);
         $apiJsonLog->error           = $response->isSuccessful() ? 'OK' : $responseData['error'] ?? OctoResponse::ERROR_CODE_INTERNAL_SERVER_ERROR;
@@ -213,5 +220,57 @@ class APIJsonLogger
         ]);
 
         return $log;
+    }
+
+    private function maskSensitiveHeaders(array $headers): array
+    {
+        $normalizedSensitive = array_map('strtolower', $this->sensitiveHeaders);
+
+        foreach ($headers as $name => &$values) {
+            if (in_array(strtolower($name), $normalizedSensitive, true)) {
+                foreach ($values as &$value) {
+                    $value = $this->maskHeaderValue($name, $value);
+                }
+            }
+        }
+
+        return $headers;
+    }
+
+    private function maskHeaderValue(string $name, string $value): string
+    {
+        $lower = strtolower($name);
+
+        // Authorization: Basic xxx / Bearer yyy
+        if ($lower === 'authorization') {
+            if (preg_match('/^(Basic|Bearer)\s+(.+)$/i', $value, $m)) {
+                $scheme      = $m[1]; // Basic / Bearer
+                $credentials = $m[2];
+
+                return $scheme . ' ' . $this->maskStringKeepLast4($credentials);
+            }
+
+            return $this->maskStringKeepLast4($value);
+        }
+
+        if ($lower === 'php-auth-pw') {
+            return $this->maskStringKeepLast4($value);
+        }
+
+        return $this->maskStringKeepLast4($value);
+    }
+
+    private function maskStringKeepLast4(string $value): string
+    {
+        $len = strlen($value);
+
+        if ($len <= 4) {
+            return str_repeat('*', $len);
+        }
+
+        $visible = substr($value, -4);
+        $masked  = str_repeat('*', $len - 4);
+
+        return $masked . $visible;
     }
 }
