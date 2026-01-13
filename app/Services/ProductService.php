@@ -47,6 +47,7 @@ class ProductService
     public const array DELIVERY_FORMATS = [
         'QR_CODE' => self::DELIVERY_FORMAT_QRCODE,
         'PDF_URL' => self::DELIVERY_FORMAT_PDF_URL,
+        'CODE128' => self::DELIVERY_FORMAT_CODE128,
         'CODE_128' => self::DELIVERY_FORMAT_CODE128
     ];
     public const DELIVERY_METHOD_VOUCHER = 'VOUCHER';
