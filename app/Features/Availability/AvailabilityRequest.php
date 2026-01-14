@@ -119,16 +119,16 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         $departure = $filterResult[0];  
         $availability = new Availability;
 
-        list($startTimeHours, $startTimeMinutes) = explode(":", $departure->start_time ? (string) $departure->start_time : '00:00');
-        list($endTimeHours, $endTimeMinutes) = explode(":", $departure->end_time ? (string) $departure->end_time : '23:59');
+        list($startTimeHours, $startTimeMinutes) = explode(":", isset($departure->start_time) && DateTimeService::validateTime((string) $departure->start_time) ? (string) $departure->start_time : '00:00');
+        list($endTimeHours, $endTimeMinutes) = explode(":", isset($departure->end_time) && DateTimeService::validateTime((string) $departure->end_time) ? (string) $departure->end_time : '23:59');
 
         $availability->setId("{$departure->start_date}|{$departure->departure_id}");
         $availability->setDepartureId((int) $departure->departure_id);
         $availability->setLocalDateTimeStart(DateTimeService::getISODateTimeString((string) $departure->start_date, $startTimeHours, $startTimeMinutes));
         $availability->setLocalDateTimeEnd(DateTimeService::getISODateTimeString((string) $departure->end_date, $endTimeHours, $endTimeMinutes));
         $availability->setAllDay(false);
-        $availability->setOpeningHoursFrom($departure->start_time ?? '00:00');
-        $availability->setOpeningHoursTo($departure->end_time ?? '23:59');
+        $availability->setOpeningHoursFrom(isset($departure->start_time) && DateTimeService::validateTime((string) $departure->start_time) ? (string) $departure->start_time : '00:00');
+        $availability->setOpeningHoursTo(isset($departure->end_time) && DateTimeService::validateTime((string) $departure->end_time) ? (string) $departure->end_time : '23:59');
 
         return $availability;
     }
@@ -212,8 +212,8 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
             $availability = new Availability;
 
-            list($startTimeHours, $startTimeMinutes) = explode(":", !empty($departure->start_time) ? (string) $departure->start_time : '00:00');
-            list($endTimeHours, $endTimeMinutes) = explode(":", !empty($departure->end_time) ? (string) $departure->end_time : '23:59');
+            list($startTimeHours, $startTimeMinutes) = explode(":", isset($departure->start_time) && DateTimeService::validateTime((string) $departure->start_time) ? (string) $departure->start_time : '00:00');
+            list($endTimeHours, $endTimeMinutes) = explode(":", isset($departure->end_time) && DateTimeService::validateTime((string) $departure->end_time) ? (string) $departure->end_time : '23:59');
 
             $availability->setContentEnabled($this->contentEnabled);
             $availability->setId($this->generateAvailabilityIdFromDepartureOrComponentObject($departure));
@@ -229,8 +229,8 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $departureCutoff = CutoffService::calculateCutoffForDeparture($this->product, $departure);
             $availability->setUtcCutoffAt($departureCutoff);
 
-            $availability->setOpeningHoursFrom(!empty($departure->start_time) ? (string) $departure->start_time : '00:00');
-            $availability->setOpeningHoursTo(!empty($departure->end_time) ? (string) $departure->end_time :'23:59');
+            $availability->setOpeningHoursFrom(isset($departure->start_time) && DateTimeService::validateTime((string) $departure->start_time) ? (string) $departure->start_time : '00:00');
+            $availability->setOpeningHoursTo(isset($departure->end_time) && DateTimeService::validateTime((string) $departure->end_time) ? (string) $departure->end_time :'23:59');
             $availability->setVacancies((int) $departure->spaces_remaining);
             $availability->setCapacity((int) $departure->spaces_total);
 

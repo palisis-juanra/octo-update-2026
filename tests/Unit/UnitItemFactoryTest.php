@@ -125,7 +125,7 @@ class UnitItemFactoryTest extends UnitTestCase
         $this->assertEquals($urlLink, $unitItemRate2Person1->getTicket()->getDeliveryOptions()['deliveryValue']);
     }
 
-    public function test_create_whenComponentDoesNotHaveUrl_thenWeGetNull(): void
+    public function test_create_whenComponentDoesNotHaveUrl_thenWeDefaultTourcmsBarcodeValue(): void
     {
         $showBooking = $this->bookingWithOneUrlPerComponentXML;
         unset($showBooking->components->component[0]->urls->url);
@@ -153,14 +153,49 @@ class UnitItemFactoryTest extends UnitTestCase
             1
         );
 
-        $this->assertEmpty($unitItemRate1Person1->getTicket()->getDeliveryOptions(), "DeliveryOptions should be empty");
-        $this->assertEmpty($unitItemRate1Person2->getTicket()->getDeliveryOptions(), "DeliveryOptions should be empty");
-        $this->assertEmpty($unitItemRate2Person1->getTicket()->getDeliveryOptions(), "DeliveryOptions should be empty");
+        $this->assertEquals($unitItemRate1Person1->getTicket()->getDeliveryOptions()['deliveryValue'], (string) $this->bookingWithOneUrlPerComponentXML->barcode_data, "deliveryValue should be default barcode");
+        $this->assertEquals($unitItemRate1Person2->getTicket()->getDeliveryOptions()['deliveryValue'], (string) $this->bookingWithOneUrlPerComponentXML->barcode_data,  "deliveryValue should be default barcode");
+        $this->assertEquals($unitItemRate2Person1->getTicket()->getDeliveryOptions()['deliveryValue'], (string) $this->bookingWithOneUrlPerComponentXML->barcode_data, "deliveryValue should be default barcode");
+    }
+
+    public function test_create_whenComponentHaveCode128Ticket_thenWeGetTicketValueAndFormat()
+    {
+        $unitItemFactory = new UnitItemFactory();
+        $unitItem1 = $unitItemFactory->create(
+            $this->getFakeBooking($this->bookingWithTicketsXML),
+            $this->getFakeUnit(),
+            1
+        );
+
+        $unitItem2 = $unitItemFactory->create(
+            $this->getFakeBooking($this->bookingWithTicketsXML),
+            $this->getFakeUnit(),
+            2
+        );
+
+        $unitItem3 = $unitItemFactory->create(
+            $this->getFakeBooking($this->bookingWithTicketsXML),
+            $this->getFakeUnit(2),
+            1
+        );
+
+        $ticket1Value = (string) $this->bookingWithTicketsXML->components->component[0]->tickets->ticket[0]->value;
+        $ticket2Value = (string) $this->bookingWithTicketsXML->components->component[0]->tickets->ticket[1]->value;
+        $ticket3Value = (string) $this->bookingWithTicketsXML->components->component[1]->tickets->ticket[0]->value;
+
+        $this->assertEquals($ticket1Value, $unitItem1->getTicket()->getDeliveryOptions()['deliveryValue']);
+        $this->assertEquals(ProductService::DELIVERY_FORMAT_CODE128, $unitItem1->getTicket()->getDeliveryOptions()['deliveryFormat']);
+
+        $this->assertEquals($ticket2Value, $unitItem2->getTicket()->getDeliveryOptions()['deliveryValue']);
+        $this->assertEquals(ProductService::DELIVERY_FORMAT_CODE128, $unitItem2->getTicket()->getDeliveryOptions()['deliveryFormat']);
+
+        $this->assertEquals($ticket3Value, $unitItem3->getTicket()->getDeliveryOptions()['deliveryValue']);
+        $this->assertEquals(ProductService::DELIVERY_FORMAT_CODE128, $unitItem3->getTicket()->getDeliveryOptions()['deliveryFormat']);
     }
 
     // PROTECTED METHODS
 
-    protected function getFakeBooking(SimpleXMLElement $showBooking): Booking
+    protected function getFakeBooking(SimpleXMLElement $showBooking, array $deliveryFormats = [ProductService::DELIVERY_FORMAT_PDF_URL]): Booking
     {
         $booking = $this->getMockBuilder(Booking::class)
             ->onlyMethods(['getProduct', 'getBookingData'])
@@ -170,17 +205,17 @@ class UnitItemFactoryTest extends UnitTestCase
             ->willReturn($showBooking);
         $booking
             ->method('getProduct')
-            ->willReturn($this->getFakeProduct());
+            ->willReturn($this->getFakeProduct($deliveryFormats));
         
         return $booking;
     }
 
-    protected function getFakeProduct(): Product
+    protected function getFakeProduct(array $deliveryFormats = [ProductService::DELIVERY_FORMAT_PDF_URL]): Product
     {
         $product = new Product();
         $product->setDeliveryMethods([ProductService::DELIVERY_METHOD_TICKET]);
         $product->setRedemptionMethod(ProductService::REDEMPTION_METHOD_DIGITAL);
-        $product->setDeliveryFormats([ProductService::DELIVERY_FORMAT_PDF_URL]);
+        $product->setDeliveryFormats($deliveryFormats);
 
         return $product;
     }

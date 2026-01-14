@@ -39,12 +39,18 @@ class OctoAuthentication
             return OctoResponse::FORBIDDEN();
         }
 
+        $xCorrelationId = $this->getCorrelationIdFromHeaders($request) ?? Str::uuid();
+        $xRequestId = $this->getRequestIdFromHeaders($request) ?? Str::uuid();
+
+        $request->headers->set(self::FIELD_X_CORRELATION_ID, $xCorrelationId);
+        $request->headers->set(self::FIELD_X_REQUEST_ID, $xRequestId);
+
         $request->merge([
             self::FIELD_MAID => $this->getMaidFromAuthHeader($auth),
             self::FIELD_CHANNEL_ID => $this->getChannelFromAuthHeader($auth),
             self::FIELD_API_KEY => $this->getAPIKeyFromAuthHeader($auth),
-            self::FIELD_X_CORRELATION_ID => $this->getCorrelationIdFromHeaders($request) ?? Str::uuid(),
-            self::FIELD_X_REQUEST_ID => $this->getRequestIdFromHeaders($request),
+            self::FIELD_X_CORRELATION_ID => $xCorrelationId, 
+            self::FIELD_X_REQUEST_ID => $xRequestId
         ]);
 
 
@@ -82,9 +88,9 @@ class OctoAuthentication
         return $request->header('X-Correlation-Id');
     }
 
-    public static function getRequestIdFromHeaders(Request $request): string
+    public static function getRequestIdFromHeaders(Request $request): string | null
     {
-        return $request->header('X-Request-Id') ?? '';
+        return $request->header('X-Request-Id');
     }
 
 }

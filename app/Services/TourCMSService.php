@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\BookingAlreadyRedeemedException;
 use App\Exceptions\FailSignatureException;
+use App\Exceptions\InvalidProductIdException;
 use App\Exceptions\NoAPIResponseException;
 use App\Exceptions\FailPermissionException;
 use App\Exceptions\SupplierSubsystemError;

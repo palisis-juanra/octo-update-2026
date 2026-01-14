@@ -4,13 +4,12 @@ namespace App\Http\Middleware;
 
 use App\Facades\OctoRequestFacade;
 use App\Http\Requests\OctoRequest;
+use Illuminate\Http\Request;
 use Closure;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class CapabilitiesHeader
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
         $response = $next($request);
         $capabilitiesStr = OctoRequestFacade::getActiveCapabilitiesAsString();

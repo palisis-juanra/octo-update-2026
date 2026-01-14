@@ -2,6 +2,7 @@
 
 namespace App\Models\Availability;
 
+use App\Services\DateTimeService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
 
@@ -66,8 +67,8 @@ class AvailabilityCalendarRequest
             $availability = new CalendarAvailability();
 
             $openingHours = new OpeningHours(
-                !empty($date->start_time) ? (string) $date->start_time : self::START_TIME_DEFAULT,
-                !empty($date->end_time) ? (string) $date->end_time : self::END_TIME_DEFAULT
+                isset($date->start_time) && DateTimeService::validateTime((string) $date->start_time) ? (string) $date->start_time : self::START_TIME_DEFAULT,
+                isset($date->end_time) && DateTimeService::validateTime((string) $date->end_time) ? (string) $date->end_time : self::END_TIME_DEFAULT
             );
 
             $availability->setLocalDate($date->start_date)

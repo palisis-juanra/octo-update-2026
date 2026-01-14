@@ -11,9 +11,9 @@ use App\Models\UnitItem;
 use App\Services\ProductService;
 use App\Services\UnitService;
 use App\Services\XMLService;
-use Exception;
 use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
+use stdClass;
 
 class UnitItemFactory
 {
@@ -28,7 +28,9 @@ class UnitItemFactory
     {
         $product = $booking->getProduct();
         $contact = $booking->getContact();
-        $components = XMLService::getArrayFromXmlNode($booking->getBookingData()->components, 'component');
+        $bookingData = $booking->getBookingData();
+
+        $components = XMLService::getArrayFromXmlNode($bookingData->components, 'component');
         try {
             $component = self::getComponentByRateId($components, $unit->getId(), $number);
         } catch (ComponentNotFoundException $e) {
@@ -53,7 +55,7 @@ class UnitItemFactory
                      ->setSupplierReference($component->operator_reference ?? null);
 
             $customer = null;
-            $customers = XMLService::getArrayFromXmlNode($booking->getBookingData()->customers, 'customer');
+            $customers = XMLService::getArrayFromXmlNode($bookingData->customers, 'customer');
             foreach ($customers as $customerXML) {
                 if ($customerXML->customer_id == $customerId) {
                     $customer = $customerXML;
@@ -73,13 +75,13 @@ class UnitItemFactory
             $ticket = new Ticket();
             $ticket->setRedemptionMethod(redemptionMethod: $product->getRedemptionMethod());
 
-            $ticketValue = self::getTicketValueForUnitItem($component,$number, $product->getDeliveryFormats()[0]);
-            if (!empty($ticketValue)) {
+            $ticketFormatAndValue = self::getTicketFormatAndValueForUnitItem($component,$number, $product->getDeliveryFormats());
+            if (!empty($ticketFormatAndValue)) {
                 $ticket->setRedemptionMethod($booking->getProduct()->getRedemptionMethod());
                 $ticket->setUtcRedeemedAt(!empty($component->redeemed_at_utc_seconds) ? (int) $component->redeemed_at_utc_seconds : null);
                 $ticket->setDeliveryOptions([
-                    "deliveryFormat" => $booking->getProduct()->getDeliveryFormats()[0],
-                    "deliveryValue" => $ticketValue
+                    "deliveryFormat" => $ticketFormatAndValue->format,
+                    "deliveryValue" => $ticketFormatAndValue->value ?? (string) $bookingData->barcode_data
                 ]);
             }
             $unitItem->setTicket($ticket);
@@ -88,23 +90,36 @@ class UnitItemFactory
         return $unitItem;
     }
 
-    protected static function getTicketValueForUnitItem(?SimpleXMLElement $component, int $number, string $deliveryFormat): ?string
-    {    
+    /**
+     * @return object
+     */
+    protected static function getTicketFormatAndValueForUnitItem(?SimpleXMLElement $component, int $number, array $deliveryFormats): object
+    {
+        $ticket = new stdClass();
+        $ticket->format = ProductService::DELIVERY_FORMAT_QRCODE;
+        $ticket->value = null;
+    
+
         if (empty($component)) {
-            return null;
+            return $ticket;
         }
     
         $tickets = $component->tickets;
         $urls = $component->urls;
 
-        if (empty($tickets) && !isset($urls->url)) { return null; }
+        if (empty($tickets) && !isset($urls->url)) { 
+            return $ticket; 
+        }
     
         if (!empty($tickets)) {
             $tickets = XMLService::getArrayFromXmlNode($tickets, 'ticket');
-            return !empty($tickets[$number-1]) ? (string) $tickets[$number-1]->value : null;
+            $value = !empty($tickets[$number-1]) ? (string) $tickets[$number-1]->value : null;
+            $ticket->format = ProductService::DELIVERY_FORMATS[(string) $component->barcode_symbology];
+            $ticket->value = $value;
+            return $ticket;
         }
 
-        if (isset($urls->url)  && $deliveryFormat === ProductService::DELIVERY_FORMAT_PDF_URL) {
+        if (isset($urls->url) && in_array(ProductService::DELIVERY_FORMAT_PDF_URL, $deliveryFormats)) {
             $urls = XMLService::getArrayFromXmlNode($urls, 'url');
 
             // Try to set the url for the person $number
@@ -116,13 +131,14 @@ class UnitItemFactory
             }
 
             if (empty($url) || empty($url->link) || (string) $url->mime_type !== self::MIME_TYPE_PDF) {
-                return null;
+                return $ticket;
             }
-
-            return (string) $url->link;
+            $ticket->format = ProductService::DELIVERY_FORMAT_PDF_URL;
+            $ticket->value = (string) $url->link;
+            return $ticket;
         }
 
-        return null;
+        return $ticket;
     }
 
     protected static function getComponentByRateId(array $tourCMSComponents, string $unitId, string $number): ?SimpleXMLElement

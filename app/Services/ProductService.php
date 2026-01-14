@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Builders\BookingBuilder;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
+use App\Exceptions\NoMatchingDataException;
 use App\Facades\OctoRequestFacade;
 use App\Http\Requests\OctoRequest;
 use App\Models\Location;
@@ -20,6 +21,7 @@ use App\Models\Unit;
 use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
+use Exception;
 use JsonException;
 use SimpleXMLElement;
 use stdClass;
@@ -40,12 +42,14 @@ class ProductService
         self::AVAILABILITY_TYPE_OPENING_HOURS
     ];
 
-    public const DELIVERY_FORMAT_QRCODE = 'QRCODE';
-    public const DELIVERY_FORMAT_CODE128A = 'CODE128A';
-    public const DELIVERY_FORMAT_PDF_URL = 'PDF_URL';
-    public const DELIVERY_FORMATS = [
+    public const string DELIVERY_FORMAT_QRCODE = 'QRCODE';
+    public const string DELIVERY_FORMAT_CODE128 = 'CODE128';
+    public const string DELIVERY_FORMAT_PDF_URL = 'PDF_URL';
+    public const array DELIVERY_FORMATS = [
         'QR_CODE' => self::DELIVERY_FORMAT_QRCODE,
-        'PDF_URL' => self::DELIVERY_FORMAT_PDF_URL
+        'PDF_URL' => self::DELIVERY_FORMAT_PDF_URL,
+        'CODE128' => self::DELIVERY_FORMAT_CODE128,
+        'CODE_128' => self::DELIVERY_FORMAT_CODE128
     ];
     public const DELIVERY_METHOD_VOUCHER = 'VOUCHER';
     public const DELIVERY_METHOD_TICKET = 'TICKET';
@@ -82,6 +86,8 @@ class ProductService
     ];
     public const CANCELLATION_CUTOFF_UNIT_DEFAULT = self::CANCELLATION_CUTOFF_UNIT_MINUTE;
     public const CANCELLATION_CUTOFF_AMOUNT_DEFAULT = 45;
+    public const CANCELLATION_CUTOFF_NON_REFUNDABLE = 'Non refundable';
+    public const CANCELLATION_CUTOFF_AMOUNT_NON_REFUNDABLE = 3650; // 10 years
     public const AVAILABILITY_LOCAL_START_TIMES_DEFAULT = '00:00';
     public const TIME_TYPE_STRICT = 'strict';
     public const TIME_TYPE_STRICT_START = 'strict_start';
@@ -156,6 +162,7 @@ class ProductService
     public const array CONTENT_FIELDS_TO_SPLIT = ['inc', 'ex', 'exp', 'essential'];
     public const DEFAULT_DURATION_MINUTES = 60;
     public const TIMEZONE_NOT_SET = 'NOTSET';
+    public const TIME_NOT_SET = 'NOTSET';
     public const DEFAULT_CHANNEL_LANG = 'en';
     public const DEFAULT_CHANNEL_COUNTRY = 'GB';
     public const IDENTIFIER_TYPE_GOOGLE_PLACE_ID = 'googlePlaceId';
@@ -195,7 +202,8 @@ class ProductService
     public function find(string $productId, array $productArrayFromDB = []): Product
     {
         $tour = $this->findTourDataFromAPI($productId);
-        $this->logger->info(["message" => "Show tour response", "APIResponse" => $tour]);
+        // TODO Uncomment if needed
+        //$this->logger->info(["message" => "Show tour response", "APIResponse" => $tour]);
 
         if ($this->getTourDistributionIdentifierFromProductId($productId) != (string) $tour->distribution_identifier) {
             throw new InvalidProductIdException($productId);
@@ -329,6 +337,10 @@ class ProductService
         return $product;
     }
 
+    /**
+     * @param SimpleXMLElement $tour
+     * @return Option[]
+     */
     public function getProductOptions(SimpleXMLElement $tour): array
     {
 
@@ -374,7 +386,11 @@ class ProductService
             $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DEFAULT;
             $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_DEFAULT;
             $optionCancellationCutoff = "{$optionCancellationCutoffAmount} {$optionCancellationCutoffUnit}s";
-            if (isset($tour->cancellation_policy) && isset($tour->cancellation_policy->policy)) {
+            if (isset($tour->non_refundable) && (int) $tour->non_refundable == 1) {
+                $optionCancellationCutoffAmount = self::CANCELLATION_CUTOFF_AMOUNT_NON_REFUNDABLE;
+                $optionCancellationCutoffUnit = self::CANCELLATION_CUTOFF_UNIT_DAY;
+                $optionCancellationCutoff = self::CANCELLATION_CUTOFF_NON_REFUNDABLE;
+            } else if (isset($tour->cancellation_policy) && isset($tour->cancellation_policy->policy)) {
                 $cancellationPoliciesFromXML = XMLService::getArrayFromXmlNode($tour->cancellation_policy, 'policy');
                 $policy = $cancellationPoliciesFromXML[0] ?? null;
                 if ((isset($policy->type) && !empty($policy->type)) && (isset($policy->value) && !empty($policy->value))) {
@@ -692,7 +708,11 @@ class ProductService
     protected function findTourDataFromAPI(string $productId): SimpleXMLElement
     {
         $apiCallParameters = $this->parseProductId($productId);
-        $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId, $apiCallParameters->channelId);
+        try {
+            $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId, $apiCallParameters->channelId);
+        } catch (NoMatchingDataException $e) {
+            throw new InvalidProductIdException($productId);
+        }
         $tour = $apiResponse->tour;
         return $tour;
     }
@@ -754,12 +774,16 @@ class ProductService
             return [self::DELIVERY_FORMAT_QRCODE];
         }
 
-        foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-            if (array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
-                $deliveryFormats[] = self::DELIVERY_FORMATS[(string) $deliveryFormat];
-            } else {
+        $tourValidDeliveryFormats = array_intersect($deliveryFormatsFromXML, array_keys(self::DELIVERY_FORMATS));
+        if (empty($tourValidDeliveryFormats)) {
+            foreach ($deliveryFormatsFromXML as $deliveryFormat) {
                 $this->errors[] = "invalid delivery format: {$deliveryFormat}";
+                return [];
             }
+        }
+
+        foreach ($tourValidDeliveryFormats as $deliveryFormat) {
+            $deliveryFormats[] = self::DELIVERY_FORMATS[(string) $deliveryFormat];
         }
         return $deliveryFormats;
     }
@@ -866,11 +890,10 @@ class ProductService
         if (isset($tour->delivery_formats)) {
             $deliveryFormatsFromXML = XMLService::getArrayFromXmlNode($tour->delivery_formats, 'delivery_format');
             if (!empty($deliveryFormatsFromXML)) {
-                foreach ($deliveryFormatsFromXML as $deliveryFormat) {
-                    if (!array_key_exists((string) $deliveryFormat, self::DELIVERY_FORMATS)) {
-                        $this->logInfo("skipped product {$id}: invalid delivery format: {$deliveryFormat}.");
-                        return false;
-                    }
+                $tourValidDeliveryFormats = array_intersect($deliveryFormatsFromXML, array_keys(self::DELIVERY_FORMATS));
+                if (empty($tourValidDeliveryFormats)) {
+                    $this->logInfo("skipped product {$id}: invalid delivery format: " . implode(", ", $deliveryFormatsFromXML));
+                    return false;
                 }
             }
         }

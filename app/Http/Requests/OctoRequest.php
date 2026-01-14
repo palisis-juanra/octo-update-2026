@@ -6,33 +6,34 @@ use Illuminate\Http\Request;
 
 class OctoRequest
 {
-    public const PRODUCT_ID = 'productId';
-    public const OPTION_ID = 'optionId';
-    public const AVAILABILITY_ID = 'availabilityId';
-    public const UNIT_ITEMS = 'unitItems';
-    public const UUID = 'uuid';
-    public const CONTACT = 'contact';
-    public const RESELLER_REFERENCE = 'resellerReference';
+    public const string PRODUCT_ID = 'productId';
+    public const string OPTION_ID = 'optionId';
+    public const string AVAILABILITY_ID = 'availabilityId';
+    public const string UNIT_ITEMS = 'unitItems';
+    public const string UNITS = 'units';
+    public const string UUID = 'uuid';
+    public const string CONTACT = 'contact';
+    public const string RESELLER_REFERENCE = 'resellerReference';
 
     // Endpoints
-    public const ENDPOINT_SUPPLIER_GET = 'supplier-get';
-    public const ENDPOINT_SUPPLIERS_GET = 'suppliers-get';
-    public const ENDPOINT_PRODUCTS_GET = 'products-get';
-    public const ENDPOINT_PRODUCT_GET = 'product-get';
-    public const ENDPOINT_AVAILABILITY_CHECK = 'availability-check';
-    public const ENDPOINT_AVAILABILITY_CALENDAR = 'availability-calendar';
-    public const ENDPOINT_BOOKINGS_RESERVATION = 'booking-reservation';
-    public const ENDPOINT_BOOKINGS_CONFIRMATION = 'booking-confirmation';
-    public const ENDPOINT_BOOKING_GET = 'booking-get';
-    public const ENDPOINT_BOOKINGS_CANCELLATION = 'bookings-get';
-    public const ENDPOINT_BOOKINGS_EXTEND = 'bookings-extend';
-    public const ENDPOINT_BOOKINGS_GET = 'bookings-get';
-    public const ENDPOINT_BOOKINGS_UPDATE = 'bookings-get';
+    public const string ENDPOINT_SUPPLIER_GET = 'supplier-get';
+    public const string ENDPOINT_SUPPLIERS_GET = 'suppliers-get';
+    public const string ENDPOINT_PRODUCTS_GET = 'products-get';
+    public const string ENDPOINT_PRODUCT_GET = 'product-get';
+    public const string ENDPOINT_AVAILABILITY_CHECK = 'Check availability';
+    public const string ENDPOINT_AVAILABILITY_CALENDAR = 'availability-calendar';
+    public const string ENDPOINT_BOOKINGS_RESERVATION = 'Create temporary booking';
+    public const string ENDPOINT_BOOKINGS_CONFIRMATION = 'Commit booking';
+    public const string ENDPOINT_BOOKING_GET = 'booking-get';
+    public const string ENDPOINT_BOOKINGS_CANCELLATION = 'Cancel booking';
+    public const string ENDPOINT_BOOKINGS_EXTEND = 'bookings-extend';
+    public const string ENDPOINT_BOOKINGS_GET = 'bookings-get';
+    public const string ENDPOINT_BOOKINGS_UPDATE = 'bookings-get';
 
     // Capabilities
-    public const CAPABILITIES_HEADER = 'Octo-Capabilities';
-    public const CAPABILITIES_PRICING = 'octo/pricing';
-    public const CAPABILITIES_CONTENT = 'octo/content';
+    public const string CAPABILITIES_HEADER = 'Octo-Capabilities';
+    public const string CAPABILITIES_PRICING = 'octo/pricing';
+    public const string CAPABILITIES_CONTENT = 'octo/content';
 
     public const CAPABILITIES_ALLOWED = [
 

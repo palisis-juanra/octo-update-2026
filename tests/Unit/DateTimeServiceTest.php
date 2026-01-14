@@ -26,4 +26,18 @@ class DateTimeServiceTest extends UnitTestCase
             $this->assertEquals('2025-09-09T12:30:00' . $signCharacter . sprintf('%02d', abs($offset/3600)) . ':00', $isoDate);
         }
     }
+
+    public function test_validateTime_whenValidTime_returnsTrue(): void
+    {
+        $this->assertTrue(DateTimeService::validateTime('14:30'));
+    }
+
+    public function test_validateTime_whenInvalidTime_returnsFalse(): void
+    {
+        $this->assertFalse(DateTimeService::validateTime('25:00'));
+        $this->assertFalse(DateTimeService::validateTime('14:60'));
+        $this->assertFalse(DateTimeService::validateTime('invalid-time'));
+        $this->assertFalse(DateTimeService::validateTime('NOTSET'));
+        $this->assertFalse(DateTimeService::validateTime(''));
+    }
 }

@@ -142,8 +142,8 @@ class ProductServiceTest extends UnitTestCase
         // Given
         $invalidDeliveryFormat = 'XML';
         $apiResponseXML = $this->showTourXML;
-        $apiResponseDeliveryFormats = $apiResponseXML->tour->delivery_formats;
-        $apiResponseDeliveryFormats->addChild('delivery_format', $invalidDeliveryFormat);
+        unset($apiResponseXML->tour->delivery_formats);
+        $apiResponseXML->tour->delivery_formats->delivery_format = $invalidDeliveryFormat;
 
         $productServiceMock = $this->getMockBuilder(ProductService::class)
             ->onlyMethods(['findTourDataFromAPI', 'getProductLocale'])
@@ -504,6 +504,26 @@ class ProductServiceTest extends UnitTestCase
         $this->expectException(InvalidProductIdException::class);
         $productService->find('AA_1_2|27');
     }
+
+    public function test_getProductOptions_whenTourIsNonRefundable_thenOptionHasCorrectCancellationPolicy(): void
+    {
+        $this->showTourXML->tour->non_refundable = 1;
+
+        $tourcmsService = $this->mockTourCMSService(['showTour']);
+        $tourcmsService->method('showTour')->willReturn($this->showTourXML);
+
+        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService, new ProductMappingFactory);
+
+        $options = $productService->getProductOptions($this->showTourXML->tour);
+
+        foreach ($options as $option) {
+            $this->assertEquals(ProductService::CANCELLATION_CUTOFF_NON_REFUNDABLE, $option->getCancellationCutoff());
+            $this->assertEquals(ProductService::CANCELLATION_CUTOFF_AMOUNT_NON_REFUNDABLE, $option->getCancellationCutoffAmount());
+            $this->assertEquals(ProductService::CANCELLATION_CUTOFF_UNIT_DAY, $option->getCancellationCutoffUnit());
+        }
+    }
+
+    // PROTECTED METHODS
 
     protected function mockLogger(): JSONLogService|MockObject
     {
