@@ -51,6 +51,7 @@ class APIJsonLog implements JsonSerializable
     public function jsonSerialize(): mixed
     {
         $msg = [
+            'service' => $this->service,
             'request_id' => $this->xRequestId,
             'correlation_id' => $this->xCorrelationId,
             'user_agent' => $this->userAgent,
