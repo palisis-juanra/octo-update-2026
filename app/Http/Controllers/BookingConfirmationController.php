@@ -55,7 +55,7 @@ class BookingConfirmationController
         // We need to remove unit items without contact, as they are not needed
         $unitContacts = [];
         foreach ($unitItems as $key => $unitItem) {
-            if (array_key_exists('contact', $unitItem)) {
+            if (array_key_exists('contact', $unitItem) && !empty($unitItem['contact']) && is_array($unitItem['contact'])) {
                 $unitContacts[] = $unitItem;
             }
         }
@@ -65,7 +65,7 @@ class BookingConfirmationController
             foreach ($booking->getUnits() as $unitItem) {
                 $unitIds = array_column($unitContacts, 'unitId');
                 $key = array_search($unitItem->getId(), $unitIds);
-                $contact = Contact::create($unitContacts[$key]['contact']);
+                $contact = Contact::create($unitContacts[$key]['contact'] ?? []);
                 $this->service->updateTraveller($unitItem->getCustomerId(), $contact);
                 unset($unitContacts[$key]);
                 sort($unitContacts);
