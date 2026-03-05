@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Exceptions\APIThrottleError;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Models\Product;
@@ -13,6 +14,7 @@ use App\Services\TourCMSService;
 use PHPUnit\Framework\MockObject\MockObject;
 use SimpleXMLElement;
 use Tests\UnitTestCase;
+use TourCMS\Utils\TourCMS;
 
 class ProductServiceTest extends UnitTestCase
 {
@@ -521,6 +523,37 @@ class ProductServiceTest extends UnitTestCase
             $this->assertEquals(ProductService::CANCELLATION_CUTOFF_AMOUNT_NON_REFUNDABLE, $option->getCancellationCutoffAmount());
             $this->assertEquals(ProductService::CANCELLATION_CUTOFF_UNIT_DAY, $option->getCancellationCutoffUnit());
         }
+    }
+
+    public function test_whenShowTourResponseIsRateLimited_thenWeThrowAnException(): void
+    {
+        $this->showTourXML->tour->distribution_identifier = 'TE_1_230';
+
+        $throttledResponse = simplexml_load_file('./tests/TourCMSResponses/showTourThrottled.xml');
+        $tourCMSMock = $this->getMockBuilder(TourCMS::class)
+            ->onlyMethods(['show_tour'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $tourCMSMock->method('show_tour')->willReturn($throttledResponse);
+
+        $jsonLogService = $this->getMockBuilder(JSONLogService::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getLogId'])    
+            ->getMock();
+        $jsonLogService->method('getLogId')->willReturn('xxx');
+
+        $cache = $this->createMock(\Illuminate\Contracts\Cache\Repository::class);
+        $cache->method('get')->willReturn(null);
+        $cache->method('put')->willReturn($cache);
+
+        $tourcmsService = $this->mockTourCMSService();
+        $tourcmsService = new TourCMSService("12345", "abcde", "142", $jsonLogService, $cache);
+        $tourcmsService->setTourCMS($tourCMSMock);
+        
+        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService, new ProductMappingFactory);
+        
+        $this->expectException(APIThrottleError::class);
+        $productService->find('TE_1_230|142');
     }
 
     // PROTECTED METHODS

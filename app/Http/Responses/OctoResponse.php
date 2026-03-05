@@ -188,4 +188,9 @@ class OctoResponse {
 
         return new JsonResponse($data, Response::HTTP_BAD_REQUEST);  
     }
+
+    public static function TOO_MANY_REQUEST(): Response
+    {
+        return new JsonResponse(null, Response::HTTP_TOO_MANY_REQUESTS);
+    }
 }
