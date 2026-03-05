@@ -546,7 +546,6 @@ class ProductServiceTest extends UnitTestCase
         $cache->method('get')->willReturn(null);
         $cache->method('put')->willReturn($cache);
 
-        $tourcmsService = $this->mockTourCMSService();
         $tourcmsService = new TourCMSService("12345", "abcde", "142", $jsonLogService, $cache);
         $tourcmsService->setTourCMS($tourCMSMock);
         
