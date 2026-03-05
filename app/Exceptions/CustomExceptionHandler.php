@@ -101,6 +101,7 @@ class CustomExceptionHandler extends Handler
                 break;
 
             case (APIThrottleError::class):
+                JSONLog::error(["message" => "TourCMS API Rate Limit reached, returning 429 error", "exception" => $exception]);
                 $response = OctoResponse::TOO_MANY_REQUEST();
                 break;
             
