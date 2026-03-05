@@ -99,6 +99,10 @@ class CustomExceptionHandler extends Handler
             case (TooManyDeparturesException::class):
                 $response = OctoResponse::TOO_MANY_DEPARTURES();
                 break;
+
+            case (APIThrottleError::class):
+                $response = OctoResponse::TOO_MANY_REQUEST();
+                break;
             
             case (APICallNotOKException::class):
 
@@ -109,6 +113,7 @@ class CustomExceptionHandler extends Handler
                 }
                 
                 $response = OctoResponse::INTERNAL_SERVER_ERROR();
+                break;
 
             case (NoAPIResponseException::class):
 
@@ -119,6 +124,7 @@ class CustomExceptionHandler extends Handler
                 }
                 
                 $response = OctoResponse::INTERNAL_SERVER_ERROR();
+                break;
 
             default:
                 try  {
