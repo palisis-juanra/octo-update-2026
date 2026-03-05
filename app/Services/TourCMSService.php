@@ -10,8 +10,6 @@ use App\Exceptions\NoAPIResponseException;
 use App\Exceptions\FailPermissionException;
 use App\Exceptions\SupplierSubsystemError;
 use App\Exceptions\TooManyDeparturesException;
-use App\Http\Middleware\OctoAuthentication;
-use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
 use App\Facades\JSONLog;
 use DateInterval;
@@ -51,7 +49,7 @@ class TourCMSService
     public const ERROR_PERM = 'FAIL_PERM';
     public const OCTO_USER_AGENT = 'octo.tourcms.com';
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR = 'SUPPLIER_SUBSYSTEM_ERROR';
-    public const string ERROR_API_THROTLE = 'API throttle';
+    public const string ERROR_API_THROTTLE = 'API throttle';
     public const int MAX_SHOW_TOUR_DEPARTURES_COUNT = 500;
 
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
@@ -118,10 +116,10 @@ class TourCMSService
         $redisKey = self::CACHE_REDIS_KEY_SHOW_TOUR . $tourId . '|' . $channelId;
         
         if (true === $cached) {
-            $cachedShowChannel = $this->cache->get($redisKey);
+            $cachedShowTour = $this->cache->get($redisKey);
             
-            if (!empty($cachedShowChannel)) {
-                return simplexml_load_string($cachedShowChannel);
+            if (!empty($cachedShowTour)) {
+                return simplexml_load_string($cachedShowTour);
             }
         }
 
@@ -326,7 +324,7 @@ class TourCMSService
                 throw new FailPermissionException();
             case self::ERROR_SUPPLIER_SUBSYSTEM_ERROR:
                 throw new SupplierSubsystemError((string) $response->supplier_subsystem_error ?? '');
-            case self::ERROR_API_THROTLE:
+            case self::ERROR_API_THROTTLE:
                 throw new APIThrottleError();
             default:
                 throw new APICallNotOKException();
