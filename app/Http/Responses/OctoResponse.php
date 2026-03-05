@@ -42,7 +42,7 @@ class OctoResponse {
     public const string ERROR_MESSAGE_INVALID_AVAILABILITY_ID = 'Invalid AvailabilityId. Must be a valid one';
     public const string ERROR_MESSAGE_INVALID_BOOKING_UUID = 'The Booking UUID was invalid or missing';
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR_DEFAULT = 'Invalid subsystem response';
-    public const string ERROR_MESSAGE_TOO_MANY_REQUESTS = 'Too many request, please wait before continue';
+    public const string ERROR_MESSAGE_TOO_MANY_REQUESTS = 'Too many requests, please wait before continue';
 
     public static function UNAUTHORIZED(string $errorMessage = self::ERROR_MESSAGE_UNAUTHORIZED): Response
     {
@@ -197,6 +197,6 @@ class OctoResponse {
             self::FIELD_ERROR_MESSAGE => self::ERROR_MESSAGE_TOO_MANY_REQUESTS,
         ];
 
-        return new JsonResponse(null, Response::HTTP_TOO_MANY_REQUESTS);
+        return new JsonResponse($data, Response::HTTP_TOO_MANY_REQUESTS);
     }
 }
