@@ -3,20 +3,19 @@
 namespace App\Services;
 
 use App\Exceptions\APICallNotOKException;
+use App\Exceptions\APIThrottleError;
 use App\Exceptions\BookingAlreadyRedeemedException;
 use App\Exceptions\FailSignatureException;
-use App\Exceptions\InvalidProductIdException;
 use App\Exceptions\NoAPIResponseException;
 use App\Exceptions\FailPermissionException;
 use App\Exceptions\SupplierSubsystemError;
 use App\Exceptions\TooManyDeparturesException;
-use App\Http\Middleware\OctoAuthentication;
-use Illuminate\Support\Facades\Request;
 use App\Exceptions\NoMatchingDataException;
 use App\Facades\JSONLog;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Support\Facades\Cache;
 use SimpleXMLElement;
 use stdClass;
@@ -50,6 +49,7 @@ class TourCMSService
     public const ERROR_PERM = 'FAIL_PERM';
     public const OCTO_USER_AGENT = 'octo.tourcms.com';
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR = 'SUPPLIER_SUBSYSTEM_ERROR';
+    public const string ERROR_API_THROTTLE = 'API throttle';
     public const int MAX_SHOW_TOUR_DEPARTURES_COUNT = 500;
 
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
@@ -57,8 +57,10 @@ class TourCMSService
     protected TourCMS $tourCMS;
     protected TourCMSMulti $tourCMSMulti;
     protected string $channelId;
+    protected JSONLogService $jsonLogService;
+    protected CacheRepository $cache;
 
-    public function __construct(string $maid, string $APIKey)
+    public function __construct(string $maid, string $APIKey, string $channelId, JSONLogService $jsonLogService, CacheRepository $cache)
     {
         $this->tourCMS = new TourCMS($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMS->set_base_url($this->getAPIBaseUrl());
@@ -67,7 +69,9 @@ class TourCMSService
         $this->tourCMSMulti = new TourCMSMulti($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMSMulti->set_base_url($this->getAPIBaseUrl());
 
-        $this->channelId = Request::get(OctoAuthentication::FIELD_CHANNEL_ID);
+        $this->channelId = $channelId;
+        $this->jsonLogService = $jsonLogService;
+        $this->cache = $cache;
     }
 
     public function showChannel(?string $channelId = null, bool $cached = true): SimpleXMLElement
@@ -112,18 +116,18 @@ class TourCMSService
         $redisKey = self::CACHE_REDIS_KEY_SHOW_TOUR . $tourId . '|' . $channelId;
         
         if (true === $cached) {
-            $cachedShowChannel = Cache::driver('redis')->get($redisKey);
+            $cachedShowTour = $this->cache->get($redisKey);
             
-            if (!empty($cachedShowChannel)) {
-                return simplexml_load_string($cachedShowChannel);
+            if (!empty($cachedShowTour)) {
+                return simplexml_load_string($cachedShowTour);
             }
         }
 
-        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, $this->jsonLogService->getLogId());
         $response = $this->tourCMS->show_tour($tourId, $channelId);
         $response = $this->handleResponse($response);
         
-        Cache::driver('redis')->put($redisKey, $response->asXML(), self::CACHE_TIME_SHOW_TOUR);
+        $this->cache->put($redisKey, $response->asXML(), self::CACHE_TIME_SHOW_TOUR);
         
         return $response; 
     }
@@ -278,6 +282,14 @@ class TourCMSService
         return $children;
     }
 
+    public function setTourCMS(TourCMS $tourCMS): self
+    {
+        $this->tourCMS = $tourCMS;
+        return $this;
+    }
+
+    /* PROTECTED METHODS */
+
     protected function getAPIBaseUrl()
     {
         return env('API_BASE_URL', self::DEFAULT_API_BASE_URL);
@@ -312,6 +324,8 @@ class TourCMSService
                 throw new FailPermissionException();
             case self::ERROR_SUPPLIER_SUBSYSTEM_ERROR:
                 throw new SupplierSubsystemError((string) $response->supplier_subsystem_error ?? '');
+            case self::ERROR_API_THROTTLE:
+                throw new APIThrottleError();
             default:
                 throw new APICallNotOKException();
         }

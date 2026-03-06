@@ -709,7 +709,7 @@ class ProductService
     {
         $apiCallParameters = $this->parseProductId($productId);
         try {
-            $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId, $apiCallParameters->channelId);
+            $apiResponse = $this->tourCMSService->showTour($apiCallParameters->tourId, $apiCallParameters->channelId, cached: true);
         } catch (NoMatchingDataException $e) {
             throw new InvalidProductIdException($productId);
         }

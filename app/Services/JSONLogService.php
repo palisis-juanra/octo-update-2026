@@ -26,7 +26,7 @@ class JSONLogService
         self::LOG_TYPE_LOG  
     ];
 
-    public function __construct(string $channelId = '', string $marketplaceId = '', string $endpoint = '', string $correlationId = null, string $xRequestId = '')
+    public function __construct(string $channelId = '', string $marketplaceId = '', string $endpoint = '', ?string $correlationId = null, string $xRequestId = '')
     {
         if (empty($correlationId)) {
             $correlationId = $correlationId = Str::uuid();

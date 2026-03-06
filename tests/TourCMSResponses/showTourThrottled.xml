@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response>
+<request>GET /c/tour/show.xml?id=230</request>
+<remaining_hits>0</remaining_hits>
+<hourly_limit>3000</hourly_limit>
+<throttled_until_timestamp>1772709726</throttled_until_timestamp>
+<error>API throttle</error>
+<log_id>1772709626|4dc85d92-fe7a-4e98-a018-81e5ac82e56d</log_id>
+</response>
