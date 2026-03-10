@@ -271,6 +271,13 @@ class TourCMSService
         return $this->handleResponse($response);
     }
 
+    public function getTourPromotions(int $tourId): SimpleXMLElement
+    {
+        $endpoint = '/api/tours/promotions/get.xml?tour_id=' . $tourId;
+        $response = $this->tourCMS->request($endpoint, $this->channelId);
+        return $this->handleResponse($response);
+    }
+
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
     {
         $children = [];
