@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\AvailabilityRequestMissingParamException;
+use App\Exceptions\InvalidRateIdException;
+use App\Facades\OctoRequestFacade;
 use App\Factories\AvailabilityRequestFactory;
 use App\Http\Middleware\OctoAuthentication;
+use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Models\Product;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
 use App\Services\ProductService;
+use App\Services\RateService;
 use App\Services\UnitService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,7 +29,8 @@ class AvailabilityController extends Controller
         public AvailabilityRequestFactory $availabilityRequestFactory, 
         public AvailabilityService $availabilityService, 
         public ProductService $productService, 
-        public JSONLogService $logger) {}
+        public JSONLogService $logger,
+        public RateService $rateService) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -37,10 +42,15 @@ class AvailabilityController extends Controller
             $this->availabilityService->validateRequestParams($requestParams);
 
             $productId = $request->post('productId');
-            $product = $this->productService->find($productId);
+            $product = $this->productService->find(productId: $productId);
 
             if ($product->getPricingType() === Product::PRICING_TYPE_VOLUME && isset($requestParams['units'])) {
                 UnitService::validateQuantityBasedUnits($requestParams['units']);
+            }
+
+            if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+                $rateId = $requestParams[OctoRequest::RATE_ID] ?? null;
+                $this->rateService->validateRateId($product->getTourId(), $rateId);
             }
 
             $availabilityRequest = $this->availabilityRequestFactory->get($product, $requestParams);

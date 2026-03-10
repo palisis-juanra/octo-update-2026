@@ -11,12 +11,14 @@ class AvailabilityTransformer extends BaseTransformer
     public const MODE_BOOKING_AVAILABILITY = 'bookingAvailability';
 
     protected PricingTransformer $pricingTransformer;
+    protected RateTransformer $rateTransformer;
 
     public function __construct(string $mode = BaseTransformer::BASIC)
     {
         parent::__construct($mode);
 
         $this->pricingTransformer = new PricingTransformer();
+        $this->rateTransformer = new RateTransformer();
     }
 
     public function basicTransform($availability): array
@@ -61,7 +63,7 @@ class AvailabilityTransformer extends BaseTransformer
             $data['unitPricing'] = [];
 
             foreach ($unitPricings as $unitPricing) {
-                $data['unitPricing'][] = [
+                $unitPricingData = [
                     'unitId' => $unitPricing->getUnitId(),
                     'original' => $unitPricing->getOriginalPrice(),
                     'retail' => $unitPricing->getRetailPrice(),
@@ -70,7 +72,22 @@ class AvailabilityTransformer extends BaseTransformer
                     'currencyPrecision' => $unitPricing->getCurrencyPrecision(),
                     'includedTaxes' => $unitPricing->getIncludedTaxes()
                 ];
+
+                if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+                    $unitPricingData['rateId'] = $unitPricing->getRateId();
+                    $ratesData = [];
+                    foreach ($unitPricing->getRates() as $rate) {
+                        $ratesData[] = $this->rateTransformer->transform($rate);
+                    }
+                    $unitPricingData['rates'] = $ratesData;
+                }
+
+                $data['unitPricing'][] = $unitPricingData;
             }            
+        }
+
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+            $data['availableRates'] = $availability->getAvailableRates();   
         }
 
         return $data;

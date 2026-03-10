@@ -12,6 +12,11 @@ class Pricing
     protected int $retail;
     protected ?int $net;
     protected array $includedTaxes = [];
+    protected ?string $rateId = null;
+    /**
+     * @var Rate[]
+     */
+    protected array $rates = [];
 
     public function __construct(
         int $original,
@@ -95,5 +100,32 @@ class Pricing
         $this->includedTaxes = $includedTaxes;
 
         return $this;
+    }
+
+    public function setRateId(string $rateId): static
+    {
+        $this->rateId = $rateId;
+
+        return $this;
+    }
+
+    public function getRateId(): ?string
+    {
+        return $this->rateId;
+    }
+
+    /**
+     * @param Rate[] $rates
+     * @return Pricing
+     */
+    public function setRates(array $rates): static
+    {
+        $this->rates = $rates;
+        return $this;
+    }
+
+    public function getRates(): array
+    {
+        return $this->rates;
     }
 }
