@@ -1,0 +1,54 @@
+<response>
+  <request>GET /c/tour/datesprices/checkavail.xml?id=67&amp;date=2026-03-15&amp;r1=1&amp;webhook_debug=1&amp;webhook_info=1</request>
+  <error>OK</error>
+  <channel_id>142</channel_id>
+  <account_id>1</account_id>
+  <tour_id>67</tour_id>
+  <tour_name>[OCTO] SINGLE</tour_name>
+  <tour_name_long>[OCTO] SINGLE</tour_name_long>
+  <component_key_valid_for>3600</component_key_valid_for>
+  <sale_quantity_rule>PERSON</sale_quantity_rule>
+  <available_components>
+    <component>
+      <start_date>2026-03-15</start_date>
+      <end_date>2026-03-15</end_date>
+      <start_time>13:00</start_time>
+      <end_time>15:00</end_time>
+      <start_time_utcseconds>1773576000</start_time_utcseconds>
+      <end_time_utcseconds>1773583200</end_time_utcseconds>
+      <public_bookable>true</public_bookable>
+      <date_code/>
+      <sale_currency>EUR</sale_currency>
+      <min_booking_size>1</min_booking_size>
+      <spaces_remaining>15</spaces_remaining>
+      <total_price>50.00</total_price>
+      <total_price_display>&amp;#8364;50.00</total_price_display>
+      <net_price>39.75</net_price>
+      <price_breakdown>
+        <price_row rate-id="r1" label="Adults (1)" sale-currency="EUR" price="50.00" price-display="&amp;#8364;50.00">Adults (1) &amp;#8364;50.00</price_row>
+      </price_breakdown>
+      <note/>
+      <special_offer_note/>
+      <component_key>W/ms71w3szx96v1TrYeX1gjPxT2QWkA17phTT5RWVyYFN8svVWUS64mfbCxswJYL</component_key>
+      <supplier_note/>
+      <date_id>60131</date_id>
+      <date_type>departure</date_type>
+      <options/>
+      <pickup_on_request_key>SIQzG2ausCDZx720D1Tjvw==</pickup_on_request_key>
+      <pickup_points>
+        <pickup>
+          <pickup_key>9ix6ce2/XhLxpwGifbkSzw==</pickup_key>
+          <time>09:00</time>
+          <pickup_name>Pickup imborrable</pickup_name>
+          <pickup_id>5</pickup_id>
+          <description>123</description>
+          <address1>123</address1>
+          <postcode>123</postcode>
+          <geocode>123.000000,321.000000</geocode>
+          <supplier_pickup_code>dasd</supplier_pickup_code>
+        </pickup>
+      </pickup_points>
+    </component>
+  </available_components>
+  <webhook_id>e729f67d-f7c6-4da9-adb2-25feaf123c10</webhook_id>
+</response>
