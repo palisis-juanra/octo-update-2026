@@ -19,11 +19,11 @@ class RateService
 
     /**
      * @param int $tourId
-     * @param string $rateId
+     * @param null|string $rateId
      * @throws InvalidRateIdException
      * @return bool
      */
-    public function validateRateId(int $tourId, string $rateId): bool
+    public function validateRateId(int $tourId, ?string $rateId): bool
     {
         if (empty($rateId)) {
             return true;
@@ -40,10 +40,11 @@ class RateService
     }
 
     /**
-     * @param TourCMSService $tourCMSService
-     * @return array
+     * Fetch promotions for a certain tour
+     * @param int $tourId
+     * @return Promotion[]
      */
-    protected function getPromotionsForTour(int $tourId): array
+    public function getPromotionsForTour(int $tourId): array
     {
         $tourPromotionsXML = $this->tourCMSService->getTourPromotions($tourId);
         if (empty($tourPromotionsXML->promotions)) {

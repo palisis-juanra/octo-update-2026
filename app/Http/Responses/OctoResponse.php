@@ -45,7 +45,7 @@ class OctoResponse {
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR_DEFAULT = 'Invalid subsystem response';
     public const string ERROR_MESSAGE_TOO_MANY_REQUESTS = 'Too many requests, please wait before continue';
     public const string ERROR_CODE_INVALID_RATE_ID = 'INVALID_RATE_ID';
-    public const string ERROR_MESSAGE_INVALID_RATE_ID = "Invalid Rate Id, must be one of 'OPEN', 'GENIUS1' or 'GENIUS2'";
+    public const string ERROR_MESSAGE_INVALID_RATE_ID = "Invalid Rate Id";
 
     public static function UNAUTHORIZED(string $errorMessage = self::ERROR_MESSAGE_UNAUTHORIZED): Response
     {

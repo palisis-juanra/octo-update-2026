@@ -102,7 +102,7 @@ class Pricing
         return $this;
     }
 
-    public function setRateId(string $rateId): static
+    public function setRateId(?string $rateId): static
     {
         $this->rateId = $rateId;
 
