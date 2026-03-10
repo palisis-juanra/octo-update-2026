@@ -24,10 +24,12 @@ use TourCMS\Utils\TourCMS;
 class TourCMSService
 {
     // Cache
-    public const CACHE_REDIS_KEY_SHOW_CHANNEL = 'SHOW_CHANNEL|';
-    public const CACHE_REDIS_KEY_SHOW_TOUR = 'SHOW_TOUR|';
-    public const CACHE_TIME_SHOW_CHANNEL = 600;
-    public const CACHE_TIME_SHOW_TOUR = 300;
+    public const string CACHE_REDIS_KEY_SHOW_CHANNEL = 'SHOW_CHANNEL|';
+    public const string CACHE_REDIS_KEY_SHOW_TOUR = 'SHOW_TOUR|';
+    public const string CACHE_REDIS_KEY_GET_TOUR_PROMOTIONS = 'GET_TOUR_PROMOTIONS|';
+    public const int CACHE_TIME_SHOW_CHANNEL = 600;
+    public const int CACHE_TIME_SHOW_TOUR = 300;
+    public const int CACHE_TIME_GET_TOUR_PROMOTIONS = 300;
 
     // Errors
     public const ERROR_FAIL_SIG = 'FAIL_SIG';
@@ -54,6 +56,7 @@ class TourCMSService
 
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
 
+    protected int $maid;
     protected TourCMS $tourCMS;
     protected TourCMSMulti $tourCMSMulti;
     protected string $channelId;
@@ -62,6 +65,8 @@ class TourCMSService
 
     public function __construct(string $maid, string $APIKey, string $channelId, JSONLogService $jsonLogService, CacheRepository $cache)
     {
+        $this->maid = (int) $maid;
+
         $this->tourCMS = new TourCMS($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMS->set_base_url($this->getAPIBaseUrl());
         $this->tourCMS->set_user_agent(self::OCTO_USER_AGENT);
@@ -271,11 +276,27 @@ class TourCMSService
         return $this->handleResponse($response);
     }
 
-    public function getTourPromotions(int $tourId): SimpleXMLElement
+    public function getTourPromotions(int $tourId, bool $cached = true): SimpleXMLElement
     {
         $endpoint = '/api/tours/promotions/get.xml?tour_id=' . $tourId;
+
+        $redisKey = self::CACHE_REDIS_KEY_GET_TOUR_PROMOTIONS . "{$this->maid}|{$tourId}|{$this->channelId}";
+        
+        if (true === $cached) {
+            $cachedGetTourPromotions = $this->cache->get($redisKey);
+            
+            if (!empty($cachedGetTourPromotions)) {
+                return simplexml_load_string($cachedGetTourPromotions);
+            }
+        }
+
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, $this->jsonLogService->getLogId());
         $response = $this->tourCMS->request($endpoint, $this->channelId);
-        return $this->handleResponse($response);
+        $this->handleResponse($response);
+        
+        $this->cache->put($redisKey, $response->asXML(), self::CACHE_TIME_GET_TOUR_PROMOTIONS);
+        
+        return $response;
     }
 
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array

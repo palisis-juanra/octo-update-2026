@@ -12,7 +12,7 @@ class InvalidRateIdException extends Exception
     public function __construct(string $rateId, string $message = "", int $code = 0, Throwable|null $previous = null)
     {
         $this->rateId = $rateId;
-        return parent::__construct($message, $code, $previous);
+        parent::__construct($message, $code, $previous);
     }
 
     public function getRateId(): string

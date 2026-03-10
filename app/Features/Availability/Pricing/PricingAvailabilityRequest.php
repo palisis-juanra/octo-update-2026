@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\Rate;
 use App\Models\TourCMS\Promotion;
 use App\Services\OptionService;
+use App\Services\RateService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
 use App\Services\XMLService;
@@ -19,6 +20,7 @@ use SimpleXMLElement;
 
 class PricingAvailabilityRequest extends AvailabilityRequest
 {
+    protected RateService $rateService;
     protected string $currency;
     protected array $units;
     protected int $minBookingSize;
@@ -31,8 +33,9 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     protected bool $allDay = false;
     protected ?string $rateId = null;
 
-    public function __construct(Product $product, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize, int $maxBookingSize, bool $allDay = false, ?string $rateId = null)
+    public function __construct(RateService $rateService, Product $product, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize, int $maxBookingSize, bool $allDay = false, ?string $rateId = null)
     {
+        $this->rateService = $rateService;
         $this->product = $product;
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
@@ -73,7 +76,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $this->updateAvailabilitiesWithCheckAvailComponents($availabilities, $checkAvailcomponents);
 
         if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
-            $promotions = $this->getPromotionsForTour($tourCMSService);
+            $promotions = $this->rateService->getPromotionsForTour($this->product->getTourId());
             $this->addPromotionsToAvailabilities($availabilities, $promotions, $this->rateId);
             $this->applyPromotionDiscount($availabilities, $promotions, $this->rateId);
         }
@@ -155,43 +158,13 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     }
 
     /**
-     * Summary of getPromotionsForTour
-     * @param TourCMSService $tourCMSService
-     * @return array
-     */
-    protected function getPromotionsForTour(TourCMSService $tourCMSService): array
-    {
-        $tourPromotionsXML = $tourCMSService->getTourPromotions($this->product->getTourId());
-        if (empty($tourPromotionsXML->promotions)) {
-            return [];
-        }
-
-        $promotions = [];
-        $promotionsData = XMLService::getArrayFromXmlNode($tourPromotionsXML->promotions, 'promotion') ?? [];
-        foreach ($promotionsData as $promotionData) {
-            $promotions[] = Promotion::fromXML($promotionData);
-        }
-
-        return $promotions;
-    }
-
-    /**
      * @param Availability[] $availabilities
      * @param Promotion[] $promotions
      */
     protected function addPromotionsToAvailabilities(array $availabilities, array $promotions, ?string $rateId): void
     {
-        $availableRates = [];
-        $allowedPromotionNames = ['OPEN', 'GENIUS1', 'GENIUS2'];
-
-        foreach ($promotions as $promotion) {
-            if (in_array($promotion->getName(), $allowedPromotionNames)) {
-                $availableRates[] = $promotion;
-            }
-        }
-
         foreach ($availabilities as $availability) {
-            $availability->setAvailableRates(array_map(function(Promotion $promotion) { return $promotion->getName(); }, $availableRates));
+            $availability->setAvailableRates(array_map(function(Promotion $promotion) { return $promotion->getName(); }, $promotions));
 
 
             /* Availability Pricing */
@@ -203,11 +176,11 @@ class PricingAvailabilityRequest extends AvailabilityRequest
             $retailPrice = $availabilityPricing->getRetail();
             $netPrice = $availabilityPricing->getNet();
 
-            foreach ($availableRates as $promotion) {
+            foreach ($promotions as $promotion) {
 
                 $discount = $promotion->getDiscount();
-                $rateRetailPrice = (int) round($retailPrice * (1- $discount / 100));
-                $rateNetPrice = (int) round($netPrice * (1- $discount / 100));
+                $rateRetailPrice = (int) round($retailPrice * (1 - $discount / 100));
+                $rateNetPrice = (int) round($netPrice * (1 - $discount / 100));
 
                 $rates[] = new Rate(
                     $promotion->getName(),
@@ -226,10 +199,10 @@ class PricingAvailabilityRequest extends AvailabilityRequest
 
                 $rates = [];
 
-                foreach ($availableRates as $promotion) {
+                foreach ($promotions as $promotion) {
                     $discount = $promotion->getDiscount();
-                    $rateRetailPrice = (int) round($unitPricing->getRetailPrice() * (1- $discount / 100));
-                    $rateNetPrice = (int) round($unitPricing->getNetPrice() * (1- $discount / 100));
+                    $rateRetailPrice = (int) round($unitPricing->getRetailPrice() * (1 - $discount / 100));
+                    $rateNetPrice = (int) round($unitPricing->getNetPrice() * (1 - $discount / 100));
 
                     $rates[] = new Rate(
                         $promotion->getName(),
@@ -271,19 +244,19 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         foreach ($availabilities as $availability) {
             $pricing = $availability->getPricing();
 
-            $newOriginalPrice = (int) round($pricing->getOriginal() * (1 - $discount / 100));
-            $newRetailPrice = (int) round($pricing->getRetail() * (1- $discount / 100));
-            $newNetPrice = (int) round($pricing->getNet() * (1- $discount / 100));
+            $newRetailPrice = (int) round($pricing->getRetail() * (1 - $discount / 100));
+            $newNetPrice = (int) round($pricing->getNet() * (1 - $discount / 100));
 
-            $pricing->setOriginal($newOriginalPrice);
             $pricing->setRetail($newRetailPrice);
             $pricing->setNet($newNetPrice);
 
             $unitPricingArray = $availability->getUnitPricing();
             foreach ($unitPricingArray as $unitPricing) {
-                $newOriginalPrice = (int) round($unitPricing->getOriginalPrice() * (1 - $discount / 100));
-                $newRetailPrice = (int) round($unitPricing->getRetailPrice() * (1- $discount / 100));
-                $newNetPrice = (int) round($unitPricing->getNetPrice() * (1- $discount / 100));
+                $newRetailPrice = (int) round($unitPricing->getRetailPrice() * (1 - $discount / 100));
+                $newNetPrice = (int) round($unitPricing->getNetPrice() * (1 - $discount / 100));
+
+                $unitPricing->setRetailPrice($newRetailPrice);
+                $unitPricing->setNetPrice($newNetPrice);
             }
         }
 
