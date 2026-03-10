@@ -19,6 +19,7 @@ class OctoResponse {
     public const string FIELD_AVAILABILITY_ID = 'availabilityId';
     public const string FIELD_BOOKING_UUID = 'uuid';
     public const string FIELD_TIMESTAMP = 'timestamp';
+    public const string FIELD_RATE_ID = 'rateId';
 
     public const string ERROR_CODE_UNAUTHORIZED = 'UNAUTHORIZED';
     public const string ERROR_CODE_FORBIDDEN = 'FORBIDDEN';
@@ -43,6 +44,8 @@ class OctoResponse {
     public const string ERROR_MESSAGE_INVALID_BOOKING_UUID = 'The Booking UUID was invalid or missing';
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR_DEFAULT = 'Invalid subsystem response';
     public const string ERROR_MESSAGE_TOO_MANY_REQUESTS = 'Too many requests, please wait before continue';
+    public const string ERROR_CODE_INVALID_RATE_ID = 'INVALID_RATE_ID';
+    public const string ERROR_MESSAGE_INVALID_RATE_ID = "Invalid Rate Id, must be one of 'OPEN', 'GENIUS1' or 'GENIUS2'";
 
     public static function UNAUTHORIZED(string $errorMessage = self::ERROR_MESSAGE_UNAUTHORIZED): Response
     {
@@ -149,6 +152,17 @@ class OctoResponse {
             self::FIELD_ERROR => self::ERROR_CODE_INVALID_BOOKING_UUID,
             self::FIELD_ERROR_MESSAGE => $errorMessage,
             self::FIELD_BOOKING_UUID => $bookingUuid
+        ];
+
+        return new JsonResponse($data, Response::HTTP_BAD_REQUEST);  
+    }
+
+    public static function INVALID_RATE_ID(string $rateId): Response
+    {
+        $data = [
+            self::FIELD_ERROR => self::ERROR_CODE_INVALID_RATE_ID,
+            self::FIELD_ERROR_MESSAGE => self::ERROR_MESSAGE_INVALID_RATE_ID,
+            self::FIELD_RATE_ID => $rateId
         ];
 
         return new JsonResponse($data, Response::HTTP_BAD_REQUEST);  

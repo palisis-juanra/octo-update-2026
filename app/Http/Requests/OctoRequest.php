@@ -14,6 +14,7 @@ class OctoRequest
     public const string UUID = 'uuid';
     public const string CONTACT = 'contact';
     public const string RESELLER_REFERENCE = 'resellerReference';
+    public const string RATE_ID = 'rateId';
 
     // Endpoints
     public const string ENDPOINT_SUPPLIER_GET = 'supplier-get';
@@ -34,8 +35,9 @@ class OctoRequest
     public const string CAPABILITIES_HEADER = 'Octo-Capabilities';
     public const string CAPABILITIES_PRICING = 'octo/pricing';
     public const string CAPABILITIES_CONTENT = 'octo/content';
+    public const string CAPABILITIES_BOOKINGCOM_RATES = 'bookingcom/rates';
 
-    public const CAPABILITIES_ALLOWED = [
+    public const array CAPABILITIES_ALLOWED = [
 
         self::ENDPOINT_SUPPLIER_GET => [
             self::CAPABILITIES_CONTENT
@@ -57,7 +59,8 @@ class OctoRequest
 
         self::ENDPOINT_AVAILABILITY_CHECK => [
             self::CAPABILITIES_PRICING,
-            self::CAPABILITIES_CONTENT
+            self::CAPABILITIES_CONTENT,
+            self::CAPABILITIES_BOOKINGCOM_RATES
         ]
     ];
 
