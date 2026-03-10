@@ -10,10 +10,13 @@ use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Product;
 use App\Services\ProductService;
+use App\Services\RateService;
+use PHPUnit\Framework\MockObject\MockObject;
 use Tests\FeatureTestCase;
 
 class AvailabilityRequestFactoryTest extends FeatureTestCase
 {
+    public $rateServiceMock;
     public $productServiceMock;
     public AvailabilityRequestFactory $factory;
     public const PRICING_HEADER = 'pricing';
@@ -27,7 +30,12 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
             ->onlyMethods(['getTourIdFromProductId'])
             ->getMock();
         $this->productServiceMock->method('getTourIdFromProductId')->willReturn('67');
-        $this->factory = new AvailabilityRequestFactory($this->productServiceMock);
+
+        $this->rateServiceMock = $this->getMockBuilder(RateService::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+        $this->factory = new AvailabilityRequestFactory($this->productServiceMock, $this->rateServiceMock);
     }
 
     public function test_whenRequestHasOnlyOneDayWithoutPricingHeader_thenAvailabilityRequestIsCreated()
