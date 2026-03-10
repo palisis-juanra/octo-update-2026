@@ -10,11 +10,12 @@ use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Product;
 use App\Services\AvailabilityService;
 use App\Services\ProductService;
+use App\Services\RateService;
 use App\Services\UnitService;
 
 class AvailabilityRequestFactory
 {
-    public function __construct(public ProductService $productService) {}
+    public function __construct(public ProductService $productService, public RateService $rateService) {}
 
     public function get(Product $product, array $requestParams): BaseAvailabilityRequest
     {
@@ -43,7 +44,7 @@ class AvailabilityRequestFactory
         $pricing = OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
-            return new PricingAvailabilityRequest($product, $optionId, $localDate, $units, $currency, $product->getMinBookingSize(), $product->getMaxBookingSize(), $product->getAllDay(), $rateId);        
+            return new PricingAvailabilityRequest($this->rateService, $product, $optionId, $localDate, $units, $currency, $product->getMinBookingSize(), $product->getMaxBookingSize(), $product->getAllDay(), $rateId);        
         }
 
         if (!$multiDates) {
