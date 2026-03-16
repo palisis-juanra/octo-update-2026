@@ -161,7 +161,7 @@ class TourCMSService
         }
 
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
-        error_log(JSONLog::getLogId());
+        JsonLog::info("Calling show tour departures for Tour {$tourId}, channel {$this->channelId}");
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response);
         $departureCount = (int) $response->tour->dates_and_prices->total_departure_count ?? 0;

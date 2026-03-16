@@ -85,7 +85,7 @@ class CustomExceptionHandler extends Handler
                 break;
 
             case (NoMatchingDataException::class):
-                $response = OctoResponse::INVALID_PRODUCT_ID($exception->productId);
+                $response = OctoResponse::INVALID_PRODUCT_ID(0);
                 break;
                 
             case (BadRequestException::class):

@@ -4,6 +4,8 @@ namespace App\Features\Availability;
 
 use App\Exceptions\InvalidAvailabilityIdException;
 use App\Exceptions\InvalidUnitIdException;
+use App\Exceptions\NoMatchingDataException;
+use App\Facades\JsonLog;
 use App\Facades\OctoRequestFacade;
 use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
@@ -186,21 +188,26 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         if (!$needsPricing) {
             $mappingQueryString .= '&hide_prices=1';
         }
-        $response = $tourCMSService->showTourDepartures($this->product->getTourId(),$this->localDateStart, $this->localDateEnd, $mappingQueryString);
+        try {
 
-        if (!isset($response->tour->dates_and_prices)) {
-            return [];
-        }
-        if ($needsPricing) {
-            $this->currency = (string)$response->tour->sale_currency;
-        }
-        $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
-        $page = 2;
-        while (count($departures) < $response->tour->dates_and_prices->total_departure_count) {
-            $pagedMappingQueryString = $mappingQueryString . "&page=$page";
-            $response = $tourCMSService->showTourDepartures($this->product->getTourId(),$this->localDateStart, $this->localDateEnd, $pagedMappingQueryString);
-            $departures = array_merge($departures, $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure'));
-            $page++;
+            $response = $tourCMSService->showTourDepartures($this->product->getTourId(),$this->localDateStart, $this->localDateEnd, $mappingQueryString);
+            if (!isset($response->tour->dates_and_prices)) {
+                return [];
+            }
+            if ($needsPricing) {
+                $this->currency = (string)$response->tour->sale_currency;
+            }
+            $departures = $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure');
+            $page = 2;
+            while (count($departures) < $response->tour->dates_and_prices->total_departure_count) {
+                $pagedMappingQueryString = $mappingQueryString . "&page=$page";
+                $response = $tourCMSService->showTourDepartures($this->product->getTourId(),$this->localDateStart, $this->localDateEnd, $pagedMappingQueryString);
+                $departures = array_merge($departures, $tourCMSService->getArrayFromXmlNode($response->tour->dates_and_prices, 'departure'));
+                $page++;
+            }
+        } catch (NoMatchingDataException $e) {
+            JsonLog::error("NO MATCHING DATA error for Show Tour Departures Call");
+            throw $e;
         }
         return $departures;
     }
