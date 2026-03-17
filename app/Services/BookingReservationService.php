@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\NoAvailabilityException;
+use App\Facades\JsonLog;
 use App\Factories\BookingFactory;
 use App\Factories\UnitItemFactory;
 use App\Models\Availability\Availability;
@@ -21,7 +22,7 @@ class BookingReservationService
         public JSONLogService $logger,
     ) {}
 
-    public function reserve(Product $product, Option $option, Availability $availability, array $unitItems, ?string $uuid = null, ?string $notes = null): Booking
+    public function reserve(Product $product, Option $option, Availability $availability, array $unitItems, ?string $uuid = null, ?string $notes = null, ?string $rateId = null): Booking
     {
         $date = $availability->getDate();
         $departureId = $availability->getAttributes()['departure_id'];
@@ -52,7 +53,7 @@ class BookingReservationService
         $availabilityFromComponent = $this->availabilityService->generateAvailabilityObjectFromComponent($component, $product);
 
         // Start new booking with the componentId required
-        $bookingData = $this->getBookingDataForStartNewBooking($unitItems, $componentKey, $uuid);
+        $bookingData = $this->getBookingDataForStartNewBooking($unitItems, $componentKey, $uuid, $rateId);
         $startNewBookingXML = $this->tourCMSService->startNewBooking($bookingData);
         $this->logger->info(["message" => "Temporary booking created in TourCMS"]);
 
@@ -118,7 +119,7 @@ class BookingReservationService
         throw new NoAvailabilityException;
     }
 
-    public function getBookingDataForStartNewBooking(array $unitItems, string $componentKey, string $uuid = null): SimpleXMLElement
+    public function getBookingDataForStartNewBooking(array $unitItems, string $componentKey, ?string $uuid = null, ?string $promotionName = null): SimpleXMLElement
     {
         $booking = new SimpleXMLElement('<booking />');
         $booking->addChild('manage_uuid', 1);
@@ -130,6 +131,12 @@ class BookingReservationService
         $component = $components->addChild('component');
         $component->addChild('component_key', $componentKey);
         $booking->addChild('customers');
+        
+        if (!empty($promotionName)) {
+            JsonLog::info("Adding promotion name {$promotionName} to start new booking XML");
+            $promotions = $booking->addChild('tour_promotions');
+            $promotions->addChild('tour_promotion', $promotionName);
+        }
 
         return $booking;
     }
