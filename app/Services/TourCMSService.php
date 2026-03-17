@@ -166,11 +166,12 @@ class TourCMSService
         }
 
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
-        JsonLog::info("Calling show tour departures for Tour {$tourId}, channel {$this->channelId}");
+        JsonLog::info("Calling show tour departures for Tour {$tourId}, channel {$this->channelId}, qs: $queryString");
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response);
         $departureCount = (int) $response->tour->dates_and_prices->total_departure_count ?? 0;
         if ($departureCount > self::MAX_SHOW_TOUR_DEPARTURES_COUNT) {
+            $this->jsonLogService->info("Reached max number of departures in show tour departures: " . self::MAX_SHOW_TOUR_DEPARTURES_COUNT);
             throw new TooManyDeparturesException($departureCount);
         }
 
