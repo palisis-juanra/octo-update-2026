@@ -61,6 +61,10 @@ class OctoRequest
             self::CAPABILITIES_PRICING,
             self::CAPABILITIES_CONTENT,
             self::CAPABILITIES_BOOKINGCOM_RATES
+        ],
+
+        self::ENDPOINT_BOOKINGS_RESERVATION => [
+            self::CAPABILITIES_BOOKINGCOM_RATES
         ]
     ];
 
