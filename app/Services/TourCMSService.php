@@ -6,6 +6,7 @@ use App\Exceptions\APICallNotOKException;
 use App\Exceptions\APIThrottleError;
 use App\Exceptions\BookingAlreadyRedeemedException;
 use App\Exceptions\FailSignatureException;
+use App\Exceptions\InvalidRateIdException;
 use App\Exceptions\NoAPIResponseException;
 use App\Exceptions\FailPermissionException;
 use App\Exceptions\SupplierSubsystemError;
@@ -52,6 +53,7 @@ class TourCMSService
     public const OCTO_USER_AGENT = 'octo.tourcms.com';
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR = 'SUPPLIER_SUBSYSTEM_ERROR';
     public const string ERROR_API_THROTTLE = 'API throttle';
+    public const string ERROR_INVALID_PROMOTION = 'BUCKET_HAS_NO_PROMOTION_WITH_NAME';
     public const int MAX_SHOW_TOUR_DEPARTURES_COUNT = 500;
 
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
@@ -228,12 +230,21 @@ class TourCMSService
         
     }
 
+    /**
+     * @param SimpleXMLElement $bookingData
+     * @throws InvalidRateIdException
+     * @return SimpleXMLElement
+     */
     public function startNewBooking(SimpleXMLElement $bookingData): SimpleXMLElement
     {
         $bookingData->associate_customers = 1;
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
-        $response = $this->tourCMS->start_new_booking($bookingData, $this->channelId);
-        return $this->handleResponse($response); 
+        try {
+            $response = $this->tourCMS->start_new_booking($bookingData, $this->channelId);
+            return $this->handleResponse($response); 
+        } catch (InvalidRateIdException) {
+            throw new InvalidRateIdException((string) $bookingData->tour_promotions->tour_promotion ?? '');
+        }
     }
 
     public function commitBooking(string $bookingId, ?string $agentRef = ''): SimpleXMLElement
@@ -363,6 +374,8 @@ class TourCMSService
                 throw new SupplierSubsystemError((string) ($responseXML->supplier_subsystem_error ?? ''));
             case self::ERROR_API_THROTTLE:
                 throw new APIThrottleError();
+            case self::ERROR_INVALID_PROMOTION:
+                throw new InvalidRateIdException(0);
             default:
                 $rawResponse = $responseXML instanceof SimpleXMLElement
                     ? $responseXML->asXML()
