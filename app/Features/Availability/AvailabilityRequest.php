@@ -17,6 +17,7 @@ use App\Models\Availability\AvailabilityUnitPricing;
 use App\Models\Pricing;
 use App\Models\Product;
 use App\Services\CutoffService;
+use App\Services\RateService;
 use App\Services\UnitService;
 use App\Services\XMLService;
 use SimpleXMLElement;
@@ -28,22 +29,20 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected string $localDateStart;
     protected string $localDateEnd;
     protected array $units;
-    protected int $minBookingSize;
-    protected int $maxBookingSize;
     protected int $maxUnits;
     protected array $cutoff;
     protected string $currency;
     protected bool $allDay = false;
+    protected ?string$rateId = null;
 
-    public function __construct(protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false)
+    public function __construct(protected RateService $rateService, protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false, ?string $rateId = null)
     {
         $this->tourId = $product->getTourId();
-        $this->minBookingSize = $product->getMinBookingSize();
-        $this->maxBookingSize = $product->getMaxBookingSize();
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
         $this->allDay = $allDay;
+        $this->rateId = $rateId;
     }
 
 // GET SET FUNCTIONS
@@ -87,12 +86,12 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
     public function getMinBookingSize(): int
     {
-        return $this->minBookingSize;
+        return $this->product->getMinBookingSize();
     }
 
     public function getMaxBookingSize(): int
     {
-        return $this->maxBookingSize;
+        return $this->product->getMaxBookingSize();
     }
 
     // PUBLIC FUNCTIONS
@@ -213,7 +212,11 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     }
 
     protected function getAvailabilitiesFromDepartures(array $departures):array
-    {   
+    {
+        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+            $promotions = $this->rateService->getPromotionsForTour($this->product->getTourId());
+        }
+
         $availabilities = [];
         foreach ($departures as $departure) {
 
@@ -248,6 +251,14 @@ class AvailabilityRequest extends BaseAvailabilityRequest
                 $availability->setPricing($pricing);
                 $availability->setUnitPricing($unitPricing);
             }
+
+            if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+                $promotions = $this->rateService->getPromotionsForTour($this->product->getTourId());
+                foreach ($availabilities as $availability) {
+                    $this->rateService->addPromotionsToAvailability($availability, $promotions, $this->rateId);
+                }
+            }
+
             if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
                 $supplierNote = !empty($departure->supplier_note) ? (string) $departure->supplier_note : '';
                 $availability->setTitle("{$this->tourName} {$supplierNote}");

@@ -44,7 +44,7 @@ class AvailabilityRequestFactory
         $pricing = OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
-            return new PricingAvailabilityRequest($this->rateService, $product, $optionId, $localDate, $units, $currency, $product->getMinBookingSize(), $product->getMaxBookingSize(), $product->getAllDay(), $rateId);        
+            return new PricingAvailabilityRequest($this->rateService, $product, $optionId, $localDate, $units, $currency, $rateId);        
         }
 
         if (!$multiDates) {
@@ -52,7 +52,7 @@ class AvailabilityRequestFactory
             $localDateStart = $localDate;
         }
 
-        $availabilityRequest = new AvailabilityRequest($product, $optionId, $localDateStart, $localDateEnd);
+        $availabilityRequest = new AvailabilityRequest($this->rateService, $product, $optionId, $localDateStart, $localDateEnd);
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $availabilityRequest->setContentEnabled(true);

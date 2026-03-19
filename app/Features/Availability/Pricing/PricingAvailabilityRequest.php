@@ -9,22 +9,16 @@ use App\Http\Requests\OctoRequest;
 use App\Models\Availability\Availability;
 use App\Models\Pricing;
 use App\Models\Product;
-use App\Models\Rate;
-use App\Models\TourCMS\Promotion;
 use App\Services\OptionService;
 use App\Services\RateService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
-use App\Services\XMLService;
-use SimpleXMLElement;
 
 class PricingAvailabilityRequest extends AvailabilityRequest
 {
     protected RateService $rateService;
     protected string $currency;
     protected array $units;
-    protected int $minBookingSize;
-    protected int $maxBookingSize;
     protected Product $product;
     protected string $optionId;
     protected string $localDateStart;
@@ -33,7 +27,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     protected bool $allDay = false;
     protected ?string $rateId = null;
 
-    public function __construct(RateService $rateService, Product $product, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize, int $maxBookingSize, bool $allDay = false, ?string $rateId = null)
+    public function __construct(RateService $rateService, Product $product, string $optionId, string $localDateStart, array $units, string $currency, ?string $rateId = null)
     {
         $this->rateService = $rateService;
         $this->product = $product;
@@ -42,9 +36,6 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $this->localDateEnd = $localDateStart;
         $this->units = $units;
         $this->currency = $currency;
-        $this->minBookingSize = $minBookingSize;
-        $this->maxBookingSize = $maxBookingSize;
-        $this->allDay = $allDay;
         $this->rateId = $rateId;
     }
 
@@ -77,8 +68,9 @@ class PricingAvailabilityRequest extends AvailabilityRequest
 
         if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
             $promotions = $this->rateService->getPromotionsForTour($this->product->getTourId());
-            $this->addPromotionsToAvailabilities($availabilities, $promotions, $this->rateId);
-            $this->applyPromotionDiscount($availabilities, $promotions, $this->rateId);
+            foreach ($availabilities as $availability) {
+                $this->rateService->addPromotionsToAvailability($availability, $promotions, $this->rateId);
+            }
         }
 
         return $availabilities;
@@ -89,7 +81,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $params = '';
 
         if (empty($units)) {
-            return "r1={$this->minBookingSize}";
+            return "r1={$this->product->getMinBookingSize()}";
         }
 
         foreach ($units as $rateData) {
@@ -155,110 +147,5 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         }
         $availableComponents = $tourCMSService->getArrayFromXmlNode($response->available_components, 'component');
         return $availableComponents;
-    }
-
-    /**
-     * @param Availability[] $availabilities
-     * @param Promotion[] $promotions
-     */
-    protected function addPromotionsToAvailabilities(array $availabilities, array $promotions, ?string $rateId): void
-    {
-        foreach ($availabilities as $availability) {
-            $availability->setAvailableRates(array_map(function(Promotion $promotion) { return $promotion->getName(); }, $promotions));
-
-
-            /* Availability Pricing */
-
-            $rates = [];
-            $availabilityPricing = $availability->getPricing();
-            $availabilityPricing->setRateId($rateId);
-            
-            $retailPrice = $availabilityPricing->getRetail();
-            $netPrice = $availabilityPricing->getNet();
-
-            foreach ($promotions as $promotion) {
-
-                $discount = $promotion->getDiscount();
-                $rateRetailPrice = (int) round($retailPrice * (1 - $discount / 100));
-                $rateNetPrice = (int) round($netPrice * (1 - $discount / 100));
-
-                $rates[] = new Rate(
-                    $promotion->getName(),
-                    $rateRetailPrice,
-                    $rateNetPrice
-                );
-            }
-            $availabilityPricing->setRates($rates);
-
-            /* Availability Unit Pricing */
-
-            $unitPricingArray = $availability->getUnitPricing();
-            /* @var AvailabilityUnitPricing[] */
-            foreach ($unitPricingArray as $unitPricing) {
-                $unitPricing->setRateId($rateId);
-
-                $rates = [];
-
-                foreach ($promotions as $promotion) {
-                    $discount = $promotion->getDiscount();
-                    $rateRetailPrice = (int) round($unitPricing->getRetailPrice() * (1 - $discount / 100));
-                    $rateNetPrice = (int) round($unitPricing->getNetPrice() * (1 - $discount / 100));
-
-                    $rates[] = new Rate(
-                        $promotion->getName(),
-                        $rateRetailPrice,
-                        $rateNetPrice
-                    );
-                }
-                $unitPricing->setRates($rates);
-            }
-        }
-    }
-
-    /**
-     * Apply a promotion to availabilities
-     * @param TourCMSService $tourCMSService
-     * @param Availability[] $availabilities
-     * @return void
-     */
-    protected function applyPromotionDiscount(array $availabilities, array $promotions, ?string $rateId): void
-    {
-        if (empty($rateId)) {
-            return;
-        }
-
-        $promotionToApply = null;
-        foreach ($promotions as $promotion) {
-            if ((string) $promotion->getName() === $rateId) {
-                $promotionToApply = $promotion;
-                break;
-            }
-        }
-
-        if (!$promotionToApply) {
-            return;
-        }
-
-        $discount = (float) $promotionToApply->getDiscount();
-
-        foreach ($availabilities as $availability) {
-            $pricing = $availability->getPricing();
-
-            $newRetailPrice = (int) round($pricing->getRetail() * (1 - $discount / 100));
-            $newNetPrice = (int) round($pricing->getNet() * (1 - $discount / 100));
-
-            $pricing->setRetail($newRetailPrice);
-            $pricing->setNet($newNetPrice);
-
-            $unitPricingArray = $availability->getUnitPricing();
-            foreach ($unitPricingArray as $unitPricing) {
-                $newRetailPrice = (int) round($unitPricing->getRetailPrice() * (1 - $discount / 100));
-                $newNetPrice = (int) round($unitPricing->getNetPrice() * (1 - $discount / 100));
-
-                $unitPricing->setRetailPrice($newRetailPrice);
-                $unitPricing->setNetPrice($newNetPrice);
-            }
-        }
-
     }
 } 

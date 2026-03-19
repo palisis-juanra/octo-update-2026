@@ -2,13 +2,7 @@
 
 namespace App\Interfaces;
 
-use App\Models\Product;
-use App\Services\AvailabilityService;
 use App\Services\TourCMSService;
-use DateInterval;
-use DateTime;
-use DateTimeZone;
-use SimpleXMLElement;
 
 abstract class BaseAvailabilityRequest
 {
