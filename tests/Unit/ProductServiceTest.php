@@ -538,9 +538,12 @@ class ProductServiceTest extends UnitTestCase
 
         $jsonLogService = $this->getMockBuilder(JSONLogService::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getLogId'])    
+            ->onlyMethods(['info', 'getLogId'])    
             ->getMock();
         $jsonLogService->method('getLogId')->willReturn('xxx');
+                $jsonLogService
+            ->expects($this->any())
+            ->method('info');
 
         $cache = $this->createMock(\Illuminate\Contracts\Cache\Repository::class);
         $cache->method('get')->willReturn(null);
