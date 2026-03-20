@@ -177,7 +177,8 @@ class ProductService
         public TourCMSService $tourCMSService, 
         public JSONLogService $logger, 
         public LocaleService $localeService,
-        public ProductMappingFactory $productMappingFactory)
+        public ProductMappingFactory $productMappingFactory,
+        public RateService $rateService)
     {
         $this->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
     }
@@ -332,6 +333,11 @@ class ProductService
             $saleCurrency = !empty($tour->sale_currency) ? (string) $tour->sale_currency : (string) $this->tourCMSService->showChannel()->channel->sale_currency;            
             $product->setDefaultCurrency($saleCurrency);
             $product->setAvailableCurrencies([$saleCurrency]);
+        }
+
+        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+            $promotions = $this->rateService->getTourPromotions($product->getTourId());
+            $product->setPromotions($promotions); 
         }
 
         return $product;
