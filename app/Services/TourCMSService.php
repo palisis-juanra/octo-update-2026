@@ -304,6 +304,7 @@ class TourCMSService
     protected function handleResponse(mixed $response): SimpleXMLElement
     {
         if (!$response) throw new NoAPIResponseException();
+
         switch ((string)$response->error) {
             case self::ERROR_OK:
             case self::ERROR_PREVIOUSLY_CANCELLED:
@@ -327,6 +328,7 @@ class TourCMSService
             case self::ERROR_API_THROTTLE:
                 throw new APIThrottleError();
             default:
+                $this->jsonLogService->info("API Call error: " . json_encode($response));
                 throw new APICallNotOKException();
         }
     }
