@@ -10,14 +10,14 @@ use App\Models\Availability\Availability;
 use App\Models\Pricing;
 use App\Models\Product;
 use App\Models\TourCMS\Promotion;
+use App\Services\AvailabilityPromotionService;
 use App\Services\OptionService;
-use App\Services\RateService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
 
 class PricingAvailabilityRequest extends AvailabilityRequest
 {
-    protected RateService $rateService;
+    protected AvailabilityPromotionService $availabilityPromotionService;
     protected string $currency;
     protected array $units;
     protected Product $product;
@@ -28,9 +28,9 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     protected bool $allDay = false;
     protected ?Promotion $promotion = null;
 
-    public function __construct(RateService $rateService, Product $product, string $optionId, string $localDateStart, array $units, string $currency, ?Promotion $promotion = null)
+    public function __construct(AvailabilityPromotionService $availabilityPromotionService, Product $product, string $optionId, string $localDateStart, array $units, string $currency, ?Promotion $promotion = null)
     {
-        $this->rateService = $rateService;
+        $this->availabilityPromotionService = $availabilityPromotionService;
         $this->product = $product;
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
@@ -69,7 +69,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
 
         if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
             foreach ($availabilities as $availability) {
-                $this->rateService->addPromotionsToAvailability($this->product, $availability, $this->promotion);
+                $this->availabilityPromotionService->enrichAvailabilityWithPromotions($this->product, $availability, $this->promotion);
             }
         }
 

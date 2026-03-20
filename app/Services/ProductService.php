@@ -21,7 +21,6 @@ use App\Models\Unit;
 use App\Models\UnitRestrictions;
 use App\Transformers\BaseTransformer;
 use App\Transformers\ProductTransformer;
-use Exception;
 use JsonException;
 use SimpleXMLElement;
 use stdClass;
@@ -178,7 +177,7 @@ class ProductService
         public JSONLogService $logger, 
         public LocaleService $localeService,
         public ProductMappingFactory $productMappingFactory,
-        public RateService $rateService)
+        public TourPromotionService $tourPromotionService)
     {
         $this->productTransformer = new ProductTransformer(BaseTransformer::FULL_TRANSFORM);
     }
@@ -336,7 +335,7 @@ class ProductService
         }
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
-            $promotions = $this->rateService->getTourPromotions($product->getTourId());
+            $promotions = $this->tourPromotionService->getTourPromotions($product->getTourId());
             $product->setPromotions($promotions); 
         }
 
