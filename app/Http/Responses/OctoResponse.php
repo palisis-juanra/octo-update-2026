@@ -46,6 +46,7 @@ class OctoResponse {
     public const string ERROR_MESSAGE_TOO_MANY_REQUESTS = 'Too many requests, please wait before continue';
     public const string ERROR_CODE_INVALID_RATE_ID = 'INVALID_RATE_ID';
     public const string ERROR_MESSAGE_INVALID_RATE_ID = "Invalid Rate Id";
+    public const string ERROR_MESSAGE_INVALID_RATE_ID_FOR_DATE = "Rate is invalid for availability date";
 
     public static function UNAUTHORIZED(string $errorMessage = self::ERROR_MESSAGE_UNAUTHORIZED): Response
     {
@@ -162,6 +163,17 @@ class OctoResponse {
         $data = [
             self::FIELD_ERROR => self::ERROR_CODE_INVALID_RATE_ID,
             self::FIELD_ERROR_MESSAGE => self::ERROR_MESSAGE_INVALID_RATE_ID,
+            self::FIELD_RATE_ID => $rateId
+        ];
+
+        return new JsonResponse($data, Response::HTTP_BAD_REQUEST);  
+    }
+
+    public static function INVALID_RATE_ID_FOR_DATE(string $rateId): Response
+    {
+        $data = [
+            self::FIELD_ERROR => self::ERROR_CODE_INVALID_RATE_ID,
+            self::FIELD_ERROR_MESSAGE => self::ERROR_MESSAGE_INVALID_RATE_ID_FOR_DATE,
             self::FIELD_RATE_ID => $rateId
         ];
 
