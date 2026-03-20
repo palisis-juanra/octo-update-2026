@@ -26,7 +26,12 @@ class AvailabilityRequestFactory
         $availabilityIds = $requestParams[AvailabilityService::PARAM_AVAILABILITY_IDS] ?? [];
         $currency = $requestParams[AvailabilityService::PARAM_CURRENCY] ?? '';
         $units = $requestParams[UnitService::PARAM_UNITS] ?? [];
+        
         $rateId = $requestParams[OctoRequest::RATE_ID] ?? null;
+        $promotion = null;
+        if (!empty($rateId)) {
+            $promotion = $this->rateService->getTourPromotion($product->getTourId(), $rateId);
+        }
 
         if (!empty($availabilityIds)) {
             if (count($availabilityIds) == 1) {
@@ -44,7 +49,7 @@ class AvailabilityRequestFactory
         $pricing = OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
-            return new PricingAvailabilityRequest($this->rateService, $product, $optionId, $localDate, $units, $currency, $rateId);        
+            return new PricingAvailabilityRequest($this->rateService, $product, $optionId, $localDate, $units, $currency, $promotion);        
         }
 
         if (!$multiDates) {
@@ -52,7 +57,7 @@ class AvailabilityRequestFactory
             $localDateStart = $localDate;
         }
 
-        $availabilityRequest = new AvailabilityRequest($this->rateService, $product, $optionId, $localDateStart, $localDateEnd);
+        $availabilityRequest = new AvailabilityRequest($this->rateService, $product, $optionId, $localDateStart, $localDateEnd, $promotion);
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $availabilityRequest->setContentEnabled(true);

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\InvalidOptionIdException;
+use App\Models\TourCMS\Promotion;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,6 +42,7 @@ class Product extends Model
     protected $pricingPer = self::PRICING_PER_UNIT;
     protected ?Pricing $pricing = null;
     protected string $pricingType = self::PRICING_TYPE_MULTIPLE_RATES;
+    protected array $promotions = [];
 
 
     public function getId(): string
@@ -491,6 +493,25 @@ class Product extends Model
     public function setTourId($tourId): self
     {
         $this->tourId = $tourId;
+
+        return $this;
+    }
+
+    /**
+     * @return Promotion[]
+     */
+    public function getPromotions()
+    {
+        return $this->promotions;
+    }
+
+    /**
+     * @param Promotion[] $promotions
+     * @return static
+     */
+    public function setPromotions(array $promotions)
+    {
+        $this->promotions = $promotions;
 
         return $this;
     }

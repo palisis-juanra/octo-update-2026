@@ -16,6 +16,7 @@ use App\Models\Availability\Availability;
 use App\Models\Availability\AvailabilityUnitPricing;
 use App\Models\Pricing;
 use App\Models\Product;
+use App\Models\TourCMS\Promotion;
 use App\Services\CutoffService;
 use App\Services\RateService;
 use App\Services\UnitService;
@@ -33,16 +34,16 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected array $cutoff;
     protected string $currency;
     protected bool $allDay = false;
-    protected ?string$rateId = null;
+    protected ?Promotion $promotion = null;
 
-    public function __construct(protected RateService $rateService, protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false, ?string $rateId = null)
+    public function __construct(protected RateService $rateService, protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', ?Promotion $promotion = null)
     {
         $this->tourId = $product->getTourId();
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
-        $this->allDay = $allDay;
-        $this->rateId = $rateId;
+        $this->allDay = $product->getAllDay();
+        $this->promotion = $promotion;
     }
 
 // GET SET FUNCTIONS
@@ -213,10 +214,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
     protected function getAvailabilitiesFromDepartures(array $departures):array
     {
-        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
-            $promotions = $this->rateService->getPromotionsForTour($this->product->getTourId());
-        }
-
         $availabilities = [];
         foreach ($departures as $departure) {
 
@@ -253,10 +250,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             }
 
             if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
-                $promotions = $this->rateService->getPromotionsForTour($this->product->getTourId());
-                foreach ($availabilities as $availability) {
-                    $this->rateService->addPromotionsToAvailability($availability, $promotions, $this->rateId);
-                }
+                $this->rateService->addPromotionsToAvailability($this->product, $availability, $this->promotion);
             }
 
             if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {

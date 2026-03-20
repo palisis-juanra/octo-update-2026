@@ -13,6 +13,7 @@ use App\Services\LocaleService;
 use App\Services\OptionService;
 use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
+use App\Services\RateService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
@@ -112,8 +113,12 @@ class BookingReservationTest extends FeatureTestCase
         
         $this->instance(AvailabilityService::class, $availabilityServiceMock);
 
+        $rateServiceMock = $this->getMockBuilder(RateService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         // Mock ProductService
-        $productService = new ProductService($tourCMSServiceMock, $this->getLoggerMock(), new LocaleService, new ProductMappingFactory);
+        $productService = new ProductService($tourCMSServiceMock, $this->getLoggerMock(), new LocaleService, new ProductMappingFactory, $rateServiceMock);
         $this->instance(ProductService::class, $productService);
 
         // Mock Controller

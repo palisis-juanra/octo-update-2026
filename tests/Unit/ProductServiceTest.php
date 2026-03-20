@@ -10,6 +10,7 @@ use App\Services\JSONLogService;
 use App\Services\LocaleService;
 use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
+use App\Services\RateService;
 use App\Services\TourCMSService;
 use PHPUnit\Framework\MockObject\MockObject;
 use SimpleXMLElement;
@@ -442,7 +443,10 @@ class ProductServiceTest extends UnitTestCase
 
     public function test_whenTourHasStartTimezone_thenProductHasTourStartTimezoneAsTimezone(): void
     {
-        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory);
+    $rateServiceMock = $this->getMockBuilder(RateService::class)
+            ->disableOriginalConstructor()
+            ->getMock();    
+    $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory, $rateServiceMock);
         
         $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
         $this->assertSame((string)$this->showTourXML->tour->start_timezone, $timezone);  
@@ -450,7 +454,10 @@ class ProductServiceTest extends UnitTestCase
 
     public function test_whenTourHasNotStartTimezone_thenProductHasTourEndTimezoneAsTimezone(): void
     {
-        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory);
+    $rateServiceMock = $this->getMockBuilder(RateService::class)
+            ->disableOriginalConstructor()
+            ->getMock();    
+    $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory, $rateServiceMock);
 
         unset($this->showTourXML->tour->start_timezone);
         $timezone = $productService->getProductTimeZone($this->showTourXML->tour);
@@ -467,7 +474,10 @@ class ProductServiceTest extends UnitTestCase
 
     public function test_whenTourHasNeitherStartNorEndTimezone_thenProductHasAccountTimezoneAsTimezone(): void
     {
-        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory);
+    $rateServiceMock = $this->getMockBuilder(RateService::class)
+            ->disableOriginalConstructor()
+            ->getMock();    
+    $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory, $rateServiceMock);
 
         unset($this->showTourXML->tour->start_timezone);
         unset($this->showTourXML->tour->end_timezone);
@@ -491,7 +501,10 @@ class ProductServiceTest extends UnitTestCase
         $tourcmsService = $this->mockTourCMSService(['showTour']);
         $tourcmsService->method('showTour')->willReturn($this->showTourXML);
         
-        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService, new ProductMappingFactory);
+        $rateServiceMock = $this->getMockBuilder(RateService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService, new ProductMappingFactory, $rateServiceMock);
 
         
         $this->expectException(InvalidProductIdException::class);
@@ -514,7 +527,10 @@ class ProductServiceTest extends UnitTestCase
         $tourcmsService = $this->mockTourCMSService(['showTour']);
         $tourcmsService->method('showTour')->willReturn($this->showTourXML);
 
-        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService, new ProductMappingFactory);
+        $rateServiceMock = $this->getMockBuilder(RateService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService, new ProductMappingFactory, $rateServiceMock);
 
         $options = $productService->getProductOptions($this->showTourXML->tour);
 
@@ -552,7 +568,10 @@ class ProductServiceTest extends UnitTestCase
         $tourcmsService = new TourCMSService("12345", "abcde", "142", $jsonLogService, $cache);
         $tourcmsService->setTourCMS($tourCMSMock);
         
-        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService, new ProductMappingFactory);
+        $rateServiceMock = $this->getMockBuilder(RateService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productService = new ProductService($tourcmsService, $this->mockLogger(), new LocaleService, new ProductMappingFactory, $rateServiceMock);
         
         $this->expectException(APIThrottleError::class);
         $productService->find('TE_1_230|142');

@@ -29,7 +29,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
             ]
         ];
 
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD", 1, 5);
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
 
         $expectedParams = "r1=3";
         
@@ -52,7 +52,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
             ]
         ];
 
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD", 1, 5);
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
 
         $expectedParams = "r1=2&r2=1";
         
@@ -73,7 +73,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
         ];
         $minBookingSize = 1;
         
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD", $minBookingSize, 5);
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
 
         $this->expectException(InvalidUnitIdException::class);
         
@@ -87,7 +87,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
         $units = [];
         $minBookingSize = 1;
         
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD", $minBookingSize, 5);
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
 
         // If we dont have units, we set the quantity to the minimum booking size
         $expectedParams = "r1={$minBookingSize}";

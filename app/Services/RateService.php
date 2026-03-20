@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\InvalidRateIdException;
 use App\Facades\JsonLog;
 use App\Models\Availability\Availability;
+use App\Models\Product;
 use App\Models\Rate;
 use App\Models\TourCMS\Promotion;
 
@@ -32,7 +33,7 @@ class RateService
             return true;
         }
 
-        $validPromotions = $this->getPromotionsForTour($tourId);
+        $validPromotions = $this->getTourPromotions($tourId);
         $validPromotionsNames = array_map(function(Promotion $promotion) { return $promotion->getName(); }, $validPromotions);
 
         if (!in_array($rateId, $validPromotionsNames)) {
@@ -47,7 +48,7 @@ class RateService
      * @param int $tourId
      * @return Promotion[]
      */
-    public function getPromotionsForTour(int $tourId): array
+    public function getTourPromotions(int $tourId): array
     {
         $tourPromotionsXML = $this->tourCMSService->getTourPromotions($tourId);
         if (empty($tourPromotionsXML->promotions)) {
@@ -64,28 +65,50 @@ class RateService
     }
 
     /**
-     * Add promotion/rate and apply discount to the availability
-     * @param Availability[] $availabilities
-     * @param Promotion[] $promotions
+     * Get a Promotion by its name
+     * @param int $tourId
+     * @param string $promotionName
+     * @return null
      */
-    public function addPromotionsToAvailability(Availability $availability, array $promotions, ?string $rateId): Availability
+    public function getTourPromotion(int $tourId, string $promotionName): ?Promotion
     {
+        $tourPromotions = $this->getTourPromotions($tourId);
+        if (empty($tourPromotions)) {
+            return null;
+        }
 
-        $promotionToApply = null;
-        $availableRateNames = [];
-        foreach ($promotions as $promotion) {
-            $availableRateNames[] = $promotion->getName();
-            if ($promotion->getName() === $rateId) {
-                $promotionToApply = $promotion;
+        foreach ($tourPromotions as $promotion) {
+            if ($promotion->getName() === $promotionName) {
+                return $promotion;
             }
         }
+
+        return null;
+    }
+
+
+    /**
+     * @param Product $product
+     * @param Availability $availability
+     * @param mixed $promotion
+     * @return Availability
+     */
+    public function addPromotionsToAvailability(Product $product, Availability $availability, ?Promotion $promotionToApply): Availability
+    {
+        $availableRateNames = [];
+        $promotions = $product->getPromotions();
+        foreach ($promotions as $promotion) {
+            $availableRateNames[] = $promotion->getName();
+        }
         $availability->setAvailableRates($availableRateNames);   
+
+        $rateId = $promotionToApply != null ? $promotionToApply->getName() : null;
 
         $this->updateAvailabilityPricing($availability, $promotions, $rateId);
         $this->updateAvailabilityUnitPricing($availability, $promotions, $rateId);
 
         if (null !== $promotionToApply) {
-            JsonLog::info("Applying rate {$rateId} discount to availability {$availability->getId()}");
+            JsonLog::info("Applying rate {$promotionToApply->getName()} discount to availability {$availability->getId()}");
             $this->applyPromotionDiscount($availability, $promotionToApply);
         }
 
