@@ -338,7 +338,15 @@ class TourCMSService
                 $rawResponse = $responseXML instanceof SimpleXMLElement
                     ? $responseXML->asXML()
                     : (string) $responseXML;
-                $this->jsonLogService->error(["message" => "API Call error: ", "response" => $rawResponse]);
+                
+                $rawResponseOneLine = str_replace(
+                    ["\r", "\n", "\t"],
+                    '',
+                    $rawResponse
+                );
+                $rawResponseOneLine = trim($rawResponseOneLine);
+
+                $this->jsonLogService->error(["message" => "API Call error", "response" => json_encode($rawResponseOneLine)]);
                 throw new APICallNotOKException();
         }
     }
