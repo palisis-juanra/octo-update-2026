@@ -17,8 +17,8 @@ use App\Models\Availability\AvailabilityUnitPricing;
 use App\Models\Pricing;
 use App\Models\Product;
 use App\Models\TourCMS\Promotion;
+use App\Services\AvailabilityPromotionService;
 use App\Services\CutoffService;
-use App\Services\RateService;
 use App\Services\UnitService;
 use App\Services\XMLService;
 use SimpleXMLElement;
@@ -36,7 +36,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected bool $allDay = false;
     protected ?Promotion $promotion = null;
 
-    public function __construct(protected RateService $rateService, protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', ?Promotion $promotion = null)
+    public function __construct(protected AvailabilityPromotionService $availabilityPromotionService, protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', ?Promotion $promotion = null)
     {
         $this->tourId = $product->getTourId();
         $this->optionId = $optionId;
@@ -250,7 +250,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             }
 
             if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
-                $this->rateService->addPromotionsToAvailability($this->product, $availability, $this->promotion);
+                $this->availabilityPromotionService->enrichAvailabilityWithPromotions($this->product, $availability, $this->promotion);
             }
 
             if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {

@@ -8,14 +8,18 @@ use App\Features\Availability\Pricing\PricingAvailabilityRequest;
 use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Product;
+use App\Services\AvailabilityPromotionService;
 use App\Services\AvailabilityService;
 use App\Services\ProductService;
-use App\Services\RateService;
+use App\Services\TourPromotionService;
 use App\Services\UnitService;
 
 class AvailabilityRequestFactory
 {
-    public function __construct(public ProductService $productService, public RateService $rateService) {}
+    public function __construct(
+        public ProductService $productService, 
+        public TourPromotionService $tourPromotionService,
+        public AvailabilityPromotionService $availabilityPromotionService) {}
 
     public function get(Product $product, array $requestParams): BaseAvailabilityRequest
     {
@@ -30,7 +34,7 @@ class AvailabilityRequestFactory
         $rateId = $requestParams[OctoRequest::RATE_ID] ?? null;
         $promotion = null;
         if (!empty($rateId)) {
-            $promotion = $this->rateService->getTourPromotion($product->getTourId(), $rateId);
+            $promotion = $this->tourPromotionService->getTourPromotionByName($product->getTourId(), $rateId);
         }
 
         if (!empty($availabilityIds)) {
@@ -49,7 +53,7 @@ class AvailabilityRequestFactory
         $pricing = OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING);
         $multiDates = !empty($localDateStart) && !empty($localDateEnd);
         if ($pricing && !$multiDates) {
-            return new PricingAvailabilityRequest($this->rateService, $product, $optionId, $localDate, $units, $currency, $promotion);        
+            return new PricingAvailabilityRequest($this->availabilityPromotionService, $product, $optionId, $localDate, $units, $currency, $promotion);        
         }
 
         if (!$multiDates) {
@@ -57,7 +61,7 @@ class AvailabilityRequestFactory
             $localDateStart = $localDate;
         }
 
-        $availabilityRequest = new AvailabilityRequest($this->rateService, $product, $optionId, $localDateStart, $localDateEnd, $promotion);
+        $availabilityRequest = new AvailabilityRequest($this->availabilityPromotionService, $product, $optionId, $localDateStart, $localDateEnd, $promotion);
 
         if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $availabilityRequest->setContentEnabled(true);

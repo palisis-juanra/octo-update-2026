@@ -3,18 +3,19 @@
 use App\Exceptions\InvalidUnitIdException;
 use App\Features\Availability\Pricing\PricingAvailabilityRequest;
 use App\Models\Product;
-use App\Services\RateService;
+use App\Services\AvailabilityPromotionService;
+use App\Services\TourPromotionService;
 use Tests\UnitTestCase;
 
 class PricingAvailabilityRequestTest extends UnitTestCase
 {
-    protected $rateServiceMock;
+    protected $availabilityPromotionService;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->rateServiceMock = $this->getMockBuilder(RateService::class)
+        $this->availabilityPromotionService = $this->getMockBuilder(AvailabilityPromotionService::class)
             ->disableOriginalConstructor()
             ->onlyMethods([])
             ->getMock();
@@ -29,7 +30,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
             ]
         ];
 
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->availabilityPromotionService, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
 
         $expectedParams = "r1=3";
         
@@ -52,7 +53,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
             ]
         ];
 
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->availabilityPromotionService, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
 
         $expectedParams = "r1=2&r2=1";
         
@@ -73,7 +74,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
         ];
         $minBookingSize = 1;
         
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->availabilityPromotionService, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
 
         $this->expectException(InvalidUnitIdException::class);
         
@@ -87,7 +88,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
         $units = [];
         $minBookingSize = 1;
         
-        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->rateServiceMock, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
+        $pricingAvailabilityRequest = new PricingAvailabilityRequest($this->availabilityPromotionService, $this->getProduct(1), "SINGLE", "2023-10-01", $units, "USD");
 
         // If we dont have units, we set the quantity to the minimum booking size
         $expectedParams = "r1={$minBookingSize}";
