@@ -304,15 +304,23 @@ class TourCMSService
     protected function handleResponse(mixed $response): SimpleXMLElement
     {
         if (!$response) throw new NoAPIResponseException();
-        switch ((string)$response->error) {
+        
+        $responseXML = $response;
+        if (!($response instanceof SimpleXMLElement)) {
+            $responseXML = simplexml_load_string($response);
+        }
+
+        if (false === $responseXML) {
+            $this->jsonLogService->error(["message" => "Response is not valid XML", "API response" => $response]);
+            throw new APICallNotOKException();
+        }
+
+        switch ((string)$responseXML->error) {
             case self::ERROR_OK:
             case self::ERROR_PREVIOUSLY_CANCELLED:
             case self::ERROR_BOOKING_ALREADY_COMMITED:
             case self::ERROR_NO_DATA_CHANGED:
-                if (!($response instanceof SimpleXMLElement)) {
-                    $response = simplexml_load_string($response);
-                }
-                return $response;
+                return $responseXML;
             case self::ERROR_FAIL_SIG:
             case self::ERROR_FAIL_KEYNOTFOUND:
                 throw new FailSignatureException();
@@ -323,10 +331,22 @@ class TourCMSService
             case self::ERROR_PERM:
                 throw new FailPermissionException();
             case self::ERROR_SUPPLIER_SUBSYSTEM_ERROR:
-                throw new SupplierSubsystemError((string) $response->supplier_subsystem_error ?? '');
+                throw new SupplierSubsystemError((string) ($responseXML->supplier_subsystem_error ?? ''));
             case self::ERROR_API_THROTTLE:
                 throw new APIThrottleError();
             default:
+                $rawResponse = $responseXML instanceof SimpleXMLElement
+                    ? $responseXML->asXML()
+                    : (string) $responseXML;
+                
+                $rawResponseOneLine = str_replace(
+                    ["\r", "\n", "\t"],
+                    '',
+                    $rawResponse
+                );
+                $rawResponseOneLine = trim($rawResponseOneLine);
+
+                $this->jsonLogService->error(["message" => "API Call error", "response" => json_encode($rawResponseOneLine)]);
                 throw new APICallNotOKException();
         }
     }
