@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Exceptions\InvalidRateIdException;
 use App\Models\TourCMS\Promotion;
+use DateInterval;
+use DateTime;
 
 /**
  * Service responsible for retrieving and validating tour promotions.
@@ -37,7 +39,12 @@ class TourPromotionService
         $promotionsData = XMLService::getArrayFromXmlNode($tourPromotionsXML->promotions, 'promotion') ?? [];
         
         $promotions = [];
+        $promotions[] = Promotion::createOpenPromotion();
+        
         foreach ($promotionsData as $promotionData) {
+            if ((string) $promotionData->name == Promotion::OPEN_PROMOTION_NAME) {
+                continue;
+            }
             $promotions[] = Promotion::fromXML($promotionData);
         }
         return $promotions;

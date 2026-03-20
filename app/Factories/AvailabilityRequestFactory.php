@@ -8,6 +8,7 @@ use App\Features\Availability\Pricing\PricingAvailabilityRequest;
 use App\Http\Requests\OctoRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use App\Models\Product;
+use App\Models\TourCMS\Promotion;
 use App\Services\AvailabilityPromotionService;
 use App\Services\AvailabilityService;
 use App\Services\ProductService;
@@ -31,9 +32,9 @@ class AvailabilityRequestFactory
         $currency = $requestParams[AvailabilityService::PARAM_CURRENCY] ?? '';
         $units = $requestParams[UnitService::PARAM_UNITS] ?? [];
         
-        $rateId = $requestParams[OctoRequest::RATE_ID] ?? null;
-        $promotion = null;
-        if (!empty($rateId)) {
+        $rateId = $requestParams[OctoRequest::RATE_ID] ?? Promotion::OPEN_PROMOTION_NAME;
+        $promotion = Promotion::createOpenPromotion();;
+        if ($rateId !== Promotion::OPEN_PROMOTION_NAME) {
             $promotion = $this->tourPromotionService->getTourPromotionByName($product->getTourId(), $rateId);
         }
 

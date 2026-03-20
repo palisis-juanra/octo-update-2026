@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
+use App\Models\TourCMS\Promotion;
 use App\Services\JSONLogService;
 use App\Services\TourCMSService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -181,7 +182,7 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
         $this->assertArrayHasKey('rateId', $firstAvailability['pricing']);
         $this->assertArrayHasKey('rates', $firstAvailability['pricing']);
 
-        $this->assertNull($firstAvailability['pricing']['rateId']);
+        $this->assertsame(Promotion::OPEN_PROMOTION_NAME, $firstAvailability['pricing']['rateId']);
         $this->assertIsArray($firstAvailability['pricing']['rates']);
         $this->assertNotEmpty($firstAvailability['pricing']['rates']);
 
@@ -194,7 +195,7 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
 
         $this->assertArrayHasKey('rateId', $firstUnitPricing);
         $this->assertArrayHasKey('rates', $firstUnitPricing);
-        $this->assertNull($firstUnitPricing['rateId']);
+        $this->assertSame(Promotion::OPEN_PROMOTION_NAME, $firstUnitPricing['rateId']);
         $this->assertIsArray($firstUnitPricing['rates']);
         
     }
@@ -230,7 +231,7 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
      *
      * Without rateId, main pricing must remain unchanged.
      */
-    $this->assertNull($pricing['rateId']);
+    $this->assertEquals(Promotion::OPEN_PROMOTION_NAME, $pricing['rateId']);
     $this->assertEquals(5000, $pricing['retail']);
     $this->assertEquals(3975, $pricing['net']);
 

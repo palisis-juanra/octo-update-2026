@@ -2,33 +2,29 @@
 
 namespace App\Services;
 
+use App\Exceptions\PromotionNotApplicableException;
 use App\Facades\JsonLog;
 use App\Models\Availability\Availability;
 use App\Models\Product;
 use App\Models\Rate;
 use App\Models\TourCMS\Promotion;
+use DateTimeImmutable;
+use DateTimeInterface;
 
-/**
- * Service responsible for enriching availability objects with promotion-based rates.
- *
- * This service does not fetch promotions from external sources. Instead, it receives
- * already available Promotion objects and applies them to an Availability instance by:
- * - populating the list of available rate identifiers
- * - generating derived Rate objects for pricing and unit pricing
- * - optionally applying the selected promotion discount directly to the base pricing
- */
 class AvailabilityPromotionService
 {
+    protected JsonLogService $jsonLogService;
+
+    public function __construct(JsonLogService $jsonLogService)
+    {
+        $this->jsonLogService = $jsonLogService;
+    }
+
     /**
      * Enrich an availability with promotion-derived rates and optionally apply
      * a selected promotion discount to the base pricing.
      *
-     * The method:
-     * - extracts promotion names and sets them as available rates
-     * - generates rate alternatives for availability pricing
-     * - generates rate alternatives for unit pricing
-     * - if a selected promotion is provided, applies its discount directly
-     *   to the current availability prices
+     * Only promotions applicable to the availability start date will be used.
      *
      * @param Product $product Product containing the applicable promotions.
      * @param Availability $availability Availability to mutate.
@@ -40,57 +36,116 @@ class AvailabilityPromotionService
         Availability $availability,
         ?Promotion $selectedPromotion = null
     ): Availability {
-        $promotions = $product->getPromotions();
+        
+        $applicablePromotions = $this->getApplicablePromotionsForAvailability($product->getPromotions(), $availability);
+
+        if ($selectedPromotion !== null && !$this->isPromotionApplicableToAvailability($selectedPromotion, $availability)) {
+            throw new PromotionNotApplicableException($selectedPromotion->getName(), $availability->getLocalDateTimeStart());
+        }
+
         $selectedRateId = $selectedPromotion?->getName();
 
-        $availability->setAvailableRates($this->extractPromotionNames($promotions));
+        $availability->setAvailableRates($this->extractPromotionNames($applicablePromotions));
 
         $this->buildAvailabilityRates(
             $availability,
-            $promotions,
+            $applicablePromotions,
             $selectedRateId
         );
 
         if ($selectedPromotion !== null) {
-            JsonLog::info(
-                "Applying rate {$selectedPromotion->getName()} discount to availability {$availability->getId()}"
-            );
-
-            $this->applyPromotionDiscount(
-                $availability,
-                $selectedPromotion
-            );
+            $this->jsonLogService->info("Applying rate {$selectedPromotion->getName()} discount to availability {$availability->getId()}");
+            $this->applyPromotionDiscount($availability, $selectedPromotion);
         }
 
         return $availability;
     }
 
     /**
-     * Extract promotion names from a list of Promotion objects.
+     * Filter promotions and keep only those applicable to the availability start date.
      *
-     * This is used to populate the availability availableRates field.
-     *
-     * @param Promotion[] $promotions List of promotions.
-     * @return string[] Promotion names.
+     * @param Promotion[] $promotions Promotions to evaluate.
+     * @param Availability $availability Availability whose start date will be used.
+     * @return Promotion[] Applicable promotions.
      */
-    protected function extractPromotionNames(array $promotions): array
+    protected function getApplicablePromotionsForAvailability(array $promotions, Availability $availability): array
     {
-        $promotionNames = [];
+        $applicablePromotions = [];
         foreach ($promotions as $promotion) {
-            $promotionNames[] = $promotion->getName();
+            if ($this->isPromotionApplicableToAvailability($promotion, $availability)) {
+                $applicablePromotions[] = $promotion;
+            }
         }
-
-        return $promotionNames;
+        return $applicablePromotions;
     }
 
     /**
-     * Build all promotion-derived rates for the given availability.
+     * Determine whether a promotion applies to the given availability start date.
      *
-     * This includes both top-level pricing rates and unit pricing rates.
+     * A promotion is considered applicable when the availability start date falls
+     * within the promotion validity range, including boundary dates.
      *
-     * @param Availability $availability Availability to enrich.
-     * @param Promotion[] $promotions Promotions to use for rate generation.
-     * @param string|null $selectedRateId Selected rate identifier, if any.
+     * @param Promotion $promotion Promotion to validate.
+     * @param Availability $availability Availability to evaluate.
+     * @return bool True when the promotion applies to the availability.
+     */
+    protected function isPromotionApplicableToAvailability(Promotion $promotion, Availability $availability): bool
+    {
+        $availabilityStartDate = $this->normalizeDate($availability->getLocalDateTimeStart());
+        $promotionStartDate = $this->normalizeDate($promotion->getStartDate());
+        $promotionEndDate = $this->normalizeDate($promotion->getEndDate());
+
+        if ($promotionStartDate !== null && $availabilityStartDate < $promotionStartDate) {
+            $this->jsonLogService->info("Promotion {$promotion->getName()} is not applicable, availability start date is before promotion start date");
+            return false;
+        }
+
+        if ($promotionEndDate !== null && $availabilityStartDate > $promotionEndDate) {
+            $this->jsonLogService->info("Promotion {$promotion->getName()} is not applicable, availability start date is after promotion start date");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Normalize a date value into a DateTimeImmutable instance.
+     *
+     * Supported input types:
+     * - null
+     * - DateTimeInterface
+     * - string parseable by DateTimeImmutable
+     *
+     * @param mixed $date Date value to normalize.
+     * @return DateTimeImmutable|null Normalized date, or null when input is null/empty.
+     */
+    protected function normalizeDate(mixed $date): ?DateTimeImmutable
+    {
+        if ($date === null || $date === '') {
+            return null;
+        }
+
+        if ($date instanceof DateTimeInterface) {
+            return new DateTimeImmutable($date->format('Y-m-d H:i:s'));
+        }
+
+        return new DateTimeImmutable((string) $date);
+    }
+
+    /**
+     * @param Promotion[] $promotions
+     * @return string[]
+     */
+    protected function extractPromotionNames(array $promotions): array
+    {
+        return array_map(
+            static fn (Promotion $promotion) => $promotion->getName(),
+            $promotions
+        );
+    }
+
+    /**
+     * @param Promotion[] $promotions
      * @return void
      */
     protected function buildAvailabilityRates(
@@ -98,34 +153,19 @@ class AvailabilityPromotionService
         array $promotions,
         ?string $selectedRateId
     ): void {
-        $this->buildAvailabilityPricingRates(
-            $availability,
-            $promotions,
-            $selectedRateId
-        );
-
-        $this->buildAvailabilityUnitPricingRates(
-            $availability,
-            $promotions,
-            $selectedRateId
-        );
+        $this->buildAvailabilityPricingRates($availability, $promotions, $selectedRateId);
+        $this->buildAvailabilityUnitPricingRates($availability, $promotions, $selectedRateId);
     }
 
     /**
-     * Build rate alternatives for the main availability pricing object.
-     *
-     * Each promotion produces a derived Rate instance containing the discounted
-     * retail and net values based on the current pricing values.
-     *
-     * The selected rate id is also assigned to the pricing object.
-     *
-     * @param Availability $availability Availability whose pricing will be enriched.
-     * @param Promotion[] $promotions Promotions to convert into rates.
-     * @param string|null $selectedRateId Selected rate identifier, if any.
+     * @param Promotion[] $promotions
      * @return void
      */
-    protected function buildAvailabilityPricingRates(Availability $availability, array $promotions, ?string $selectedRateId): void
-    {
+    protected function buildAvailabilityPricingRates(
+        Availability $availability,
+        array $promotions,
+        ?string $selectedRateId
+    ): void {
         $pricing = $availability->getPricing();
         $pricing->setRateId($selectedRateId);
 
@@ -147,15 +187,7 @@ class AvailabilityPromotionService
     }
 
     /**
-     * Build rate alternatives for each unit pricing entry in the availability.
-     *
-     * Each unit pricing element receives:
-     * - the selected rate id
-     * - a list of Rate instances derived from the provided promotions
-     *
-     * @param Availability $availability Availability whose unit pricing will be enriched.
-     * @param Promotion[] $promotions Promotions to convert into unit-level rates.
-     * @param string|null $selectedRateId Selected rate identifier, if any.
+     * @param Promotion[] $promotions
      * @return void
      */
     protected function buildAvailabilityUnitPricingRates(
@@ -184,13 +216,6 @@ class AvailabilityPromotionService
     /**
      * Apply a selected promotion discount directly to the base pricing of an availability.
      *
-     * This mutates:
-     * - the main pricing object
-     * - all unit pricing entries
-     *
-     * This method should only be called when a promotion has actually been selected
-     * by the consumer and the final response pricing must reflect that selection.
-     *
      * @param Availability $availability Availability to mutate.
      * @param Promotion $promotion Promotion whose discount will be applied.
      * @return void
@@ -209,7 +234,6 @@ class AvailabilityPromotionService
             $unitPricing->setRetailPrice(
                 $this->applyDiscount($unitPricing->getRetailPrice(), $discount)
             );
-
             $unitPricing->setNetPrice(
                 $this->applyDiscount($unitPricing->getNetPrice(), $discount)
             );
@@ -218,13 +242,6 @@ class AvailabilityPromotionService
 
     /**
      * Apply a percentage discount to a price.
-     *
-     * The result is rounded and cast to integer to match the expected pricing format.
-     *
-     * Example:
-     * - price: 1000
-     * - discount: 10
-     * - result: 900
      *
      * @param int $price Original price.
      * @param float $discount Discount percentage.

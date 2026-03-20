@@ -2,6 +2,7 @@
 
 namespace App\Models\TourCMS;
 
+use DateInterval;
 use DateTime;
 use SimpleXMLElement;
 
@@ -10,12 +11,14 @@ use SimpleXMLElement;
  */
 class Promotion
 {
+    public const string OPEN_PROMOTION_NAME = "OPEN";
+
     protected string $name;
     protected float $discount;
     protected DateTime $startDate;
     protected DateTime $endDate;
 
-    protected function __construct(string $name, float $discount, DateTime $startDate, DateTime $endDate)
+    public function __construct(string $name, float $discount, DateTime $startDate, DateTime $endDate)
     {
         $this->name = $name;
         $this->discount = $discount;
@@ -47,6 +50,16 @@ class Promotion
         );
     }
 
+    public static function createOpenPromotion()
+    {
+        return new Promotion(
+            self::OPEN_PROMOTION_NAME, 
+            0, 
+            (new DateTime())->sub(DateInterval::createFromDateString("10 year")), 
+            (new DateTime())->add(DateInterval::createFromDateString("10 year"))
+        );
+    }
+
     public function getName(): string
     {
         return $this->name;
@@ -55,5 +68,15 @@ class Promotion
     public function getDiscount(): float
     {
         return $this->discount;
+    }
+
+    public function getStartDate()
+    {
+        return $this->startDate;
+    }
+
+    public function getEndDate()
+    {
+        return $this->endDate;
     }
 }
