@@ -241,11 +241,10 @@ class TourCMSService
         $bookingData->associate_customers = 1;
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->start_new_booking($bookingData, $this->channelId);
-        if ($response->error = self::ERROR_PROMOTION_NOT_FOUND) {
+        if ((string) $response->error === self::ERROR_PROMOTION_NOT_FOUND) {
             throw new InvalidRateIdException((string) $bookingData->tour_promotions->tour_promotion ?? '');
         }
-            return $this->handleResponse($response); 
-
+        return $this->handleResponse($response); 
     }
 
     public function commitBooking(string $bookingId, ?string $agentRef = ''): SimpleXMLElement
