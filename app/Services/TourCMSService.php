@@ -54,6 +54,7 @@ class TourCMSService
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR = 'SUPPLIER_SUBSYSTEM_ERROR';
     public const string ERROR_API_THROTTLE = 'API throttle';
     public const string ERROR_INVALID_PROMOTION = 'BUCKET_HAS_NO_PROMOTION_WITH_NAME';
+    public const string ERROR_PROMOTION_NOT_FOUND = 'PROMOTION_NOT_FOUND';
     public const int MAX_SHOW_TOUR_DEPARTURES_COUNT = 500;
 
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
@@ -239,12 +240,12 @@ class TourCMSService
     {
         $bookingData->associate_customers = 1;
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
-        try {
-            $response = $this->tourCMS->start_new_booking($bookingData, $this->channelId);
-            return $this->handleResponse($response); 
-        } catch (InvalidRateIdException) {
+        $response = $this->tourCMS->start_new_booking($bookingData, $this->channelId);
+        if ($response->error = self::ERROR_PROMOTION_NOT_FOUND) {
             throw new InvalidRateIdException((string) $bookingData->tour_promotions->tour_promotion ?? '');
         }
+            return $this->handleResponse($response); 
+
     }
 
     public function commitBooking(string $bookingId, ?string $agentRef = ''): SimpleXMLElement
