@@ -32,8 +32,6 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected string $localDateStart;
     protected string $localDateEnd;
     protected array $units;
-    protected int $maxUnits;
-    protected array $cutoff;
     protected string $currency;
     protected bool $allDay = false;
     protected ?Promotion $promotion = null;
@@ -235,7 +233,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $available = $this->isDepartureAvailable($departure);
             $availability->setAvailable($available);
             $availability->setStatus($this->getOctoStatus((string) $departure->status, $available));
-            $availability->setMaxUnits($this->maxUnits);
+            $availability->setMaxUnits($this->product->getMaxBookingSize());
 
             $departureCutoff = CutoffService::calculateCutoffForDeparture($this->product, $departure);
             $availability->setUtcCutoffAt($departureCutoff);
