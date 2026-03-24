@@ -13,7 +13,7 @@ use App\Models\Product;
 use App\Services\AvailabilityService;
 use App\Services\JSONLogService;
 use App\Services\ProductService;
-use App\Services\RateService;
+use App\Services\TourPromotionService;
 use App\Services\UnitService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +21,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AvailabilityController extends Controller
 {
-
     public const DEFAULT_MAX_UNITS = 10;
 
     public function __construct(
@@ -29,7 +28,7 @@ class AvailabilityController extends Controller
         public AvailabilityService $availabilityService, 
         public ProductService $productService, 
         public JSONLogService $logger,
-        public RateService $rateService) {}
+        public TourPromotionService $tourPromotionService) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -49,7 +48,7 @@ class AvailabilityController extends Controller
 
             if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
                 $rateId = $requestParams[OctoRequest::RATE_ID] ?? null;
-                $this->rateService->validateRateId($product->getTourId(), $rateId);
+                $this->tourPromotionService->validateRateId($product->getTourId(), $rateId);
             }
 
             $availabilityRequest = $this->availabilityRequestFactory->get($product, $requestParams);

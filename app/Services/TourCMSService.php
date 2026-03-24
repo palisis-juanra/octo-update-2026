@@ -66,9 +66,9 @@ class TourCMSService
     protected JSONLogService $jsonLogService;
     protected CacheRepository $cache;
 
-    public function __construct(string $maid, string $APIKey, string $channelId, JSONLogService $jsonLogService, CacheRepository $cache)
+    public function __construct(int $maid, string $APIKey, string $channelId, JSONLogService $jsonLogService, CacheRepository $cache)
     {
-        $this->maid = (int) $maid;
+        $this->maid = $maid;
 
         $this->tourCMS = new TourCMS($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMS->set_base_url($this->getAPIBaseUrl());
