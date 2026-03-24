@@ -120,7 +120,7 @@ class AvailabilityPromotionService
      */
     protected function normalizeDate(mixed $date): ?DateTimeImmutable
     {
-        if ($date === null || $date === '') {
+        if (empty($date)) {
             return null;
         }
 
