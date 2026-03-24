@@ -304,7 +304,7 @@ class TourCMSService
 
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, $this->jsonLogService->getLogId());
         $response = $this->tourCMS->request($endpoint, $this->channelId);
-        $this->handleResponse($response);
+        $response = $this->handleResponse($response);
         
         $this->cache->put($redisKey, $response->asXML(), self::CACHE_TIME_GET_TOUR_PROMOTIONS);
         

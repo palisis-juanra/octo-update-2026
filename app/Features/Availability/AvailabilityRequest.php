@@ -25,6 +25,8 @@ use SimpleXMLElement;
 
 class AvailabilityRequest extends BaseAvailabilityRequest
 {
+    protected AvailabilityPromotionService $availabilityPromotionService;
+    protected Product $product;
     protected string $tourId;
     protected string $optionId;
     protected string $localDateStart;
@@ -36,8 +38,10 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     protected bool $allDay = false;
     protected ?Promotion $promotion = null;
 
-    public function __construct(protected AvailabilityPromotionService $availabilityPromotionService, protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', ?Promotion $promotion = null)
+    public function __construct(AvailabilityPromotionService $availabilityPromotionService, Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', ?Promotion $promotion = null)
     {
+        $this->availabilityPromotionService = $availabilityPromotionService;
+        $this->product = $product;
         $this->tourId = $product->getTourId();
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;

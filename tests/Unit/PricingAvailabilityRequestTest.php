@@ -101,6 +101,7 @@ class PricingAvailabilityRequestTest extends UnitTestCase
     protected function getProduct(int $tourId): Product
     {
         $product = new Product();
+        $product->setTourId($tourId);
         
         return $product->setId($tourId);
     }

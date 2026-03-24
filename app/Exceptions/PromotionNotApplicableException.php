@@ -10,7 +10,7 @@ class PromotionNotApplicableException extends Exception
 
     public function __construct(string $promotionName, string $madeDate)
     {
-        parent::__construct("Promotion '{$promotionName}' does not apply to made date '{$madeDate}'.");
+        parent::__construct("Promotion '{$promotionName}' does not apply to availability date '{$madeDate}'.");
         $this->promotionName = $promotionName;
     }
 
