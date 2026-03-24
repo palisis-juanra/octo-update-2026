@@ -12,7 +12,6 @@ use App\Models\Product;
 use App\Services\AvailabilityPromotionService;
 use App\Services\ProductService;
 use App\Services\TourPromotionService;
-use PHPUnit\Framework\MockObject\MockObject;
 use Tests\FeatureTestCase;
 
 class AvailabilityRequestFactoryTest extends FeatureTestCase

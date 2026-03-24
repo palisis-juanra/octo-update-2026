@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\InvalidRateIdException;
 use App\Models\TourCMS\Promotion;
-use DateInterval;
-use DateTime;
 
 /**
  * Service responsible for retrieving and validating tour promotions.

@@ -18,20 +18,19 @@ use App\Services\UnitService;
 class PricingAvailabilityRequest extends AvailabilityRequest
 {
     protected AvailabilityPromotionService $availabilityPromotionService;
+    protected Product $product;
     protected string $currency;
     protected array $units;
-    protected Product $product;
     protected string $optionId;
     protected string $localDateStart;
     protected string $localDateEnd;
-    protected bool $allowPricing = true;
-    protected bool $allDay = false;
     protected ?Promotion $promotion = null;
 
     public function __construct(AvailabilityPromotionService $availabilityPromotionService, Product $product, string $optionId, string $localDateStart, array $units, string $currency, ?Promotion $promotion = null)
     {
         $this->availabilityPromotionService = $availabilityPromotionService;
         $this->product = $product;
+        $this->tourId = $product->getTourId();
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateStart;

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\AvailabilityRequestInvalidParamException;
 use App\Exceptions\AvailabilityRequestMissingParamException;
-use App\Exceptions\InvalidRateIdException;
 use App\Facades\OctoRequestFacade;
 use App\Factories\AvailabilityRequestFactory;
 use App\Http\Middleware\OctoAuthentication;

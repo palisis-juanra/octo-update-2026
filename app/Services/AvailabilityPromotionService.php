@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Exceptions\PromotionNotApplicableException;
-use App\Facades\JsonLog;
 use App\Models\Availability\Availability;
 use App\Models\Product;
 use App\Models\Rate;
