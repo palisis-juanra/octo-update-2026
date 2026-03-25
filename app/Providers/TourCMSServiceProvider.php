@@ -38,7 +38,7 @@ class TourCMSServiceProvider extends ServiceProvider
 
             $jsonLogService = $app->make(JSONLogService::class);
 
-            return new TourCMSService($maid, $APIKey, $channelId, $jsonLogService, $redisCache);
+            return new TourCMSService((int) $maid, $APIKey, $channelId, $jsonLogService, $redisCache);
     
         });
     }

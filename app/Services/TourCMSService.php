@@ -6,6 +6,7 @@ use App\Exceptions\APICallNotOKException;
 use App\Exceptions\APIThrottleError;
 use App\Exceptions\BookingAlreadyRedeemedException;
 use App\Exceptions\FailSignatureException;
+use App\Exceptions\InvalidRateIdException;
 use App\Exceptions\NoAPIResponseException;
 use App\Exceptions\FailPermissionException;
 use App\Exceptions\SupplierSubsystemError;
@@ -24,10 +25,12 @@ use TourCMS\Utils\TourCMS;
 class TourCMSService
 {
     // Cache
-    public const CACHE_REDIS_KEY_SHOW_CHANNEL = 'SHOW_CHANNEL|';
-    public const CACHE_REDIS_KEY_SHOW_TOUR = 'SHOW_TOUR|';
-    public const CACHE_TIME_SHOW_CHANNEL = 600;
-    public const CACHE_TIME_SHOW_TOUR = 300;
+    public const string CACHE_REDIS_KEY_SHOW_CHANNEL = 'SHOW_CHANNEL|';
+    public const string CACHE_REDIS_KEY_SHOW_TOUR = 'SHOW_TOUR|';
+    public const string CACHE_REDIS_KEY_GET_TOUR_PROMOTIONS = 'GET_TOUR_PROMOTIONS|';
+    public const int CACHE_TIME_SHOW_CHANNEL = 600;
+    public const int CACHE_TIME_SHOW_TOUR = 300;
+    public const int CACHE_TIME_GET_TOUR_PROMOTIONS = 300;
 
     // Errors
     public const ERROR_FAIL_SIG = 'FAIL_SIG';
@@ -50,18 +53,23 @@ class TourCMSService
     public const OCTO_USER_AGENT = 'octo.tourcms.com';
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR = 'SUPPLIER_SUBSYSTEM_ERROR';
     public const string ERROR_API_THROTTLE = 'API throttle';
+    public const string ERROR_INVALID_PROMOTION = 'BUCKET_HAS_NO_PROMOTION_WITH_NAME';
+    public const string ERROR_PROMOTION_NOT_FOUND = 'PROMOTION_NOT_FOUND';
     public const int MAX_SHOW_TOUR_DEPARTURES_COUNT = 500;
 
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
 
+    protected int $maid;
     protected TourCMS $tourCMS;
     protected TourCMSMulti $tourCMSMulti;
     protected string $channelId;
     protected JSONLogService $jsonLogService;
     protected CacheRepository $cache;
 
-    public function __construct(string $maid, string $APIKey, string $channelId, JSONLogService $jsonLogService, CacheRepository $cache)
+    public function __construct(int $maid, string $APIKey, string $channelId, JSONLogService $jsonLogService, CacheRepository $cache)
     {
+        $this->maid = $maid;
+
         $this->tourCMS = new TourCMS($maid, $APIKey, self::RESPONSE_FORMAT_SIMPLEXML);
         $this->tourCMS->set_base_url($this->getAPIBaseUrl());
         $this->tourCMS->set_user_agent(self::OCTO_USER_AGENT);
@@ -161,11 +169,12 @@ class TourCMSService
         }
 
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
-        JsonLog::info("Calling show tour departures for Tour {$tourId}, channel {$this->channelId}");
+        JsonLog::info("Calling show tour departures for Tour {$tourId}, channel {$this->channelId}, qs: $queryString");
         $response = $this->tourCMS->show_tour_departures($tourId, $this->channelId, $queryString);
         $response = $this->handleResponse($response);
         $departureCount = (int) $response->tour->dates_and_prices->total_departure_count ?? 0;
         if ($departureCount > self::MAX_SHOW_TOUR_DEPARTURES_COUNT) {
+            $this->jsonLogService->info("Reached max number of departures in show tour departures: " . self::MAX_SHOW_TOUR_DEPARTURES_COUNT);
             throw new TooManyDeparturesException($departureCount);
         }
 
@@ -222,11 +231,19 @@ class TourCMSService
         
     }
 
+    /**
+     * @param SimpleXMLElement $bookingData
+     * @throws InvalidRateIdException
+     * @return SimpleXMLElement
+     */
     public function startNewBooking(SimpleXMLElement $bookingData): SimpleXMLElement
     {
         $bookingData->associate_customers = 1;
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->start_new_booking($bookingData, $this->channelId);
+        if ((string) $response->error === self::ERROR_PROMOTION_NOT_FOUND) {
+            throw new InvalidRateIdException((string) $bookingData->tour_promotions->tour_promotion ?? '');
+        }
         return $this->handleResponse($response); 
     }
 
@@ -269,6 +286,29 @@ class TourCMSService
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->delete_booking($bookingId, $this->channelId);
         return $this->handleResponse($response);
+    }
+
+    public function getTourPromotions(int $tourId, bool $cached = true): SimpleXMLElement
+    {
+        $endpoint = '/api/tours/promotions/get.xml?tour_id=' . $tourId;
+
+        $redisKey = self::CACHE_REDIS_KEY_GET_TOUR_PROMOTIONS . "{$this->maid}|{$tourId}|{$this->channelId}";
+        
+        if (true === $cached) {
+            $cachedGetTourPromotions = $this->cache->get($redisKey);
+            
+            if (!empty($cachedGetTourPromotions)) {
+                return simplexml_load_string($cachedGetTourPromotions);
+            }
+        }
+
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, $this->jsonLogService->getLogId());
+        $response = $this->tourCMS->request($endpoint, $this->channelId);
+        $response = $this->handleResponse($response);
+        
+        $this->cache->put($redisKey, $response->asXML(), self::CACHE_TIME_GET_TOUR_PROMOTIONS);
+        
+        return $response;
     }
 
     public function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
@@ -334,6 +374,8 @@ class TourCMSService
                 throw new SupplierSubsystemError((string) ($responseXML->supplier_subsystem_error ?? ''));
             case self::ERROR_API_THROTTLE:
                 throw new APIThrottleError();
+            case self::ERROR_INVALID_PROMOTION:
+                throw new InvalidRateIdException(0);
             default:
                 $rawResponse = $responseXML instanceof SimpleXMLElement
                     ? $responseXML->asXML()

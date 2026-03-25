@@ -16,6 +16,8 @@ use App\Models\Availability\Availability;
 use App\Models\Availability\AvailabilityUnitPricing;
 use App\Models\Pricing;
 use App\Models\Product;
+use App\Models\TourCMS\Promotion;
+use App\Services\AvailabilityPromotionService;
 use App\Services\CutoffService;
 use App\Services\UnitService;
 use App\Services\XMLService;
@@ -23,27 +25,27 @@ use SimpleXMLElement;
 
 class AvailabilityRequest extends BaseAvailabilityRequest
 {
+    protected AvailabilityPromotionService $availabilityPromotionService;
+    protected Product $product;
     protected string $tourId;
     protected string $optionId;
     protected string $localDateStart;
     protected string $localDateEnd;
     protected array $units;
-    protected int $minBookingSize;
-    protected int $maxBookingSize;
-    protected int $maxUnits;
-    protected array $cutoff;
     protected string $currency;
     protected bool $allDay = false;
+    protected ?Promotion $promotion = null;
 
-    public function __construct(protected Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', bool $allDay = false)
+    public function __construct(AvailabilityPromotionService $availabilityPromotionService, Product $product, string $optionId, string $localDateStart, string $localDateEnd = '', ?Promotion $promotion = null)
     {
+        $this->availabilityPromotionService = $availabilityPromotionService;
+        $this->product = $product;
         $this->tourId = $product->getTourId();
-        $this->minBookingSize = $product->getMinBookingSize();
-        $this->maxBookingSize = $product->getMaxBookingSize();
         $this->optionId = $optionId;
         $this->localDateStart = $localDateStart;
         $this->localDateEnd = $localDateEnd;
-        $this->allDay = $allDay;
+        $this->allDay = $product->getAllDay();
+        $this->promotion = $promotion;
     }
 
 // GET SET FUNCTIONS
@@ -87,12 +89,12 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
     public function getMinBookingSize(): int
     {
-        return $this->minBookingSize;
+        return $this->product->getMinBookingSize();
     }
 
     public function getMaxBookingSize(): int
     {
-        return $this->maxBookingSize;
+        return $this->product->getMaxBookingSize();
     }
 
     // PUBLIC FUNCTIONS
@@ -213,7 +215,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
     }
 
     protected function getAvailabilitiesFromDepartures(array $departures):array
-    {   
+    {
         $availabilities = [];
         foreach ($departures as $departure) {
 
@@ -231,7 +233,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $available = $this->isDepartureAvailable($departure);
             $availability->setAvailable($available);
             $availability->setStatus($this->getOctoStatus((string) $departure->status, $available));
-            $availability->setMaxUnits($this->maxUnits);
+            $availability->setMaxUnits($this->product->getMaxBookingSize());
 
             $departureCutoff = CutoffService::calculateCutoffForDeparture($this->product, $departure);
             $availability->setUtcCutoffAt($departureCutoff);
@@ -248,6 +250,11 @@ class AvailabilityRequest extends BaseAvailabilityRequest
                 $availability->setPricing($pricing);
                 $availability->setUnitPricing($unitPricing);
             }
+
+            if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+                $this->availabilityPromotionService->enrichAvailabilityWithPromotions($this->product, $availability, $this->promotion);
+            }
+
             if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
                 $supplierNote = !empty($departure->supplier_note) ? (string) $departure->supplier_note : '';
                 $availability->setTitle("{$this->tourName} {$supplierNote}");
@@ -332,17 +339,19 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             if(!array_key_exists($rateId, $ratesArray)) {
                 throw new InvalidUnitIdException($unit['id']);
             }
-            $totalPricing += (float) $ratesArray[$rateId]->rate_price * $unit['quantity'];
-            $netPrice += 
-                (
-                    !empty($ratesArray[$rateId]->net_price) ? 
-                    ((float) $ratesArray[$rateId]->net_price) : 
-                    ((float) $ratesArray[$rateId]->rate_price)
-                ) * $unit['quantity'];
-        }
+            $rateData = $ratesArray[$rateId];
 
-        $totalPricing *= 100;
-        $netPrice *= 100;
+            $rateQuantity = (int) $unit['quantity'];
+            $ratePrice = (int) round($rateData->rate_price * 100);
+
+            $rateNetPrice = $ratePrice;
+            if (!empty($rateData->net_price)) {
+                $rateNetPrice = (int) round($rateData->net_price * 100);
+            }
+
+            $totalPricing += $ratePrice * $rateQuantity;
+            $netPrice += $rateNetPrice * $rateQuantity;
+        }
 
         return new Pricing(
             $totalPricing,

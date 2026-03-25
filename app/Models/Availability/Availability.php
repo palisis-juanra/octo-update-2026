@@ -72,6 +72,8 @@ class Availability extends Model
     protected ?string $title = null;
     protected ?string $shortDescription = null;
     protected array $unitPricing = [];
+    /* @var string[] */
+    protected array $availableRates = [];
 
     /**
      * Get the value of id
@@ -446,6 +448,7 @@ class Availability extends Model
 
     /**
      * Get the value of unitPricing
+     * @return AvailabilityUnitPricing[]
      */ 
     public function getUnitPricing(): array
     {
@@ -461,6 +464,17 @@ class Availability extends Model
     {
         $this->unitPricing = $unitPricing;
 
+        return $this;
+    }
+
+    public function getAvailableRates(): array
+    {
+        return $this->availableRates;
+    }
+
+    public function setAvailableRates(array $availableRates): self
+    {
+        $this->availableRates = $availableRates;
         return $this;
     }
 }

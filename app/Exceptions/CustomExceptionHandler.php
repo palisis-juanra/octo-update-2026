@@ -84,6 +84,14 @@ class CustomExceptionHandler extends Handler
                 $response = OctoResponse::INVALID_BOOKING_UUID($exception->bookingUuid);
                 break;
 
+            case (InvalidRateIdException::class):
+                $response = OctoResponse::INVALID_RATE_ID($exception->getRateId());
+                break;
+            
+            case (PromotionNotApplicableException::class):
+                $response = OctoResponse::INVALID_RATE_ID_FOR_DATE($exception->getPromotionName());
+                break;
+
             case (NoMatchingDataException::class):
                 $response = OctoResponse::INVALID_PRODUCT_ID(0);
                 break;

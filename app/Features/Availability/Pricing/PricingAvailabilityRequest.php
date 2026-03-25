@@ -3,12 +3,14 @@
 namespace App\Features\Availability\Pricing;
 
 use App\Facades\JSONLog;
+use App\Facades\OctoRequestFacade;
 use App\Features\Availability\AvailabilityRequest;
-use App\Interfaces\BaseAvailabilityRequest;
+use App\Http\Requests\OctoRequest;
 use App\Models\Availability\Availability;
 use App\Models\Pricing;
 use App\Models\Product;
-use App\Services\DateTimeService;
+use App\Models\TourCMS\Promotion;
+use App\Services\AvailabilityPromotionService;
 use App\Services\OptionService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
@@ -17,26 +19,12 @@ class PricingAvailabilityRequest extends AvailabilityRequest
 {
     protected string $currency;
     protected array $units;
-    protected int $minBookingSize;
-    protected int $maxBookingSize;
-    protected Product $product;
-    protected string $optionId;
-    protected string $localDateStart;
-    protected string $localDateEnd;
-    protected bool $allowPricing = true;
-    protected bool $allDay = false;
 
-    public function __construct(Product $product, string $optionId, string $localDateStart, array $units, string $currency, int $minBookingSize, int $maxBookingSize, bool $allDay = false)
+    public function __construct(AvailabilityPromotionService $availabilityPromotionService, Product $product, string $optionId, string $localDateStart, array $units, string $currency, ?Promotion $promotion = null)
     {
-        $this->product = $product;
-        $this->optionId = $optionId;
-        $this->localDateStart = $localDateStart;
-        $this->localDateEnd = $localDateStart;
+        parent::__construct($availabilityPromotionService, $product, $optionId, $localDateStart, $localDateStart, $promotion);
         $this->units = $units;
         $this->currency = $currency;
-        $this->minBookingSize = $minBookingSize;
-        $this->maxBookingSize = $maxBookingSize;
-        $this->allDay = $allDay;
     }
 
     /**
@@ -65,12 +53,14 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $checkAvailcomponents = $this->fetchComponentsFromTourCMS($tourCMSService);
         JSONLog::info(['checkAvailcomponents' => $checkAvailcomponents]);
         $this->updateAvailabilitiesWithCheckAvailComponents($availabilities, $checkAvailcomponents);
-        return $availabilities;
-    }
 
-    public function getOctoStatusFromTourCMSStatus(string $tourCMSStatus): string
-    {
-        return BaseAvailabilityRequest::OCTO_STATUS_AVAILABLE;
+        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+            foreach ($availabilities as $availability) {
+                $this->availabilityPromotionService->enrichAvailabilityWithPromotions($this->product, $availability, $this->promotion);
+            }
+        }
+
+        return $availabilities;
     }
 
     public function generateRatesParamsFromUnits(array $units): string
@@ -78,7 +68,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         $params = '';
 
         if (empty($units)) {
-            return "r1={$this->minBookingSize}";
+            return "r1={$this->product->getMinBookingSize()}";
         }
 
         foreach ($units as $rateData) {
@@ -103,23 +93,23 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     }
 
     /**
-     * Summary of validateAvailableComponents
+     * Update availability pricing with prices coming from check avail endpoint
      * @param Availability[] $availabilities
      * @param array $checkAvailcomponents
      * @return void
      */
     protected function updateAvailabilitiesWithCheckAvailComponents(array $availabilities, array $checkAvailcomponents): void
     {
-        $checkAvailcomponentsIndexed = $this->indexCheckAvailComponents($checkAvailcomponents);
+        $checkAvailComponentsIndexed = $this->indexCheckAvailComponents($checkAvailcomponents);
         foreach ($availabilities as $availability) {
 
-            if (!isset($checkAvailcomponentsIndexed[$availability->getId()])) {
+            if (!isset($checkAvailComponentsIndexed[$availability->getId()])) {
                 $availability->setAvailable(false);
                 continue;
             }
 
-            $totalPricing = $checkAvailcomponentsIndexed[$availability->getId()]->total_price * 100;
-            $netPrice = $checkAvailcomponentsIndexed[$availability->getId()]->net_price * 100;
+            $totalPricing = (int) round((float) $checkAvailComponentsIndexed[$availability->getId()]->total_price * 100);
+            $netPrice = (int) round((float) $checkAvailComponentsIndexed[$availability->getId()]->net_price * 100);
             
             $pricing = new Pricing(
                 $totalPricing,

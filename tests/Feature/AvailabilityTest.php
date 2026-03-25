@@ -276,6 +276,15 @@ class AvailabilityTest extends FeatureTestCase
         $channelIdProperty->setAccessible(true);
         $channelIdProperty->setValue($tourCMSServiceMock, 'some_channel_id');
 
+        $jsonLogServiceMock = $this->createMock(JSONLogService::class);
+        $jsonLogServiceMock
+            ->expects($this->any())
+            ->method('info');
+
+        $jsonLogServiceProperty = $reflection->getProperty('jsonLogService');
+        $jsonLogServiceProperty->setAccessible(true);
+        $jsonLogServiceProperty->setValue($tourCMSServiceMock, $jsonLogServiceMock);
+
         App::instance(TourCMSService::class, $tourCMSServiceMock);
 
         $response = $this->post(

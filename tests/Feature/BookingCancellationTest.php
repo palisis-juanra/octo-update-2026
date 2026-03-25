@@ -11,6 +11,7 @@ use App\Services\BookingCancellationService;
 use App\Services\LocaleService;
 use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
+use App\Services\TourPromotionService;
 use App\Services\TourCMSService;
 use App\Services\UnitService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -111,7 +112,11 @@ class BookingCancellationTest extends FeatureTestCase
         
         $this->instance(AvailabilityService::class, $this->availabilityService);
 
-        $this->productService = new ProductService($this->tourCMSService, $this->getLoggerMock(), new LocaleService, new ProductMappingFactory);
+        $tourPromotionServiceMock = $this->getMockBuilder(TourPromotionService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->productService = new ProductService($this->tourCMSService, $this->getLoggerMock(), new LocaleService, new ProductMappingFactory, $tourPromotionServiceMock);
         $this->instance(ProductService::class, $this->productService);
 
 

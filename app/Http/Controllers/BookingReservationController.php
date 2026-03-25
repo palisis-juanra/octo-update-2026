@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\InvalidAvailabilityIdException;
+use App\Facades\OctoRequestFacade;
 use App\Http\Middleware\OctoAuthentication;
 use App\Http\Requests\OctoRequest;
 use App\Services\AvailabilityService;
@@ -54,7 +55,12 @@ class BookingReservationController extends Controller
         $availabilityId = $requestParams[OctoRequest::AVAILABILITY_ID];
         $availability = $this->availabilityService->getAvailabilityObjectFromAvailabilityId($availabilityId);
 
-        $booking = $this->bookingService->reserve($product, $option, $availability, $unitItems, $uuid, $notes);
+        $rateId = $requestParams[OctoRequest::RATE_ID] ?? null;
+        if (false === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+            $rateId = null;
+        }
+
+        $booking = $this->bookingService->reserve($product, $option, $availability, $unitItems, $uuid, $notes, $rateId);
         $bookingData = $this->transformer->transform($booking);
         $booking->update(['complete_booking_json' => json_encode($bookingData)]);
         $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
