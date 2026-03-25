@@ -93,7 +93,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     }
 
     /**
-     * Summary of validateAvailableComponents
+     * Update availability pricing with prices coming from check avail endpoint
      * @param Availability[] $availabilities
      * @param array $checkAvailcomponents
      * @return void
@@ -108,8 +108,8 @@ class PricingAvailabilityRequest extends AvailabilityRequest
                 continue;
             }
 
-            $totalPricing = $checkAvailComponentsIndexed[$availability->getId()]->total_price * 100;
-            $netPrice = $checkAvailComponentsIndexed[$availability->getId()]->net_price * 100;
+            $totalPricing = (int) round((float) $checkAvailComponentsIndexed[$availability->getId()]->total_price * 100);
+            $netPrice = (int) round((float) $checkAvailComponentsIndexed[$availability->getId()]->net_price * 100);
             
             $pricing = new Pricing(
                 $totalPricing,
