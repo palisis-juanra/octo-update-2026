@@ -377,6 +377,9 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $unitId = !empty($this->units) ? $this->units[0]['id'] : "{$this->product->getId()}|r1";
 
             $rateNumber = !empty($this->units) ? (int) $this->units[0]['quantity'] : $this->getMinBookingSize();
+            if ($rateNumber <= $this->getMinBookingSize()) {
+                $rateNumber = 1;
+            }
             $rateId = "r{$rateNumber}";
             $rate = isset($rates[$rateId]) ? $rates[$rateId] : $this->getMaxRateForVolumeProduct($departure);
 
