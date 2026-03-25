@@ -339,17 +339,19 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             if(!array_key_exists($rateId, $ratesArray)) {
                 throw new InvalidUnitIdException($unit['id']);
             }
-            $totalPricing += (float) $ratesArray[$rateId]->rate_price * $unit['quantity'];
-            $netPrice += 
-                (
-                    !empty($ratesArray[$rateId]->net_price) ? 
-                    ((float) $ratesArray[$rateId]->net_price) : 
-                    ((float) $ratesArray[$rateId]->rate_price)
-                ) * $unit['quantity'];
-        }
+            $rateData = $ratesArray[$rateId];
 
-        $totalPricing *= 100;
-        $netPrice *= 100;
+            $rateQuantity = (int) $unit['quantity'];
+            $ratePrice = (int) round($rateData->rate_price * 100);
+
+            $rateNetPrice = $ratePrice;
+            if (!empty($rateData->net_price)) {
+                $rateNetPrice = (int) round($rateData->net_price * 100);
+            }
+
+            $totalPricing += $ratePrice * $rateQuantity;
+            $netPrice += $rateNetPrice * $rateQuantity;
+        }
 
         return new Pricing(
             $totalPricing,
