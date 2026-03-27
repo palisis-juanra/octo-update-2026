@@ -10,6 +10,7 @@ use App\Models\Availability\Availability;
 use App\Models\Booking;
 use App\Models\Option;
 use App\Models\Product;
+use App\Models\TourCMS\Promotion;
 use App\Services\AvailabilityService;
 use SimpleXMLElement;
 
@@ -132,7 +133,7 @@ class BookingReservationService
         $component->addChild('component_key', $componentKey);
         $booking->addChild('customers');
         
-        if (!empty($promotionName)) {
+        if (!empty($promotionName) && Promotion::OPEN_PROMOTION_NAME !== $promotionName) {
             JsonLog::info("Adding promotion name {$promotionName} to start new booking XML");
             $promotions = $booking->addChild('tour_promotions');
             $promotions->addChild('tour_promotion', $promotionName);

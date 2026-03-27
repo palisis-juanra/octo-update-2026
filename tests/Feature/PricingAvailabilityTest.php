@@ -545,7 +545,7 @@ class PricingAvailabilityTest extends FeatureTestCase
                 ]
             ]);
         
-        // With min booking size 2, we should return the price for the r2...
+        // With min booking size 2, we should return the price for the r1 still as show tour deps returns price for min booking size in r1...
         $this->showQuantityBasedPricingTourXML->tour->min_booking_size = 2;
         $tourCMSServiceMock
             ->method('showTour')
@@ -564,11 +564,6 @@ class PricingAvailabilityTest extends FeatureTestCase
                 OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
             ]
         );
-
-        $departure = $this->showQuantityBasedPricingTourDeparturesOneDayXML->tour->dates_and_prices->departure[0];
-        $expectedNetPrice = $departure->extra_rates->rate[0]->rate_price * 100;
-        $expectedOriginalPrice  = $departure->extra_rates->rate[0]->rate_price * 100;
-        $expectedRetailPrice  = $departure->extra_rates->rate[0]->rate_price * 100;
 
         $response
             ->assertOk()
