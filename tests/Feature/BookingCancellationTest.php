@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\BookingNotCancellableException;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Http\Responses\OctoResponse;
 use App\Models\Availability\Availability;
@@ -22,6 +23,7 @@ class BookingCancellationTest extends FeatureTestCase
 {
     const INVALID_BOOKING_UUID = '0j9wdajdwa-09ad-9wdf-0j0k-0jhdw28hd';
     const VALID_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
+    protected const string NOT_CANCELLABLE_BOOKING_UUID = '3f3a7973-fcaa-44f4-a934-e4c252092436';
     const VALID_BOOKING_ID = 4093;
     const VALID_BOOKING_OBJECT_ID = '1|143|3899';
     const VALID_PRODUCT_ID = 'TE_1_67|142';
@@ -139,6 +141,10 @@ class BookingCancellationTest extends FeatureTestCase
                 if ($uuid == self::VALID_BOOKING_UUID) {
                     return $booking;
                 }
+                if ($uuid == self::NOT_CANCELLABLE_BOOKING_UUID) {
+                    $this->showBookingCancelledXML->booking->cancellable = '0';
+                    return $booking;
+                }
                 throw new InvalidBookingUUIDException($uuid);
             });
 
@@ -177,5 +183,16 @@ class BookingCancellationTest extends FeatureTestCase
             "availabilityId" => self::VALID_AVAILABILITY_ID,
             "optionId" => self::VALID_OPTION_ID
         ]);
+    }
+
+    public function test_whenBookingIsNotCancellable_thenExpectsBookingNotCancellableError(): void
+    {
+        $response = $this->post("/bookings/". self::NOT_CANCELLABLE_BOOKING_UUID ."/cancel", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        
+        $response->assertBadRequest();
+        
+        $responseData = $response->decodeResponseJson();
+        $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_UNPROCESSABLE_ENTITY);
+        $this->assertEquals($responseData['errorMessage'], BookingNotCancellableException::ERROR_MESSAGE);
     }
 }
