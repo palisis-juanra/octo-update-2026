@@ -127,7 +127,7 @@ class BookingFactory
         if ($status == Booking::STATUS_CONFIRMED) {
             $booking->setUtcConfirmedAt(isset($bookingData->confirmed_at_utc_seconds) ? (int) $bookingData->confirmed_at_utc_seconds : null);
         }
-        $booking->setCancellable((bool) $bookingData->cancellable);
+        $booking->setCancellable($bookingData->cancellable == '1');
 
         if ((int) $bookingData->cancel_reason !== 0) {
             $cancellation = new BookingCancellation(
