@@ -21,15 +21,15 @@ use Tests\FeatureTestCase;
 
 class BookingCancellationTest extends FeatureTestCase
 {
-    const INVALID_BOOKING_UUID = '0j9wdajdwa-09ad-9wdf-0j0k-0jhdw28hd';
-    const VALID_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
+    public const string INVALID_BOOKING_UUID = '0j9wdajdwa-09ad-9wdf-0j0k-0jhdw28hd';
+    public const string VALID_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
     protected const string NOT_CANCELLABLE_BOOKING_UUID = '3f3a7973-fcaa-44f4-a934-e4c252092436';
-    const VALID_BOOKING_ID = 4093;
-    const VALID_BOOKING_OBJECT_ID = '1|143|3899';
-    const VALID_PRODUCT_ID = 'TE_1_67|142';
-    const VALID_AVAILABILITY_ID = '2024-12-30|32433';
-    const VALID_OPTION_ID = 'START_TIME';
-    const VALID_UNIT_ITEMS = [
+    public const int VALID_BOOKING_ID = 4093;
+    public const string VALID_BOOKING_OBJECT_ID = '1|143|3899';
+    public const string VALID_PRODUCT_ID = 'TE_1_67|142';
+    public const string VALID_AVAILABILITY_ID = '2024-12-30|32433';
+    public const string VALID_OPTION_ID = 'START_TIME';
+    public const array VALID_UNIT_ITEMS = [
         [
             UnitService::UNIT_ID_FIELD => "TE_1_67|142|r1"
         ],
