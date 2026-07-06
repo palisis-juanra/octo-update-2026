@@ -76,7 +76,6 @@ class BookingConfirmationController
                 $contact = Contact::create($unitContacts[$key]['contact'] ?? []);
                 if ($unitItem->uuid === $bookingUnitsArray[array_key_first($bookingUnitsArray)]->uuid) {
                     
-                    
                     if (!empty($leadContact)) {
                         $leadContact = $this->service->contactService->completeLeaderPaxContactData($contact, $leadContact);
                         continue;
@@ -103,6 +102,10 @@ class BookingConfirmationController
 
         $bookingData = $this->transformer->transform($booking);
         $bookingByUUID->update(['status' => Booking::STATUS_CONFIRMED, 'complete_booking_json' => json_encode($bookingData), 'unit_items' => json_encode($unitItems)]);
+
+        $note = "Booking lead passenger details\n\n Lead passenger details:\n" . json_encode($leadTravellerContactData);
+        $this->service->tourCMSService->callTourCMSAddNoteToBooking($booking->getChannelId(), $booking->getBookingId(), $note);
+
         $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
 
         return new JsonResponse($bookingData, Response::HTTP_OK);

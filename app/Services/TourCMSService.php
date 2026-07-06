@@ -59,6 +59,8 @@ class TourCMSService
 
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
 
+    public const string NOTE_TYPE_AUDIT = 'AUDIT';
+
     protected int $maid;
     protected TourCMS $tourCMS;
     protected TourCMSMulti $tourCMSMulti;
@@ -326,6 +328,11 @@ class TourCMSService
     {
         $this->tourCMS = $tourCMS;
         return $this;
+    }
+
+    public function callTourCMSAddNoteToBooking(int $channelId, int $booking_id, string $note): void
+    {
+        $this->tourCMS->add_note_to_booking($booking_id, $channelId, htmlspecialchars($note), self::NOTE_TYPE_AUDIT);
     }
 
     /* PROTECTED METHODS */
