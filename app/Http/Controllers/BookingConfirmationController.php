@@ -38,20 +38,20 @@ class BookingConfirmationController
             $this->logger->info(["message" => "Booking already confirmed", "uuid" => $uuid, "id" => $booking->getId()]);
             return new JsonResponse($bookingData, Response::HTTP_OK);
         }
-        
+
         $unitItems = $request->post(OctoRequest::UNIT_ITEMS) ?? [];
         if (!empty($unitItems)) {
             $this->unitService->validateUnitItems($unitItems);
             // check unit items same as reservation
             $this->service->checkUnitItemsHaveNotChanged($booking, $unitItems);
         }
-        
+
         // Update reseller reference
         $resellerReference = $request->post(OctoRequest::RESELLER_REFERENCE);
         if (!empty($resellerReference)) {
             $booking = $booking->setResellerReference($resellerReference);
         }
-        
+
         // We need to remove unit items without contact, as they are not needed
         $unitContacts = [];
         foreach ($unitItems as $key => $unitItem) {
@@ -64,7 +64,8 @@ class BookingConfirmationController
         $leadContact = null;
 
         if (!empty($leadTravellerContactData)) {
-            $leadContact = Contact::create($leadTravellerContactData);
+            $originalLeadContact = Contact::create($leadTravellerContactData);
+            $leadContact = $originalLeadContact;
         }
 
         if (!empty($unitContacts)) {
@@ -75,12 +76,12 @@ class BookingConfirmationController
                 $key = array_search($unitItem->getId(), $unitIds);
                 $contact = Contact::create($unitContacts[$key]['contact'] ?? []);
                 if ($unitItem->uuid === $bookingUnitsArray[array_key_first($bookingUnitsArray)]->uuid) {
-                    
+
                     if (!empty($leadContact)) {
                         $leadContact = $this->service->contactService->completeLeaderPaxContactData($contact, $leadContact);
                         continue;
                     }
-                        
+
                     $leadContact = $contact;
                 }
                 $this->service->updateTraveller($unitItem->getCustomerId(), $contact);
@@ -98,6 +99,11 @@ class BookingConfirmationController
         // Commit booking
         $this->logger->info(["message" => "Confirming booking", "uuid" => $uuid, "id" => $booking->getId()]);
         $booking = $this->service->confirmBooking($booking);
+
+        if (!empty($originalLeadContact)) {
+            $booking->setContact($originalLeadContact);
+        }
+
         $unitItems = $booking->getUnits();
 
         $bookingData = $this->transformer->transform($booking);
