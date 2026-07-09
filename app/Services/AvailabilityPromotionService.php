@@ -227,7 +227,7 @@ class AvailabilityPromotionService
 
         $pricing = $availability->getPricing();
         $pricing->setRetail($this->applyDiscount($pricing->getRetail(), $discount));
-        $pricing->setNet($this->applyDiscount($pricing->getNet(), $discount));
+        $pricing->setNet($this->applyDiscount($pricing->getNet() ?? $pricing->getRetail(), $discount));
 
         foreach ($availability->getUnitPricing() as $unitPricing) {
             $unitPricing->setRetailPrice(

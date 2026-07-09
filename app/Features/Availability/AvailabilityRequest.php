@@ -70,7 +70,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $this->optionId;
     }
 
-    public function setOptionId($optionId)
+    public function setOptionId(string $optionId)
     {
         $this->optionId = $optionId;
         return $this;
@@ -81,7 +81,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         return $this->units;
     }
 
-    public function setUnits($units)
+    public function setUnits(array $units)
     {
         $this->units = $units;
         return $this;
