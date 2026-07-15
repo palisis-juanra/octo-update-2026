@@ -48,7 +48,7 @@ class ContactService
                 self::MISSING_EMAIL_ADDRESS => $newLeadContactData->setEmailAddress($originalLeadContactData->getEmailAddress()),
                 self::MISSING_NOTES         => $newLeadContactData->setNotes($originalLeadContactData->getNotes()),
                 self::MISSING_POSTAL_CODE   => $newLeadContactData->setPostalCode($originalLeadContactData->getPostalCode()),
-                self::MISSING_COUNTRY       => $newLeadContactData->setCountry($originalLeadContactData->getCountry()) 
+                self::MISSING_COUNTRY       => $newLeadContactData->setCountry($originalLeadContactData->getCountry())
             };
         }
 
@@ -58,7 +58,7 @@ class ContactService
     private function missingContactDataForLead(Contact $contact): array
     {
         $missingData = [];
-        
+
         $contact->getEmailAddress() ??  $missingData[] = self::MISSING_EMAIL_ADDRESS;
         $contact->getCountry()      ??  $missingData[] = self::MISSING_COUNTRY;
         $contact->getPhoneNumber()  ??  $missingData[] = self::MISSING_PHONE_NUMBER;

@@ -77,7 +77,7 @@ class BookingConfirmationService extends BookingService
     }
 
     /**
-     * Unit items must remain the same, so if they are different 
+     * Unit items must remain the same, so if they are different
      * @param \App\Models\Booking $booking
      * @param array $unitItems
      * @throws \Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException

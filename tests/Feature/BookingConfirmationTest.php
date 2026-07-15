@@ -139,11 +139,35 @@ class BookingConfirmationTest extends FeatureTestCase
         $call = 0;
 
         $this->bookingConfirmationServiceMock
-            ->expects($this->exactly(3))
+            ->expects($this->exactly(4))
             ->method('updateTraveller')
             ->willReturnCallback(function (int $customerId, Contact $contact) use (&$call, $mockedCustomerData) {
                 switch ($call++) {
                     case 0:
+                        $this->assertEquals(13851, $customerId);
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][0]['contact']['fullName'],
+                            $contact->getFullName()
+                        );
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][0]['contact']['firstName'],
+                            $contact->getFirstName()
+                        );
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][0]['contact']['lastName'],
+                            $contact->getLastName()
+                        );
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][0]['contact']['emailAddress'],
+                            $contact->getEmailAddress()
+                        );
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][0]['contact']['notes'],
+                            $contact->getNotes()
+                        );
+                        break;
+
+                    case 1:
                         $this->assertEquals(13852, $customerId);
                         $this->assertEquals(
                             $mockedCustomerData['unitItems'][1]['contact']['fullName'],
@@ -167,7 +191,7 @@ class BookingConfirmationTest extends FeatureTestCase
                         );
                         break;
 
-                    case 1:
+                    case 2:
                         $this->assertEquals(13853, $customerId);
                         $this->assertEquals(
                             $mockedCustomerData['unitItems'][2]['contact']['fullName'],
@@ -191,7 +215,7 @@ class BookingConfirmationTest extends FeatureTestCase
                         );
                         break;
 
-                    case 2:
+                    case 3:
                         $this->assertEquals(13851, $customerId);
                         $this->assertNotEquals(
                             $mockedCustomerData['contact']['fullName'],
@@ -241,12 +265,12 @@ class BookingConfirmationTest extends FeatureTestCase
         $call = 0;
 
         $this->bookingConfirmationServiceMock
-            ->expects($this->exactly(3))
+            ->expects($this->exactly(4))
             ->method('updateTraveller')
             ->willReturnCallback(function (int $customerId, Contact $contact) use (&$call, $mockedCustomerData) {
                 switch ($call++) {
                     case 0:
-                        $this->assertEquals(13852, $customerId);
+                        $this->assertEquals(13851, $customerId);
                         $this->assertEquals(
                             $mockedCustomerData['unitItems'][1]['contact']['fullName'],
                             $contact->getFullName()
@@ -270,6 +294,30 @@ class BookingConfirmationTest extends FeatureTestCase
                         break;
 
                     case 1:
+                        $this->assertEquals(13852, $customerId);
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][1]['contact']['fullName'],
+                            $contact->getFullName()
+                        );
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][1]['contact']['firstName'],
+                            $contact->getFirstName()
+                        );
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][1]['contact']['lastName'],
+                            $contact->getLastName()
+                        );
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][1]['contact']['emailAddress'],
+                            $contact->getEmailAddress()
+                        );
+                        $this->assertEquals(
+                            $mockedCustomerData['unitItems'][1]['contact']['notes'],
+                            $contact->getNotes()
+                        );
+                        break;
+
+                    case 2:
                         $this->assertEquals(13853, $customerId);
                         $this->assertEquals(
                             $mockedCustomerData['unitItems'][2]['contact']['fullName'],
@@ -293,7 +341,7 @@ class BookingConfirmationTest extends FeatureTestCase
                         );
                         break;
 
-                    case 2:
+                    case 3:
                         $this->assertEquals(13851, $customerId);
                         $this->assertEquals(
                             $mockedCustomerData['unitItems'][1]['contact']['fullName'],
@@ -343,11 +391,35 @@ class BookingConfirmationTest extends FeatureTestCase
         $call = 0;
 
         $this->bookingConfirmationServiceMock
-            ->expects($this->exactly(3))
+            ->expects($this->exactly(4))
             ->method('updateTraveller')
             ->willReturnCallback(function (int $customerId, Contact $contact) use (&$call, $mockedCustomerData) {
                 switch ($call++) {
                     case 0:
+                        $this->assertEquals(13851, $customerId);
+                        $this->assertNotEquals(
+                            $mockedCustomerData['contact']['fullName'],
+                            $contact->getFullName()
+                        );
+                        $this->assertNotEquals(
+                            $mockedCustomerData['contact']['firstName'],
+                            $contact->getFirstName()
+                        );
+                        $this->assertNotEquals(
+                            $mockedCustomerData['contact']['lastName'],
+                            $contact->getLastName()
+                        );
+                        $this->assertEquals(
+                            $mockedCustomerData['contact']['emailAddress'],
+                            $contact->getEmailAddress()
+                        );
+                        $this->assertNotEquals(
+                            $mockedCustomerData['contact']['notes'],
+                            $contact->getNotes()
+                        );
+                        break;
+
+                    case 1:
                         $this->assertEquals(13852, $customerId);
                         $this->assertEquals(
                             $mockedCustomerData['unitItems'][1]['contact']['fullName'],
@@ -371,7 +443,7 @@ class BookingConfirmationTest extends FeatureTestCase
                         );
                         break;
 
-                    case 1:
+                    case 2:
                         $this->assertEquals(13853, $customerId);
                         $this->assertEquals(
                             $mockedCustomerData['unitItems'][2]['contact']['fullName'],
@@ -395,7 +467,7 @@ class BookingConfirmationTest extends FeatureTestCase
                         );
                         break;
 
-                    case 2:
+                    case 3:
                         $this->assertEquals(13851, $customerId);
                         $this->assertNotEquals(
                             $mockedCustomerData['contact']['fullName'],
