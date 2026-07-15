@@ -6,6 +6,7 @@ use App\Http\Requests\OctoRequest;
 use App\Models\Booking;
 use App\Models\Contact;
 use App\Services\BookingConfirmationService;
+use App\Services\BookingContactService;
 use App\Services\JSONLogService;
 use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
@@ -18,9 +19,11 @@ class BookingConfirmationController
 {
     public BookingTransformer $transformer;
     public UnitService $unitService;
+    public BookingContactService $bookingContactService;
 
     public function __construct(public BookingConfirmationService $service, public JSONLogService $logger)
     {
+        $this->bookingContactService = new BookingContactService();
         $this->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->unitService = new UnitService();
     }
@@ -75,18 +78,15 @@ class BookingConfirmationController
                 $unitIds = array_column($unitContacts, 'unitId');
                 $key = array_search($unitItem->getId(), $unitIds);
                 $contact = Contact::create($unitContacts[$key]['contact'] ?? []);
-                if ($unitItem->uuid === $bookingUnitsArray[array_key_first($bookingUnitsArray)]->uuid) {
-
-                    if (!empty($leadContact)) {
-                        $leadContact = $this->service->contactService->completeLeaderPaxContactData($contact, $leadContact);
-                        continue;
-                    }
-
-                    $leadContact = $contact;
-                }
+                $leadContact = $this->bookingContactService->assignLeadContactDataToFirstUnit(
+                    $unitItem->uuid,
+                    $bookingUnitsArray[array_key_first($bookingUnitsArray)]->uuid,
+                    $contact,
+                    $leadContact
+                );
                 $this->service->updateTraveller($unitItem->getCustomerId(), $contact);
                 unset($unitContacts[$key]);
-                sort($unitContacts);
+                $unitContacts = array_values($unitContacts);
             }
         }
 
@@ -109,7 +109,7 @@ class BookingConfirmationController
         $bookingData = $this->transformer->transform($booking);
         $bookingByUUID->update(['status' => Booking::STATUS_CONFIRMED, 'complete_booking_json' => json_encode($bookingData), 'unit_items' => json_encode($unitItems)]);
 
-        $note = "Booking lead passenger details\n\n Lead passenger details:\n" . json_encode($leadTravellerContactData);
+        $note = "Original customer details:\n" . json_encode($leadTravellerContactData);
         $this->service->tourCMSService->callTourCMSAddNoteToBooking($booking->getChannelId(), $booking->getBookingId(), $note);
 
         $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
