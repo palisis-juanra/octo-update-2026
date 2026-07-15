@@ -39,7 +39,7 @@ class BookingGetController extends Controller
 
             $originalBookingJSON = json_decode($bookingByUUID->complete_booking_json, true);
 
-            if (!is_null($originalBookingJSON) && !empty($originalBookingJSON['contact'])) {
+            if (is_array($originalBookingJSON) && !empty($originalBookingJSON['contact'])) {
                 $transformedBooking['contact'] = $originalBookingJSON['contact'];
             }
 
