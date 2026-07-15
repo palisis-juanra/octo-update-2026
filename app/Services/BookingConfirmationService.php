@@ -16,6 +16,9 @@ class BookingConfirmationService extends BookingService
     public const ERROR_BOOKING_NOT_FOUND = 'API return no matching data, invalid booking ID / channel';
     public const ERROR_MESSAGE_UNIT_ITEMS_CHANGED = "Unit items must not change between reservation and confirmation";
 
+    public const ORIGINAL_CUSTOMER_AUDIT_NOTE_PREFIX = "Original customer details:\n";
+    public const ORIGINAL_CUSTOMER_DATA_NOT_PROVIDED_MESSAGE = "No data available";
+
     public function __construct(
         public TourCMSService $tourCMSService,
         public JSONLogService $logger,
@@ -100,5 +103,17 @@ class BookingConfirmationService extends BookingService
             $this->logger->info(["message" => "Units items has changed from reservation to confirmation, throwing exception", "reservation" => $bookingUnitItems, "confirmation" => $unitItems]);
             throw new UnprocessableEntityHttpException(self::ERROR_MESSAGE_UNIT_ITEMS_CHANGED);
         }
+    }
+
+    public function createOriginalCustomerDetailsAuditNote(Booking $booking, ?array $leadCustomerContactData): void
+    {
+        $leadCustomerContactData = json_encode($leadCustomerContactData);
+
+        if ($leadCustomerContactData === false) {
+            $leadCustomerContactData = self::ORIGINAL_CUSTOMER_DATA_NOT_PROVIDED_MESSAGE;
+        }
+
+        $note = self::ORIGINAL_CUSTOMER_AUDIT_NOTE_PREFIX . $leadCustomerContactData;
+        $this->tourCMSService->callTourCMSAddNoteToBooking($booking->getChannelId(), $booking->getBookingId(), $note);
     }
 }

@@ -2,16 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Booking;
 use App\Models\Contact;
 
 class BookingContactService
 {
-    public ContactService $contactService;
-
-    public function __construct()
-    {
-        $this->contactService = new ContactService();
-    }
+    public function __construct(public ContactService $contactService, public BookingConfirmationService $bookingConfirmationService) {}
 
     /**
      * Populates missing fields in the lead customer contact using data from the
@@ -32,8 +28,7 @@ class BookingContactService
         string $firstBookingUnitArrayUUID,
         Contact $unitContact,
         ?Contact $leadContact
-    ): Contact|null
-    {
+    ): Contact|null {
         if ($unitUUID != $firstBookingUnitArrayUUID) {
             return $leadContact;
         }
@@ -43,5 +38,73 @@ class BookingContactService
         }
 
         return $this->contactService->completeLeaderPaxContactData($unitContact, $leadContact);
+    }
+
+    public function createLeadTravellerContact(?array $leadTravellerContactData): Contact|null
+    {
+        if (empty($leadTravellerContactData)) {
+            return null;
+        }
+
+        return Contact::create($leadTravellerContactData);
+    }
+
+    public function createUnitContactsArray(array $unitItems): array
+    {
+        $unitContacts = [];
+        foreach ($unitItems as $key => $unitItem) {
+            if (
+                array_key_exists('contact', $unitItem) &&
+                !empty($unitItem['contact']) && is_array(
+                    $unitItem['contact']
+                )
+            ) {
+                $unitContacts[] = $unitItem;
+            }
+        }
+
+        return $unitContacts;
+    }
+
+    public function updateBookingTravelersWithContactInfo(
+        array $unitContacts,
+        Booking $booking,
+        ?Contact $leadContact
+    ): Contact|null {
+        if (empty($unitContacts)) {
+            return $leadContact;
+        }
+
+        // Update unit items
+        $bookingUnitsArray = $booking->getUnits();
+        foreach ($bookingUnitsArray as $unitItem) {
+            $unitIds = array_column($unitContacts, 'unitId');
+            $key = array_search($unitItem->getId(), $unitIds);
+            $contact = Contact::create($unitContacts[$key]['contact'] ?? []);
+            $leadContact = $this->assignLeadContactDataToFirstUnit(
+                $unitItem->uuid,
+                $bookingUnitsArray[array_key_first($bookingUnitsArray)]->uuid,
+                $contact,
+                $leadContact
+            );
+
+            $this->bookingConfirmationService->updateTraveller($unitItem->getCustomerId(), $contact);
+            unset($unitContacts[$key]);
+            $unitContacts = array_values($unitContacts);
+        }
+
+        return $leadContact;
+    }
+
+    public function updateBookingLeadCustomerContactInfo(Booking $booking, ?Contact $leadContact): Booking
+    {
+        if (empty($leadContact)) {
+            return $booking;
+        }
+
+        $this->bookingConfirmationService->updateTraveller($booking->getLeadCustomerId(), $leadContact);
+        $booking->setContact($leadContact);
+
+        return $booking;
     }
 }

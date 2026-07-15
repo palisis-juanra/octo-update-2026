@@ -19,11 +19,9 @@ class BookingConfirmationController
 {
     public BookingTransformer $transformer;
     public UnitService $unitService;
-    public BookingContactService $bookingContactService;
 
-    public function __construct(public BookingConfirmationService $service, public JSONLogService $logger)
+    public function __construct(public BookingConfirmationService $service, public JSONLogService $logger, public BookingContactService $bookingContactService)
     {
-        $this->bookingContactService = new BookingContactService();
         $this->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->unitService = new UnitService();
     }
@@ -56,45 +54,16 @@ class BookingConfirmationController
         }
 
         // We need to remove unit items without contact, as they are not needed
-        $unitContacts = [];
-        foreach ($unitItems as $key => $unitItem) {
-            if (array_key_exists('contact', $unitItem) && !empty($unitItem['contact']) && is_array($unitItem['contact'])) {
-                $unitContacts[] = $unitItem;
-            }
-        }
+        $unitContacts = $this->bookingContactService->createUnitContactsArray($unitItems);
 
         $leadTravellerContactData = $request->post(OctoRequest::CONTACT);
-        $leadContact = null;
+        $originalLeadContact = $this->bookingContactService->createLeadTravellerContact($leadTravellerContactData);
+        $leadContact = $originalLeadContact;
 
-        if (!empty($leadTravellerContactData)) {
-            $originalLeadContact = Contact::create($leadTravellerContactData);
-            $leadContact = $originalLeadContact;
-        }
-
-        if (!empty($unitContacts)) {
-            // Update unit items
-            $bookingUnitsArray = $booking->getUnits();
-            foreach ($bookingUnitsArray as $unitItem) {
-                $unitIds = array_column($unitContacts, 'unitId');
-                $key = array_search($unitItem->getId(), $unitIds);
-                $contact = Contact::create($unitContacts[$key]['contact'] ?? []);
-                $leadContact = $this->bookingContactService->assignLeadContactDataToFirstUnit(
-                    $unitItem->uuid,
-                    $bookingUnitsArray[array_key_first($bookingUnitsArray)]->uuid,
-                    $contact,
-                    $leadContact
-                );
-                $this->service->updateTraveller($unitItem->getCustomerId(), $contact);
-                unset($unitContacts[$key]);
-                $unitContacts = array_values($unitContacts);
-            }
-        }
+        $leadContact = $this->bookingContactService->updateBookingTravelersWithContactInfo($unitContacts, $booking, $leadContact);
 
         // Update customers information
-        if (!empty($leadContact)) {
-            $this->service->updateTraveller($booking->getLeadCustomerId(), $leadContact);
-            $booking->setContact($leadContact);
-        }
+        $booking = $this->bookingContactService->updateBookingLeadCustomerContactInfo($booking, $leadContact);
 
         // Commit booking
         $this->logger->info(["message" => "Confirming booking", "uuid" => $uuid, "id" => $booking->getId()]);
@@ -109,8 +78,7 @@ class BookingConfirmationController
         $bookingData = $this->transformer->transform($booking);
         $bookingByUUID->update(['status' => Booking::STATUS_CONFIRMED, 'complete_booking_json' => json_encode($bookingData), 'unit_items' => json_encode($unitItems)]);
 
-        $note = "Original customer details:\n" . json_encode($leadTravellerContactData);
-        $this->service->tourCMSService->callTourCMSAddNoteToBooking($booking->getChannelId(), $booking->getBookingId(), $note);
+        $this->service->createOriginalCustomerDetailsAuditNote($booking, $leadTravellerContactData);
 
         $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
 
