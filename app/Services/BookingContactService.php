@@ -28,7 +28,7 @@ class BookingContactService
         string $firstBookingUnitArrayUUID,
         Contact $unitContact,
         ?Contact $leadContact
-    ): Contact|null {
+    ): Contact {
         if ($unitUUID != $firstBookingUnitArrayUUID) {
             return $leadContact;
         }
