@@ -60,6 +60,7 @@ class TourCMSService
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
 
     public const string NOTE_TYPE_AUDIT = 'AUDIT';
+    public const string AUDIT_NOTE_ORIGINAL_CUSTOMER_DATA_ERROR_LOG_PREFIX = 'Audit note with original customer data could not be added';
 
     protected int $maid;
     protected TourCMS $tourCMS;
@@ -334,8 +335,12 @@ class TourCMSService
     {
         $addNoteResponse = $this->tourCMS->add_note_to_booking($booking_id, $channelId, htmlspecialchars($note), self::NOTE_TYPE_AUDIT);
 
-        if (empty($addNoteResponse) || $addNoteResponse->error != self::ERROR_OK) {
-            JSONLog::info('Audit note with original customer data could not be added');
+        if (empty($addNoteResponse)) {
+            JSONLog::info(self::AUDIT_NOTE_ORIGINAL_CUSTOMER_DATA_ERROR_LOG_PREFIX . 'Empty response.');
+        }
+
+        if ($addNoteResponse->error != self::ERROR_OK) {
+            JSONLog::info(self::AUDIT_NOTE_ORIGINAL_CUSTOMER_DATA_ERROR_LOG_PREFIX . 'Error while creating note.');
         }
     }
 

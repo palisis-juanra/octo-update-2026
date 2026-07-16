@@ -49,6 +49,15 @@ class BookingContactService
         return Contact::create($leadTravellerContactData);
     }
 
+    /**
+     * Filters and builds an array of unit contacts from raw unit item data.
+     *
+     * This method iterates through a list of unit items and extracts only those
+     * that contain a valid, non-empty 'contact' sub-array.
+     *
+     * @param array<int, array{contact?: array<string, mixed>, string: mixed}> $unitItems Raw array of unit items.
+     * @return array<int, array{contact: array<string, mixed>, string: mixed}> Filtered array containing only unit items with valid contact data.
+     */
     public function createUnitContactsArray(array $unitItems): array
     {
         $unitContacts = [];
@@ -66,6 +75,19 @@ class BookingContactService
         return $unitContacts;
     }
 
+    /**
+     * Updates travelers' contact information for each booking unit and identifies/assigns the lead contact.
+     *
+     * This method iterates through the units of a booking, maps them to the corresponding
+     * contact information provided in  $unitContacts, updates each traveler's record via
+     * the booking confirmation service, and determines/assigns the lead contact details
+     * starting from the first booking unit.
+     *
+     * @param array<int, array{unitId: mixed, contact: array<string, mixed>}> $unitContacts Array of contact data for units
+     * @param Booking $booking The booking entity containing the units to be updated.
+     * @param Contact|null $leadContact The existing lead contact, if any.
+     * * @return Contact|null The updated lead contact, or null if none is set.
+     */
     public function updateBookingTravelersWithContactInfo(
         array $unitContacts,
         Booking $booking,
