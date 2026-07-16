@@ -6,6 +6,7 @@ use App\Http\Requests\OctoRequest;
 use App\Models\Booking;
 use App\Models\Contact;
 use App\Services\BookingConfirmationService;
+use App\Services\BookingContactService;
 use App\Services\JSONLogService;
 use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
@@ -19,7 +20,7 @@ class BookingConfirmationController
     public BookingTransformer $transformer;
     public UnitService $unitService;
 
-    public function __construct(public BookingConfirmationService $service, public JSONLogService $logger)
+    public function __construct(public BookingConfirmationService $service, public JSONLogService $logger, public BookingContactService $bookingContactService)
     {
         $this->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->unitService = new UnitService();
@@ -38,55 +39,49 @@ class BookingConfirmationController
             $this->logger->info(["message" => "Booking already confirmed", "uuid" => $uuid, "id" => $booking->getId()]);
             return new JsonResponse($bookingData, Response::HTTP_OK);
         }
-        
+
         $unitItems = $request->post(OctoRequest::UNIT_ITEMS) ?? [];
         if (!empty($unitItems)) {
             $this->unitService->validateUnitItems($unitItems);
             // check unit items same as reservation
             $this->service->checkUnitItemsHaveNotChanged($booking, $unitItems);
         }
-        
+
         // Update reseller reference
         $resellerReference = $request->post(OctoRequest::RESELLER_REFERENCE);
         if (!empty($resellerReference)) {
             $booking = $booking->setResellerReference($resellerReference);
         }
-        
-        // We need to remove unit items without contact, as they are not needed
-        $unitContacts = [];
-        foreach ($unitItems as $key => $unitItem) {
-            if (array_key_exists('contact', $unitItem) && !empty($unitItem['contact']) && is_array($unitItem['contact'])) {
-                $unitContacts[] = $unitItem;
-            }
-        }
 
-        if (!empty($unitContacts)) {
-            // Update unit items
-            foreach ($booking->getUnits() as $unitItem) {
-                $unitIds = array_column($unitContacts, 'unitId');
-                $key = array_search($unitItem->getId(), $unitIds);
-                $contact = Contact::create($unitContacts[$key]['contact'] ?? []);
-                $this->service->updateTraveller($unitItem->getCustomerId(), $contact);
-                unset($unitContacts[$key]);
-                sort($unitContacts);
-            }
-        }
+        // We need to remove unit items without contact, as they are not needed
+        $unitContacts = $this->bookingContactService->createUnitContactsArray($unitItems);
+
+        $leadTravellerContactData = $request->post(OctoRequest::CONTACT);
+        $originalLeadContact = $this->bookingContactService->createLeadTravellerContact($leadTravellerContactData);
+        $leadContact = $originalLeadContact;
+
+        $leadContact = $this->bookingContactService->updateBookingTravelersWithContactInfo($unitContacts, $booking, $leadContact);
 
         // Update customers information
-        $leadTravellerContactData = $request->post(OctoRequest::CONTACT);
-        if (!empty($leadTravellerContactData)) {
-            $contact = Contact::create($leadTravellerContactData);
-            $this->service->updateTraveller($booking->getLeadCustomerId(), $contact);
-            $booking->setContact($contact);
+        if (!empty($leadContact)) {
+            $booking = $this->bookingContactService->updateBookingLeadCustomerContactInfo($booking, $leadContact);
         }
 
         // Commit booking
         $this->logger->info(["message" => "Confirming booking", "uuid" => $uuid, "id" => $booking->getId()]);
         $booking = $this->service->confirmBooking($booking);
+
+        if (!empty($originalLeadContact)) {
+            $booking->setContact($originalLeadContact);
+        }
+
         $unitItems = $booking->getUnits();
 
         $bookingData = $this->transformer->transform($booking);
         $bookingByUUID->update(['status' => Booking::STATUS_CONFIRMED, 'complete_booking_json' => json_encode($bookingData), 'unit_items' => json_encode($unitItems)]);
+
+        $this->service->createOriginalCustomerDetailsAuditNote($booking, $leadTravellerContactData);
+
         $this->logger->info(["message" => "Request processed, returning response", "response" => $bookingData]);
 
         return new JsonResponse($bookingData, Response::HTTP_OK);

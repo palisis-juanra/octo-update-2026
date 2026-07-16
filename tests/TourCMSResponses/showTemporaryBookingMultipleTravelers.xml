@@ -1,0 +1,358 @@
+<response>
+  <request>GET /c/booking/show.xml?booking_id=6595&amp;show_temporary_bookings=1</request>
+  <error>OK</error>
+  <booking>
+    <booking_id>6595</booking_id>
+    <booking_uuid>dd6fd9f3-7ed1-4848-98ef-c1b006307631</booking_uuid>
+    <channel_id>142</channel_id>
+    <account_id>1</account_id>
+    <channel_name>PORTUGAL CHANNEL</channel_name>
+    <made_date_time>2026-07-06 18:05:01</made_date_time>
+    <made_username>webapimp</made_username>
+    <made_type>W</made_type>
+    <made_name>WEB API</made_name>
+    <start_date>2026-07-02</start_date>
+    <end_date>2026-07-02</end_date>
+    <booking_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</booking_name>
+    <booking_name_custom/>
+    <status>-1</status>
+    <status_text/>
+    <withheld>0</withheld>
+    <voucher_url>http://voucher.tourcms.local/print.php?id=mjOhfLsAEau7gD1aHJO2SQ%2FspLIkSyv6XGahujaifHQ%3D</voucher_url>
+    <voucher_pdf_desktop>http://voucher.tourcms.local/pdf/print.php?id=mjOhfLsAEau7gD1aHJO2SQ%2FspLIkSyv6XGahujaifHQ%3D&amp;version=desktop</voucher_pdf_desktop>
+    <voucher_pdf_mobile>http://voucher.tourcms.local/pdf/print.php?id=mjOhfLsAEau7gD1aHJO2SQ%2FspLIkSyv6XGahujaifHQ%3D&amp;version=mobile</voucher_pdf_mobile>
+    <barcode_data>TOURCMS|1|6595</barcode_data>
+    <barcode_priority>tourcms_barcode</barcode_priority>
+    <made_date_time_at_utc_seconds>1783353900</made_date_time_at_utc_seconds>
+    <confirmed_at_utc_seconds>1783353900</confirmed_at_utc_seconds>
+    <updated_at_utc_seconds>1783353900</updated_at_utc_seconds>
+    <non_refundable>0</non_refundable>
+    <cancellable>0</cancellable>
+    <cancel_reason>0</cancel_reason>
+    <cancel_text>Not cancelled</cancel_text>
+    <final_check>0</final_check>
+    <lead_customer_id>13851</lead_customer_id>
+    <lead_customer_name/>
+    <lead_customer_firstname/>
+    <lead_customer_surname/>
+    <lead_customer_country/>
+    <lead_customer_postcode/>
+    <lead_customer_email/>
+    <lead_customer_tel_home/>
+    <lead_customer_tel_mobile/>
+    <lead_customer_contact_note/>
+    <lead_customer_birth_place/>
+    <nationality/>
+    <nationality_text/>
+    <pass_num/>
+    <pass_issue/>
+    <pass_issue_date/>
+    <pass_expiry_date/>
+    <lead_customer_agent_ref/>
+    <lead_customer_travelling>1</lead_customer_travelling>
+    <customer_count>3</customer_count>
+    <sale_currency>EUR</sale_currency>
+    <sales_revenue>200.00</sales_revenue>
+    <sales_revenue_display>&amp;#8364;200.00</sales_revenue_display>
+    <deposit>0.00</deposit>
+    <deposit_display>&amp;#8364;0.00</deposit_display>
+    <agent_type>TRUSTED</agent_type>
+    <agent_ref/>
+    <agent_ref_components/>
+    <tracking_miscid>0</tracking_miscid>
+    <commission>14.10</commission>
+    <commission_tax>0.28</commission_tax>
+    <commission_currency>EUR</commission_currency>
+    <commission_display>&amp;#8364;14.10</commission_display>
+    <commission_tax_display>&amp;#8364;0.28</commission_tax_display>
+    <booking_has_net_price>0</booking_has_net_price>
+    <payment_status>0</payment_status>
+    <payment_status_text>No payment made</payment_status_text>
+    <balance_owed_by>A</balance_owed_by>
+    <balance>185.62</balance>
+    <balance_display>&amp;#8364;185.62</balance_display>
+    <balance_due>2026-06-02</balance_due>
+    <customer_special_request/>
+    <customers_agecat_breakdown>1 Adult, 2 Children</customers_agecat_breakdown>
+    <payments>
+      <payment>
+        <payment_date_time>2026-07-06 18:05:01</payment_date_time>
+        <payment_value>14.38</payment_value>
+        <payment_currency>EUR</payment_currency>
+        <payment_value_display>&amp;#8364;14.38</payment_value_display>
+        <payment_type>Agent commission (Automatic)</payment_type>
+        <payment_reference/>
+        <payment_note>Automatically calculated by TourCMS equal to agent commission</payment_note>
+        <payment_by>A</payment_by>
+        <payment_by_id>4</payment_by_id>
+        <payment_transaction_reference/>
+        <gateway_mode/>
+      </payment>
+    </payments>
+    <palisis_marketpay>
+      <account_id>8516279228713369</account_id>
+    </palisis_marketpay>
+    <customers>
+      <customer>
+        <customer_id>13851</customer_id>
+        <customer_name/>
+        <title/>
+        <firstname/>
+        <middlename/>
+        <surname/>
+        <agent_customer_ref/>
+        <birth_place/>
+        <country/>
+        <postcode/>
+        <nationality/>
+        <nationality_text/>
+        <pass_num/>
+        <pass_issue/>
+        <pass_issue_date/>
+        <pass_expiry_date/>
+        <customer_email/>
+        <customer_tel_home/>
+        <customer_tel_mobile/>
+        <customer_contact_note/>
+        <gender/>
+        <agecat>a</agecat>
+        <agecat_text>Adult</agecat_text>
+        <insurance_number/>
+        <insurance_supplier_name/>
+        <insurance_note/>
+      </customer>
+      <customer>
+        <customer_id>13852</customer_id>
+        <customer_name/>
+        <title/>
+        <firstname/>
+        <middlename/>
+        <surname/>
+        <agent_customer_ref/>
+        <birth_place/>
+        <country/>
+        <postcode/>
+        <nationality/>
+        <nationality_text/>
+        <pass_num/>
+        <pass_issue/>
+        <pass_issue_date/>
+        <pass_expiry_date/>
+        <customer_email/>
+        <customer_tel_home/>
+        <customer_tel_mobile/>
+        <customer_contact_note/>
+        <gender/>
+        <agecat>c</agecat>
+        <agecat_text>Child</agecat_text>
+        <insurance_number/>
+        <insurance_supplier_name/>
+        <insurance_note/>
+      </customer>
+      <customer>
+        <customer_id>13853</customer_id>
+        <customer_name/>
+        <title/>
+        <firstname/>
+        <middlename/>
+        <surname/>
+        <agent_customer_ref/>
+        <birth_place/>
+        <country/>
+        <postcode/>
+        <nationality/>
+        <nationality_text/>
+        <pass_num/>
+        <pass_issue/>
+        <pass_issue_date/>
+        <pass_expiry_date/>
+        <customer_email/>
+        <customer_tel_home/>
+        <customer_tel_mobile/>
+        <customer_contact_note/>
+        <gender/>
+        <agecat>c</agecat>
+        <agecat_text>Child</agecat_text>
+        <insurance_number/>
+        <insurance_supplier_name/>
+        <insurance_note/>
+      </customer>
+    </customers>
+    <components>
+      <component>
+        <component_id>10495</component_id>
+        <redeemed_at/>
+        <redeemed_at_utc_seconds/>
+        <linked_component_id>10495</linked_component_id>
+        <product_id>67</product_id>
+        <date_id>46253</date_id>
+        <date_type>departure</date_type>
+        <product_code>BCNFCBAR</product_code>
+        <date_code/>
+        <start_date>2026-07-02</start_date>
+        <end_date>2026-07-02</end_date>
+        <local_payment>0</local_payment>
+        <customer_payment>0</customer_payment>
+        <start_time>20:00</start_time>
+        <end_time/>
+        <component_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</component_name>
+        <product_note/>
+        <component_note/>
+        <rate_breakdown>r2|c</rate_breakdown>
+        <customers>
+          <customer>
+            <customer_id>13852</customer_id>
+          </customer>
+          <customer>
+            <customer_id>13853</customer_id>
+          </customer>
+        </customers>
+        <rate_description/>
+        <supplier_note/>
+        <redeem>Հայերեն Shqip ‫العربية Български Català 中文简体 Hrvatski Česky Dansk Nederlands English Eesti Filipino Suomi Français ქართული Deutsch Ελληνικά ‫עברית हिन्दी Magyar Indonesia Italiano Latviski Lietuviškai македонски Melayu Norsk Polski Português Româna Pyccкий Српски Slovenčina Slovenščina Español Svenska ไทย Türkçe Українська Tiếng Việt
+Lorem Ipsum
+"Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit..."
+"There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain..."
+What is Lorem Ipsum?
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets. It has survived not only many decades, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised thanks to these sheets and more recently with desktop publishing software including versions of Lorem Ipsum.
+
+Why do we use it?
+It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+
+
+Where does it come from?
+Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites </redeem>
+        <receipt_info>Հայերեն Shqip ‫العربية Български Català 中文简体 Hrvatski Česky Dansk Nederlands English Eesti Filipino Suomi Français ქართული Deutsch Ελληνικά ‫עברית हिन्दी Magyar Indonesia Italiano Latviski Lietuviškai македонски Melayu Norsk Polski Português Româna Pyccкий Српски Slovenčina Slovenščina Español Svenska ไทย Türkçe Українська Tiếng Việt
+Lorem Ipsum
+"Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit..."
+"There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain..."
+What is Lorem Ipsum?
+Lorem Ipsum is sim</receipt_info>
+        <product_type>4</product_type>
+        <sale_quantity>2</sale_quantity>
+        <sale_quantity_rule>GROUP</sale_quantity_rule>
+        <sale_tax_percentage>0.00</sale_tax_percentage>
+        <sale_tax_inclusive>0</sale_tax_inclusive>
+        <sale_currency>EUR</sale_currency>
+        <sale_price>100.00</sale_price>
+        <tax_total>0.00</tax_total>
+        <sale_price_inc_tax_total>100.00</sale_price_inc_tax_total>
+        <sale_exchange_rate>1.0000000000</sale_exchange_rate>
+        <currency_base>EUR</currency_base>
+        <sale_price_base>100.00</sale_price_base>
+        <tax_total_base>0.00</tax_total_base>
+        <sale_price_inc_tax_total_base>100.00</sale_price_inc_tax_total_base>
+        <promo_apply>0</promo_apply>
+        <voucher_redemption_status>0</voucher_redemption_status>
+        <voucher_redemption_username/>
+        <questions>
+          <q>
+            <question_key>/B627NaSXG3HWIYnSQEF0A==</question_key>
+            <question/>
+            <explanation/>
+            <placeholder/>
+            <question_internal/>
+            <repeat>2</repeat>
+            <repeat_type>Q</repeat_type>
+            <answer_type>text</answer_type>
+            <answer_mandatory>yes</answer_mandatory>
+          </q>
+        </questions>
+        <urls>
+          <url>
+            <type>voucher</type>
+            <mime_type>text/html</mime_type>
+            <link>https://example.com/6595</link>
+            <label>freetext</label>
+          </url>
+        </urls>
+      </component>
+      <component>
+        <component_id>10494</component_id>
+        <redeemed_at/>
+        <redeemed_at_utc_seconds/>
+        <linked_component_id>10494</linked_component_id>
+        <product_id>67</product_id>
+        <date_id>46253</date_id>
+        <date_type>departure</date_type>
+        <product_code>BCNFCBAR</product_code>
+        <date_code/>
+        <start_date>2026-07-02</start_date>
+        <end_date>2026-07-02</end_date>
+        <local_payment>0</local_payment>
+        <customer_payment>0</customer_payment>
+        <start_time>20:00</start_time>
+        <end_time/>
+        <component_name>Camp Nou Tour: F.C. Barcelona - Open Date Ticket</component_name>
+        <product_note/>
+        <component_note/>
+        <rate_breakdown>r1|a</rate_breakdown>
+        <customers>
+          <customer>
+            <customer_id>13851</customer_id>
+          </customer>
+        </customers>
+        <rate_description/>
+        <supplier_note/>
+        <redeem>Հայերեն Shqip ‫العربية Български Català 中文简体 Hrvatski Česky Dansk Nederlands English Eesti Filipino Suomi Français ქართული Deutsch Ελληνικά ‫עברית हिन्दी Magyar Indonesia Italiano Latviski Lietuviškai македонски Melayu Norsk Polski Português Româna Pyccкий Српски Slovenčina Slovenščina Español Svenska ไทย Türkçe Українська Tiếng Việt
+Lorem Ipsum
+"Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit..."
+"There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain..."
+What is Lorem Ipsum?
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets. It has survived not only many decades, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised thanks to these sheets and more recently with desktop publishing software including versions of Lorem Ipsum.
+
+Why do we use it?
+It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+
+
+Where does it come from?
+Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites </redeem>
+        <receipt_info>Հայերեն Shqip ‫العربية Български Català 中文简体 Hrvatski Česky Dansk Nederlands English Eesti Filipino Suomi Français ქართული Deutsch Ελληνικά ‫עברית हिन्दी Magyar Indonesia Italiano Latviski Lietuviškai македонски Melayu Norsk Polski Português Româna Pyccкий Српски Slovenčina Slovenščina Español Svenska ไทย Türkçe Українська Tiếng Việt
+Lorem Ipsum
+"Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit..."
+"There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain..."
+What is Lorem Ipsum?
+Lorem Ipsum is sim</receipt_info>
+        <product_type>4</product_type>
+        <sale_quantity>1</sale_quantity>
+        <sale_quantity_rule>GROUP</sale_quantity_rule>
+        <sale_tax_percentage>0.00</sale_tax_percentage>
+        <sale_tax_inclusive>0</sale_tax_inclusive>
+        <sale_currency>EUR</sale_currency>
+        <sale_price>100.00</sale_price>
+        <tax_total>0.00</tax_total>
+        <sale_price_inc_tax_total>100.00</sale_price_inc_tax_total>
+        <sale_exchange_rate>1.0000000000</sale_exchange_rate>
+        <currency_base>EUR</currency_base>
+        <sale_price_base>100.00</sale_price_base>
+        <tax_total_base>0.00</tax_total_base>
+        <sale_price_inc_tax_total_base>100.00</sale_price_inc_tax_total_base>
+        <promo_apply>0</promo_apply>
+        <voucher_redemption_status>0</voucher_redemption_status>
+        <voucher_redemption_username/>
+        <questions>
+          <q>
+            <question_key>/B627NaSXG3HWIYnSQEF0A==</question_key>
+            <question/>
+            <explanation/>
+            <placeholder/>
+            <question_internal/>
+            <repeat>1</repeat>
+            <repeat_type>Q</repeat_type>
+            <answer_type>text</answer_type>
+            <answer_mandatory>yes</answer_mandatory>
+          </q>
+        </questions>
+        <urls>
+          <url>
+            <type>voucher</type>
+            <mime_type>text/html</mime_type>
+            <link>https://example.com/6595</link>
+            <label>freetext</label>
+          </url>
+        </urls>
+      </component>
+    </components>
+    <metadata/>
+  </booking>
+</response>

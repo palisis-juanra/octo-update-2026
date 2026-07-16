@@ -28,7 +28,7 @@ class BookingGetController extends Controller
         $this->bookingService = $bookingService;
         $this->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
     }
-    
+
     public function show(string $bookingUUID): JsonResponse
     {
         try {
@@ -36,6 +36,12 @@ class BookingGetController extends Controller
             $bookingByUUID = $this->bookingService->getBookingByUuid($bookingUUID);
             $bookingXMLResponse = $this->bookingService->getBooking($bookingByUUID, true);
             $transformedBooking = $this->transformer->transform($bookingXMLResponse);
+
+            $originalBookingJSON = json_decode($bookingByUUID->complete_booking_json, true);
+
+            if (is_array($originalBookingJSON) && !empty($originalBookingJSON['contact'])) {
+                $transformedBooking['contact'] = $originalBookingJSON['contact'];
+            }
 
             $bookingByUUID->update(['complete_booking_json' => json_encode($transformedBooking)]);
             $this->logger->info(["message" => "Request processed, returning response", "response" => $transformedBooking]);

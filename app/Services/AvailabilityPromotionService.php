@@ -226,15 +226,17 @@ class AvailabilityPromotionService
         $discount = (float) $promotion->getDiscount();
 
         $pricing = $availability->getPricing();
-        $pricing->setRetail($this->applyDiscount($pricing->getRetail(), $discount));
-        $pricing->setNet($this->applyDiscount($pricing->getNet(), $discount));
+        $retailPricing = $pricing->getRetail();
+        $pricing->setRetail($this->applyDiscount($retailPricing, $discount));
+        $pricing->setNet($this->applyDiscount($pricing->getNet() ?? $retailPricing, $discount));
 
         foreach ($availability->getUnitPricing() as $unitPricing) {
+            $unitRetailPrice = $unitPricing->getRetailPrice();
             $unitPricing->setRetailPrice(
-                $this->applyDiscount($unitPricing->getRetailPrice(), $discount)
+                $this->applyDiscount($unitRetailPrice, $discount)
             );
             $unitPricing->setNetPrice(
-                $this->applyDiscount($unitPricing->getNetPrice(), $discount)
+                $this->applyDiscount($unitPricing->getNetPrice() ?? $unitRetailPrice, $discount)
             );
         }
     }
