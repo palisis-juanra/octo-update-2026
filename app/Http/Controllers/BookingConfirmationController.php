@@ -63,7 +63,9 @@ class BookingConfirmationController
         $leadContact = $this->bookingContactService->updateBookingTravelersWithContactInfo($unitContacts, $booking, $leadContact);
 
         // Update customers information
-        $booking = $this->bookingContactService->updateBookingLeadCustomerContactInfo($booking, $leadContact);
+        if (!empty($leadContact)) {
+            $booking = $this->bookingContactService->updateBookingLeadCustomerContactInfo($booking, $leadContact);
+        }
 
         // Commit booking
         $this->logger->info(["message" => "Confirming booking", "uuid" => $uuid, "id" => $booking->getId()]);

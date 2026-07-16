@@ -120,10 +120,6 @@ class BookingContactService
 
     public function updateBookingLeadCustomerContactInfo(Booking $booking, ?Contact $leadContact): Booking
     {
-        if (empty($leadContact)) {
-            return $booking;
-        }
-
         $this->bookingConfirmationService->updateTraveller($booking->getLeadCustomerId(), $leadContact);
         $booking->setContact($leadContact);
 
