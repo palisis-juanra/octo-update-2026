@@ -6,6 +6,7 @@ use App\Exceptions\APIThrottleError;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\InvalidProductIdException;
 use App\Models\Product;
+use App\Models\ProductMapping;
 use App\Services\JSONLogService;
 use App\Services\LocaleService;
 use App\Services\ProductMappingFactory;
@@ -575,6 +576,44 @@ class ProductServiceTest extends UnitTestCase
         
         $this->expectException(APIThrottleError::class);
         $productService->find('TE_1_230|142');
+    }
+
+    public function test_getOptionTitle_whenCustomLabelPresent_thenTitleIsCustomLabel(): void
+    {
+        $tourPromotionServiceMock = $this->getMockBuilder(TourPromotionService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory, $tourPromotionServiceMock);
+
+        // A partial mapping with a custom label: the title must be the custom label, not the
+        // first-departure note, so a single start time is not exposed to OCTO.
+        $productMapping = new ProductMapping(
+            ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
+            '{"en":"Semi-Private - English - 09:30 AM"}',
+            'ESP_[*]',
+            ['08:00', '09:30'],
+            'English - Group'
+        );
+
+        $this->assertSame('English - Group', $productService->getOptionTitle('Tour Name', $productMapping));
+    }
+
+    public function test_getOptionTitle_whenNoCustomLabel_thenTitleFallsBackToFirstDepartureLabel(): void
+    {
+        $tourPromotionServiceMock = $this->getMockBuilder(TourPromotionService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory, $tourPromotionServiceMock);
+
+        // No custom label: behaviour is unchanged, the per-language label (first-departure note) is used.
+        $productMapping = new ProductMapping(
+            ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
+            '{"en":"Semi-Private - English - 09:30 AM"}',
+            'ESP_[*]',
+            ['08:00', '09:30']
+        );
+
+        $this->assertSame('Semi-Private - English - 09:30 AM', $productService->getOptionTitle('Tour Name', $productMapping));
     }
 
     // PROTECTED METHODS

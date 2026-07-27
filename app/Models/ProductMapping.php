@@ -11,13 +11,15 @@ class ProductMapping
     protected string $label;
     protected string $value;
     protected array $startTimes = [];
+    protected string $customLabel;
 
-    public function __construct(string $type, string $label, string $value, array $startTimes = [])
+    public function __construct(string $type, string $label, string $value, array $startTimes = [], string $customLabel = '')
     {
         $this->type = $type;
         $this->value = $value;
         $this->label = $label;
         $this->startTimes = $startTimes;
+        $this->customLabel = $customLabel;
     }
 
     public function getType(): string
@@ -38,5 +40,10 @@ class ProductMapping
     public function getStartTimes(): array
     {
         return $this->startTimes;
+    }
+
+    public function getCustomLabel(): string
+    {
+        return $this->customLabel;
     }
 }
