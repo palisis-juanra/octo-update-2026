@@ -291,6 +291,13 @@ class TourCMSService
         return $this->handleResponse($response);
     }
 
+    public function updateBooking(SimpleXMLElement $bookingData): SimpleXMLElement
+    {
+        $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
+        $response = $this->tourCMS->update_booking($bookingData, $this->channelId);
+        return $this->handleResponse($response);
+    }
+
     public function getTourPromotions(int $tourId, bool $cached = true): SimpleXMLElement
     {
         $endpoint = '/api/tours/promotions/get.xml?tour_id=' . $tourId;

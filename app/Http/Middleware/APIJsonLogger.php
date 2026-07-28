@@ -210,6 +210,11 @@ class APIJsonLogger
                     'booking_uuid' => $request->route(OctoRequest::UUID)
                 ];
                 break;
+            case OctoRequest::ENDPOINT_BOOKINGS_UPDATE:
+                $specificData = [
+                    'booking_uuid' => $request->route(OctoRequest::UUID)
+                ];
+                break;
             default:
                 break;
         }
