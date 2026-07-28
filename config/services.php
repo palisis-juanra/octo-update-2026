@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'tcms' => [
+        // JSON-encoded array of internal email addresses, matching the same
+        // env var used across other TourCMS projects (e.g. supplier.tourcms.api)
+        // for internal failure-notification alerts.
+        'internal_emails' => env('TCMS_INTERNAL_EMAILS'),
+    ],
+
 ];
