@@ -251,7 +251,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
                 $availability->setUnitPricing($unitPricing);
             }
 
-            if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+            if ($this->promotionEnrichmentEnabled() && OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
                 $this->availabilityPromotionService->enrichAvailabilityWithPromotions($this->product, $availability, $this->promotion);
             }
 
@@ -265,6 +265,17 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         } 
 
         return $availabilities;
+    }
+
+    /**
+     * Whether promotion enrichment should run as part of building availabilities
+     * from departures. Subclasses that apply promotion enrichment separately
+     * (after replacing pricing from another source) should override this to
+     * avoid double-applying promotion discounts.
+     */
+    protected function promotionEnrichmentEnabled(): bool
+    {
+        return true;
     }
 
     protected function isDepartureAvailable(SimpleXMLElement $departure): bool
@@ -309,6 +320,31 @@ class AvailabilityRequest extends BaseAvailabilityRequest
         }
     }
 
+    /**
+     * Units to price when building the top level pricing block.
+     *
+     * Date range requests carry no unit selection, so fall back to the minimum
+     * booking size of the default rate. This mirrors the default that
+     * PricingAvailabilityRequest::generateRatesParamsFromUnits() sends to the
+     * check availability endpoint, and keeps pricing consistent with the
+     * unitPricing entry for r1 instead of returning a zeroed block.
+     *
+     * @return array<int, array{id: string, quantity: int}>
+     */
+    protected function unitsForPricing(): array
+    {
+        if (!empty($this->units)) {
+            return $this->units;
+        }
+
+        return [
+            [
+                'id' => "{$this->product->getId()}|r1",
+                'quantity' => $this->getMinBookingSize(),
+            ],
+        ];
+    }
+
     protected function getPricingForShowTourDeparture(SimpleXMLElement $departure): Pricing
     {
         $totalPricing = 0;
@@ -325,16 +361,16 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $quantity = !empty($this->units) ? $this->units[0]['quantity'] : $this->getMinBookingSize();
 
             return new Pricing(
-                $rate->rate_price * $quantity * 100,
-                $rate->rate_price * $quantity * 100,
-                isset($rate->net_price) ? ($rate->net_price * $quantity * 100) : null,
+                (int) round($rate->rate_price * $quantity * 100),
+                (int) round($rate->rate_price * $quantity * 100),
+                isset($rate->net_price) ? (int) round($rate->net_price * $quantity * 100) : null,
                 $this->currency
             );
 
         }
 
         // Multiple rates
-        foreach ($this->units as $unit) {
+        foreach ($this->unitsForPricing() as $unit) {
             $rateId = UnitService::getTourCMSRateId($unit['id']);
             if(!array_key_exists($rateId, $ratesArray)) {
                 throw new InvalidUnitIdException($unit['id']);
@@ -383,24 +419,24 @@ class AvailabilityRequest extends BaseAvailabilityRequest
             $rateId = "r{$rateNumber}";
             $rate = isset($rates[$rateId]) ? $rates[$rateId] : $this->getMaxRateForVolumeProduct($departure);
 
-            $unitPricings[] = 
+            $unitPricings[] =
                 (new AvailabilityUnitPricing)
                     ->setUnitId($unitId)
-                    ->setOriginalPrice($rate->rate_price * 100)
-                    ->setRetailPrice($rate->rate_price * 100)
-                    ->setNetPrice((!empty($rate->net_price) ? $rate->net_price : $rate->rate_price) * 100)
+                    ->setOriginalPrice((int) round($rate->rate_price * 100))
+                    ->setRetailPrice((int) round($rate->rate_price * 100))
+                    ->setNetPrice((int) round((!empty($rate->net_price) ? $rate->net_price : $rate->rate_price) * 100))
                     ->setCurrency($this->currency);
-           
+
             return $unitPricings;
         }
 
         foreach ($rates as $rateId => $rate) {
-            $unitPricings[] = 
+            $unitPricings[] =
                 (new AvailabilityUnitPricing)
                     ->setUnitId("{$this->product->getId()}|{$rateId}")
-                    ->setOriginalPrice($rate->rate_price * 100)
-                    ->setRetailPrice($rate->rate_price * 100)
-                    ->setNetPrice((!empty($rate->net_price) ? $rate->net_price : $rate->rate_price) * 100)
+                    ->setOriginalPrice((int) round($rate->rate_price * 100))
+                    ->setRetailPrice((int) round($rate->rate_price * 100))
+                    ->setNetPrice((int) round((!empty($rate->net_price) ? $rate->net_price : $rate->rate_price) * 100))
                     ->setCurrency($this->currency);
         }
 

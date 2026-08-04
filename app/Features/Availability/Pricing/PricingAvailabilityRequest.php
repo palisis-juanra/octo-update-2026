@@ -47,6 +47,11 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         return $this;
     }
 
+    protected function promotionEnrichmentEnabled(): bool
+    {
+        return false;
+    }
+
     public function getAvailabilities(TourCMSService $tourCMSService): array
     {
         $availabilities = parent::getAvailabilities($tourCMSService);
