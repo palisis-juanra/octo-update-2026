@@ -145,11 +145,11 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
         $this->assertSame($r1->getNetPrice(), $pricing->getNet());
     }
 
-    public function test_promotionEnrichmentEnabled_plainAvailabilityRequest_isEnabled(): void
+    public function test_isPromotionEnrichmentEnabled_plainAvailabilityRequest_isEnabled(): void
     {
         $availabilityRequest = $this->makeAvailabilityRequest();
 
-        $method = $this->getProtectedMethod($availabilityRequest, 'promotionEnrichmentEnabled');
+        $method = $this->getProtectedMethod($availabilityRequest, 'isPromotionEnrichmentEnabled');
 
         $this->assertTrue($method->invoke($availabilityRequest));
     }
@@ -159,7 +159,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
      * pricing block with check_tour_availability values, so the inherited
      * enrichment must stay off to avoid discounting unitPricing twice.
      */
-    public function test_promotionEnrichmentEnabled_pricingAvailabilityRequest_isDisabled(): void
+    public function test_isPromotionEnrichmentEnabled_pricingAvailabilityRequest_isDisabled(): void
     {
         $pricingAvailabilityRequest = new PricingAvailabilityRequest(
             $this->makePromotionServiceMock(),
@@ -170,13 +170,13 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
             'EUR'
         );
 
-        $method = $this->getProtectedMethod($pricingAvailabilityRequest, 'promotionEnrichmentEnabled');
+        $method = $this->getProtectedMethod($pricingAvailabilityRequest, 'isPromotionEnrichmentEnabled');
 
         $this->assertFalse($method->invoke($pricingAvailabilityRequest));
     }
 
     /**
-     * Guards the reason promotionEnrichmentEnabled() exists: applyPromotionDiscount
+     * Guards the reason isPromotionEnrichmentEnabled() exists: applyPromotionDiscount
      * mutates unitPricing in place, so a second enrichment pass compounds the
      * discount (3280 -> 2952 -> 2657) rather than being idempotent.
      */

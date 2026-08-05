@@ -47,7 +47,18 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         return $this;
     }
 
-    protected function promotionEnrichmentEnabled(): bool
+    /**
+     * Disabled for pricing availability requests.
+     *
+     * This request replaces the pricing built from the departures with the unit
+     * pricing returned by the check availability components (see
+     * getAvailabilities()), and only then enriches the availabilities with
+     * promotions. If the parent were allowed to enrich during building as well,
+     * the promotion discount would be applied twice.
+     *
+     * @return bool Always false; enrichment happens after pricing is replaced.
+     */
+    protected function isPromotionEnrichmentEnabled(): bool
     {
         return false;
     }

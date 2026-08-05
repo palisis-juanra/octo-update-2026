@@ -251,7 +251,7 @@ class AvailabilityRequest extends BaseAvailabilityRequest
                 $availability->setUnitPricing($unitPricing);
             }
 
-            if ($this->promotionEnrichmentEnabled() && OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
+            if ($this->isPromotionEnrichmentEnabled() && OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
                 $this->availabilityPromotionService->enrichAvailabilityWithPromotions($this->product, $availability, $this->promotion);
             }
 
@@ -269,11 +269,20 @@ class AvailabilityRequest extends BaseAvailabilityRequest
 
     /**
      * Whether promotion enrichment should run as part of building availabilities
-     * from departures. Subclasses that apply promotion enrichment separately
-     * (after replacing pricing from another source) should override this to
-     * avoid double-applying promotion discounts.
+     * from departures.
+     *
+     * Enabled here because a plain availability request builds its pricing once,
+     * straight from the departure data, so enriching it with promotions while the
+     * availability is being built is the only place the discount is applied.
+     *
+     * Subclasses that apply promotion enrichment separately (for example after
+     * replacing the pricing with values from another source) must override this
+     * and return false, otherwise the promotion discount would be applied twice:
+     * once on the departure pricing here and again on the replaced pricing.
+     *
+     * @return bool True to enrich availabilities with promotions during building.
      */
-    protected function promotionEnrichmentEnabled(): bool
+    protected function isPromotionEnrichmentEnabled(): bool
     {
         return true;
     }
