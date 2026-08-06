@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response>
+    <tour>
+        <tour_departure_structure>
+            <type>SUPPLIER_NOTE_PLUS_START_TIME</type>
+            <add_new_auto>1</add_new_auto>
+            <departure_types>
+                <type>
+                    <active>1</active>
+                    <partial>1</partial>
+                    <label>{"en":"","es":""}</label>
+                    <custom_label>English - Group</custom_label>
+                    <fields>
+                        <field>
+                            <name>supplier_note</name>
+                            <value>ESP_</value>
+                        </field>
+                    </fields>
+                    <start_times>
+                        <start_time>13:00</start_time>
+                        <start_time>17:00</start_time>
+                    </start_times>
+                </type>
+                <type>
+                    <active>1</active>
+                    <partial>-1</partial>
+                    <label>{"en":"","es":""}</label>
+                    <fields>
+                        <field>
+                            <name>supplier_note</name>
+                            <value>_ESP</value>
+                        </field>
+                    </fields>
+                    <start_times>
+                        <start_time>13:00</start_time>
+                        <start_time>17:00</start_time>
+                    </start_times>
+                </type>
+            </departure_types>
+        </tour_departure_structure>
+    </tour>
+</response>

@@ -458,6 +458,12 @@ class ProductService
             return self::OPTION_TITLE_DEFAULT;
         }
 
+        // A user-defined custom label (partial mappings) takes precedence over the first-departure note,
+        // so partial-mapping options do not expose a single departure start time in the title.
+        if (!empty($productMapping->getCustomLabel())) {
+            return $productMapping->getCustomLabel();
+        }
+
         if (empty($productMapping->getLabel())) {
             return $tourName;
         }

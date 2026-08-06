@@ -155,4 +155,32 @@ class ProductMappingFactoryTest extends UnitTestCase
         $productMappings = $this->productMappingFactory->create($tourData);
         $this->assertEquals($expectedProductOptions, $productMappings);
     }
+
+    public function test_whenPartialMappingHasCustomLabel_thenProductMappingCarriesIt(): void
+    {
+        $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE_PLUS_START_TIME_CUSTOM_LABEL.xml'));
+        $tourData = $showTourResponseXML->tour;
+
+        $expectedProductOptions = [
+            new ProductMapping(
+                ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
+                '{"en":"","es":""}',
+                'ESP_[*]',
+                ['13:00', '17:00'],
+                'English - Group'
+            ),
+            // Second mapping has no <custom_label> element, so it falls back to an empty custom label.
+            new ProductMapping(
+                ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
+                '{"en":"","es":""}',
+                '[*]_ESP',
+                ['13:00', '17:00']
+            )
+        ];
+
+        $productMappings = $this->productMappingFactory->create($tourData);
+        $this->assertEquals($expectedProductOptions, $productMappings);
+        $this->assertSame('English - Group', $productMappings[0]->getCustomLabel());
+        $this->assertSame('', $productMappings[1]->getCustomLabel());
+    }
 }
