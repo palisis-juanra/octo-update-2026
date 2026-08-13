@@ -685,6 +685,61 @@ class ProductTest extends FeatureTestCase
         ]);
     }
 
+    public function test_whenContentCapabilityIsSet_thenOptionHasTitle(): void
+    {
+        $this->showTourXML->tour->distribution_identifier = 'TE_1_681';
+
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+            ->onlyMethods(['showTour', 'showChannel'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $tourCMSService->method('showTour')->willReturn($this->showTourXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        App::instance(TourCMSService::class, $tourCMSService);
+
+        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
+        App::instance(ProductService::class, $productServiceMock);
+
+        $response = $this->get(
+            "/products/TE_1_681|142",
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_CONTENT
+            ]
+        );
+
+        $response->assertOk();
+        $options = $response->json('options');
+        $this->assertArrayHasKey('title', $options[0]);
+    }
+
+    public function test_whenContentCapabilityIsNotSet_thenOptionHasNoTitle(): void
+    {
+        $this->showTourXML->tour->distribution_identifier = 'TE_1_682';
+
+        $tourCMSService = $this->getMockBuilder(TourCMSService::class)
+            ->onlyMethods(['showTour', 'showChannel'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $tourCMSService->method('showTour')->willReturn($this->showTourXML);
+        $tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
+        App::instance(TourCMSService::class, $tourCMSService);
+
+        $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
+        App::instance(ProductService::class, $productServiceMock);
+
+        $response = $this->get(
+            "/products/TE_1_682|142",
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS
+            ]
+        );
+
+        $response->assertOk();
+        $options = $response->json('options');
+        $this->assertArrayNotHasKey('title', $options[0]);
+    }
+
     protected function getProductServiceMock(array $properties = [])
     {
         $productServiceMock = $this->getMockBuilder(ProductService::class)

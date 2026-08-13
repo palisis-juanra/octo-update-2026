@@ -48,7 +48,7 @@ class OptionTransformer extends BaseTransformer
             'units' => $unitsTransformed
         ];
 
-        if (!empty($option->getContent())) {
+        if (!empty($option->getContent()) && true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
             $optionContent = $this->optionContentTransformer->transform($option->getContent());
             $data = array_merge($data, $optionContent);
         }
