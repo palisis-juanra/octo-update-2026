@@ -8,8 +8,7 @@
                 <type>
                     <active>1</active>
                     <partial>1</partial>
-                    <label>{"en":"","es":""}</label>
-                    <custom_label>English - Group</custom_label>
+                    <label>{"en":"English - Group"}</label>
                     <fields>
                         <field>
                             <name>supplier_note</name>

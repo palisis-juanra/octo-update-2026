@@ -578,34 +578,34 @@ class ProductServiceTest extends UnitTestCase
         $productService->find('TE_1_230|142');
     }
 
-    public function test_getOptionTitle_whenCustomLabelPresent_thenTitleIsCustomLabel(): void
+    public function test_getOptionTitle_whenLabelIsOverriddenWithCustomLabel_thenReturnsIt(): void
     {
         $tourPromotionServiceMock = $this->getMockBuilder(TourPromotionService::class)
             ->disableOriginalConstructor()
             ->getMock();
         $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory, $tourPromotionServiceMock);
 
-        // A partial mapping with a custom label: the title must be the custom label, not the
-        // first-departure note, so a single start time is not exposed to OCTO.
+        // Core overrides the label of a partial mapping with the custom label (as {"en": ...}) when set,
+        // so the option title is that custom label instead of the first-departure note.
         $productMapping = new ProductMapping(
             ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
-            '{"en":"Semi-Private - English - 09:30 AM"}',
+            '{"en":"English - Group"}',
             'ESP_[*]',
-            ['08:00', '09:30'],
-            'English - Group'
+            ['08:00', '09:30']
         );
 
         $this->assertSame('English - Group', $productService->getOptionTitle('Tour Name', $productMapping));
     }
 
-    public function test_getOptionTitle_whenNoCustomLabel_thenTitleFallsBackToFirstDepartureLabel(): void
+    public function test_getOptionTitle_whenLabelIsPerLanguageJson_thenReturnsChannelLanguageValue(): void
     {
         $tourPromotionServiceMock = $this->getMockBuilder(TourPromotionService::class)
             ->disableOriginalConstructor()
             ->getMock();
         $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory, $tourPromotionServiceMock);
 
-        // No custom label: behaviour is unchanged, the per-language label (first-departure note) is used.
+        // Without a custom label the per-language label (first-departure note) is resolved by channel
+        // language (mocked channel language is 'en').
         $productMapping = new ProductMapping(
             ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
             '{"en":"Semi-Private - English - 09:30 AM"}',
@@ -614,6 +614,23 @@ class ProductServiceTest extends UnitTestCase
         );
 
         $this->assertSame('Semi-Private - English - 09:30 AM', $productService->getOptionTitle('Tour Name', $productMapping));
+    }
+
+    public function test_getProductOptions_whenPartialMappingLabelIsCustom_thenOptionTitleUsesIt(): void
+    {
+        // End-to-end for the option-building path used by both product detail and list: a partial mapping
+        // whose label was overridden with the custom label must surface it as the option title.
+        $tourXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE_PLUS_START_TIME_CUSTOM_LABEL.xml'));
+        $tour = $tourXML->tour;
+
+        $tourPromotionServiceMock = $this->getMockBuilder(TourPromotionService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $productService = new ProductService($this->mockTourCMSService(), $this->mockLogger(), new LocaleService, new ProductMappingFactory, $tourPromotionServiceMock);
+
+        $options = $productService->getProductOptions($tour);
+
+        $this->assertSame('English - Group', $options[0]->getContent()->getTitle());
     }
 
     // PROTECTED METHODS

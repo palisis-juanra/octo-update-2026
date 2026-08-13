@@ -156,20 +156,20 @@ class ProductMappingFactoryTest extends UnitTestCase
         $this->assertEquals($expectedProductOptions, $productMappings);
     }
 
-    public function test_whenPartialMappingHasCustomLabel_thenProductMappingCarriesIt(): void
+    public function test_whenPartialMappingLabelIsOverriddenWithCustomLabel_thenProductMappingCarriesIt(): void
     {
+        // Core overrides the label with the custom label (as {"en": ...}) when set; the factory reads
+        // it as the mapping label like any other, with no separate custom_label field.
         $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE_PLUS_START_TIME_CUSTOM_LABEL.xml'));
         $tourData = $showTourResponseXML->tour;
 
         $expectedProductOptions = [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
-                '{"en":"","es":""}',
+                '{"en":"English - Group"}',
                 'ESP_[*]',
-                ['13:00', '17:00'],
-                'English - Group'
+                ['13:00', '17:00']
             ),
-            // Second mapping has no <custom_label> element, so it falls back to an empty custom label.
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE_PLUS_START_TIME,
                 '{"en":"","es":""}',
@@ -180,7 +180,5 @@ class ProductMappingFactoryTest extends UnitTestCase
 
         $productMappings = $this->productMappingFactory->create($tourData);
         $this->assertEquals($expectedProductOptions, $productMappings);
-        $this->assertSame('English - Group', $productMappings[0]->getCustomLabel());
-        $this->assertSame('', $productMappings[1]->getCustomLabel());
     }
 }

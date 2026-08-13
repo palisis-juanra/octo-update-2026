@@ -104,7 +104,6 @@ class ProductMappingFactory
 
 
             $label = !empty($mapping->label) ? (string) $mapping->label : '';
-            $customLabel = !empty($mapping->custom_label) ? (string) $mapping->custom_label : '';
 
             $startTimes = [];
             $startTimesXML = XMLService::getArrayFromXmlNode($mapping->start_times, 'start_time');
@@ -112,7 +111,7 @@ class ProductMappingFactory
                 $startTimes[] = (string) $startTime;
             }
 
-            $productMappings[] = new ProductMapping($this->structureType, $label, $supplierNote, $startTimes, $customLabel);
+            $productMappings[] = new ProductMapping($this->structureType, $label, $supplierNote, $startTimes);
             
         }
 
