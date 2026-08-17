@@ -91,17 +91,17 @@ class BookingUpdateService
      */
     protected function createPatchedBooking(array $requestParams, string $originalUuid, Booking $oldBookingByUUID, Booking $oldBooking, array $originalBookingJson): array
     {
-        $optionId = $requestParams[self::FIELD_OPTION_ID] ?? $originalBookingJson[self::FIELD_OPTION_ID];
+        $optionId = $requestParams[self::FIELD_OPTION_ID] ?? $originalBookingJson[self::FIELD_OPTION_ID] ?? $oldBookingByUUID->option_id;
         $this->optionService->validateOptionId($optionId);
 
-        $productId = $originalBookingJson['productId'];
+        $productId = $originalBookingJson['productId'] ?? $oldBookingByUUID->product_id;
         $product = $this->productService->find($productId);
         $option = $product->getOptionById($optionId);
 
-        $availabilityId = $requestParams[self::FIELD_AVAILABILITY_ID] ?? $originalBookingJson[self::FIELD_AVAILABILITY_ID];
+        $availabilityId = $requestParams[self::FIELD_AVAILABILITY_ID] ?? $originalBookingJson[self::FIELD_AVAILABILITY_ID] ?? $oldBookingByUUID->availability_id;
         $availability = $this->availabilityService->getAvailabilityObjectFromAvailabilityId($availabilityId);
 
-        $unitItems = $requestParams[self::FIELD_UNIT_ITEMS] ?? $originalBookingJson[self::FIELD_UNIT_ITEMS];
+        $unitItems = $requestParams[self::FIELD_UNIT_ITEMS] ?? $originalBookingJson[self::FIELD_UNIT_ITEMS] ?? json_decode($oldBookingByUUID->unit_items, true) ?? [];
         $this->unitService->validateUnitItems($unitItems, $productId);
 
         $notes = $requestParams[self::FIELD_NOTES] ?? $originalBookingJson[self::FIELD_NOTES] ?? null;
@@ -232,34 +232,66 @@ class BookingUpdateService
     protected function cancelOldBookingOrNotify(Booking $oldBooking, Booking $oldBookingByUUID, Booking $newBooking): void
     {
         try {
-            if ($this->bookingCancellationService->shouldWeCancelBooking($oldBooking)) {
-                $cancelled = $this->bookingCancellationService->cancelBooking($oldBooking);
-            } else {
-                $cancelled = $this->bookingCancellationService->deleteBooking($oldBooking);
-            }
-
-            if (true !== $cancelled) {
-                throw new InvalidBookingUUIDException($oldBooking->getUuid());
-            }
-
-            $this->bookingCancellationService->updateBookingStatusToCancelled($oldBooking);
-            $oldBooking->setCancellation(new BookingCancellation("Replaced by new booking, TourCMS ID: {$newBooking->getBookingId()}"));
-
-            $oldBookingTransformed = $this->transformer->transform($oldBooking);
-            $oldBookingByUUID->update(['complete_booking_json' => json_encode($oldBookingTransformed)]);
-
-            $this->createBookingReplacedAuditNote($oldBooking, $newBooking);
+            $this->cancelOldBooking($oldBooking, $oldBookingByUUID, $newBooking);
         } catch (Throwable $exception) {
+            $this->notifyCancellationFailure($oldBooking, $newBooking, $exception);
+        }
+    }
+
+    /**
+     * Cancel (or delete) the old booking and record the replacement on it.
+     * Throws if the cancellation itself fails, letting the caller decide how to react.
+     */
+    protected function cancelOldBooking(Booking $oldBooking, Booking $oldBookingByUUID, Booking $newBooking): void
+    {
+        if ($this->bookingCancellationService->shouldWeCancelBooking($oldBooking)) {
+            $cancelled = $this->bookingCancellationService->cancelBooking($oldBooking);
+        } else {
+            $cancelled = $this->bookingCancellationService->deleteBooking($oldBooking);
+        }
+
+        if (true !== $cancelled) {
+            throw new InvalidBookingUUIDException($oldBooking->getUuid());
+        }
+
+        $this->bookingCancellationService->updateBookingStatusToCancelled($oldBooking);
+        $oldBooking->setCancellation(new BookingCancellation("Replaced by new booking, TourCMS ID: {$newBooking->getBookingId()}"));
+
+        $oldBookingTransformed = $this->transformer->transform($oldBooking);
+        $oldBookingByUUID->update(['complete_booking_json' => json_encode($oldBookingTransformed)]);
+
+        $this->createBookingReplacedAuditNote($oldBooking, $newBooking);
+    }
+
+    /**
+     * Log and email internal recipients when cancelling the old booking failed,
+     * so the update itself doesn't fail on top of an already-failed cancellation.
+     */
+    protected function notifyCancellationFailure(Booking $oldBooking, Booking $newBooking, Throwable $exception): void
+    {
+        $this->logger->error([
+            "message" => "Failed to cancel old booking after booking update, sending notification email",
+            "oldBookingId" => $oldBooking->getId(),
+            "newBookingId" => $newBooking->getId(),
+            "exception" => $exception->getMessage(),
+        ]);
+
+        $internalEmails = array_filter(
+            (array) json_decode(config('services.tcms.internal_emails'), true),
+            fn ($email) => is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL)
+        );
+
+        if (empty($internalEmails)) {
             $this->logger->error([
-                "message" => "Failed to cancel old booking after booking update, sending notification email",
+                "message" => "No valid internal emails configured, skipping cancellation failure notification",
                 "oldBookingId" => $oldBooking->getId(),
                 "newBookingId" => $newBooking->getId(),
-                "exception" => $exception->getMessage(),
             ]);
 
-            $internalEmails = json_decode(config('services.tcms.internal_emails'), true);
-            Mail::to($internalEmails)
-                ->send(new BookingCancellationFailedMail($oldBooking, $newBooking, $exception->getMessage()));
+            return;
         }
+
+        Mail::to($internalEmails)
+            ->send(new BookingCancellationFailedMail($oldBooking, $newBooking, $exception->getMessage()));
     }
 }
