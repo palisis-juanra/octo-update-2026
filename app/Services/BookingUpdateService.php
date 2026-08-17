@@ -89,7 +89,13 @@ class BookingUpdateService
     /**
      * @return array{0: Booking, 1: Booking} [persisted Eloquent row, rich domain object for the response]
      */
-    protected function createPatchedBooking(array $requestParams, string $originalUuid, Booking $oldBookingByUUID, Booking $oldBooking, array $originalBookingJson): array
+    protected function createPatchedBooking(
+        array $requestParams,
+        string $originalUuid,
+        Booking $oldBookingByUUID,
+        Booking $oldBooking,
+        array $originalBookingJson
+    ): array
     {
         $optionId = $requestParams[self::FIELD_OPTION_ID] ?? $originalBookingJson[self::FIELD_OPTION_ID] ?? $oldBookingByUUID->option_id;
         $this->optionService->validateOptionId($optionId);
