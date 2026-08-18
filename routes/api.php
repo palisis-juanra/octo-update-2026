@@ -5,6 +5,7 @@ use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\BookingCancellationController;
 use App\Http\Controllers\BookingReservationController;
 use App\Http\Controllers\BookingConfirmationController;
+use App\Http\Controllers\BookingUpdateController;
 use App\Http\Controllers\BookingGetController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Middleware\AgentWithFullBookingPermissions;
@@ -71,15 +72,16 @@ Route::middleware([OctoAuthentication::class, CapabilitiesHeader::class])->group
         Route::post('/bookings/{uuid}/cancel', [BookingCancellationController::class, 'cancel'])
             ->name(OctoRequest::ENDPOINT_BOOKINGS_CANCELLATION)
             ->middleware([APIJsonLogger::class]);
+
+        Route::patch('/bookings/{uuid}', [BookingUpdateController::class, 'update'])
+            ->name(OctoRequest::ENDPOINT_BOOKINGS_UPDATE)
+            ->middleware([APIJsonLogger::class]);
     });
 
     // Endpoints not implemented
 
     Route::post('/bookings/{uuid}/extend', function () { throw new NotFoundHttpException; })
         ->name(OctoRequest::ENDPOINT_BOOKINGS_EXTEND);
-
-    Route::patch('/bookings/{uuid}', function () { throw new NotFoundHttpException; })
-        ->name(OctoRequest::ENDPOINT_BOOKINGS_UPDATE);
 
     Route::get('/bookings', function () { throw new NotFoundHttpException; })
         ->name(OctoRequest::ENDPOINT_BOOKINGS_GET);

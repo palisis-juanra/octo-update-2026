@@ -15,6 +15,7 @@ class OctoRequest
     public const string CONTACT = 'contact';
     public const string RESELLER_REFERENCE = 'resellerReference';
     public const string RATE_ID = 'rateId';
+    public const string NOTES = 'notes';
 
     // Endpoints
     public const string ENDPOINT_SUPPLIER_GET = 'supplier-get';
@@ -29,7 +30,7 @@ class OctoRequest
     public const string ENDPOINT_BOOKINGS_CANCELLATION = 'Cancel booking';
     public const string ENDPOINT_BOOKINGS_EXTEND = 'bookings-extend';
     public const string ENDPOINT_BOOKINGS_GET = 'bookings-get';
-    public const string ENDPOINT_BOOKINGS_UPDATE = 'bookings-get';
+    public const string ENDPOINT_BOOKINGS_UPDATE = 'bookings-update';
 
     // Capabilities
     public const string CAPABILITIES_HEADER = 'Octo-Capabilities';
