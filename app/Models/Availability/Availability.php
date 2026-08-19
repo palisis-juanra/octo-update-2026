@@ -3,63 +3,19 @@
 namespace App\Models\Availability;
 
 use App\Models\Pricing;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Guarded;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[Table('availability', 'id', 'string', false)]
+#[Fillable('departure_id', 'local_date_time_start', 'local_date_time_end', 'all_day', 'available', 'status', 'vacancies', 'capacity', 'max_units', 'utc_cutoff_at', 'opening_hours_from', 'opening_hours_to')]
+#[Guarded('currency', 'pricing')]
 class Availability extends Model
 {
     use HasFactory, HasVersion4Uuids;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'availability';
-
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
-     * The data type of the primary key ID.
-     *
-     * @var string
-     */
-    protected $keyType = 'string';
-
-    /**
-     * Indicates if the model's ID is auto-incrementing.
-     *
-     * @var bool
-     */
-    public $incrementing = false;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'departure_id',
-        'local_date_time_start',
-        'local_date_time_end',
-        'all_day',
-        'available',
-        'status',
-        'vacancies',
-        'capacity',
-        'max_units',
-        'utc_cutoff_at',
-        'opening_hours_from',
-        'opening_hours_to',
-    ];
-
-    protected $guarded = ['currency', 'pricing'];
 
     public static $snakeAttributes = true;
 
@@ -68,8 +24,6 @@ class Availability extends Model
     public string $date;
 
     public ?Pricing $pricing = null;
-
-    public $timestamps = true;
 
     protected bool $contentEnabled = false;
 

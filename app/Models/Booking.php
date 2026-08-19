@@ -7,10 +7,14 @@ use App\Services\DateTimeService;
 use App\Services\XMLService;
 use DateTime;
 use DateTimeZone;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use SimpleXMLElement;
 
+#[Table('bookings', 'uuid', 'string', false)]
+#[Fillable('booking_id', 'account_id', 'channel_id', 'availability_id', 'product_id', 'option_id', 'unit_items', 'complete_booking_json', 'status')]
 class Booking extends Model
 {
     use HasFactory;
@@ -80,51 +84,6 @@ class Booking extends Model
     protected SimpleXMLElement $bookingData;
 
     protected array $completeBookingJson;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'bookings';
-
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'uuid';
-
-    /**
-     * The data type of the primary key ID.
-     *
-     * @var string
-     */
-    protected $keyType = 'string';
-
-    /**
-     * Indicates if the model's ID is auto-incrementing.
-     *
-     * @var bool
-     */
-    public $incrementing = false;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'booking_id',
-        'account_id',
-        'channel_id',
-        'availability_id',
-        'product_id',
-        'option_id',
-        'unit_items',
-        'complete_booking_json',
-        'status',
-    ];
 
     public static $snakeAttributes = true;
 
