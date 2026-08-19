@@ -3,13 +3,13 @@
 namespace App\Models\Availability;
 
 use App\Models\Pricing;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Availability extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasVersion4Uuids;
 
     /**
      * The table associated with the model.
