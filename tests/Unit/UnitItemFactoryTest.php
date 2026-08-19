@@ -161,7 +161,7 @@ class UnitItemFactoryTest extends UnitTestCase
         $this->assertEquals($unitItemRate2Person1->getTicket()->getDeliveryOptions()['deliveryValue'], (string) $this->bookingWithOneUrlPerComponentXML->barcode_data, 'deliveryValue should be default barcode');
     }
 
-    public function test_create_when_component_have_code128_ticket_then_we_get_ticket_value_and_format()
+    public function test_create_when_component_have_code128_ticket_then_we_get_ticket_value_and_format(): void
     {
         $unitItemFactory = new UnitItemFactory;
         $unitItem1 = $unitItemFactory->create(

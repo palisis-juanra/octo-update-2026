@@ -22,7 +22,7 @@ class VoucherTest extends UnitTestCase
         $this->showBookingXML = simplexml_load_file('./tests/TourCMSResponses/showBooking.xml')->booking;
     }
 
-    public function test_when_barcode_priority_is_agent_ref_and_its_present_then_we_get_agent_ref()
+    public function test_when_barcode_priority_is_agent_ref_and_its_present_then_we_get_agent_ref(): void
     {
         $this->showBookingXML->barcode_priority = Voucher::BARCODE_PRIORITY_AGENT_REF;
         $this->showBookingXML->agent_ref = self::FAKE_AGENT_REF;

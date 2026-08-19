@@ -179,7 +179,7 @@ class AvailabilityTest extends FeatureTestCase
         $this->assertEquals($responseData['errorMessage'], AvailabilityService::ERROR_MESSAGE_AVAILABILITY_NEED_DATE);
     }
 
-    public function test_when_we_send_correct_data_then_we_call_to_tourcms_api()
+    public function test_when_we_send_correct_data_then_we_call_to_tourcms_api(): void
     {
 
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
@@ -205,7 +205,7 @@ class AvailabilityTest extends FeatureTestCase
         $this->assertNotEmpty($responseData);
     }
 
-    public function test_when_no_pricing_and_multi_date_then_show_tour_departure_is_called_from1_to5_times()
+    public function test_when_no_pricing_and_multi_date_then_show_tour_departure_is_called_from1_to5_times(): void
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
@@ -232,7 +232,7 @@ class AvailabilityTest extends FeatureTestCase
         $this->assertNotEmpty($responseData);
     }
 
-    public function test_when_no_pricing_and_single_date_then_show_tour_departure_is_called_from1_to5_times()
+    public function test_when_no_pricing_and_single_date_then_show_tour_departure_is_called_from1_to5_times(): void
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);
@@ -257,7 +257,7 @@ class AvailabilityTest extends FeatureTestCase
         $this->assertNotEmpty($responseData);
     }
 
-    public function test_when_no_pricing_and_too_many_departures_then_response_says_unprocessable_entity()
+    public function test_when_no_pricing_and_too_many_departures_then_response_says_unprocessable_entity(): void
     {
         $tourCMSMock = $this->getMockBuilder(TourCMS::class)
             ->disableOriginalConstructor()

@@ -9,7 +9,7 @@ use Tests\UnitTestCase;
 
 class BookingReservationServiceTest extends UnitTestCase
 {
-    public function test_we_generate_correct_rates_query_string_from_unit_items()
+    public function test_we_generate_correct_rates_query_string_from_unit_items(): void
     {
         $mock = $this->getMockBuilder(BookingReservationService::class)
             ->disableOriginalConstructor()
@@ -62,7 +62,7 @@ class BookingReservationServiceTest extends UnitTestCase
         $this->assertEquals($multipleMultipleExpected, $multipleMultiplRatesQueryString);
     }
 
-    public function test_we_generate_correct_check_avail_query_string()
+    public function test_we_generate_correct_check_avail_query_string(): void
     {
         $mock = $this->getMockBuilder(BookingReservationService::class)
             ->disableOriginalConstructor()
@@ -88,7 +88,7 @@ class BookingReservationServiceTest extends UnitTestCase
         $this->assertEquals($expectedQueryString, $queryString);
     }
 
-    public function test_we_find_component_by_departure_id()
+    public function test_we_find_component_by_departure_id(): void
     {
         $component1 = new SimpleXMLElement('<component />');
         $component1->addChild('date_id', 1);
@@ -108,7 +108,7 @@ class BookingReservationServiceTest extends UnitTestCase
         $this->assertEquals($component1, $foundComponent);
     }
 
-    public function test_when_we_cant_find_component_by_departure_id_then_we_throw_an_exception()
+    public function test_when_we_cant_find_component_by_departure_id_then_we_throw_an_exception(): void
     {
         $component1 = new SimpleXMLElement('<component />');
         $component1->addChild('date_id', 1);
@@ -127,7 +127,7 @@ class BookingReservationServiceTest extends UnitTestCase
         $mock->getComponentByDepartureId($components, 3);
     }
 
-    public function test_when_we_generate_booking_data_without_uuid_then_we_get_correct_xml()
+    public function test_when_we_generate_booking_data_without_uuid_then_we_get_correct_xml(): void
     {
         $mock = $this->getMockBuilder(BookingReservationService::class)
             ->disableOriginalConstructor()
@@ -152,7 +152,7 @@ class BookingReservationServiceTest extends UnitTestCase
         $this->assertEquals($totalCustomers, (int) $startNewBookingXML->total_customers);
     }
 
-    public function test_when_we_generate_booking_data_with_uuid_then_we_get_correct_xml()
+    public function test_when_we_generate_booking_data_with_uuid_then_we_get_correct_xml(): void
     {
         $mock = $this->getMockBuilder(BookingReservationService::class)
             ->disableOriginalConstructor()

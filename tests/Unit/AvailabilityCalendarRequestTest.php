@@ -29,7 +29,7 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->datesAndDealsNoDatesXML = simplexml_load_string($this->datesAndDealsNoDatesString);
     }
 
-    public function test_get_availabilities_when_call_with_valid_data_then_we_get_valid_availabilities_array()
+    public function test_get_availabilities_when_call_with_valid_data_then_we_get_valid_availabilities_array(): void
     {
         // Given
         $datesAndDealsData = [];
@@ -53,7 +53,7 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->assertCount(self::DATES_AND_DEALS_XML_COUNT, $availabilities);
     }
 
-    public function test_fetch_dates_and_deals_from_ap_i_when_call_with_valid_data_then_we_get_valid_dates_and_deals_array()
+    public function test_fetch_dates_and_deals_from_ap_i_when_call_with_valid_data_then_we_get_valid_dates_and_deals_array(): void
     {
         // Given
         $availabilityCalendarRequestMock = $this->getMockBuilder(AvailabilityCalendarRequest::class)
@@ -84,7 +84,7 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->assertCount(self::DATES_AND_DEALS_XML_COUNT, $datesAndDeals);
     }
 
-    public function test_fetch_dates_and_deals_from_ap_i_when_api_returns_no_dates_then_we_get_empty_array()
+    public function test_fetch_dates_and_deals_from_ap_i_when_api_returns_no_dates_then_we_get_empty_array(): void
     {
         // Given
         $availabilityCalendarRequestMock = $this->getMockBuilder(AvailabilityCalendarRequest::class)
@@ -111,7 +111,7 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->assertEmpty($datesAndDeals);
     }
 
-    public function test_get_availabilities_from_dates_and_deals_when_call_with_valid_data_then_we_get_valid_availabilities_array()
+    public function test_get_availabilities_from_dates_and_deals_when_call_with_valid_data_then_we_get_valid_availabilities_array(): void
     {
         // Given
         $datesAndDealsData = [];
@@ -134,7 +134,7 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->assertCount(self::DATES_AND_DEALS_XML_COUNT, $availabilities);
     }
 
-    public function test_check_spaces_remaining_when_call_with_exceeding_unit_quantity_then_should_return_false()
+    public function test_check_spaces_remaining_when_call_with_exceeding_unit_quantity_then_should_return_false(): void
     {
         // Given
         $units = [

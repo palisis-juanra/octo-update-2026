@@ -41,7 +41,7 @@ class AvailabilityCalendarServiceTest extends UnitTestCase
         $this->datesAndDealsXML = simplexml_load_string($this->datesAndDealsString);
     }
 
-    public function test_get_calendar_when_valid_request_parameters_then_we_get_calendar_array_with_info()
+    public function test_get_calendar_when_valid_request_parameters_then_we_get_calendar_array_with_info(): void
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
@@ -80,7 +80,7 @@ class AvailabilityCalendarServiceTest extends UnitTestCase
         $this->assertCount(self::DATES_AND_DEALS_XML_COUNT, $calendar);
     }
 
-    public function test_validate_request_params_when_missing_local_date_end_parameter_then_should_throw_availability_request_missing_param_exception()
+    public function test_validate_request_params_when_missing_local_date_end_parameter_then_should_throw_availability_request_missing_param_exception(): void
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
@@ -100,7 +100,7 @@ class AvailabilityCalendarServiceTest extends UnitTestCase
         $availabilityCalendarServiceMock->validateRequestParams($requestParams);
     }
 
-    public function test_validate_request_params_when_local_date_end_earlier_than_local_date_start_then_should_throw_availability_request_invalid_param_exception()
+    public function test_validate_request_params_when_local_date_end_earlier_than_local_date_start_then_should_throw_availability_request_invalid_param_exception(): void
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
@@ -137,7 +137,7 @@ class AvailabilityCalendarServiceTest extends UnitTestCase
         $availabilityCalendarServiceMock->validateRequestParams($requestParams);
     }
 
-    public function test_validate_request_params_when_invalid_date_then_should_throw_availability_request_invalid_param_exception()
+    public function test_validate_request_params_when_invalid_date_then_should_throw_availability_request_invalid_param_exception(): void
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
@@ -174,7 +174,7 @@ class AvailabilityCalendarServiceTest extends UnitTestCase
         $availabilityCalendarServiceMock->validateRequestParams($requestParams);
     }
 
-    public function test_get_availability_request_when_there_is_a_valid_product_then_we_get_valid_availability_request()
+    public function test_get_availability_request_when_there_is_a_valid_product_then_we_get_valid_availability_request(): void
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)
@@ -208,7 +208,7 @@ class AvailabilityCalendarServiceTest extends UnitTestCase
         $this->assertEquals([], $availabilityRequest->getUnits());
     }
 
-    public function test_get_availability_request_when_empty_params_then_we_get_empty_availability_calendar_request()
+    public function test_get_availability_request_when_empty_params_then_we_get_empty_availability_calendar_request(): void
     {
         // Given
         $availabilityCalendarServiceMock = $this->getMockBuilder(AvailabilityCalendarService::class)

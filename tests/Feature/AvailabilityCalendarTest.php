@@ -217,7 +217,7 @@ class AvailabilityCalendarTest extends FeatureTestCase
         $this->assertEquals(AvailabilityCalendarService::ERROR_MESSAGE_LOCAL_DATE_END_INVALID, $response['errorMessage']);
     }
 
-    public function test_when_we_send_correct_data_then_we_get_valid_availability_calendar_response()
+    public function test_when_we_send_correct_data_then_we_get_valid_availability_calendar_response(): void
     {
 
         $response = $this->post(

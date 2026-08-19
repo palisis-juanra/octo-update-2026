@@ -24,7 +24,7 @@ class AvailabilityServiceTest extends UnitTestCase
 
     }
 
-    public function test_validate_availability_ids_when_availability_id_does_not_match_reg_ex_then_throws_invalid_availability_id_exception()
+    public function test_validate_availability_ids_when_availability_id_does_not_match_reg_ex_then_throws_invalid_availability_id_exception(): void
     {
         $availabilityService = $this->getMockBuilder(AvailabilityService::class)
             ->onlyMethods([])
@@ -42,7 +42,7 @@ class AvailabilityServiceTest extends UnitTestCase
         $result = $validateAvailabilityIdsFunction->invokeArgs($availabilityService, [$AvailabilityIds]);
     }
 
-    public function test_generate_availability_object_from_component_returns_correct_dates()
+    public function test_generate_availability_object_from_component_returns_correct_dates(): void
     {
         $availabilityService = $this->getMockBuilder(AvailabilityService::class)
             ->onlyMethods([])

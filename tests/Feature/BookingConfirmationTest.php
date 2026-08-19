@@ -109,7 +109,7 @@ class BookingConfirmationTest extends FeatureTestCase
         ]);
     }
 
-    public function test_when_booking_has_tickets_then_we_get_it_on_response()
+    public function test_when_booking_has_tickets_then_we_get_it_on_response(): void
     {
         $this->mockServices('tests/TourCMSResponses/showBookingWithTickets.xml');
         $response = $this->post('/bookings/'.self::VALID_BOOKING_UUID.'/confirm', [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);

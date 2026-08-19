@@ -49,7 +49,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->factory = new AvailabilityRequestFactory($this->productServiceMock, $this->tourPromotionServiceMock, $this->availabilityPromotionServiceMock);
     }
 
-    public function test_when_request_has_only_one_day_without_pricing_header_then_availability_request_is_created()
+    public function test_when_request_has_only_one_day_without_pricing_header_then_availability_request_is_created(): void
     {
         $requestParams = [
             'productId' => 'TE_1_67|142',
@@ -66,7 +66,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
 
     }
 
-    public function test_when_request_has_a_period_of_time_without_pricing_header_then_availability_then_availability_request_is_created()
+    public function test_when_request_has_a_period_of_time_without_pricing_header_then_availability_then_availability_request_is_created(): void
     {
         $requestParams = [
             'productId' => 'TE_1_67|142',
@@ -83,7 +83,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->assertEquals($requestParams['localDateEnd'], $availabilityRequest->getLocalDateEnd());
     }
 
-    public function test_when_request_has_a_only_one_day_with_pricing_header_then_pricing_availability_request_is_created()
+    public function test_when_request_has_a_only_one_day_with_pricing_header_then_pricing_availability_request_is_created(): void
     {
         OctoRequestFacade::shouldReceive('isCapabilityActive')
             ->andReturn(true);
@@ -101,7 +101,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->assertEquals($requestParams['localDate'], $availabilityRequest->getLocalDateStart());
     }
 
-    public function test_when_request_has_multiple_availability_ids_then_local_date_start_and_local_date_end_match_min_and_max_date()
+    public function test_when_request_has_multiple_availability_ids_then_local_date_start_and_local_date_end_match_min_and_max_date(): void
     {
         $requestParams = [
             'productId' => 'TE_1_67|142',
@@ -124,7 +124,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->assertEquals(max($availabilityIdsDates), $availabilityRequest->getLocalDateEnd());
     }
 
-    public function test_when_request_has_only_one_availability_id_then_local_date_start_match_availability_id_date()
+    public function test_when_request_has_only_one_availability_id_then_local_date_start_match_availability_id_date(): void
     {
         $requestParams = [
             'productId' => 'TE_1_67|142',
@@ -141,7 +141,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->assertEquals($availabilityIdDate, $availabilityRequest->getLocalDateStart());
     }
 
-    public function test_when_request_has_only_one_availability_id_with_pricing_header_then_pricing_availability_request_is_created()
+    public function test_when_request_has_only_one_availability_id_with_pricing_header_then_pricing_availability_request_is_created(): void
     {
         $this->withHeaders([
             OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING,
@@ -167,7 +167,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->assertEquals($availabilityIdDate, $availabilityRequest->getLocalDateStart());
     }
 
-    public function test_when_request_has_only_one_availability_id_without_pricing_header_then_single_day_availability_request_is_created()
+    public function test_when_request_has_only_one_availability_id_without_pricing_header_then_single_day_availability_request_is_created(): void
     {
         $requestParams = [
             'productId' => 'TE_1_67|142',
