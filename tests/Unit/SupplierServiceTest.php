@@ -22,7 +22,7 @@ class SupplierServiceTest extends UnitTestCase
         $this->showChannelXML = simplexml_load_string($this->showChannelString);
     }
 
-    public function test_when_call_get_supplier_data_with_no_capabilities_then_we_have_supplier_response_json()
+    public function test_when_call_get_supplier_data_with_no_capabilities_then_we_have_supplier_response_json(): void
     {
         // Given
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
@@ -48,7 +48,7 @@ class SupplierServiceTest extends UnitTestCase
         $this->assertNotEmpty($supplierData);
     }
 
-    public function test_when_call_get_supplier_data_with_capabilities_then_we_get_supplier_response_with_content_capability_info()
+    public function test_when_call_get_supplier_data_with_capabilities_then_we_get_supplier_response_with_content_capability_info(): void
     {
         // Given
 
@@ -97,7 +97,7 @@ class SupplierServiceTest extends UnitTestCase
         $this->assertNull($media['copyright']);
     }
 
-    public function test_when_call_get_supplier_data_then_get_right_complete_address()
+    public function test_when_call_get_supplier_data_then_get_right_complete_address(): void
     {
         // Given
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)

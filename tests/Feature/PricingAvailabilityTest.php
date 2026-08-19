@@ -76,7 +76,7 @@ class PricingAvailabilityTest extends FeatureTestCase
         $this->checkAvailXML = simplexml_load_file('tests/TourCMSResponses/checkAvailability.xml');
     }
 
-    public function test_when_pricing_is_allowed_and_is_multi_date_then_show_tour_departure_is_called_from1_to5_times()
+    public function test_when_pricing_is_allowed_and_is_multi_date_then_show_tour_departure_is_called_from1_to5_times(): void
     {
         $tourCMSServiceMock = Mockery::mock(TourCMSService::class)->makePartial();
         $tourCMSServiceMock->shouldReceive('showChannel')->zeroOrMoreTimes()->andReturn($this->showChannelXML);

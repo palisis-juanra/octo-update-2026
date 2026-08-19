@@ -52,7 +52,7 @@ class ProductServiceTest extends UnitTestCase
             ->getMock();
     }
 
-    public function test_when_call_find_then_we_get_valid_structure()
+    public function test_when_call_find_then_we_get_valid_structure(): void
     {
         // Given
         $productServiceMock = $this->getMockBuilder(ProductService::class)
@@ -75,7 +75,7 @@ class ProductServiceTest extends UnitTestCase
         $this->assertInstanceOf(Product::class, $product);
     }
 
-    public function test_when_call_find_with_multiple_invalid_fields_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_with_multiple_invalid_fields_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $productServiceMock = $this->getMockBuilder(ProductService::class)
@@ -96,7 +96,7 @@ class ProductServiceTest extends UnitTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_without_time_zone_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_without_time_zone_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $apiResponseXML = $this->showTourXML;
@@ -123,7 +123,7 @@ class ProductServiceTest extends UnitTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_and_transform_without_delivery_formats_then_should_assume_qrcode()
+    public function test_when_call_find_and_transform_without_delivery_formats_then_should_assume_qrcode(): void
     {
         // Given
         $apiResponseXML = $this->showTourXML;
@@ -148,7 +148,7 @@ class ProductServiceTest extends UnitTestCase
         $this->assertEquals([$productServiceMock::DELIVERY_FORMAT_QRCODE], $product->getDeliveryFormats());
     }
 
-    public function test_when_call_find_and_transform_with_invalid_delivery_format_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_and_transform_with_invalid_delivery_format_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $invalidDeliveryFormat = 'XML';
@@ -175,7 +175,7 @@ class ProductServiceTest extends UnitTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_and_transform_without_delivery_methods_then_should_assume_voucher()
+    public function test_when_call_find_and_transform_without_delivery_methods_then_should_assume_voucher(): void
     {
         // Given
         $apiResponseXML = $this->showTourXML;
@@ -200,7 +200,7 @@ class ProductServiceTest extends UnitTestCase
         $this->assertEquals([$productServiceMock::DELIVERY_METHOD_VOUCHER], $product->getDeliveryMethods());
     }
 
-    public function test_when_call_find_with_invalid_delivery_method_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_with_invalid_delivery_method_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $invalidDeliveryMethod = 'TICKETS';
@@ -227,7 +227,7 @@ class ProductServiceTest extends UnitTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_without_redemption_method_then_should_assume_digital()
+    public function test_when_call_find_without_redemption_method_then_should_assume_digital(): void
     {
         // Given
         $apiResponseXML = $this->showTourXML;
@@ -252,7 +252,7 @@ class ProductServiceTest extends UnitTestCase
         $this->assertEquals($productServiceMock::REDEMPTION_METHOD_DIGITAL, $product->getRedemptionMethod());
     }
 
-    public function test_when_call_find_with_invalid_redemption_method_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_with_invalid_redemption_method_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $invalidRedemptionMethod = 'ANALOGIC';
@@ -278,7 +278,7 @@ class ProductServiceTest extends UnitTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_without_mapping_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_without_mapping_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $apiResponseXML = $this->showTourXML;
@@ -303,7 +303,7 @@ class ProductServiceTest extends UnitTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_with_unset_mapping_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_with_unset_mapping_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $apiResponseXML = $this->showTourXML;
@@ -329,7 +329,7 @@ class ProductServiceTest extends UnitTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_validate_product_id_with_invalid_product_id_then_validate_product_id_should_return_false()
+    public function test_when_call_validate_product_id_with_invalid_product_id_then_validate_product_id_should_return_false(): void
     {
         $authChannel = '143';
         $invalidProductIdList = [
@@ -349,7 +349,7 @@ class ProductServiceTest extends UnitTestCase
         }
     }
 
-    public function test_when_call_get_product_list_then_we_get_valid_structure()
+    public function test_when_call_get_product_list_then_we_get_valid_structure(): void
     {
         // Given
         $tourListData = [];
@@ -378,7 +378,7 @@ class ProductServiceTest extends UnitTestCase
         $this->assertNotEmpty($productList);
     }
 
-    public function test_when_call_get_product_list_with_invalid_tour_then_get_product_list_should_skip_tour()
+    public function test_when_call_get_product_list_with_invalid_tour_then_get_product_list_should_skip_tour(): void
     {
         // Given
 

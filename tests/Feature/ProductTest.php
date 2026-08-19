@@ -71,7 +71,7 @@ class ProductTest extends FeatureTestCase
             ->getMock();
     }
 
-    public function test_when_call_find_and_transform_then_we_get_valid_structure()
+    public function test_when_call_find_and_transform_then_we_get_valid_structure(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -102,7 +102,7 @@ class ProductTest extends FeatureTestCase
         $this->assertNotEmpty($productData);
     }
 
-    public function test_when_call_find_and_transform_with_multiple_invalid_fields_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_and_transform_with_multiple_invalid_fields_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -129,7 +129,7 @@ class ProductTest extends FeatureTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_and_transform_without_time_zone_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_and_transform_without_time_zone_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -162,7 +162,7 @@ class ProductTest extends FeatureTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_and_transform_without_delivery_formats_then_should_assume_qrcode()
+    public function test_when_call_find_and_transform_without_delivery_formats_then_should_assume_qrcode(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -193,7 +193,7 @@ class ProductTest extends FeatureTestCase
         $this->assertEquals([$productServiceMock::DELIVERY_FORMAT_QRCODE], $product->getDeliveryFormats());
     }
 
-    public function test_when_call_find_and_transform_with_invalid_delivery_format_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_and_transform_with_invalid_delivery_format_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -222,7 +222,7 @@ class ProductTest extends FeatureTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_and_transform_without_delivery_methods_then_should_assume_voucher()
+    public function test_when_call_find_and_transform_without_delivery_methods_then_should_assume_voucher(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -253,7 +253,7 @@ class ProductTest extends FeatureTestCase
         $this->assertEquals([$productServiceMock::DELIVERY_METHOD_VOUCHER], $product->getDeliveryMethods());
     }
 
-    public function test_when_call_find_with_invalid_delivery_method_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_with_invalid_delivery_method_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -286,7 +286,7 @@ class ProductTest extends FeatureTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_without_redemption_method_then_should_assume_digital()
+    public function test_when_call_find_without_redemption_method_then_should_assume_digital(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -317,7 +317,7 @@ class ProductTest extends FeatureTestCase
         $this->assertEquals($productServiceMock::REDEMPTION_METHOD_DIGITAL, $product->getRedemptionMethod());
     }
 
-    public function test_when_call_find_with_invalid_redemption_method_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_with_invalid_redemption_method_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -349,7 +349,7 @@ class ProductTest extends FeatureTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_without_mapping_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_without_mapping_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -380,7 +380,7 @@ class ProductTest extends FeatureTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_find_with_unset_mapping_then_should_throw_invalid_product_content_exception()
+    public function test_when_call_find_with_unset_mapping_then_should_throw_invalid_product_content_exception(): void
     {
         // Given
         $request = Request::create('/products/TE_1_2|143', 'GET', [
@@ -412,7 +412,7 @@ class ProductTest extends FeatureTestCase
         $product = $productServiceMock->find($productId);
     }
 
-    public function test_when_call_validate_product_id_with_invalid_product_id_then_validate_product_id_should_return_false()
+    public function test_when_call_validate_product_id_with_invalid_product_id_then_validate_product_id_should_return_false(): void
     {
         // Given
         $request = Request::create('/products/TEa_1c_2cs|14x3', 'GET', [
@@ -440,7 +440,7 @@ class ProductTest extends FeatureTestCase
         $productServiceMock->validateProductId($productId, $authChannel);
     }
 
-    public function test_when_call_get_product_list_and_transform_then_we_get_valid_structure()
+    public function test_when_call_get_product_list_and_transform_then_we_get_valid_structure(): void
     {
         // Given
         $request = Request::create('/products', 'GET', [
@@ -473,7 +473,7 @@ class ProductTest extends FeatureTestCase
         $this->assertNotEmpty($productListData);
     }
 
-    public function test_when_call_get_product_list_and_transform_with_invalid_tour_then_get_product_list_should_skip_tour()
+    public function test_when_call_get_product_list_and_transform_with_invalid_tour_then_get_product_list_should_skip_tour(): void
     {
         // Given
         $request = Request::create('/products', 'GET', [
