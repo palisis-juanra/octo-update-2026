@@ -25,9 +25,9 @@ class TourCMSServiceProvider extends ServiceProvider
 
             $request = app(Request::class);
 
-            $maid = $request->get(OctoAuthentication::FIELD_MAID);
-            $APIKey = $request->get(OctoAuthentication::FIELD_API_KEY);
-            $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+            $maid = $request->input(OctoAuthentication::FIELD_MAID);
+            $APIKey = $request->input(OctoAuthentication::FIELD_API_KEY);
+            $channelId = $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
 
             /** @var CacheFactory $cacheFactory */
             $cacheFactory = $app->make(CacheFactory::class);

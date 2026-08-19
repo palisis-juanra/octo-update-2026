@@ -35,7 +35,7 @@ class AvailabilityController extends Controller
         try {
 
             $requestParams = $request->post();
-            $requestParams['channelId'] = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+            $requestParams['channelId'] = $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
 
             $this->availabilityService->validateRequestParams($requestParams);
 
@@ -52,12 +52,12 @@ class AvailabilityController extends Controller
             }
 
             $availabilityRequest = $this->availabilityRequestFactory->get($product, $requestParams);
-            $availabilityIds = $request->get(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
+            $availabilityIds = $request->input(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
 
             $availabilityRequest->setAvailabilityIds($availabilityIds);
             $availabilityRequest->setTourName($product->getInternalName());
 
-            $optionId = $request->get(AvailabilityService::PARAM_OPTION_ID);
+            $optionId = $request->input(AvailabilityService::PARAM_OPTION_ID);
             $option = $product->getOptionById($optionId);
 
             $availabilityRequest->setMaxUnits($option->getRestrictions()->maxUnits ?? self::DEFAULT_MAX_UNITS);

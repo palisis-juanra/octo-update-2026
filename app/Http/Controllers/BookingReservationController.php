@@ -39,7 +39,7 @@ class BookingReservationController extends Controller
     {
         $requestParams = $request->post();
         $this->logger->info(['message' => 'Starting to process booking reservation request', 'request' => $request->post()]);
-        $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+        $channelId = $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
 
         $this->validateRequestParams($requestParams, $channelId);
 

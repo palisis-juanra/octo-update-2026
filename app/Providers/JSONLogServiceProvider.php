@@ -18,10 +18,10 @@ class JSONLogServiceProvider extends ServiceProvider
 
             $request = app(Request::class);
 
-            $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
-            $maid = $request->get(OctoAuthentication::FIELD_MAID);
+            $channelId = $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
+            $maid = $request->input(OctoAuthentication::FIELD_MAID);
             $endpoint = substr($request->getPathInfo(), 1);
-            $xCorrelationId = $request->get(OctoAuthentication::FIELD_X_CORRELATION_ID);
+            $xCorrelationId = $request->input(OctoAuthentication::FIELD_X_CORRELATION_ID);
 
             return new JSONLogService($channelId, $maid, $endpoint, $xCorrelationId);
 

@@ -434,7 +434,7 @@ class ProductTest extends FeatureTestCase
         // When
         $splitPath = explode('/', $request->getPathInfo());
         $productId = end($splitPath);
-        $authChannel = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+        $authChannel = $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
 
         // Then
         $productServiceMock->validateProductId($productId, $authChannel);
@@ -461,7 +461,7 @@ class ProductTest extends FeatureTestCase
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
         // When
-        $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+        $channelId = $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
 
         $productList = $productServiceMock->getProductList($channelId);
         $productListData = $productServiceMock->transformList($productList);
@@ -494,7 +494,7 @@ class ProductTest extends FeatureTestCase
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $tourCMSService]);
 
         // When
-        $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+        $channelId = $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
 
         $productList = $productServiceMock->getProductList($channelId);
         $productListData = $productServiceMock->transformList($productList);

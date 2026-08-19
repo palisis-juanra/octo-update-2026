@@ -66,7 +66,7 @@ class SupplierController extends Controller
     )]
     public function index(Request $request): JsonResponse
     {
-        $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+        $channelId = $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
         $supplierData = $this->supplierService->getSupplierData($channelId);
         if ($this->isSuppliersRequest(request()->getRequestUri())) {
             $supplierData = [$supplierData];

@@ -86,7 +86,7 @@ class AvailabilityCalendarController extends Controller
     {
         try {
             $requestParams = $request->post();
-            $requestParams['channelId'] = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
+            $requestParams['channelId'] = $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
 
             $this->availabilityCalendarService->validateRequestParams($requestParams);
 
