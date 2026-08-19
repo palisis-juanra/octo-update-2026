@@ -2,7 +2,6 @@
 
 namespace App\Factories;
 
-use App\Facades\JSONLog;
 use App\Models\Availability\Availability;
 use App\Models\Booking;
 use App\Models\BookingCancellation;
@@ -10,7 +9,6 @@ use App\Models\Contact;
 use App\Models\Option;
 use App\Models\Product;
 use App\Models\Voucher;
-use App\Models\UnitItem;
 use App\Services\XMLService;
 use SimpleXMLElement;
 
@@ -18,13 +16,8 @@ class BookingFactory
 {
     /**
      * Summary of createFromStartNewBookingXML
-     * @param SimpleXMLElement $startNewBookingData
-     * @param Product $product
-     * @param Option $option
-     * @param Availability $availability
-     * @param array $unitItems
-     * @param ?string $notes
-     * @return Booking
+     *
+     * @param  array  $unitItems
      */
     public static function createFromStartNewBookingXML(
         SimpleXMLElement $startNewBookingData,
@@ -33,12 +26,11 @@ class BookingFactory
         Availability $availability,
         array $requestUnitItems,
         ?string $notes = null
-    ): Booking
-    {
-        $booking = new Booking();
+    ): Booking {
+        $booking = new Booking;
 
         $bookingData = $startNewBookingData->booking;
-        
+
         $booking->setBookingData($bookingData);
         $booking->setBookingId((int) $bookingData->booking_id);
         $booking->setUuid((string) $bookingData->booking_uuid);
@@ -66,8 +58,8 @@ class BookingFactory
 
         $booking->setUnits($unitItems);
         $booking->setUnitItems($unitItems);
-        
-        if (!is_null($notes)){
+
+        if (! is_null($notes)) {
             $booking->setNotes($notes);
         }
 
@@ -81,13 +73,8 @@ class BookingFactory
 
     /**
      * Get the booking informatin from tourcms show booking response
-     * @param string $bookingUuid
-     * @param \SimpleXMLElement $showBookingXML
-     * @param \App\Models\Product $product
-     * @param \App\Models\Option $option
-     * @param \App\Models\Availability\Availability $availability
-     * @param string $savedUnitItems we need to pass already stored unit items to know the uuid of each one
-     * @return Booking
+     *
+     * @param  string  $savedUnitItems  we need to pass already stored unit items to know the uuid of each one
      */
     public static function createFromShowBookingXML(
         string $bookingUuid,
@@ -96,12 +83,11 @@ class BookingFactory
         Availability $availability,
         string $savedUnitItems,
         Option $option,
-    ): Booking
-    {
-        $booking = new Booking();
+    ): Booking {
+        $booking = new Booking;
 
         $bookingData = $showBookingXML->booking;
-        
+
         $booking->setBookingData($bookingData);
         $booking->setBookingId((int) $bookingData->booking_id);
         $booking->setUuid((string) $bookingUuid);
@@ -109,7 +95,7 @@ class BookingFactory
         $booking->setChannelId((int) $bookingData->channel_id);
 
         $booking->setLeadCustomerId((int) $bookingData->lead_customer_id);
-        if (isset($bookingData->agent_ref) && !empty((string)$bookingData->agent_ref)) {
+        if (isset($bookingData->agent_ref) && ! empty((string) $bookingData->agent_ref)) {
             $booking->setResellerReference((string) $bookingData->agent_ref);
         }
 
@@ -136,11 +122,11 @@ class BookingFactory
             );
             $booking->setCancellation(cancellation: $cancellation);
         }
-        
+
         $booking->setProduct($product);
         $booking->setOption($option);
         $booking->setOptionId($option->getId());
-        
+
         $booking->setAvailability(availability: $availability);
 
         // UNITS
@@ -149,10 +135,10 @@ class BookingFactory
 
         $storedUnitItems = json_decode($savedUnitItems, 1);
         foreach ($storedUnitItems as $emptyUnitItem) {
-            
+
             $unitId = (string) $emptyUnitItem['unitId'];
             $unit = $option->getUnitById($unitId);
-            
+
             if (array_key_exists($unitId, $unitsQuantities)) {
                 $unitsQuantities[$unitId]++;
             } else {
@@ -160,7 +146,7 @@ class BookingFactory
             }
 
             $unitItem = UnitItemFactory::create($booking, $unit, $unitsQuantities[$unitId], $emptyUnitItem['uuid'] ?? null);
-            
+
             $unitItems[] = $unitItem;
         }
 
@@ -174,6 +160,7 @@ class BookingFactory
 
         $supplierReference = $booking->getSupplierReferenceFromUnitItems();
         $booking->setSupplierReference($supplierReference);
+
         return $booking;
     }
 
@@ -197,12 +184,11 @@ class BookingFactory
     public static function isBookingRedeemed(array $components): bool
     {
         foreach ($components as $component) {
-            if (!empty($component->redeemed_at) || !empty($component->redeemed_at_utc_seconds)) {
+            if (! empty($component->redeemed_at) || ! empty($component->redeemed_at_utc_seconds)) {
                 return true;
             }
         }
 
         return false;
     }
-
 }

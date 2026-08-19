@@ -5,34 +5,48 @@ namespace App\Models;
 class Unit extends BaseModel
 {
     public const ADULT = 'ADULT';
+
     public const YOUTH = 'YOUTH';
+
     public const CHILD = 'CHILD';
+
     public const INFANT = 'INFANT';
+
     public const FAMILY = 'FAMILY';
+
     public const SENIOR = 'SENIOR';
+
     public const STUDENT = 'STUDENT';
+
     public const MILITARY = 'MILITARY';
+
     public const OTHER = 'OTHER';
 
     protected string $id;
-    protected string $internalName;
-    protected ?string $reference;
-    protected string $type;
-    protected array $requiredContactFields;
-    protected UnitRestrictions $restrictions;
-    protected string $title;
-    protected ?string $shortDescription = null;
-    protected string $rateId;
-    protected ?Pricing $pricing = null;
-    
-    public function __construct()
-    {
 
-    }
+    protected string $internalName;
+
+    protected ?string $reference;
+
+    protected string $type;
+
+    protected array $requiredContactFields;
+
+    protected UnitRestrictions $restrictions;
+
+    protected string $title;
+
+    protected ?string $shortDescription = null;
+
+    protected string $rateId;
+
+    protected ?Pricing $pricing = null;
+
+    public function __construct() {}
 
     /**
      * Get the value of id
-     */ 
+     */
     public function getId(): string
     {
         return $this->id;
@@ -40,9 +54,7 @@ class Unit extends BaseModel
 
     /**
      * Set the value of id
-     *
-     * @return  self
-     */ 
+     */
     public function setId($id): self
     {
         $this->id = $id;
@@ -52,7 +64,7 @@ class Unit extends BaseModel
 
     /**
      * Get the value of internalName
-     */ 
+     */
     public function getInternalName(): string
     {
         return $this->internalName;
@@ -60,9 +72,7 @@ class Unit extends BaseModel
 
     /**
      * Set the value of internalName
-     *
-     * @return  self
-     */ 
+     */
     public function setInternalName($internalName): self
     {
         $this->internalName = $internalName;
@@ -72,7 +82,7 @@ class Unit extends BaseModel
 
     /**
      * Get the value of reference
-     */ 
+     */
     public function getReference(): ?string
     {
         return $this->reference;
@@ -80,9 +90,7 @@ class Unit extends BaseModel
 
     /**
      * Set the value of reference
-     *
-     * @return  self
-     */ 
+     */
     public function setReference($reference): self
     {
         $this->reference = $reference;
@@ -92,7 +100,7 @@ class Unit extends BaseModel
 
     /**
      * Get the value of type
-     */ 
+     */
     public function getType(): string
     {
         return $this->type;
@@ -100,9 +108,7 @@ class Unit extends BaseModel
 
     /**
      * Set the value of type
-     *
-     * @return  self
-     */ 
+     */
     public function setType($type): self
     {
         $this->type = $type;
@@ -112,7 +118,7 @@ class Unit extends BaseModel
 
     /**
      * Get the value of requiredContactFields
-     */ 
+     */
     public function getRequiredContactFields(): array
     {
         return $this->requiredContactFields;
@@ -120,9 +126,7 @@ class Unit extends BaseModel
 
     /**
      * Set the value of requiredContactFields
-     *
-     * @return  self
-     */ 
+     */
     public function setRequiredContactFields($requiredContactFields): self
     {
         $this->requiredContactFields = $requiredContactFields;
@@ -132,7 +136,7 @@ class Unit extends BaseModel
 
     /**
      * Get the value of restrictions
-     */ 
+     */
     public function getRestrictions(): UnitRestrictions
     {
         return $this->restrictions;
@@ -140,9 +144,7 @@ class Unit extends BaseModel
 
     /**
      * Set the value of restrictions
-     *
-     * @return  self
-     */ 
+     */
     public function setRestrictions(UnitRestrictions $restrictions): self
     {
         $this->restrictions = $restrictions;
@@ -157,9 +159,7 @@ class Unit extends BaseModel
 
     /**
      * Set the value of title
-     *
-     * @return  self
-     */ 
+     */
     public function setTitle(string $title): self
     {
         $this->title = $title;
@@ -169,24 +169,21 @@ class Unit extends BaseModel
 
     /**
      * Get the value of shortDescription
-     */ 
-    public function getShortDescription(): string|null
+     */
+    public function getShortDescription(): ?string
     {
         return $this->shortDescription;
     }
 
     /**
      * Set the value of shortDescription
-     *
-     * @return  self
-     */ 
+     */
     public function setShortDescription(string $shortDescription): self
     {
         $this->shortDescription = $shortDescription;
 
         return $this;
     }
-
 
     public function getRateId(): string
     {

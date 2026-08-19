@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use App\Facades\OctoRequestFacade;
 use App\Http\Requests\OctoRequest;
-use Illuminate\Http\Request;
 use Closure;
+use Illuminate\Http\Request;
 
 class CapabilitiesHeader
 {

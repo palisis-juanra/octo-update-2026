@@ -2,7 +2,6 @@
 
 namespace App\Transformers;
 
-
 class PostalAddressTransformer extends BaseTransformer
 {
     public function __construct(string $mode)
@@ -18,7 +17,7 @@ class PostalAddressTransformer extends BaseTransformer
             'addressRegion' => $postalAddress->getAddressRegion(),
             'postalCode' => $postalAddress->getPostalCode(),
             'addressCountry' => $postalAddress->getAddressCountry(),
-            'postOfficeBoxNumber' => $postalAddress->getPostOfficeBoxNumber()
+            'postOfficeBoxNumber' => $postalAddress->getPostOfficeBoxNumber(),
         ];
     }
 

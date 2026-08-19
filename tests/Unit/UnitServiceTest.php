@@ -6,7 +6,7 @@ use Tests\UnitTestCase;
 
 class UnitServiceTest extends UnitTestCase
 {
-    public function test_getTourCMSRateId_withValidUnitId(): void
+    public function test_get_tour_cms_rate_id_with_valid_unit_id(): void
     {
         $unitId = 'TE_1_67|142|r1';
         $expectedRateId = 'r1';
@@ -16,7 +16,7 @@ class UnitServiceTest extends UnitTestCase
         $this->assertEquals($expectedRateId, $result);
     }
 
-    public function test_getTourCMSRateId_withInvalidUnitId(): void
+    public function test_get_tour_cms_rate_id_with_invalid_unit_id(): void
     {
         $unitId = 'TE_1_67|r1';
 

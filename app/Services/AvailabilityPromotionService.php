@@ -25,9 +25,9 @@ class AvailabilityPromotionService
      *
      * Only promotions applicable to the availability start date will be used.
      *
-     * @param Product $product Product containing the applicable promotions.
-     * @param Availability $availability Availability to mutate.
-     * @param Promotion|null $selectedPromotion Promotion selected by the consumer, if any.
+     * @param  Product  $product  Product containing the applicable promotions.
+     * @param  Availability  $availability  Availability to mutate.
+     * @param  Promotion|null  $selectedPromotion  Promotion selected by the consumer, if any.
      * @return Availability The same availability instance after being enriched.
      */
     public function enrichAvailabilityWithPromotions(
@@ -35,10 +35,10 @@ class AvailabilityPromotionService
         Availability $availability,
         ?Promotion $selectedPromotion = null
     ): Availability {
-        
+
         $applicablePromotions = $this->getApplicablePromotionsForAvailability($product->getPromotions(), $availability);
 
-        if ($selectedPromotion !== null && !$this->isPromotionApplicableToAvailability($selectedPromotion, $availability)) {
+        if ($selectedPromotion !== null && ! $this->isPromotionApplicableToAvailability($selectedPromotion, $availability)) {
             throw new PromotionNotApplicableException($selectedPromotion->getName(), $availability->getLocalDateTimeStart());
         }
 
@@ -63,8 +63,8 @@ class AvailabilityPromotionService
     /**
      * Filter promotions and keep only those applicable to the availability start date.
      *
-     * @param Promotion[] $promotions Promotions to evaluate.
-     * @param Availability $availability Availability whose start date will be used.
+     * @param  Promotion[]  $promotions  Promotions to evaluate.
+     * @param  Availability  $availability  Availability whose start date will be used.
      * @return Promotion[] Applicable promotions.
      */
     protected function getApplicablePromotionsForAvailability(array $promotions, Availability $availability): array
@@ -75,6 +75,7 @@ class AvailabilityPromotionService
                 $applicablePromotions[] = $promotion;
             }
         }
+
         return $applicablePromotions;
     }
 
@@ -84,8 +85,8 @@ class AvailabilityPromotionService
      * A promotion is considered applicable when the availability start date falls
      * within the promotion validity range, including boundary dates.
      *
-     * @param Promotion $promotion Promotion to validate.
-     * @param Availability $availability Availability to evaluate.
+     * @param  Promotion  $promotion  Promotion to validate.
+     * @param  Availability  $availability  Availability to evaluate.
      * @return bool True when the promotion applies to the availability.
      */
     protected function isPromotionApplicableToAvailability(Promotion $promotion, Availability $availability): bool
@@ -96,11 +97,13 @@ class AvailabilityPromotionService
 
         if ($promotionStartDate !== null && $availabilityStartDate < $promotionStartDate) {
             $this->jsonLogService->info("Promotion {$promotion->getName()} is not applicable, availability start date is before promotion start date");
+
             return false;
         }
 
         if ($promotionEndDate !== null && $availabilityStartDate > $promotionEndDate) {
             $this->jsonLogService->info("Promotion {$promotion->getName()} is not applicable, availability start date is after promotion start date");
+
             return false;
         }
 
@@ -115,7 +118,7 @@ class AvailabilityPromotionService
      * - DateTimeInterface
      * - string parseable by DateTimeImmutable
      *
-     * @param mixed $date Date value to normalize.
+     * @param  mixed  $date  Date value to normalize.
      * @return DateTimeImmutable|null Normalized date, or null when input is null/empty.
      */
     protected function normalizeDate(mixed $date): ?DateTimeImmutable
@@ -132,7 +135,7 @@ class AvailabilityPromotionService
     }
 
     /**
-     * @param Promotion[] $promotions
+     * @param  Promotion[]  $promotions
      * @return string[]
      */
     protected function extractPromotionNames(array $promotions): array
@@ -144,8 +147,7 @@ class AvailabilityPromotionService
     }
 
     /**
-     * @param Promotion[] $promotions
-     * @return void
+     * @param  Promotion[]  $promotions
      */
     protected function buildAvailabilityRates(
         Availability $availability,
@@ -157,8 +159,7 @@ class AvailabilityPromotionService
     }
 
     /**
-     * @param Promotion[] $promotions
-     * @return void
+     * @param  Promotion[]  $promotions
      */
     protected function buildAvailabilityPricingRates(
         Availability $availability,
@@ -186,8 +187,7 @@ class AvailabilityPromotionService
     }
 
     /**
-     * @param Promotion[] $promotions
-     * @return void
+     * @param  Promotion[]  $promotions
      */
     protected function buildAvailabilityUnitPricingRates(
         Availability $availability,
@@ -215,9 +215,8 @@ class AvailabilityPromotionService
     /**
      * Apply a selected promotion discount directly to the base pricing of an availability.
      *
-     * @param Availability $availability Availability to mutate.
-     * @param Promotion $promotion Promotion whose discount will be applied.
-     * @return void
+     * @param  Availability  $availability  Availability to mutate.
+     * @param  Promotion  $promotion  Promotion whose discount will be applied.
      */
     protected function applyPromotionDiscount(
         Availability $availability,
@@ -244,8 +243,8 @@ class AvailabilityPromotionService
     /**
      * Apply a percentage discount to a price.
      *
-     * @param int $price Original price.
-     * @param float $discount Discount percentage.
+     * @param  int  $price  Original price.
+     * @param  float  $discount  Discount percentage.
      * @return int Discounted and rounded price.
      */
     protected function applyDiscount(int $price, float $discount): int

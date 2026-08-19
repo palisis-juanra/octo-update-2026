@@ -5,9 +5,13 @@ namespace App\Models;
 class Place
 {
     protected string $latitude;
+
     protected string $longitude;
+
     protected PostalAddress $postalAddress;
+
     protected array $identifiers = [];
+
     protected array $sameAs = [];
 
     public function __construct()
@@ -17,7 +21,7 @@ class Place
 
     /**
      * Get the value of latitude
-     */ 
+     */
     public function getLatitude(): string
     {
         return $this->latitude;
@@ -25,9 +29,7 @@ class Place
 
     /**
      * Set the value of latitude
-     *
-     * @return  self
-     */ 
+     */
     public function setLatitude(string $latitude): self
     {
         $this->latitude = $latitude;
@@ -37,7 +39,7 @@ class Place
 
     /**
      * Get the value of longitude
-     */ 
+     */
     public function getLongitude(): string
     {
         return $this->longitude;
@@ -45,9 +47,7 @@ class Place
 
     /**
      * Set the value of longitude
-     *
-     * @return  self
-     */ 
+     */
     public function setLongitude(string $longitude): self
     {
         $this->longitude = $longitude;
@@ -57,7 +57,7 @@ class Place
 
     /**
      * Get the value of postalAddress
-     */ 
+     */
     public function getPostalAddress(): PostalAddress
     {
         return $this->postalAddress;
@@ -65,9 +65,7 @@ class Place
 
     /**
      * Set the value of postalAddress
-     *
-     * @return  self
-     */ 
+     */
     public function setPostalAddress(PostalAddress $postalAddress): self
     {
         $this->postalAddress = $postalAddress;
@@ -77,7 +75,7 @@ class Place
 
     /**
      * Get the value of identifiers
-     */ 
+     */
     public function getIdentifiers()
     {
         return $this->identifiers;
@@ -85,9 +83,7 @@ class Place
 
     /**
      * Set the value of identifiers
-     *
-     * @return  self
-     */ 
+     */
     public function setIdentifiers(array $identifiers): self
     {
         $this->identifiers = $identifiers;
@@ -97,7 +93,7 @@ class Place
 
     /**
      * Get the value of sameAs
-     */ 
+     */
     public function getSameAs(): array
     {
         return $this->sameAs;
@@ -105,9 +101,7 @@ class Place
 
     /**
      * Set the value of sameAs
-     *
-     * @return  self
-     */ 
+     */
     public function setSameAs(array $sameAs): self
     {
         $this->sameAs = $sameAs;

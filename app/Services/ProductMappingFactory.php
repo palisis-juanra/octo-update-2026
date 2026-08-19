@@ -8,14 +8,16 @@ use SimpleXMLElement;
 class ProductMappingFactory
 {
     protected SimpleXMLElement $tour;
+
     protected string $structureType;
+
     protected array $mappingAssistantOptions;
 
     public function __construct() {}
 
     /**
      * Create product mappings for a given tour XML
-     * @param SimpleXMLElement $tour
+     *
      * @return ProductMapping[]
      */
     public function create(SimpleXMLElement $tour): array
@@ -55,10 +57,10 @@ class ProductMappingFactory
         return [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
-                "",
-                "",
+                '',
+                '',
                 $startTimes
-            )
+            ),
         ];
     }
 
@@ -75,7 +77,7 @@ class ProductMappingFactory
 
                 $mappings[] = new ProductMapping(
                     $this->structureType,
-                    !empty($mapping->label) ? (string) $mapping->label : '',
+                    ! empty($mapping->label) ? (string) $mapping->label : '',
                     (string) $mapping->fields->field->value,
                     $availabilityStartTime
                 );
@@ -97,14 +99,13 @@ class ProductMappingFactory
             $supplierNote = (string) $mapping->fields->field->value;
 
             if ($mapping->partial == 1) {
-                $supplierNote .= "[*]";
+                $supplierNote .= '[*]';
             } else {
                 $supplierNote = "[*]{$supplierNote}";
             }
 
-
-            $label = !empty($mapping->label) ? (string) $mapping->label : '';
-            $customLabel = !empty($mapping->custom_label) ? (string) $mapping->custom_label : '';
+            $label = ! empty($mapping->label) ? (string) $mapping->label : '';
+            $customLabel = ! empty($mapping->custom_label) ? (string) $mapping->custom_label : '';
 
             $startTimes = [];
             $startTimesXML = XMLService::getArrayFromXmlNode($mapping->start_times, 'start_time');
@@ -113,7 +114,7 @@ class ProductMappingFactory
             }
 
             $productMappings[] = new ProductMapping($this->structureType, $label, $supplierNote, $startTimes, $customLabel);
-            
+
         }
 
         return $productMappings;
@@ -133,9 +134,8 @@ class ProductMappingFactory
             $startTimes = ['09:00'];
         }
 
-        $singleMapping = new ProductMapping(ProductService::MAPPING_STRUCTURE_TYPE_SINGLE, "", '', $startTimes);
+        $singleMapping = new ProductMapping(ProductService::MAPPING_STRUCTURE_TYPE_SINGLE, '', '', $startTimes);
+
         return [$singleMapping];
     }
-
-
 }

@@ -17,13 +17,19 @@ use Throwable;
 class BookingUpdateService
 {
     public const FIELD_OPTION_ID = 'optionId';
+
     public const FIELD_AVAILABILITY_ID = 'availabilityId';
+
     public const FIELD_UNIT_ITEMS = 'unitItems';
+
     public const FIELD_NOTES = 'notes';
+
     public const FIELD_CONTACT = 'contact';
+
     public const FIELD_RESELLER_REFERENCE = 'resellerReference';
 
     public const BOOKING_REPLACED_AUDIT_NOTE_PREFIX = 'Booking updated. Replaced by new booking, TourCMS ID: ';
+
     public const BOOKING_REBOOK_AUDIT_NOTE_PREFIX = 'This booking is a rebook of previous booking. Old TourCMS ID: ';
 
     public BookingTransformer $transformer;
@@ -54,12 +60,12 @@ class BookingUpdateService
      */
     public function update(string $uuid, array $requestParams): array
     {
-        $this->logger->info(["message" => "Starting to process booking update request", "uuid" => $uuid, "request" => $requestParams]);
+        $this->logger->info(['message' => 'Starting to process booking update request', 'uuid' => $uuid, 'request' => $requestParams]);
 
         $oldBookingByUUID = $this->bookingCancellationService->getBookingByUuid($uuid);
         $oldBooking = $this->bookingCancellationService->getBooking($oldBookingByUUID, true);
 
-        if (!$oldBooking->isBookingCancellable()) {
+        if (! $oldBooking->isBookingCancellable()) {
             $this->logger->info("Booking not cancellable: {$oldBooking->getId()}");
             throw new BookingNotCancellableException;
         }
@@ -81,7 +87,7 @@ class BookingUpdateService
 
         $this->cancelOldBookingOrNotify($oldBooking, $oldBookingByUUID, $newBooking);
 
-        $this->logger->info(["message" => "Booking update request processed, returning response", "response" => $bookingData]);
+        $this->logger->info(['message' => 'Booking update request processed, returning response', 'response' => $bookingData]);
 
         return $bookingData;
     }
@@ -95,8 +101,7 @@ class BookingUpdateService
         Booking $oldBookingByUUID,
         Booking $oldBooking,
         array $originalBookingJson
-    ): array
-    {
+    ): array {
         $optionId = $requestParams[self::FIELD_OPTION_ID] ?? $originalBookingJson[self::FIELD_OPTION_ID] ?? $oldBookingByUUID->option_id;
         $this->optionService->validateOptionId($optionId);
 
@@ -121,7 +126,7 @@ class BookingUpdateService
         try {
             $newBookingByUUID = $this->bookingReservationService->reserve($product, $option, $availability, $unitItems, $originalUuid, $notes, null);
 
-            if (!empty($resellerReference)) {
+            if (! empty($resellerReference)) {
                 $newBookingByUUID->setResellerReference($resellerReference);
             }
 
@@ -143,34 +148,26 @@ class BookingUpdateService
 
     /**
      * Add an audit note on the old booking pointing to the new booking that replaced it.
-     * @param \App\Models\Booking $oldBooking
-     * @param \App\Models\Booking $newBooking
-     * @return void
      */
     protected function createBookingReplacedAuditNote(Booking $oldBooking, Booking $newBooking): void
     {
-        $note = self::BOOKING_REPLACED_AUDIT_NOTE_PREFIX . $newBooking->getBookingId();
+        $note = self::BOOKING_REPLACED_AUDIT_NOTE_PREFIX.$newBooking->getBookingId();
         $this->tourCMSService->callTourCMSAddNoteToBooking($oldBooking->getChannelId(), $oldBooking->getBookingId(), $note);
     }
 
     /**
      * Add an audit note on the new booking pointing back to the old booking it replaced.
-     * @param \App\Models\Booking $newBooking
-     * @param \App\Models\Booking $oldBooking
-     * @param string $oldBookingOriginalUuid the uuid the old booking had before it was reassigned
-     * @return void
+     *
+     * @param  string  $oldBookingOriginalUuid  the uuid the old booking had before it was reassigned
      */
     protected function createBookingRebookAuditNote(Booking $newBooking, Booking $oldBooking, string $oldBookingOriginalUuid): void
     {
-        $note = self::BOOKING_REBOOK_AUDIT_NOTE_PREFIX . "{$oldBooking->getBookingId()}, UUID: {$oldBookingOriginalUuid}";
+        $note = self::BOOKING_REBOOK_AUDIT_NOTE_PREFIX."{$oldBooking->getBookingId()}, UUID: {$oldBookingOriginalUuid}";
         $this->tourCMSService->callTourCMSAddNoteToBooking($newBooking->getChannelId(), $newBooking->getBookingId(), $note);
     }
 
     /**
      * Reassign the booking_uuid TourCMS core holds for this booking to a new value.
-     * @param \App\Models\Booking $booking
-     * @param string $newUuid
-     * @return void
      */
     protected function reassignBookingUuid(Booking $booking, string $newUuid): void
     {
@@ -222,13 +219,13 @@ class BookingUpdateService
 
         $leadContact = $this->bookingContactService->updateBookingTravelersWithContactInfo($unitContacts, $booking, $leadContact);
 
-        if (!empty($leadContact)) {
+        if (! empty($leadContact)) {
             $booking = $this->bookingContactService->updateBookingLeadCustomerContactInfo($booking, $leadContact);
         }
 
         $confirmedBooking = $this->bookingConfirmationService->confirmBooking($booking);
 
-        if (!empty($originalLeadContact)) {
+        if (! empty($originalLeadContact)) {
             $confirmedBooking->setContact($originalLeadContact);
         }
 
@@ -256,7 +253,7 @@ class BookingUpdateService
             $cancelled = $this->bookingCancellationService->deleteBooking($oldBooking);
         }
 
-        if (true !== $cancelled) {
+        if ($cancelled !== true) {
             throw new InvalidBookingUUIDException($oldBooking->getUuid());
         }
 
@@ -276,10 +273,10 @@ class BookingUpdateService
     protected function notifyCancellationFailure(Booking $oldBooking, Booking $newBooking, Throwable $exception): void
     {
         $this->logger->error([
-            "message" => "Failed to cancel old booking after booking update, sending notification email",
-            "oldBookingId" => $oldBooking->getId(),
-            "newBookingId" => $newBooking->getId(),
-            "exception" => $exception->getMessage(),
+            'message' => 'Failed to cancel old booking after booking update, sending notification email',
+            'oldBookingId' => $oldBooking->getId(),
+            'newBookingId' => $newBooking->getId(),
+            'exception' => $exception->getMessage(),
         ]);
 
         $internalEmails = array_filter(
@@ -289,9 +286,9 @@ class BookingUpdateService
 
         if (empty($internalEmails)) {
             $this->logger->error([
-                "message" => "No valid internal emails configured, skipping cancellation failure notification",
-                "oldBookingId" => $oldBooking->getId(),
-                "newBookingId" => $newBooking->getId(),
+                'message' => 'No valid internal emails configured, skipping cancellation failure notification',
+                'oldBookingId' => $oldBooking->getId(),
+                'newBookingId' => $newBooking->getId(),
             ]);
 
             return;

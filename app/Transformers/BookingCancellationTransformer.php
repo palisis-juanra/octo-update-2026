@@ -9,7 +9,7 @@ class BookingCancellationTransformer extends BaseTransformer
         return [
             'refund' => $cancellation->getRefund(),
             'reason' => $cancellation->getReason(),
-            'utcCancelledAt' => $cancellation->getUtcCancelledAt()
+            'utcCancelledAt' => $cancellation->getUtcCancelledAt(),
         ];
     }
 

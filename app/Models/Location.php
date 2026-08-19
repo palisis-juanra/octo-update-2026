@@ -5,31 +5,38 @@ namespace App\Models;
 class Location
 {
     public const TYPE_START = 'START';
+
     public const TYPE_ITINERARY_ITEM = 'ITINERARY_ITEM';
+
     public const TYPE_POINT_OF_INTEREST = 'POINT_OF_INTEREST';
+
     public const TYPE_ADMISSION_INCLUDED = 'ADMISSION_INCLUDED';
+
     public const TYPE_END = 'END';
 
     protected ?string $title = null;
+
     protected ?string $shortDescription = null;
+
     protected array $types;
+
     protected ?int $minutesTo = null;
+
     protected ?int $minutesAt = null;
+
     protected Place $place;
 
     /**
      * Get the value of title
-     */ 
-    public function getTitle(): string|null
+     */
+    public function getTitle(): ?string
     {
         return $this->title;
     }
 
     /**
      * Set the value of title
-     *
-     * @return  self
-     */ 
+     */
     public function setTitle($title): self
     {
         $this->title = $title;
@@ -39,17 +46,15 @@ class Location
 
     /**
      * Get the value of shortDescription
-     */ 
-    public function getShortDescription(): string|null
+     */
+    public function getShortDescription(): ?string
     {
         return $this->shortDescription;
     }
 
     /**
      * Set the value of shortDescription
-     *
-     * @return  self
-     */ 
+     */
     public function setShortDescription($shortDescription): self
     {
         $this->shortDescription = $shortDescription;
@@ -59,7 +64,7 @@ class Location
 
     /**
      * Get the value of types
-     */ 
+     */
     public function getTypes(): array
     {
         return $this->types;
@@ -67,9 +72,7 @@ class Location
 
     /**
      * Set the value of types
-     *
-     * @return  self
-     */ 
+     */
     public function setTypes($types): self
     {
         $this->types = $types;
@@ -79,17 +82,15 @@ class Location
 
     /**
      * Get the value of minutesTo
-     */ 
-    public function getMinutesTo(): int|null
+     */
+    public function getMinutesTo(): ?int
     {
         return $this->minutesTo;
     }
 
     /**
      * Set the value of minutesTo
-     *
-     * @return  self
-     */ 
+     */
     public function setMinutesTo($minutesTo): self
     {
         $this->minutesTo = $minutesTo;
@@ -99,17 +100,15 @@ class Location
 
     /**
      * Get the value of minutesAt
-     */ 
-    public function getMinutesAt(): int|null
+     */
+    public function getMinutesAt(): ?int
     {
         return $this->minutesAt;
     }
 
     /**
      * Set the value of minutesAt
-     *
-     * @return  self
-     */ 
+     */
     public function setMinutesAt($minutesAt): self
     {
         $this->minutesAt = $minutesAt;
@@ -119,7 +118,7 @@ class Location
 
     /**
      * Get the value of place
-     */ 
+     */
     public function getPlace(): Place
     {
         return $this->place;
@@ -127,9 +126,7 @@ class Location
 
     /**
      * Set the value of place
-     *
-     * @return  self
-     */ 
+     */
     public function setPlace(Place $place): self
     {
         $this->place = $place;

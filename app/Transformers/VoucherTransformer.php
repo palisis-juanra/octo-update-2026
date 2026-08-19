@@ -4,10 +4,10 @@ namespace App\Transformers;
 
 use League\Fractal\Resource\Collection;
 
-
 class VoucherTransformer extends BaseTransformer
 {
     protected DeliveryOptionsTransformer $deliveryOptionsTransformer;
+
     public function __construct(string $mode = BaseTransformer::FULL_TRANSFORM)
     {
         parent::__construct($mode);
@@ -20,9 +20,9 @@ class VoucherTransformer extends BaseTransformer
         $deliveryOptionsTransformed = $this->manager->createData($deliveryOptionsResource)->toArray()['data'];
 
         return [
-            "redemptionMethod" => $voucher->getRedemptionMethod(),
-            "utcRedeemedAt" => $voucher->getUtcRedeemedAt(),
-            "deliveryOptions" => $deliveryOptionsTransformed
+            'redemptionMethod' => $voucher->getRedemptionMethod(),
+            'utcRedeemedAt' => $voucher->getUtcRedeemedAt(),
+            'deliveryOptions' => $deliveryOptionsTransformed,
         ];
     }
 

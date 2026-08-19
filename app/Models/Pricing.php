@@ -7,12 +7,19 @@ class Pricing
     public const CURRENCY_PRECISION = 2;
 
     protected string $currency;
+
     protected int $currencyPrecision = self::CURRENCY_PRECISION;
+
     protected int $original;
+
     protected int $retail;
+
     protected ?int $net;
+
     protected array $includedTaxes = [];
+
     protected ?string $rateId = null;
+
     /**
      * @var Rate[]
      */
@@ -66,6 +73,7 @@ class Pricing
 
         return $this;
     }
+
     public function getCurrency(): string
     {
         return $this->currency;
@@ -115,12 +123,13 @@ class Pricing
     }
 
     /**
-     * @param Rate[] $rates
+     * @param  Rate[]  $rates
      * @return Pricing
      */
     public function setRates(array $rates): static
     {
         $this->rates = $rates;
+
         return $this;
     }
 

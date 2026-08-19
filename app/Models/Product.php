@@ -12,38 +12,64 @@ class Product extends Model
     use HasFactory;
 
     public const PRICING_PER_BOOKING = 'BOOKING';
+
     public const PRICING_PER_UNIT = 'UNIT';
 
     public const PRICING_TYPE_MULTIPLE_RATES = 'MULTIPLE_RATES';
+
     public const PRICING_TYPE_VOLUME = 'VOLUME';
 
     protected string $id;
-    protected string $tourId;
-    protected string $internalName;
-    protected ?string $reference;
-    protected string $locale;
-    protected string $timeZone;
-    protected bool $allowFreesale;
-    protected bool $instantConfirmation;
-    protected bool $instantDelivery;
-    protected bool $availabilityRequired;
-    protected string $availabilityType;
-    protected array $deliveryFormats;
-    protected array $deliveryMethods;
-    protected string $redemptionMethod;
-    protected array $options;
-    protected array $cutoff;
-    protected bool $allDay = false;
-    protected int $minBookingSize = 1;
-    protected int $maxBookingSize = 20;
-    protected ?ProductContent $content = null;
-    protected $defaultCurrency;
-    protected $availableCurrencies = [];
-    protected $pricingPer = self::PRICING_PER_UNIT;
-    protected ?Pricing $pricing = null;
-    protected string $pricingType = self::PRICING_TYPE_MULTIPLE_RATES;
-    protected array $promotions = [];
 
+    protected string $tourId;
+
+    protected string $internalName;
+
+    protected ?string $reference;
+
+    protected string $locale;
+
+    protected string $timeZone;
+
+    protected bool $allowFreesale;
+
+    protected bool $instantConfirmation;
+
+    protected bool $instantDelivery;
+
+    protected bool $availabilityRequired;
+
+    protected string $availabilityType;
+
+    protected array $deliveryFormats;
+
+    protected array $deliveryMethods;
+
+    protected string $redemptionMethod;
+
+    protected array $options;
+
+    protected array $cutoff;
+
+    protected bool $allDay = false;
+
+    protected int $minBookingSize = 1;
+
+    protected int $maxBookingSize = 20;
+
+    protected ?ProductContent $content = null;
+
+    protected $defaultCurrency;
+
+    protected $availableCurrencies = [];
+
+    protected $pricingPer = self::PRICING_PER_UNIT;
+
+    protected ?Pricing $pricing = null;
+
+    protected string $pricingType = self::PRICING_TYPE_MULTIPLE_RATES;
+
+    protected array $promotions = [];
 
     public function getId(): string
     {
@@ -77,8 +103,8 @@ class Product extends Model
     /**
      * Set the value of reference
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setReference($reference)
     {
         $this->reference = $reference;
@@ -88,7 +114,7 @@ class Product extends Model
 
     /**
      * Get the value of locale
-     */ 
+     */
     public function getLocale()
     {
         return $this->locale;
@@ -97,8 +123,8 @@ class Product extends Model
     /**
      * Set the value of locale
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setLocale($locale)
     {
         $this->locale = $locale;
@@ -108,7 +134,7 @@ class Product extends Model
 
     /**
      * Get the value of timeZone
-     */ 
+     */
     public function getTimeZone()
     {
         return $this->timeZone;
@@ -117,8 +143,8 @@ class Product extends Model
     /**
      * Set the value of timeZone
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setTimeZone($timeZone)
     {
         $this->timeZone = $timeZone;
@@ -128,7 +154,7 @@ class Product extends Model
 
     /**
      * Get the value of allowFreesale
-     */ 
+     */
     public function getAllowFreesale()
     {
         return $this->allowFreesale;
@@ -137,8 +163,8 @@ class Product extends Model
     /**
      * Set the value of allowFreesale
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setAllowFreesale($allowFreesale)
     {
         $this->allowFreesale = $allowFreesale;
@@ -148,7 +174,7 @@ class Product extends Model
 
     /**
      * Get the value of instantConfirmation
-     */ 
+     */
     public function getInstantConfirmation()
     {
         return $this->instantConfirmation;
@@ -157,8 +183,8 @@ class Product extends Model
     /**
      * Set the value of instantConfirmation
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setInstantConfirmation($instantConfirmation)
     {
         $this->instantConfirmation = $instantConfirmation;
@@ -168,7 +194,7 @@ class Product extends Model
 
     /**
      * Get the value of instantDelivery
-     */ 
+     */
     public function getInstantDelivery()
     {
         return $this->instantDelivery;
@@ -177,8 +203,8 @@ class Product extends Model
     /**
      * Set the value of instantDelivery
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setInstantDelivery($instantDelivery)
     {
         $this->instantDelivery = $instantDelivery;
@@ -188,7 +214,7 @@ class Product extends Model
 
     /**
      * Get the value of availabilityRequired
-     */ 
+     */
     public function getAvailabilityRequired()
     {
         return $this->availabilityRequired;
@@ -197,8 +223,8 @@ class Product extends Model
     /**
      * Set the value of availabilityRequired
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setAvailabilityRequired($availabilityRequired)
     {
         $this->availabilityRequired = $availabilityRequired;
@@ -208,7 +234,7 @@ class Product extends Model
 
     /**
      * Get the value of deliveryFormats
-     */ 
+     */
     public function getDeliveryFormats()
     {
         return $this->deliveryFormats;
@@ -217,8 +243,8 @@ class Product extends Model
     /**
      * Set the value of deliveryFormats
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setDeliveryFormats($deliveryFormats)
     {
         $this->deliveryFormats = $deliveryFormats;
@@ -228,7 +254,7 @@ class Product extends Model
 
     /**
      * Get the value of deliveryMethods
-     */ 
+     */
     public function getDeliveryMethods()
     {
         return $this->deliveryMethods;
@@ -237,8 +263,8 @@ class Product extends Model
     /**
      * Set the value of deliveryMethods
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setDeliveryMethods($deliveryMethods)
     {
         $this->deliveryMethods = $deliveryMethods;
@@ -248,7 +274,7 @@ class Product extends Model
 
     /**
      * Get the value of redemptionMethod
-     */ 
+     */
     public function getRedemptionMethod()
     {
         return $this->redemptionMethod;
@@ -257,8 +283,8 @@ class Product extends Model
     /**
      * Set the value of redemptionMethod
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setRedemptionMethod($redemptionMethod)
     {
         $this->redemptionMethod = $redemptionMethod;
@@ -268,7 +294,7 @@ class Product extends Model
 
     /**
      * Get the value of options
-     */ 
+     */
     public function getOptions()
     {
         return $this->options;
@@ -277,8 +303,8 @@ class Product extends Model
     /**
      * Set the value of options
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setOptions($options)
     {
         $this->options = $options;
@@ -288,7 +314,7 @@ class Product extends Model
 
     /**
      * Get the value of availabilityType
-     */ 
+     */
     public function getAvailabilityType()
     {
         return $this->availabilityType;
@@ -297,8 +323,8 @@ class Product extends Model
     /**
      * Set the value of availabilityType
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setAvailabilityType($availabilityType)
     {
         $this->availabilityType = $availabilityType;
@@ -308,7 +334,7 @@ class Product extends Model
 
     /**
      * Get the value of utcCutoff
-     */ 
+     */
     public function getUtcCutoff(): string
     {
         return $this->utcCutoff;
@@ -317,8 +343,8 @@ class Product extends Model
     /**
      * Set the value of utcCutoff
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setUtcCutoff($utcCutoff): static
     {
         $this->utcCutoff = $utcCutoff;
@@ -350,10 +376,9 @@ class Product extends Model
         return $this;
     }
 
-
     /**
      * Get the value of cutoff
-     */ 
+     */
     public function getCutoff()
     {
         return $this->cutoff;
@@ -362,8 +387,8 @@ class Product extends Model
     /**
      * Set the value of cutoff
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setCutoff(array $cutoff)
     {
         $this->cutoff = $cutoff;
@@ -387,7 +412,7 @@ class Product extends Model
 
     /**
      * Get the value of content
-     */ 
+     */
     public function getContent(): ?ProductContent
     {
         return $this->content;
@@ -395,9 +420,7 @@ class Product extends Model
 
     /**
      * Set the value of content
-     *
-     * @return  self
-     */ 
+     */
     public function setContent(?ProductContent $content): self
     {
         $this->content = $content;
@@ -407,7 +430,7 @@ class Product extends Model
 
     /**
      * Get the value of allDay
-     */ 
+     */
     public function getAllDay(): bool
     {
         return $this->allDay;
@@ -415,17 +438,15 @@ class Product extends Model
 
     /**
      * Set the value of allDay
-     *
-     * @return  self
-     */ 
+     */
     public function setAllDay(bool $allDay): self
     {
         $this->allDay = $allDay;
 
         return $this;
     }
- 
-    public function getPricing(): Pricing|null
+
+    public function getPricing(): ?Pricing
     {
         return $this->pricing;
     }
@@ -506,7 +527,7 @@ class Product extends Model
     }
 
     /**
-     * @param Promotion[] $promotions
+     * @param  Promotion[]  $promotions
      * @return static
      */
     public function setPromotions(array $promotions)

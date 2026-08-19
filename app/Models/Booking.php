@@ -14,38 +14,71 @@ use SimpleXMLElement;
 class Booking extends Model
 {
     use HasFactory;
+
     public const STATUS_ON_HOLD = 'ON_HOLD';
+
     public const STATUS_EXPIRED = 'EXPIRED';
+
     public const STATUS_CONFIRMED = 'CONFIRMED';
+
     public const STATUS_CANCELLED = 'CANCELLED';
+
     public const STATUS_PENDING = 'PENDING';
+
     public const STATUS_REDEEMED = 'REDEEMED';
+
     public const TCMS_STATUS_QUOTATION = 0;
+
     public const TCMS_STATUS_PROVISIONAL = 1;
+
     public const TCMS_STATUS_CONFIRMED = 2;
+
     public const TCMS_STATUS_TEMPORARY = '-1';
+
     public const FIELD_VOUCHER = 'VOUCHER';
+
     public const FIELD_TICKET = 'TICKET';
+
     protected bool $testMode;
+
     protected ?string $utcCreatedAt;
+
     protected ?string $utcUpdatedAt;
+
     protected ?string $utcRedeemedAt;
+
     protected ?string $utcConfirmedAt;
+
     protected ?string $supplierReference;
+
     protected ?string $resellerReference;
+
     protected ?bool $cancellable;
+
     protected ?object $cancellation;
+
     protected Contact $contact;
+
     protected ?string $notes;
+
     protected ?Voucher $voucher;
+
     protected ?string $utcExpiresAt;
+
     protected ?int $expirationMinutes;
+
     protected Product $product;
+
     protected Option $option;
+
     protected Availability $availability;
+
     protected array $units;
+
     protected int $leadCustomerId;
+
     protected SimpleXMLElement $bookingData;
+
     protected array $completeBookingJson;
 
     /**
@@ -76,14 +109,14 @@ class Booking extends Model
      */
     public $incrementing = false;
 
-     /**
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'booking_id', 
-        'account_id', 
+        'booking_id',
+        'account_id',
         'channel_id',
         'availability_id',
         'product_id',
@@ -138,6 +171,7 @@ class Booking extends Model
     public function setBookingId(int $bookingId): self
     {
         $this->booking_id = $bookingId;
+
         return $this;
     }
 
@@ -156,24 +190,28 @@ class Booking extends Model
     public function setProductId(string $productId): self
     {
         $this->product_id = $productId;
+
         return $this;
     }
 
     public function setCompleteJSONFromDB(string $completeBookingJson): self
     {
         $this->complete_booking_json = $completeBookingJson;
+
         return $this;
     }
 
     public function setAccountId(int $accountId): self
     {
         $this->account_id = $accountId;
+
         return $this;
     }
 
     public function setChannelId(int $channelId): self
     {
         $this->channel_id = $channelId;
+
         return $this;
     }
 
@@ -238,7 +276,7 @@ class Booking extends Model
         $redeemDateTime->setTimestamp($redeemedAt);
         $this->utcRedeemedAt = DateTimeService::getISO8601DateFormatted($redeemDateTime);
 
-        return $this;  
+        return $this;
     }
 
     public function getUtcConfirmedAt(): ?string
@@ -248,9 +286,7 @@ class Booking extends Model
 
     /**
      * Set the value of utcConfirmedAt
-     *
-     * @return  self
-     */ 
+     */
     public function setUtcConfirmedAt(?int $confirmedAt): self
     {
         if (is_null($confirmedAt)) {
@@ -264,13 +300,13 @@ class Booking extends Model
         return $this;
     }
 
-
     public function setUtcExpiresAt(?int $seconds): self
     {
         if (is_null($seconds)) {
             $this->utcExpiresAt = null;
+
             return $this;
-        } 
+        }
         $timestamp = time() + $seconds;
 
         $expirationDateTime = new DateTime('now', new DateTimeZone('UTC'));
@@ -346,6 +382,7 @@ class Booking extends Model
     public function setSupplierReference(?string $supplierReference = null): self
     {
         $this->supplierReference = $supplierReference;
+
         return $this;
     }
 
@@ -359,16 +396,18 @@ class Booking extends Model
         $supplierRef = null;
         $supplierRefSet = false;
         foreach ($this->units as $unit) {
-            if (!$supplierRefSet && $unit->getSupplierReference() != null) {
-                 $supplierRef = $unit->getSupplierReference();
-                 $supplierRefSet = true;
-                 continue;
+            if (! $supplierRefSet && $unit->getSupplierReference() != null) {
+                $supplierRef = $unit->getSupplierReference();
+                $supplierRefSet = true;
+
+                continue;
             }
             if ($supplierRefSet && $unit->getSupplierReference() != $supplierRef) {
                 $supplierRef = null;
                 break;
             }
         }
+
         return $supplierRef;
     }
 
@@ -399,7 +438,7 @@ class Booking extends Model
     public function setNotes(string $notes): self
     {
         $this->notes = $notes;
-        
+
         return $this;
     }
 
@@ -422,8 +461,8 @@ class Booking extends Model
 
     /**
      * Summary of setUnits
-     * @param UnitItem[] $unitItems
-     * @return Booking
+     *
+     * @param  UnitItem[]  $unitItems
      */
     public function setUnits(array $unitItems): self
     {
@@ -471,7 +510,7 @@ class Booking extends Model
     public function setVoucher(?Voucher $voucher): self
     {
         $this->voucher = $voucher;
-        
+
         return $this;
     }
 
@@ -505,12 +544,13 @@ class Booking extends Model
 
         $cancelledDateTime = new DateTime('now', new DateTimeZone('UTC'));
         $cancelledDateTime->setTimestamp($cancelledAt);
+
         return DateTimeService::getISO8601DateFormatted($cancelledDateTime);
     }
 
     /**
      * Get the value of bookingData
-     */ 
+     */
     public function getBookingData(): SimpleXMLElement
     {
         return $this->bookingData;
@@ -519,7 +559,7 @@ class Booking extends Model
     public function setBookingData(SimpleXMLElement $bookingData): self
     {
         $this->bookingData = $bookingData;
-        
+
         return $this;
     }
 
@@ -534,7 +574,7 @@ class Booking extends Model
         $components = XMLService::getArrayFromXmlNode($bookingData->components, 'component');
 
         foreach ($components as $component) {
-            if (!empty((string) $component->redeemed_at)) {
+            if (! empty((string) $component->redeemed_at)) {
                 $componentsRedeemed[] = (int) $component->redeemed_at_utc_seconds;
             }
         }

@@ -2,28 +2,38 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Throwable;
 
 class JSONLogService
 {
     public string $correlationId;
+
     public string $channelId;
+
     public string $endpoint;
+
     public string $marketplaceId;
+
     public string $xRequestId;
+
     public const LOG_TYPE_INFO = 'info';
+
     public const LOG_TYPE_ERROR = 'error';
+
     public const LOG_TYPE_WARNING = 'warning';
+
     public const LOG_TYPE_DEBUG = 'debug';
+
     public const LOG_TYPE_LOG = 'log';
+
     public const LOG_TYPES = [
         self::LOG_TYPE_INFO,
         self::LOG_TYPE_ERROR,
         self::LOG_TYPE_WARNING,
         self::LOG_TYPE_DEBUG,
-        self::LOG_TYPE_LOG  
+        self::LOG_TYPE_LOG,
     ];
 
     public function __construct(string $channelId = '', string $marketplaceId = '', string $endpoint = '', ?string $correlationId = null, string $xRequestId = '')
@@ -46,14 +56,14 @@ class JSONLogService
 
     public function info(array|string $log): void
     {
-        $logArray = is_string($log) ? ["message" => $log] : $log;
-    
+        $logArray = is_string($log) ? ['message' => $log] : $log;
+
         $this->write(self::LOG_TYPE_INFO, $logArray);
     }
 
     public function error(array|string $log): void
     {
-        $logArray = is_string($log) ? ["message" => $log] : $log;
+        $logArray = is_string($log) ? ['message' => $log] : $log;
 
         if ($this->isAnExceptionLog($logArray)) {
             $exception = $logArray['exception'];
@@ -67,7 +77,7 @@ class JSONLogService
 
     public function warning(array|string $log): void
     {
-        $logArray = is_string($log) ? ["message" => $log] : $log;
+        $logArray = is_string($log) ? ['message' => $log] : $log;
 
         $this->write(self::LOG_TYPE_WARNING, $logArray);
     }
@@ -78,14 +88,14 @@ class JSONLogService
             return;
         }
 
-        $logArray = is_string($log) ? ["message" => $log] : $log;
+        $logArray = is_string($log) ? ['message' => $log] : $log;
 
         $this->write(self::LOG_TYPE_DEBUG, $logArray);
     }
 
     public function log(array|string $log): void
     {
-        $logArray = is_string($log) ? ["message" => $log] : $log;
+        $logArray = is_string($log) ? ['message' => $log] : $log;
 
         $this->write(self::LOG_TYPE_LOG, $logArray);
     }
@@ -93,7 +103,7 @@ class JSONLogService
     protected function write(string $logType, array $logArray)
     {
 
-        if (empty($logArray) || !in_array($logType, self::LOG_TYPES)) {
+        if (empty($logArray) || ! in_array($logType, self::LOG_TYPES)) {
             return;
         }
 
@@ -105,20 +115,19 @@ class JSONLogService
 
         Log::$logType($log);
 
-        return;
     }
 
     protected function getBaseLogArray(): array
     {
 
-        if (!empty($this->xRequestId)) {
+        if (! empty($this->xRequestId)) {
             $baseLogArray['xRequestId'] = $this->xRequestId;
         }
         $baseLogArray['correlationId'] = $this->correlationId;
         $baseLogArray['endpoint'] = $this->endpoint;
         $baseLogArray['channelId'] = $this->channelId;
         $baseLogArray['marketplaceId'] = $this->marketplaceId;
-    
+
         return $baseLogArray;
     }
 
@@ -131,11 +140,12 @@ class JSONLogService
     protected function getExceptionInfoAsArray(Throwable $e): array
     {
         return [
-            "exceptionMessage" => $e->getMessage(),
-            "exceptionCode" => $e->getCode(),
-            "exceptionTrace" => $e->getTrace()
+            'exceptionMessage' => $e->getMessage(),
+            'exceptionCode' => $e->getCode(),
+            'exceptionTrace' => $e->getTrace(),
         ];
     }
+
     protected function addEntriesToLogArray(array $logArray, array $entriesToAdd): array
     {
         return array_merge($logArray, $entriesToAdd);
@@ -149,5 +159,4 @@ class JSONLogService
 
         return $log;
     }
-
 }

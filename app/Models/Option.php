@@ -9,22 +9,33 @@ use Illuminate\Database\Eloquent\Model;
 class Option extends Model
 {
     protected string $id;
+
     protected bool $default;
+
     protected string $internalName;
+
     protected ?string $reference;
+
     protected array $availabilityStartTimes;
+
     protected string $cancellationCutoff;
+
     protected int $cancellationCutoffAmount;
+
     protected string $cancellationCutoffUnit;
+
     protected array $requiredContactFields;
+
     protected object $restrictions;
+
     protected array $units;
+
     protected ?OptionContent $content = null;
 
     public static function create(object $optionData): Option
     {
         $option = new Option;
-        
+
         $option->setId((string) $optionData->id);
         $option->setDefault($optionData->default);
         $option->setInternalName($optionData->internalName);
@@ -174,9 +185,8 @@ class Option extends Model
 
     /**
      * Get unit by it's ID
-     * @param string $unitId
+     *
      * @throws \App\Exceptions\InvalidUnitIdException
-     * @return \App\Models\Unit
      */
     public function getUnitById(string $unitId): Unit
     {
@@ -186,23 +196,21 @@ class Option extends Model
                 return $unit;
             }
         }
-        
+
         throw new InvalidUnitIdException($unitId);
     }
 
     /**
      * Get the value of content
-     */ 
-    public function getContent(): OptionContent|null
+     */
+    public function getContent(): ?OptionContent
     {
         return $this->content;
     }
 
     /**
      * Set the value of content
-     *
-     * @return  self
-     */ 
+     */
     public function setContent(OptionContent $content): self
     {
         $this->content = $content;
@@ -213,6 +221,7 @@ class Option extends Model
     public function addUnit(Unit $unit): self
     {
         $this->units[] = $unit;
+
         return $this;
     }
 }

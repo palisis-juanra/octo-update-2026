@@ -23,7 +23,7 @@ class TourPromotionService
      * The response is retrieved from TourCMS and transformed into an array
      * of Promotion domain objects.
      *
-     * @param int $tourId Tour identifier.
+     * @param  int  $tourId  Tour identifier.
      * @return Promotion[] List of promotions available for the given tour.
      */
     public function getTourPromotions(int $tourId): array
@@ -35,24 +35,25 @@ class TourPromotionService
         }
 
         $promotionsData = XMLService::getArrayFromXmlNode($tourPromotionsXML->promotions, 'promotion') ?? [];
-        
+
         $promotions = [];
         $promotions[] = Promotion::createOpenPromotion();
-        
+
         foreach ($promotionsData as $promotionData) {
             if ((string) $promotionData->name == Promotion::OPEN_PROMOTION_NAME) {
                 continue;
             }
             $promotions[] = Promotion::fromXML($promotionData);
         }
+
         return $promotions;
     }
 
     /**
      * Retrieve a single promotion by name for a given tour.
      *
-     * @param int $tourId Tour identifier.
-     * @param string $promotionName Promotion name to search for.
+     * @param  int  $tourId  Tour identifier.
+     * @param  string  $promotionName  Promotion name to search for.
      * @return Promotion|null The matching promotion, or null if not found.
      */
     public function getTourPromotionByName(int $tourId, string $promotionName): ?Promotion
@@ -71,12 +72,10 @@ class TourPromotionService
      *
      * An empty rate id is considered valid and no exception is thrown.
      *
-     * @param int $tourId Tour identifier.
-     * @param string|null $rateId Rate identifier received from the consumer.
+     * @param  int  $tourId  Tour identifier.
+     * @param  string|null  $rateId  Rate identifier received from the consumer.
      *
      * @throws InvalidRateIdException Thrown when the provided rate id does not exist.
-     *
-     * @return void
      */
     public function validateRateId(int $tourId, ?string $rateId): void
     {
@@ -101,7 +100,7 @@ class TourPromotionService
      *     'VIP20' => Promotion,
      * ]
      *
-     * @param int $tourId Tour identifier.
+     * @param  int  $tourId  Tour identifier.
      * @return array<string, Promotion> Promotions indexed by promotion name.
      */
     public function getTourPromotionsIndexedByName(int $tourId): array

@@ -19,27 +19,27 @@ class PricingTransformer extends BaseTransformer
 
     /**
      * Summary of basicTransform
-     * @param Pricing $pricing
-     * @return array
+     *
+     * @param  Pricing  $pricing
      */
     protected function basicTransform($pricing): array
     {
-        $data =  [
-            "original" => $pricing->getOriginal(),
-            "retail" => $pricing->getRetail(),
-            "net" => $pricing->getNet(),
-            "currency" => $pricing->getCurrency(),
-            "currencyPrecision" => $pricing->getCurrencyPrecision(),
-            "includedTaxes" => $pricing->getIncludedTaxes()
+        $data = [
+            'original' => $pricing->getOriginal(),
+            'retail' => $pricing->getRetail(),
+            'net' => $pricing->getNet(),
+            'currency' => $pricing->getCurrency(),
+            'currencyPrecision' => $pricing->getCurrencyPrecision(),
+            'includedTaxes' => $pricing->getIncludedTaxes(),
         ];
 
         if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
-            $data["rateId"] = $pricing->getRateId();
+            $data['rateId'] = $pricing->getRateId();
             $rates = [];
             foreach ($pricing->getRates() as $rate) {
                 $rates[] = $this->rateTransformer->transform($rate);
             }
-            $data["rates"] = $rates;
+            $data['rates'] = $rates;
         }
 
         return $data;

@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-
 use App\Features\Availability\AvailabilityRequest;
 use App\Interfaces\BaseAvailabilityRequest;
 use SimpleXMLElement;
@@ -10,7 +9,7 @@ use Tests\UnitTestCase;
 
 class AvailabilityRequestTest extends UnitTestCase
 {
-    public function test_isDepartureAvailable_departuresHaveNoSpaces_availabilityIsNotAvailable(): void
+    public function test_is_departure_available_departures_have_no_spaces_availability_is_not_available(): void
     {
         $availabilityRequest = $this->getMockBuilder(AvailabilityRequest::class)
             ->disableOriginalConstructor()
@@ -31,7 +30,7 @@ class AvailabilityRequestTest extends UnitTestCase
         $this->assertFalse($available);
     }
 
-    public function test_isDepartureAvailable_departuresHaveSpacesButIsClosed_availabilityIsNotAvailable(): void
+    public function test_is_departure_available_departures_have_spaces_but_is_closed_availability_is_not_available(): void
     {
         $availabilityRequest = $this->getMockBuilder(AvailabilityRequest::class)
             ->disableOriginalConstructor()
@@ -51,7 +50,7 @@ class AvailabilityRequestTest extends UnitTestCase
         $this->assertFalse($available);
     }
 
-    public function test_isDepartureAvailable_departuresHaveNoSufficientSpaces_availabilityIsNotAvailable(): void
+    public function test_is_departure_available_departures_have_no_sufficient_spaces_availability_is_not_available(): void
     {
         $availabilityRequest = $this->getMockBuilder(AvailabilityRequest::class)
             ->disableOriginalConstructor()

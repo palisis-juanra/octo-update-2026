@@ -2,14 +2,14 @@
 
 namespace App\Transformers;
 
-use App\Facades\OctoRequestFacade;
-use App\Http\Requests\OctoRequest;
 use League\Fractal\Resource\Collection;
 
 class OptionTransformer extends BaseTransformer
 {
     protected UnitTransformer $unitTransformer;
+
     protected ProductContentTransformer $productContentTransformer;
+
     protected OptionContentTransformer $optionContentTransformer;
 
     public function __construct(string $mode)
@@ -45,14 +45,14 @@ class OptionTransformer extends BaseTransformer
             'cancellationCutoffUnit' => $option->getCancellationCutoffUnit(),
             'requiredContactFields' => $option->getRequiredContactFields(),
             'restrictions' => $option->getRestrictions(),
-            'units' => $unitsTransformed
+            'units' => $unitsTransformed,
         ];
 
-        if (!empty($option->getContent())) {
+        if (! empty($option->getContent())) {
             $optionContent = $this->optionContentTransformer->transform($option->getContent());
             $data = array_merge($data, $optionContent);
         }
-    
+
         return $data;
     }
 }

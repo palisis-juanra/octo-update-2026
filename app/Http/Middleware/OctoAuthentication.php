@@ -7,19 +7,24 @@ use App\Providers\JSONLogServiceProvider;
 use App\Providers\TourCMSServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
-
+use Symfony\Component\HttpFoundation\Response;
 
 class OctoAuthentication
 {
     // MAID|CHANNEL_ID|API_KEY
     const AUTH_PATTERN_REGEX = '/^\d+\|\d+\|.+/';
+
     const AUTH_SEPARATOR = '|';
+
     const FIELD_API_KEY = 'APIKey';
+
     const FIELD_CHANNEL_ID = 'channel';
+
     const FIELD_X_CORRELATION_ID = 'X-Correlation-Id';
+
     const FIELD_X_REQUEST_ID = 'X-Request-Id';
+
     const FIELD_MAID = 'maid';
 
     /**
@@ -30,7 +35,7 @@ class OctoAuthentication
     public function handle(Request $request, Closure $next): Response
     {
         $auth = $request->bearerToken();
-    
+
         if (is_null($auth)) {
             return OctoResponse::UNAUTHORIZED();
         }
@@ -49,10 +54,9 @@ class OctoAuthentication
             self::FIELD_MAID => $this->getMaidFromAuthHeader($auth),
             self::FIELD_CHANNEL_ID => $this->getChannelFromAuthHeader($auth),
             self::FIELD_API_KEY => $this->getAPIKeyFromAuthHeader($auth),
-            self::FIELD_X_CORRELATION_ID => $xCorrelationId, 
-            self::FIELD_X_REQUEST_ID => $xRequestId
+            self::FIELD_X_CORRELATION_ID => $xCorrelationId,
+            self::FIELD_X_REQUEST_ID => $xRequestId,
         ]);
-
 
         // We should not register ServiceProviders in test enviroment
         if (env('APP_ENV') === 'testing') {
@@ -82,15 +86,14 @@ class OctoAuthentication
         return explode(self::AUTH_SEPARATOR, $auth, 3)[2];
     }
 
-    public static function getCorrelationIdFromHeaders(Request $request): string | null
+    public static function getCorrelationIdFromHeaders(Request $request): ?string
     {
-        
+
         return $request->header('X-Correlation-Id');
     }
 
-    public static function getRequestIdFromHeaders(Request $request): string | null
+    public static function getRequestIdFromHeaders(Request $request): ?string
     {
         return $request->header('X-Request-Id');
     }
-
 }

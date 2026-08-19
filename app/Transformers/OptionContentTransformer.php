@@ -13,7 +13,7 @@ class OptionContentTransformer extends BaseTransformer
     {
 
         return [
-            'title' => $optionContent->getTitle()
+            'title' => $optionContent->getTitle(),
         ];
     }
 

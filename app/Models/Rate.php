@@ -5,7 +5,9 @@ namespace App\Models;
 class Rate
 {
     protected string $id;
+
     protected int $retailPrice;
+
     protected int $netPrice;
 
     public function __construct(string $id, int $retailPrice, int $netPrice)

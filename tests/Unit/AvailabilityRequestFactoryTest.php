@@ -17,12 +17,16 @@ use Tests\FeatureTestCase;
 class AvailabilityRequestFactoryTest extends FeatureTestCase
 {
     public $tourPromotionServiceMock;
+
     public $productServiceMock;
+
     public $availabilityPromotionServiceMock;
+
     public AvailabilityRequestFactory $factory;
+
     public const PRICING_HEADER = 'pricing';
-    
-    public function setUp(): void
+
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -45,68 +49,68 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->factory = new AvailabilityRequestFactory($this->productServiceMock, $this->tourPromotionServiceMock, $this->availabilityPromotionServiceMock);
     }
 
-    public function test_whenRequestHasOnlyOneDayWithoutPricingHeader_thenAvailabilityRequestIsCreated()
+    public function test_when_request_has_only_one_day_without_pricing_header_then_availability_request_is_created()
     {
         $requestParams = [
-            "productId" => "TE_1_67|142",
-            "optionId" => "START_TIME|13:00",
-            "localDate" => "2024-11-28",
+            'productId' => 'TE_1_67|142',
+            'optionId' => 'START_TIME|13:00',
+            'localDate' => '2024-11-28',
         ];
-        
+
         $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(AvailabilityRequest::class, $availabilityRequest);
-        $this->assertEquals($requestParams["localDate"], $availabilityRequest->getLocalDateStart());
+        $this->assertEquals($requestParams['localDate'], $availabilityRequest->getLocalDateStart());
         $this->assertEquals('', $availabilityRequest->getLocalDateEnd());
 
     }
 
-    public function test_whenRequestHasAPeriodOfTimeWithoutPricingHeader_thenAvailability_thenAvailabilityRequestIsCreated()
+    public function test_when_request_has_a_period_of_time_without_pricing_header_then_availability_then_availability_request_is_created()
     {
         $requestParams = [
-            "productId" => "TE_1_67|142",
-            "optionId" => "START_TIME|13:00",
-            "localDateStart" => "2024-11-18",
-            "localDateEnd" => "2024-11-25",
+            'productId' => 'TE_1_67|142',
+            'optionId' => 'START_TIME|13:00',
+            'localDateStart' => '2024-11-18',
+            'localDateEnd' => '2024-11-25',
         ];
 
         $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(AvailabilityRequest::class, $availabilityRequest);
-        $this->assertEquals($requestParams["localDateStart"], $availabilityRequest->getLocalDateStart());
-        $this->assertEquals($requestParams["localDateEnd"], $availabilityRequest->getLocalDateEnd());
+        $this->assertEquals($requestParams['localDateStart'], $availabilityRequest->getLocalDateStart());
+        $this->assertEquals($requestParams['localDateEnd'], $availabilityRequest->getLocalDateEnd());
     }
 
-    public function test_whenRequestHasAOnlyOneDayWithPricingHeader_thenPricingAvailabilityRequestIsCreated()
+    public function test_when_request_has_a_only_one_day_with_pricing_header_then_pricing_availability_request_is_created()
     {
         OctoRequestFacade::shouldReceive('isCapabilityActive')
             ->andReturn(true);
 
         $requestParams = [
-            "productId" => "TE_1_67|142",
-            "optionId" => "START_TIME|13:00",
-            "localDate" => "2024-11-28",
+            'productId' => 'TE_1_67|142',
+            'optionId' => 'START_TIME|13:00',
+            'localDate' => '2024-11-28',
         ];
 
         $availabilityRequest = $this->factory->get($this->getProduct($requestParams['productId']), $requestParams);
 
         $this->assertInstanceOf(BaseAvailabilityRequest::class, $availabilityRequest);
         $this->assertInstanceOf(PricingAvailabilityRequest::class, $availabilityRequest);
-        $this->assertEquals($requestParams["localDate"], $availabilityRequest->getLocalDateStart());
+        $this->assertEquals($requestParams['localDate'], $availabilityRequest->getLocalDateStart());
     }
 
-    public function test_whenRequestHasMultipleAvailabilityIds_thenLocalDateStartAndLocalDateEndMatchMinAndMaxDate()
+    public function test_when_request_has_multiple_availability_ids_then_local_date_start_and_local_date_end_match_min_and_max_date()
     {
         $requestParams = [
-            "productId" => "TE_1_67|142",
-            "optionId" => "START_TIME|13:00",
-            "availabilityIds" => [
-                "2024-11-18|1234",
-                "2024-11-20|1235",
-                "2024-11-25|1236"
-            ]
+            'productId' => 'TE_1_67|142',
+            'optionId' => 'START_TIME|13:00',
+            'availabilityIds' => [
+                '2024-11-18|1234',
+                '2024-11-20|1235',
+                '2024-11-25|1236',
+            ],
         ];
 
         $availabilityIdsDates = [];
@@ -120,14 +124,14 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->assertEquals(max($availabilityIdsDates), $availabilityRequest->getLocalDateEnd());
     }
 
-    public function test_whenRequestHasOnlyOneAvailabilityId_thenLocalDateStartMatchAvailabilityIdDate()
+    public function test_when_request_has_only_one_availability_id_then_local_date_start_match_availability_id_date()
     {
         $requestParams = [
-            "productId" => "TE_1_67|142",
-            "optionId" => "START_TIME|13:00",
-            "availabilityIds" => [
-                "2024-11-18|1234"
-            ]
+            'productId' => 'TE_1_67|142',
+            'optionId' => 'START_TIME|13:00',
+            'availabilityIds' => [
+                '2024-11-18|1234',
+            ],
         ];
 
         $availabilityIdDate = explode('|', $requestParams['availabilityIds'][0])[0];
@@ -137,7 +141,7 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->assertEquals($availabilityIdDate, $availabilityRequest->getLocalDateStart());
     }
 
-    public function test_whenRequestHasOnlyOneAvailabilityIdWithPricingHeader_thenPricingAvailabilityRequestIsCreated()
+    public function test_when_request_has_only_one_availability_id_with_pricing_header_then_pricing_availability_request_is_created()
     {
         $this->withHeaders([
             OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING,
@@ -147,11 +151,11 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
             ->andReturn(true);
 
         $requestParams = [
-            "productId" => "TE_1_67|142",
-            "optionId" => "START_TIME|13:00",
-            "availabilityIds" => [
-                "2024-11-18|1234"
-            ]
+            'productId' => 'TE_1_67|142',
+            'optionId' => 'START_TIME|13:00',
+            'availabilityIds' => [
+                '2024-11-18|1234',
+            ],
         ];
 
         $availabilityIdDate = explode('|', $requestParams['availabilityIds'][0])[0];
@@ -163,14 +167,14 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
         $this->assertEquals($availabilityIdDate, $availabilityRequest->getLocalDateStart());
     }
 
-    public function test_whenRequestHasOnlyOneAvailabilityIdWithoutPricingHeader_thenSingleDayAvailabilityRequestIsCreated()
+    public function test_when_request_has_only_one_availability_id_without_pricing_header_then_single_day_availability_request_is_created()
     {
         $requestParams = [
-            "productId" => "TE_1_67|142",
-            "optionId" => "START_TIME|13:00",
-            "availabilityIds" => [
-                "2024-11-18|1234"
-            ]
+            'productId' => 'TE_1_67|142',
+            'optionId' => 'START_TIME|13:00',
+            'availabilityIds' => [
+                '2024-11-18|1234',
+            ],
         ];
 
         $availabilityIdDate = explode('|', $requestParams['availabilityIds'][0])[0];
@@ -184,13 +188,13 @@ class AvailabilityRequestFactoryTest extends FeatureTestCase
 
     public function getProduct(string $productId): Product
     {
-        $product = new Product();
+        $product = new Product;
 
         $productServiceMock = $this->getMockBuilder(ProductService::class)
             ->disableOriginalConstructor()
             ->onlyMethods([])
             ->getMock();
-        
+
         $tourId = $productServiceMock->getTourIdFromProductId($productId);
 
         return $product->setId($productId)->setTourId($tourId);

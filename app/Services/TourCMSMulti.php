@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 use stdClass;
-use TourCMS\Utils\TourCMS as TourCMS;
+use TourCMS\Utils\TourCMS;
 
 class TourCMSMulti extends TourCMS
 {
@@ -15,10 +15,10 @@ class TourCMSMulti extends TourCMS
      *
      * @author Juan Ramón González Morales
      *
-     * @param $mp Marketplace ID
-     * @param $k API Private Key
-     * @param $res Result type, defaults to raw
-     * @param $to Timeout, default 0
+     * @param  $mp  Marketplace ID
+     * @param  $k  API Private Key
+     * @param  $res  Result type, defaults to raw
+     * @param  $to  Timeout, default 0
      */
     public function __construct($mp, $k, $res = 'raw', $to = 0)
     {
@@ -35,15 +35,15 @@ class TourCMSMulti extends TourCMS
      *
      * @author Juan Ramón González Morales
      *
-     * @param $path API path to call
-     * @param $channel Channel ID, defaults to zero
-     * @param $verb HTTP Verb, defaults to GET
+     * @param  $path  API path to call
+     * @param  $channel  Channel ID, defaults to zero
+     * @param  $verb  HTTP Verb, defaults to GET
      */
     public function request($path, $channel = 0, $verb = 'GET', $post_data = null): object
     {
         // Prepare the URL we are sending to
         $url = $this->base_url.$path;
-        //Log::info('URL REQUEST: '.$url);
+        // Log::info('URL REQUEST: '.$url);
         // We need a signature for the header
 
         $outbound_time = time();
@@ -78,11 +78,11 @@ class TourCMSMulti extends TourCMS
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
             if (! is_null($post_data)) {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data->asXML());
-                //Log::info('POST DATA: '.$post_data->asXML());
+                // Log::info('POST DATA: '.$post_data->asXML());
                 $requestObject->post_data = $post_data;
             } else {
                 $requestObject->post_data = null;
-                //Log::info('NO POST DATA: ');
+                // Log::info('NO POST DATA: ');
             }
         }
 
@@ -97,7 +97,7 @@ class TourCMSMulti extends TourCMS
     /**
      * Function to process a request handler, do curl calls asynchronously and return a request handler object with responses
      *
-     * @param  stdClass  $requestHandler Object with a requestArray var which includes curl handler to do calls asynchronously
+     * @param  stdClass  $requestHandler  Object with a requestArray var which includes curl handler to do calls asynchronously
      * @return stdClass $requestHandler Received requestHandler object with responses includes from the calls
      */
     public function proccessRequests(stdClass $requestHandler): stdClass
@@ -107,6 +107,7 @@ class TourCMSMulti extends TourCMS
 
         if (empty($requestHandler->requestArray)) {
             $requestHandler->error = self::NO_REQUEST_TO_PROCESS;
+
             return $requestHandler;
         }
 
@@ -150,8 +151,7 @@ class TourCMSMulti extends TourCMS
 
         $requestHandler->endTime = microtime(true);
         $requestHandler->totalTime = round($requestHandler->endTime - $requestHandler->start_time, 3);
-        //Log::info('REQUEST TOTAL TIME: '.$requestHandler->totalTime);
-       
+        // Log::info('REQUEST TOTAL TIME: '.$requestHandler->totalTime);
 
         return $requestHandler;
     }

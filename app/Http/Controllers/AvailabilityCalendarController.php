@@ -10,13 +10,14 @@ use App\Http\Responses\OctoResponse;
 use App\Services\AvailabilityCalendarService;
 use App\Services\JSONLogService;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use OpenApi\Attributes as OA;
 
 class AvailabilityCalendarController extends Controller
 {
     public AvailabilityCalendarService $availabilityCalendarService;
+
     public JSONLogService $logger;
 
     public function __construct(AvailabilityCalendarService $availabilityCalendarService, JSONLogService $logger)
@@ -38,7 +39,7 @@ class AvailabilityCalendarController extends Controller
                         new OA\Property(property: 'productId', type: 'string', pattern: '^([A-Z]{2}_\d+_\d+\|\d+)$', description: 'Product ID.', example: 'TE_1_2|143'),
                         new OA\Property(property: 'optionId', type: 'string', pattern: '(^SINGLE)|(^(START_TIME\|([01][0-9]|2[0-3]):([0-5][0-9])$))|(^(DEPARTURE_CODE\|.*))|(^(SUPPLIER_NOTE\|.*))|(^(SUPPLIER_NOTE_PLUS_START_TIME\|.*))', description: 'Option ID.', example: 'SINGLE'),
                         new OA\Property(property: 'localDateStart', type: 'string', pattern: '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', description: 'Start date to query for (YYYY-MM-DD).', example: '2022-05-11'),
-                        new OA\Property(property: 'localDateEnd', type: 'string', pattern: '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', description: 'End date to query for (YYYY-MM-DD).', example: '2022-05-18')
+                        new OA\Property(property: 'localDateEnd', type: 'string', pattern: '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', description: 'End date to query for (YYYY-MM-DD).', example: '2022-05-18'),
                     ]
                 )
             )
@@ -51,7 +52,7 @@ class AvailabilityCalendarController extends Controller
                     mediaType: 'application/json',
                     schema: new OA\Schema(
                         type: 'array',
-                        items: new OA\Items (
+                        items: new OA\Items(
                             type: 'object',
                             properties: [
                                 new OA\Property(property: 'localDate', type: 'string', pattern: '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', description: 'A single date to query.', example: '2022-05-12'),
@@ -67,7 +68,7 @@ class AvailabilityCalendarController extends Controller
                                         type: 'object',
                                         properties: [
                                             new OA\Property(property: 'from', type: 'string', pattern: '^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$', description: 'When this product opens (HH:MM).', example: '08:00'),
-                                            new OA\Property(property: 'to', type: 'string', pattern: '^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$', description: 'When this product closes (HH:M).', example: '16:00')
+                                            new OA\Property(property: 'to', type: 'string', pattern: '^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$', description: 'When this product closes (HH:M).', example: '16:00'),
                                         ],
                                     )
                                 ),
@@ -78,7 +79,7 @@ class AvailabilityCalendarController extends Controller
             ),
             new OA\Response(response: 400, description: 'Invalid Product Id | Invalid Option Id'),
             new OA\Response(response: 403, description: 'Forbidden'),
-            new OA\Response(response: 500, description: 'Internal Server Error')
+            new OA\Response(response: 500, description: 'Internal Server Error'),
         ]
     )]
     public function index(Request $request): JsonResponse
@@ -97,7 +98,7 @@ class AvailabilityCalendarController extends Controller
 
         } catch (AvailabilityRequestMissingParamException $e) {
             return OctoResponse::BAD_REQUEST($e->getMessage());
-        } catch (AvailabilityRequestInvalidParamException $e){
+        } catch (AvailabilityRequestInvalidParamException $e) {
             return OctoResponse::BAD_REQUEST($e->getMessage());
         } catch (NoMatchingDataException $e) {
             return new JsonResponse([], Response::HTTP_OK);

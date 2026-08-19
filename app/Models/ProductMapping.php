@@ -8,9 +8,13 @@ namespace App\Models;
 class ProductMapping
 {
     protected string $type;
+
     protected string $label;
+
     protected string $value;
+
     protected array $startTimes = [];
+
     protected string $customLabel;
 
     public function __construct(string $type, string $label, string $value, array $startTimes = [], string $customLabel = '')

@@ -9,11 +9,13 @@ use Tests\FeatureTestCase;
 
 class AgentWithFullBookingPermissionsTest extends FeatureTestCase
 {
-    public const BOOKING_UUID = "46c7cf4f-25e7-4abc-ba32-2ba2aa3f3ed2";
+    public const BOOKING_UUID = '46c7cf4f-25e7-4abc-ba32-2ba2aa3f3ed2';
+
     protected TourCMSService|MockObject $tourCMSService;
+
     protected SimpleXMLElement $showChannelXML;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -27,11 +29,11 @@ class AgentWithFullBookingPermissionsTest extends FeatureTestCase
         $this->tourCMSService->method('showChannel')->willReturn($this->showChannelXML);
 
         $this->instance(TourCMSService::class, $this->tourCMSService);
-    } 
+    }
 
-    public function test_whenAgentDontHaveLevel3Permissions_thenTheyCanNotAccessBookingsEndpoints(): void
+    public function test_when_agent_dont_have_level3_permissions_then_they_can_not_access_bookings_endpoints(): void
     {
-        $response = $this->get('/bookings/' . self::BOOKING_UUID, [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response = $this->get('/bookings/'.self::BOOKING_UUID, [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
 
         $response->assertStatus(403);
     }

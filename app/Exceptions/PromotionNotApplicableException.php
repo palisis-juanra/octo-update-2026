@@ -6,7 +6,7 @@ use Exception;
 
 class PromotionNotApplicableException extends Exception
 {
-    protected string $promotionName = "";
+    protected string $promotionName = '';
 
     public function __construct(string $promotionName, string $madeDate)
     {

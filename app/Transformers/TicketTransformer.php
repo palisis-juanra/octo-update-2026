@@ -14,7 +14,7 @@ class TicketTransformer extends BaseTransformer
         return [
             'redemptionMethod' => $ticket->getRedemptionMethod(),
             'utcRedeemedAt' => $ticket->getUtcRedeemedAt(),
-            'deliveryOptions' => !empty($ticket->getDeliveryOptions()) ? [$ticket->getDeliveryOptions()] : []
+            'deliveryOptions' => ! empty($ticket->getDeliveryOptions()) ? [$ticket->getDeliveryOptions()] : [],
         ];
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Builders;
 
 use stdClass;
@@ -27,21 +28,22 @@ class BookingChecker
         'unitItems[]->contact->locales',
         'unitItems[]->contact->postalCode',
         'unitItems[]->contact->country',
-        'unitItems[]->contact->notes'
+        'unitItems[]->contact->notes',
 
     ];
 
-    public function updateStoredJsonWithNewInformation(stdClass $storedBooking, stdClass $updatedBooking): stdClass {
+    public function updateStoredJsonWithNewInformation(stdClass $storedBooking, stdClass $updatedBooking): stdClass
+    {
         $status = $updatedBooking->status;
         foreach (self::UPDATABLE_PROPERTIES as $property) {
-            if (!is_null($updatedBooking->$property)) {
+            if (! is_null($updatedBooking->$property)) {
                 $storedBooking->$property = $updatedBooking->$property;
             }
         }
 
         foreach (self::NESTED_UPDATABLE_PROPERTIES as $nestedProperty) {
             $newValue = $this->getNestedProp($updatedBooking, $nestedProperty);
-            if (!is_null($newValue)) {
+            if (! is_null($newValue)) {
                 $this->setNestedProp($storedBooking, $nestedProperty, $newValue);
             }
         }
@@ -55,10 +57,10 @@ class BookingChecker
 
     protected function getNestedProp($obj, string $path)
     {
-        $parts = explode("->", $path);
+        $parts = explode('->', $path);
 
         foreach ($parts as $part) {
-            if (str_ends_with($part, "[]")) {
+            if (str_ends_with($part, '[]')) {
                 $prop = substr($part, 0, -2);
 
                 if (is_object($obj) && isset($obj->$prop)) {
@@ -69,8 +71,8 @@ class BookingChecker
                     return null;
                 }
 
-                $remainingPath = implode("->", array_slice($parts, array_search($part, $parts) + 1));
-                if ($remainingPath === "") {
+                $remainingPath = implode('->', array_slice($parts, array_search($part, $parts) + 1));
+                if ($remainingPath === '') {
                     return $obj;
                 }
 
@@ -78,14 +80,13 @@ class BookingChecker
                 foreach ($obj as $item) {
                     $results[] = $this->getNestedProp($item, $remainingPath);
                 }
+
                 return $results;
             }
 
             if (is_object($obj) && isset($obj->$part)) {
                 $obj = $obj->$part;
-            }
-            
-            elseif (is_array($obj) && isset($obj[$part])) {
+            } elseif (is_array($obj) && isset($obj[$part])) {
                 $obj = $obj[$part];
             } else {
                 return null;
@@ -95,37 +96,37 @@ class BookingChecker
         return $obj;
     }
 
-    protected function setNestedProp(&$obj, $path, $value) 
+    protected function setNestedProp(&$obj, $path, $value)
     {
         if (is_array($value)) {
             foreach ($value as $index => $val) {
-                $this->setNestedProp($obj, str_replace("[]", "[$index]", $path), $val);
+                $this->setNestedProp($obj, str_replace('[]', "[$index]", $path), $val);
             }
         } else {
-            $parts = explode("->", $path);
+            $parts = explode('->', $path);
             $current = &$obj;
-            
+
             foreach ($parts as $i => $part) {
                 // If current is null and not the last part, stop processing
                 if ($i < count($parts) - 1 && is_null($current)) {
                     return;
                 }
-                
+
                 if (preg_match('/^(.+)\[(\d+)\]$/', $part, $matches)) {
                     $arrayName = $matches[1];
                     $index = $matches[2];
-                    
+
                     // Check if the array and index exist and are not null
-                    if (!isset($current->$arrayName) || 
-                        !isset($current->$arrayName[$index]) || 
+                    if (! isset($current->$arrayName) ||
+                        ! isset($current->$arrayName[$index]) ||
                         is_null($current->$arrayName[$index])) {
                         return;
                     }
-                    
+
                     $current = &$current->$arrayName[$index];
                 } elseif ($part === '[]') {
                     // Handle anonymous array (e.g., unitItems[])
-                    if (!is_array($current)) {
+                    if (! is_array($current)) {
                         return;
                     }
                     $current = &$current[];
@@ -133,9 +134,9 @@ class BookingChecker
                     if ($i === count($parts) - 1) {
                         // Assign value if it's the last part and current is not null
                         if (is_null($current)) {
-                            return; 
+                            return;
                         }
-                        
+
                         if (is_object($current)) {
                             $current->$part = $value;
                         } elseif (is_array($current)) {

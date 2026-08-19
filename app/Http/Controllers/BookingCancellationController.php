@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\BookingNotCancellableException;
-use App\Models\Booking;
 use App\Models\BookingCancellation;
 use App\Services\BookingCancellationService;
 use App\Services\JSONLogService;
@@ -16,22 +15,22 @@ use Symfony\Component\HttpFoundation\Response;
 class BookingCancellationController extends Controller
 {
     public const FIELD_REASON = 'reason';
+
     public const FIELD_FORCE = 'force';
-    
+
     public BookingTransformer $transformer;
 
     public function __construct(
         public BookingCancellationService $bookingCancelService,
         public JSONLogService $logger
-    ) 
-    {
+    ) {
         $this->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
     }
 
     public function cancel(Request $request, $uuid): JsonResponse
     {
         $requestParams = $request->post();
-        $this->logger->info(["message" => "Starting to process cancel booking request", "request" => $request->post()]);
+        $this->logger->info(['message' => 'Starting to process cancel booking request', 'request' => $request->post()]);
 
         $reason = $requestParams[self::FIELD_REASON] ?? null;
 
@@ -39,10 +38,10 @@ class BookingCancellationController extends Controller
 
         $booking = $this->bookingCancelService->getBooking($bookingByUUID, true);
 
-        if (!$booking->isBookingCancellable()) { 
+        if (! $booking->isBookingCancellable()) {
             $this->logger->info("Booking not cancellable: {$booking->getId()}");
             throw new BookingNotCancellableException;
-        };
+        }
 
         if ($this->bookingCancelService->shouldWeCancelBooking($booking)) {
             $this->logger->info("Booking {$booking->getUuid()} is confirmed, calling cancel booking endpoint");
@@ -53,7 +52,7 @@ class BookingCancellationController extends Controller
             $cancelled = $this->bookingCancelService->deleteBooking($booking);
         }
 
-        if (true === $cancelled) {
+        if ($cancelled === true) {
             $this->bookingCancelService->updateBookingStatusToCancelled($booking);
             $cancellation = new BookingCancellation($reason);
             $booking->setCancellation($cancellation);

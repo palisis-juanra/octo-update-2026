@@ -8,16 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 class CalendarAvailability extends Model
 {
     use HasFactory;
+
     protected string $localDate;
+
     protected bool $available;
+
     protected string $status;
+
     protected ?int $vacancies;
+
     protected ?int $capacity;
+
     protected array $openingHours;
 
     /**
      * Get the value of localDate
-     */ 
+     */
     public function getLocalDate(): string
     {
         return $this->localDate;
@@ -25,9 +31,7 @@ class CalendarAvailability extends Model
 
     /**
      * Set the value of localDate
-     *
-     * @return  self
-     */ 
+     */
     public function setLocalDate(string $localDate): self
     {
         $this->localDate = $localDate;
@@ -37,7 +41,7 @@ class CalendarAvailability extends Model
 
     /**
      * Get the value of available
-     */ 
+     */
     public function getAvailable(): bool
     {
         return $this->available;
@@ -45,9 +49,7 @@ class CalendarAvailability extends Model
 
     /**
      * Set the value of available
-     *
-     * @return  self
-     */ 
+     */
     public function setAvailable(bool $available): self
     {
         $this->available = $available;
@@ -57,7 +59,7 @@ class CalendarAvailability extends Model
 
     /**
      * Get the value of status
-     */ 
+     */
     public function getStatus(): string
     {
         return $this->status;
@@ -65,9 +67,7 @@ class CalendarAvailability extends Model
 
     /**
      * Set the value of status
-     *
-     * @return  self
-     */ 
+     */
     public function setStatus(string $status): self
     {
         $this->status = $status;
@@ -77,7 +77,7 @@ class CalendarAvailability extends Model
 
     /**
      * Get the value of vacancies
-     */ 
+     */
     public function getVacancies(): ?int
     {
         return $this->vacancies;
@@ -85,9 +85,7 @@ class CalendarAvailability extends Model
 
     /**
      * Set the value of vacancies
-     *
-     * @return  self
-     */ 
+     */
     public function setVacancies(?int $vacancies): self
     {
         $this->vacancies = $vacancies;
@@ -97,7 +95,7 @@ class CalendarAvailability extends Model
 
     /**
      * Get the value of capacity
-     */ 
+     */
     public function getCapacity(): ?int
     {
         return $this->capacity;
@@ -105,9 +103,7 @@ class CalendarAvailability extends Model
 
     /**
      * Set the value of capacity
-     *
-     * @return  self
-     */ 
+     */
     public function setCapacity(?int $capacity): self
     {
         $this->capacity = $capacity;
@@ -117,7 +113,7 @@ class CalendarAvailability extends Model
 
     /**
      * Get the value of openingHours
-     */ 
+     */
     public function getOpeningHours(): array
     {
         return $this->openingHours;
@@ -125,9 +121,7 @@ class CalendarAvailability extends Model
 
     /**
      * Set the value of openingHours
-     *
-     * @return  self
-     */ 
+     */
     public function setOpeningHours(array $openingHours): self
     {
         $this->openingHours = $openingHours;

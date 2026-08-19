@@ -7,16 +7,27 @@ use SimpleXMLElement;
 class CategoryLabelService
 {
     public const TCMS_TAG_FIELD = 'tag';
+
     public const LABEL_SELF_GUIDED = 'self-guided';
+
     public const LABEL_GUIDED_TOURS = 'guided-tours';
+
     public const LABEL_MULTI_DAY = 'multi-day';
+
     public const LABEL_ACCOMMODATION_INCLUDED = 'accommodation-included';
+
     public const LABEL_TRIP_DIFFICULTY_EASY = 'trip-difficulty-easy';
+
     public const LABEL_TRIP_DIFFICULTY_MEDIUM = 'trip-difficulty-medium';
+
     public const LABEL_TRIP_DIFFICULTY_HARD = 'trip-difficulty-hard';
+
     public const TCMS_SELF_GUIDED = 2;
+
     public const TCMS_GUIDED_TOURS = 1;
+
     public const TCMS_MULTI_DAY = 3;
+
     public const TCMS_ACCOMMODATION_INCLUDED = 1;
 
     public const TCMS_TOUR_TAGS_TO_CATEGORY_LABELS = [
@@ -39,30 +50,32 @@ class CategoryLabelService
         'museums' => 'museums',
         'nightlife' => 'nightlife',
         'outdoors' => 'outdoors',
-        'private-tours '=> 'private-tours',
+        'private-tours ' => 'private-tours',
         'romantic' => 'romantic',
         'small-group-tours' => 'small-group-tours',
         'sports' => 'sports',
         'theme-parks' => 'theme-parks',
         'walking-tours' => 'walking-tours',
-        'suitable-for-wheelchairs' => 'wheelchair-accessible'
+        'suitable-for-wheelchairs' => 'wheelchair-accessible',
     ];
 
     public static function getFromTourXML(SimpleXMLElement $tour): array
     {
         $categoryLabels = [];
-        if (empty($tour->tour_tags->tag)) return $categoryLabels;
+        if (empty($tour->tour_tags->tag)) {
+            return $categoryLabels;
+        }
 
         $tourTags = XMLService::getArrayFromXmlNode($tour->tour_tags, self::TCMS_TAG_FIELD);
         foreach ($tourTags as $tag) {
-            if (!empty($tag->token) && array_key_exists((string) $tag->token, self::TCMS_TOUR_TAGS_TO_CATEGORY_LABELS)) {
+            if (! empty($tag->token) && array_key_exists((string) $tag->token, self::TCMS_TOUR_TAGS_TO_CATEGORY_LABELS)) {
                 $categoryLabels[] = self::TCMS_TOUR_TAGS_TO_CATEGORY_LABELS[(string) $tag->token];
             }
         }
 
         if (((int) $tour->tourleader_type) == self::TCMS_SELF_GUIDED) {
             $categoryLabels[] = self::LABEL_SELF_GUIDED;
-        } else if ((int) $tour->tourleader_type == self::TCMS_GUIDED_TOURS) {
+        } elseif ((int) $tour->tourleader_type == self::TCMS_GUIDED_TOURS) {
             $categoryLabels[] = self::LABEL_GUIDED_TOURS;
         }
 

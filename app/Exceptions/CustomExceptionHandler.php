@@ -19,6 +19,7 @@ use Throwable;
 class CustomExceptionHandler extends Handler
 {
     public Request $request;
+
     public JSONLogService $logger;
 
     public function __construct(Container $container)
@@ -37,117 +38,120 @@ class CustomExceptionHandler extends Handler
 
     public function render($request, Throwable $exception): JsonResponse
     {
- 
+
         $exceptionClass = get_class($exception);
 
         switch ($exceptionClass) {
-            case (NotFoundHttpException::class):
+            case NotFoundHttpException::class:
                 $response = OctoResponse::NOT_IMPLEMENTED();
                 break;
 
-            case (MethodNotAllowedHttpException::class):
+            case MethodNotAllowedHttpException::class:
                 $response = OctoResponse::BAD_REQUEST('Invalid http request method');
                 break;
 
-            case (FailSignatureException::class): 
+            case FailSignatureException::class:
                 $response = OctoResponse::FORBIDDEN();
                 break;
 
-            case (InvalidProductIdException::class):
-            case (InvalidProductContentException::class):
+            case InvalidProductIdException::class:
+            case InvalidProductContentException::class:
                 $response = OctoResponse::INVALID_PRODUCT_ID($exception->productId);
                 break;
 
-            case (InvalidOptionIdException::class):
+            case InvalidOptionIdException::class:
                 $response = OctoResponse::INVALID_OPTION_ID($exception->optionId);
                 break;
-                
-            case (InvalidUnitIdException::class):
+
+            case InvalidUnitIdException::class:
                 $response = OctoResponse::INVALID_UNIT_ID($exception->unitId);
                 break;
 
-            case (InvalidAvailabilityIdException::class):
+            case InvalidAvailabilityIdException::class:
                 $response = OctoResponse::INVALID_AVAILABILITY_ID($exception->availabilityId);
                 break;
 
-            case (BookingAlreadyRedeemedException::class):
-            case (NoAvailabilityException::class):
-            case (UnprocessableEntityHttpException::class):
+            case BookingAlreadyRedeemedException::class:
+            case NoAvailabilityException::class:
+            case UnprocessableEntityHttpException::class:
                 $response = OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
                 break;
 
-            case (BookingNotCancellableException::class):
+            case BookingNotCancellableException::class:
                 $response = OctoResponse::UNPROCESSABLE_ENTITY($exception->getMessage());
                 break;
 
-            case (InvalidBookingUUIDException::class):
+            case InvalidBookingUUIDException::class:
                 $response = OctoResponse::INVALID_BOOKING_UUID($exception->bookingUuid);
                 break;
 
-            case (InvalidRateIdException::class):
+            case InvalidRateIdException::class:
                 $response = OctoResponse::INVALID_RATE_ID($exception->getRateId());
                 break;
-            
-            case (PromotionNotApplicableException::class):
+
+            case PromotionNotApplicableException::class:
                 $response = OctoResponse::INVALID_RATE_ID_FOR_DATE($exception->getPromotionName());
                 break;
 
-            case (NoMatchingDataException::class):
+            case NoMatchingDataException::class:
                 $response = OctoResponse::INVALID_PRODUCT_ID(0);
                 break;
-                
-            case (BadRequestException::class):
+
+            case BadRequestException::class:
                 $response = OctoResponse::BAD_REQUEST($exception->getMessage());
                 break;
 
-            case (SupplierSubsystemError::class):
+            case SupplierSubsystemError::class:
                 $response = OctoResponse::SUBSYSTEM_ERROR($exception->getErrorMessage());
                 break;
-            
-            case (TooManyDeparturesException::class):
+
+            case TooManyDeparturesException::class:
                 $response = OctoResponse::TOO_MANY_DEPARTURES();
                 break;
 
-            case (APIThrottleError::class):
-                JSONLog::error(["message" => "TourCMS API Rate Limit reached, returning 429 error", "exception" => $exception]);
+            case APIThrottleError::class:
+                JSONLog::error(['message' => 'TourCMS API Rate Limit reached, returning 429 error', 'exception' => $exception]);
                 $response = OctoResponse::TOO_MANY_REQUEST();
                 break;
-            
-            case (APICallNotOKException::class):
+
+            case APICallNotOKException::class:
 
                 try {
-                    JSONLog::error(["message" => "TourCMS API Call error"]);
+                    JSONLog::error(['message' => 'TourCMS API Call error']);
                 } catch (BindingResolutionException) {
                     parent::report($exception);
                 }
-                
+
                 $response = OctoResponse::INTERNAL_SERVER_ERROR();
                 break;
 
-            case (NoAPIResponseException::class):
+            case NoAPIResponseException::class:
 
                 try {
-                    JSONLog::error(["message" => "TourCMS API Call error, no response"]);
+                    JSONLog::error(['message' => 'TourCMS API Call error, no response']);
                 } catch (BindingResolutionException) {
                     parent::report($exception);
                 }
-                
+
                 $response = OctoResponse::INTERNAL_SERVER_ERROR();
                 break;
 
             default:
-                try  {
-                    JSONLog::error(["message" => "Exception captured by custom error handler", "exception" => $exception]);
+                try {
+                    JSONLog::error(['message' => 'Exception captured by custom error handler', 'exception' => $exception]);
+
                     return OctoResponse::INTERNAL_SERVER_ERROR();
                 } catch (BindingResolutionException) {
                     parent::report($exception);
+
                     return new JsonResponse([], Response::HTTP_INTERNAL_SERVER_ERROR);
-                }   
+                }
         }
 
         try {
-            JSONLog::info(["message" => "Exception captured by custom exception handler, returning response", "response" => json_decode($response->getContent())]);
-        } catch (BindingResolutionException) {}
+            JSONLog::info(['message' => 'Exception captured by custom exception handler, returning response', 'response' => json_decode($response->getContent())]);
+        } catch (BindingResolutionException) {
+        }
 
         return $response;
     }

@@ -18,7 +18,7 @@ class UnitRestrictionsTransformer extends BaseTransformer
             'minQuantity' => $unitRestrictions->getMinQuantity(),
             'maxQuantity' => $unitRestrictions->getMaxQuantity(),
             'paxCount' => $unitRestrictions->getPaxCount(),
-            'accompaniedBy' => $unitRestrictions->getAccompaniedBy()
+            'accompaniedBy' => $unitRestrictions->getAccompaniedBy(),
         ];
     }
 

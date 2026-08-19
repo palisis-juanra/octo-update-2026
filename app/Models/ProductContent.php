@@ -5,20 +5,30 @@ namespace App\Models;
 class ProductContent extends BaseModel
 {
     protected string $title;
+
     protected ?string $shortDescription;
+
     protected ?string $description;
+
     protected array $features = [];
+
     protected array $faqs = [];
+
     protected array $media = [];
+
     protected array $locations = [];
+
     protected array $categoryLabels = [];
+
     protected int $durationMinutesFrom;
+
     protected ?int $durationMinutesTo = null;
-    protected array $commentary = []; 
+
+    protected array $commentary = [];
 
     /**
      * Get the value of title
-     */ 
+     */
     public function getTitle(): string
     {
         return $this->title;
@@ -26,9 +36,7 @@ class ProductContent extends BaseModel
 
     /**
      * Set the value of title
-     *
-     * @return  self
-     */ 
+     */
     public function setTitle($title): self
     {
         $this->title = $title;
@@ -38,17 +46,15 @@ class ProductContent extends BaseModel
 
     /**
      * Get the value of shortDescription
-     */ 
-    public function getShortDescription(): string|null
+     */
+    public function getShortDescription(): ?string
     {
         return $this->shortDescription;
     }
 
     /**
      * Set the value of shortDescription
-     *
-     * @return  self
-     */ 
+     */
     public function setShortDescription($shortDescription): self
     {
         $this->shortDescription = $shortDescription;
@@ -58,17 +64,15 @@ class ProductContent extends BaseModel
 
     /**
      * Get the value of description
-     */ 
-    public function getDescription(): string|null
+     */
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
     /**
      * Set the value of description
-     *
-     * @return  self
-     */ 
+     */
     public function setDescription($description): self
     {
         $this->description = $description;
@@ -78,7 +82,7 @@ class ProductContent extends BaseModel
 
     /**
      * Get the value of features
-     */ 
+     */
     public function getFeatures(): array
     {
         return $this->features;
@@ -86,9 +90,7 @@ class ProductContent extends BaseModel
 
     /**
      * Set the value of features
-     *
-     * @return  self
-     */ 
+     */
     public function setFeatures($features): self
     {
         $this->features = $features;
@@ -98,7 +100,7 @@ class ProductContent extends BaseModel
 
     /**
      * Get the value of faqs
-     */ 
+     */
     public function getFaqs(): array
     {
         return $this->faqs;
@@ -106,9 +108,7 @@ class ProductContent extends BaseModel
 
     /**
      * Set the value of faqs
-     *
-     * @return  self
-     */ 
+     */
     public function setFaqs($faqs): self
     {
         $this->faqs = $faqs;
@@ -116,10 +116,9 @@ class ProductContent extends BaseModel
         return $this;
     }
 
-
     /**
      * Get the value of media
-     */ 
+     */
     public function getMedia(): array
     {
         return $this->media;
@@ -127,9 +126,7 @@ class ProductContent extends BaseModel
 
     /**
      * Set the value of media
-     *
-     * @return  self
-     */ 
+     */
     public function setMedia($media): self
     {
         $this->media = $media;
@@ -137,10 +134,9 @@ class ProductContent extends BaseModel
         return $this;
     }
 
-
     /**
      * Get the value of locations
-     */ 
+     */
     public function getLocations(): array
     {
         return $this->locations;
@@ -148,9 +144,7 @@ class ProductContent extends BaseModel
 
     /**
      * Set the value of locations
-     *
-     * @return  self
-     */ 
+     */
     public function setLocations($locations): self
     {
         $this->locations = $locations;
@@ -160,7 +154,7 @@ class ProductContent extends BaseModel
 
     /**
      * Get the value of categoryLabels
-     */ 
+     */
     public function getCategoryLabels(): array
     {
         return $this->categoryLabels;
@@ -168,9 +162,7 @@ class ProductContent extends BaseModel
 
     /**
      * Set the value of categoryLabels
-     *
-     * @return  self
-     */ 
+     */
     public function setCategoryLabels($categoryLabels): self
     {
         $this->categoryLabels = $categoryLabels;
@@ -180,7 +172,7 @@ class ProductContent extends BaseModel
 
     /**
      * Get the value of durationMinutesFrom
-     */ 
+     */
     public function getDurationMinutesFrom(): int
     {
         return $this->durationMinutesFrom;
@@ -188,9 +180,7 @@ class ProductContent extends BaseModel
 
     /**
      * Set the value of durationMinutesFrom
-     *
-     * @return  self
-     */ 
+     */
     public function setDurationMinutesFrom($durationMinutesFrom): self
     {
         $this->durationMinutesFrom = $durationMinutesFrom;
@@ -200,17 +190,15 @@ class ProductContent extends BaseModel
 
     /**
      * Get the value of durationMinutesTo
-     */ 
-    public function getDurationMinutesTo(): int|null
+     */
+    public function getDurationMinutesTo(): ?int
     {
         return $this->durationMinutesTo;
     }
 
     /**
      * Set the value of durationMinutesTo
-     *
-     * @return  self
-     */ 
+     */
     public function setDurationMinutesTo($durationMinutesTo): self
     {
         $this->durationMinutesTo = $durationMinutesTo;
@@ -220,7 +208,7 @@ class ProductContent extends BaseModel
 
     /**
      * Get the value of commentary
-     */ 
+     */
     public function getCommentary(): array
     {
         return $this->commentary;
@@ -228,9 +216,7 @@ class ProductContent extends BaseModel
 
     /**
      * Set the value of commentary
-     *
-     * @return  self
-     */ 
+     */
     public function setCommentary($commentary): self
     {
         $this->commentary = $commentary;

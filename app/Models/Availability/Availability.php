@@ -39,45 +39,52 @@ class Availability extends Model
      */
     public $incrementing = false;
 
-     /**
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'departure_id', 
-        'local_date_time_start', 
-        'local_date_time_end', 
-        'all_day', 
+        'departure_id',
+        'local_date_time_start',
+        'local_date_time_end',
+        'all_day',
         'available',
-        'status', 
+        'status',
         'vacancies',
         'capacity',
         'max_units',
         'utc_cutoff_at',
         'opening_hours_from',
-        'opening_hours_to'
+        'opening_hours_to',
     ];
-    
+
     protected $guarded = ['currency', 'pricing'];
 
     public static $snakeAttributes = true;
 
     public string $currency;
+
     public string $date;
+
     public ?Pricing $pricing = null;
-    
+
     public $timestamps = true;
+
     protected bool $contentEnabled = false;
+
     protected ?string $title = null;
+
     protected ?string $shortDescription = null;
+
     protected array $unitPricing = [];
+
     /* @var string[] */
     protected array $availableRates = [];
 
     /**
      * Get the value of id
-     */ 
+     */
     public function getId(): string
     {
         return $this->id;
@@ -85,9 +92,7 @@ class Availability extends Model
 
     /**
      * Set the value of id
-     *
-     * @return  self
-     */ 
+     */
     public function setId($id): self
     {
         $this->id = $id;
@@ -95,9 +100,9 @@ class Availability extends Model
         return $this;
     }
 
-     /**
+    /**
      * Get the value of departure_id
-     */ 
+     */
     public function getDepartureId(): string
     {
         return $this->departure_id;
@@ -105,9 +110,7 @@ class Availability extends Model
 
     /**
      * Set the value of departure_id
-     *
-     * @return  self
-     */ 
+     */
     public function setDepartureId($departureId): self
     {
         $this->departure_id = $departureId;
@@ -117,7 +120,7 @@ class Availability extends Model
 
     /**
      * Get the value of localDateTimeStart
-     */ 
+     */
     public function getLocalDateTimeStart(): string
     {
         return $this->local_date_time_start;
@@ -125,9 +128,7 @@ class Availability extends Model
 
     /**
      * Set the value of localDateTimeStart
-     *
-     * @return  self
-     */ 
+     */
     public function setLocalDateTimeStart($localDateTimeStart): self
     {
         $this->local_date_time_start = $localDateTimeStart;
@@ -137,7 +138,7 @@ class Availability extends Model
 
     /**
      * Get the value of localDateTimeEnd
-     */ 
+     */
     public function getLocalDateTimeEnd(): string
     {
         return $this->local_date_time_end;
@@ -145,9 +146,7 @@ class Availability extends Model
 
     /**
      * Set the value of localDateTimeEnd
-     *
-     * @return  self
-     */ 
+     */
     public function setLocalDateTimeEnd($localDateTimeEnd): self
     {
         $this->local_date_time_end = $localDateTimeEnd;
@@ -157,7 +156,7 @@ class Availability extends Model
 
     /**
      * Get the value of allDay
-     */ 
+     */
     public function getAllDay(): bool
     {
         return $this->all_day;
@@ -165,9 +164,7 @@ class Availability extends Model
 
     /**
      * Set the value of allDay
-     *
-     * @return  self
-     */ 
+     */
     public function setAllDay($allDay): self
     {
         $this->all_day = $allDay;
@@ -177,7 +174,7 @@ class Availability extends Model
 
     /**
      * Get the value of available
-     */ 
+     */
     public function getAvailable(): bool
     {
         return $this->available;
@@ -185,9 +182,7 @@ class Availability extends Model
 
     /**
      * Set the value of available
-     *
-     * @return  self
-     */ 
+     */
     public function setAvailable($available): self
     {
         $this->available = $available;
@@ -197,7 +192,7 @@ class Availability extends Model
 
     /**
      * Get the value of status
-     */ 
+     */
     public function getStatus(): string
     {
         return $this->status;
@@ -205,9 +200,7 @@ class Availability extends Model
 
     /**
      * Set the value of status
-     *
-     * @return  self
-     */ 
+     */
     public function setStatus($status): self
     {
         $this->status = $status;
@@ -217,7 +210,7 @@ class Availability extends Model
 
     /**
      * Get the value of vacancies
-     */ 
+     */
     public function getVacancies(): ?int
     {
         return $this->vacancies;
@@ -225,9 +218,7 @@ class Availability extends Model
 
     /**
      * Set the value of vacancies
-     *
-     * @return  self
-     */ 
+     */
     public function setVacancies($vacancies): self
     {
         $this->vacancies = $vacancies;
@@ -237,7 +228,7 @@ class Availability extends Model
 
     /**
      * Get the value of capacity
-     */ 
+     */
     public function getCapacity(): ?int
     {
         return $this->capacity;
@@ -245,9 +236,7 @@ class Availability extends Model
 
     /**
      * Set the value of capacity
-     *
-     * @return  self
-     */ 
+     */
     public function setCapacity($capacity): self
     {
         $this->capacity = $capacity;
@@ -257,7 +246,7 @@ class Availability extends Model
 
     /**
      * Get the value of maxUnits
-     */ 
+     */
     public function getMaxUnits(): int
     {
         return $this->max_units;
@@ -265,9 +254,7 @@ class Availability extends Model
 
     /**
      * Set the value of maxUnits
-     *
-     * @return  self
-     */ 
+     */
     public function setMaxUnits($maxUnits): self
     {
         $this->max_units = $maxUnits;
@@ -277,7 +264,7 @@ class Availability extends Model
 
     /**
      * Get the value of utcCutoffAt
-     */ 
+     */
     public function getUtcCutoffAt(): string
     {
         return $this->utc_cutoff_at;
@@ -285,9 +272,7 @@ class Availability extends Model
 
     /**
      * Set the value of utcCutoffAt
-     *
-     * @return  self
-     */ 
+     */
     public function setUtcCutoffAt($utcCutoffAt): self
     {
         $this->utc_cutoff_at = $utcCutoffAt;
@@ -297,7 +282,7 @@ class Availability extends Model
 
     /**
      * Get the value of openingHoursFrom
-     */ 
+     */
     public function getOpeningHoursFrom(): string
     {
         return $this->opening_hours_from;
@@ -305,9 +290,7 @@ class Availability extends Model
 
     /**
      * Set the value of openingHoursFrom
-     *
-     * @return  self
-     */ 
+     */
     public function setOpeningHoursFrom($openingHoursFrom): self
     {
         $this->opening_hours_from = $openingHoursFrom;
@@ -317,7 +300,7 @@ class Availability extends Model
 
     /**
      * Get the value of openingHoursTo
-     */ 
+     */
     public function getOpeningHoursTo(): string
     {
         return $this->opening_hours_to;
@@ -325,9 +308,7 @@ class Availability extends Model
 
     /**
      * Set the value of openingHoursTo
-     *
-     * @return  self
-     */ 
+     */
     public function setOpeningHoursTo($openingHoursTo): self
     {
         $this->opening_hours_to = $openingHoursTo;
@@ -337,7 +318,7 @@ class Availability extends Model
 
     /**
      * Get the value of currency
-     */ 
+     */
     public function getCurrency(): string
     {
         return $this->currency;
@@ -345,9 +326,7 @@ class Availability extends Model
 
     /**
      * Set the value of currency
-     *
-     * @return  self
-     */ 
+     */
     public function setCurrency($currency): self
     {
         $this->currency = $currency;
@@ -357,7 +336,7 @@ class Availability extends Model
 
     /**
      * Get the value of pricing
-     */ 
+     */
     public function getPricing(): ?Pricing
     {
         return $this->pricing;
@@ -366,8 +345,8 @@ class Availability extends Model
     /**
      * Set the value of pricing
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setPricing(?Pricing $pricing)
     {
         $this->pricing = $pricing;
@@ -383,12 +362,13 @@ class Availability extends Model
     public function setDate(string $date): self
     {
         $this->date = $date;
+
         return $this;
     }
 
     /**
      * Get the value of contentEnabled
-     */ 
+     */
     public function getContentEnabled(): bool
     {
         return $this->contentEnabled;
@@ -396,9 +376,7 @@ class Availability extends Model
 
     /**
      * Set the value of contentEnabled
-     *
-     * @return  self
-     */ 
+     */
     public function setContentEnabled(bool $contentEnabled): self
     {
         $this->contentEnabled = $contentEnabled;
@@ -408,7 +386,7 @@ class Availability extends Model
 
     /**
      * Get the value of title
-     */ 
+     */
     public function getTitle(): ?string
     {
         return $this->title;
@@ -416,9 +394,7 @@ class Availability extends Model
 
     /**
      * Set the value of title
-     *
-     * @return  self
-     */ 
+     */
     public function setTitle(?string $title): self
     {
         $this->title = $title;
@@ -428,7 +404,7 @@ class Availability extends Model
 
     /**
      * Get the value of shortDescription
-     */ 
+     */
     public function getShortDescription(): ?string
     {
         return $this->shortDescription;
@@ -436,9 +412,7 @@ class Availability extends Model
 
     /**
      * Set the value of shortDescription
-     *
-     * @return  self
-     */ 
+     */
     public function setShortDescription(?string $shortDescription): self
     {
         $this->shortDescription = $shortDescription;
@@ -448,8 +422,9 @@ class Availability extends Model
 
     /**
      * Get the value of unitPricing
+     *
      * @return AvailabilityUnitPricing[]
-     */ 
+     */
     public function getUnitPricing(): array
     {
         return $this->unitPricing;
@@ -457,9 +432,7 @@ class Availability extends Model
 
     /**
      * Set the value of unitPricing
-     *
-     * @return  self
-     */ 
+     */
     public function setUnitPricing(array $unitPricing): self
     {
         $this->unitPricing = $unitPricing;
@@ -475,6 +448,7 @@ class Availability extends Model
     public function setAvailableRates(array $availableRates): self
     {
         $this->availableRates = $availableRates;
+
         return $this;
     }
 }

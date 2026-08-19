@@ -6,21 +6,22 @@ use App\Builders\BookingBuilder;
 use App\Builders\BookingChecker;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Models\Booking;
+use App\Services\AvailabilityService;
 use App\Services\BookingCancellationService;
 use App\Services\JSONLogService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
 use Tests\UnitTestCase;
-use TourCMS;
-use App\Services\AvailabilityService;
 
 class BookingCancellationServiceTest extends UnitTestCase
 {
     const EXAMPLE_REASON = 'example reason';
+
     const VALID_BOOKING_ID = 4093;
+
     const VALID_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
 
-    public function test_whenCancelBookingAPIResponseIsNotValid_thenThrowsInvalidUUIDException(): void
+    public function test_when_cancel_booking_api_response_is_not_valid_then_throws_invalid_uuid_exception(): void
     {
         // Given
         $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
@@ -41,12 +42,12 @@ class BookingCancellationServiceTest extends UnitTestCase
         $tourCMSServiceMock
             ->method('cancelBooking')
             ->willReturn($cancelBookingResponse);
-        
+
         $bookingCancellationService
             ->method('getCancelBookingXMLRequest')
             ->willReturn($getCancelBookingXMLRequestResponse);
 
-        $booking = new Booking();
+        $booking = new Booking;
         $booking->booking_id = self::VALID_BOOKING_ID;
         $booking->uuid = self::VALID_BOOKING_UUID;
         $booking->status = Booking::STATUS_CONFIRMED;
@@ -58,7 +59,7 @@ class BookingCancellationServiceTest extends UnitTestCase
         $bookingCancellationService->cancelBooking($booking, $reason);
     }
 
-    public function test_whenCallingShowBookingAndAlreadyRedeemed_thenThrowsBookingAlreadyRedeemedException():void
+    public function test_when_calling_show_booking_and_already_redeemed_then_throws_booking_already_redeemed_exception(): void
     {
         // Given
         $bookingCancellationService = new BookingCancellationService(
@@ -79,11 +80,11 @@ class BookingCancellationServiceTest extends UnitTestCase
                 ->getMock(),
             $this->getMockBuilder(BookingChecker::class)
                 ->disableOriginalConstructor()
-                ->getMock() 
+                ->getMock()
 
         );
-        
-        $booking = new Booking();
+
+        $booking = new Booking;
         $booking->status = Booking::STATUS_REDEEMED;
 
         // When
