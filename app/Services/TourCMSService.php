@@ -5,13 +5,13 @@ namespace App\Services;
 use App\Exceptions\APICallNotOKException;
 use App\Exceptions\APIThrottleError;
 use App\Exceptions\BookingAlreadyRedeemedException;
+use App\Exceptions\FailPermissionException;
 use App\Exceptions\FailSignatureException;
 use App\Exceptions\InvalidRateIdException;
 use App\Exceptions\NoAPIResponseException;
-use App\Exceptions\FailPermissionException;
+use App\Exceptions\NoMatchingDataException;
 use App\Exceptions\SupplierSubsystemError;
 use App\Exceptions\TooManyDeparturesException;
-use App\Exceptions\NoMatchingDataException;
 use App\Facades\JSONLog;
 use DateInterval;
 use DatePeriod;
@@ -26,47 +26,80 @@ class TourCMSService
 {
     // Cache
     public const string CACHE_REDIS_KEY_SHOW_CHANNEL = 'SHOW_CHANNEL|';
+
     public const string CACHE_REDIS_KEY_SHOW_TOUR = 'SHOW_TOUR|';
+
     public const string CACHE_REDIS_KEY_GET_TOUR_PROMOTIONS = 'GET_TOUR_PROMOTIONS|';
+
     public const int CACHE_TIME_SHOW_CHANNEL = 600;
+
     public const int CACHE_TIME_SHOW_TOUR = 300;
+
     public const int CACHE_TIME_GET_TOUR_PROMOTIONS = 300;
 
     // Errors
     public const ERROR_FAIL_SIG = 'FAIL_SIG';
+
     public const ERROR_FAIL_KEYNOTFOUND = 'FAIL_KEYNOTFOUND';
+
     public const NO_MATCHING_DATA = 'NO MATCHING DATA';
+
     public const ERROR_PREVIOUSLY_CANCELLED = 'PREVIOUSLY CANCELLED';
+
     public const ERROR_BOOKING_ALREADY_REDEEMED = 'BOOKING_ALREADY_REDEEMED';
+
     public const ERROR_BOOKING_ALREADY_COMMITED = 'BOOKING ALREADY COMMITTED';
+
     public const ERROR_NO_DATA_CHANGED = 'NO DATA CHANGED';
+
     public const ERROR_OK = 'OK';
+
     public const DEFAULT_API_BASE_URL = 'https://api.tourcms.com';
+
     public const RESPONSE_FORMAT_SIMPLEXML = 'simplexml';
+
     public const LIST_TOURS_EXTENDED_TOUR_INFO_PARAM = 'extended_tour_info=1';
+
     public const SHOW_TOUR_DEPARTURES_CLOSED_PARAM = 'show_closed_departures=true';
+
     public const SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM = 'distinct_start_dates=1';
+
     public const NO_REQUEST_TO_PROCESS = 'NO_REQUEST_TO_PROCESS';
+
     public const INVALID_BOOKING_ID = 'INVALID BOOKING ID';
-    public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = "&show_temporary_bookings=1";
+
+    public const QUERYSTRING_SHOW_TEMPORARY_BOOKINGS = '&show_temporary_bookings=1';
+
     public const ERROR_PERM = 'FAIL_PERM';
+
     public const OCTO_USER_AGENT = 'octo.tourcms.com';
+
     public const string ERROR_SUPPLIER_SUBSYSTEM_ERROR = 'SUPPLIER_SUBSYSTEM_ERROR';
+
     public const string ERROR_API_THROTTLE = 'API throttle';
+
     public const string ERROR_INVALID_PROMOTION = 'BUCKET_HAS_NO_PROMOTION_WITH_NAME';
+
     public const string ERROR_PROMOTION_NOT_FOUND = 'PROMOTION_NOT_FOUND';
+
     public const int MAX_SHOW_TOUR_DEPARTURES_COUNT = 500;
 
     public const string HEADER_X_CORRELATION_ID = 'X-Correlation-Id';
 
     public const string NOTE_TYPE_AUDIT = 'AUDIT';
+
     public const string AUDIT_NOTE_ORIGINAL_CUSTOMER_DATA_ERROR_LOG_PREFIX = 'Audit note with original customer data could not be added';
 
     protected int $maid;
+
     protected TourCMS $tourCMS;
+
     protected TourCMSMulti $tourCMSMulti;
+
     protected string $channelId;
+
     protected JSONLogService $jsonLogService;
+
     protected CacheRepository $cache;
 
     public function __construct(int $maid, string $APIKey, string $channelId, JSONLogService $jsonLogService, CacheRepository $cache)
@@ -91,12 +124,12 @@ class TourCMSService
             $channelId = $this->channelId;
         }
 
-        $redisKey = self::CACHE_REDIS_KEY_SHOW_CHANNEL . $channelId;
-        if (true === $cached) {
+        $redisKey = self::CACHE_REDIS_KEY_SHOW_CHANNEL.$channelId;
+        if ($cached === true) {
 
             $cachedShowChannel = Cache::driver('redis')->get($redisKey);
 
-            if (!empty($cachedShowChannel)) {
+            if (! empty($cachedShowChannel)) {
                 return simplexml_load_string($cachedShowChannel);
             }
         }
@@ -110,11 +143,12 @@ class TourCMSService
         return $response;
     }
 
-    public function listTours(string $channelId, string $params = ""): SimpleXMLElement
+    public function listTours(string $channelId, string $params = ''): SimpleXMLElement
     {
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->list_tours($channelId, $params);
         $response = $this->handleResponse($response);
+
         return $response;
     }
 
@@ -124,12 +158,12 @@ class TourCMSService
             $channelId = $this->channelId;
         }
 
-        $redisKey = self::CACHE_REDIS_KEY_SHOW_TOUR . $tourId . '|' . $channelId;
+        $redisKey = self::CACHE_REDIS_KEY_SHOW_TOUR.$tourId.'|'.$channelId;
 
-        if (true === $cached) {
+        if ($cached === true) {
             $cachedShowTour = $this->cache->get($redisKey);
 
-            if (!empty($cachedShowTour)) {
+            if (! empty($cachedShowTour)) {
                 return simplexml_load_string($cachedShowTour);
             }
         }
@@ -156,14 +190,14 @@ class TourCMSService
     {
         $queryString = self::SHOW_TOUR_DEPARTURES_CLOSED_PARAM;
 
-        if (!empty($endDate)) {
+        if (! empty($endDate)) {
             $queryString .= "&start_date_start={$startDate}&start_date_end={$endDate}";
         } else {
             $queryString .= "&start_date_start={$startDate}&start_date_end={$startDate}";
         }
         $queryString .= '&per_page='.self::MAX_SHOW_TOUR_DEPARTURES_COUNT;
 
-        if (!empty($extraParams)) {
+        if (! empty($extraParams)) {
             if (substr($extraParams, 0, 1) != '&') {
                 $queryString .= '&';
             }
@@ -177,7 +211,7 @@ class TourCMSService
         $response = $this->handleResponse($response);
         $departureCount = (int) $response->tour->dates_and_prices->total_departure_count ?? 0;
         if ($departureCount > self::MAX_SHOW_TOUR_DEPARTURES_COUNT) {
-            $this->jsonLogService->info("Reached max number of departures in show tour departures: " . self::MAX_SHOW_TOUR_DEPARTURES_COUNT);
+            $this->jsonLogService->info('Reached max number of departures in show tour departures: '.self::MAX_SHOW_TOUR_DEPARTURES_COUNT);
             throw new TooManyDeparturesException($departureCount);
         }
 
@@ -188,13 +222,13 @@ class TourCMSService
     {
         $queryString = self::SHOW_TOUR_DATES_AND_DEALS_DISTINCT_START_DATE_PARAM;
 
-        if (!empty($endDate)) {
+        if (! empty($endDate)) {
             $queryString .= "&startdate_start={$startDate}&startdate_end={$endDate}";
         } else {
             $queryString .= "&startdate_start={$startDate}&startdate_end={$startDate}";
         }
 
-        if (!empty($extraParams)) {
+        if (! empty($extraParams)) {
             if (substr($extraParams, 0, 1) != '&') {
                 $queryString .= '&';
             }
@@ -216,14 +250,13 @@ class TourCMSService
 
         $startDateTime = new DateTime($startDate);
         $endDateTime = new DateTime($endDate);
-        $endDateTime->setTime(0,0,1);
+        $endDateTime->setTime(0, 0, 1);
 
         $interval = DateInterval::createFromDateString('1 day');
         $period = new DatePeriod($startDateTime, $interval, $endDateTime);
 
-
         foreach ($period as $dateTime) {
-            $date = $dateTime->format("Y-m-d");
+            $date = $dateTime->format('Y-m-d');
             $params = "date={$date}&{$ratesQueryString}";
             $requestHandler->requestArray[$date] = $this->tourCMSMulti->check_tour_availability($params, $tourId, $this->channelId);
         }
@@ -235,9 +268,7 @@ class TourCMSService
     }
 
     /**
-     * @param SimpleXMLElement $bookingData
      * @throws InvalidRateIdException
-     * @return SimpleXMLElement
      */
     public function startNewBooking(SimpleXMLElement $bookingData): SimpleXMLElement
     {
@@ -247,6 +278,7 @@ class TourCMSService
         if ((string) $response->error === self::ERROR_PROMOTION_NOT_FOUND) {
             throw new InvalidRateIdException((string) $bookingData->tour_promotions->tour_promotion ?? '');
         }
+
         return $this->handleResponse($response);
     }
 
@@ -254,19 +286,21 @@ class TourCMSService
     {
         $bookingData = new SimpleXMLElement('<booking />');
         $bookingData->addChild('booking_id', $bookingId);
-        if (!empty($agentRef)) {
+        if (! empty($agentRef)) {
             $bookingData->addChild('agent_ref', $agentRef);
         }
 
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->commit_new_booking($bookingData, $this->channelId);
+
         return $this->handleResponse($response);
     }
 
     public function showBooking(string $bookingId): SimpleXMLElement
     {
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
-        $response = $this->tourCMS->show_booking($bookingId . self::QUERYSTRING_SHOW_TEMPORARY_BOOKINGS, $this->channelId);
+        $response = $this->tourCMS->show_booking($bookingId.self::QUERYSTRING_SHOW_TEMPORARY_BOOKINGS, $this->channelId);
+
         return $this->handleResponse($response);
     }
 
@@ -274,6 +308,7 @@ class TourCMSService
     {
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->update_customer($customerXML, $this->channelId);
+
         return $this->handleResponse($response);
     }
 
@@ -281,6 +316,7 @@ class TourCMSService
     {
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->cancel_booking($bookingData, $this->channelId);
+
         return $this->handleResponse($response);
     }
 
@@ -288,6 +324,7 @@ class TourCMSService
     {
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->delete_booking($bookingId, $this->channelId);
+
         return $this->handleResponse($response);
     }
 
@@ -295,19 +332,20 @@ class TourCMSService
     {
         $this->tourCMS->add_header(self::HEADER_X_CORRELATION_ID, JSONLog::getLogId());
         $response = $this->tourCMS->update_booking($bookingData, $this->channelId);
+
         return $this->handleResponse($response);
     }
 
     public function getTourPromotions(int $tourId, bool $cached = true): SimpleXMLElement
     {
-        $endpoint = '/api/tours/promotions/get.xml?tour_id=' . $tourId;
+        $endpoint = '/api/tours/promotions/get.xml?tour_id='.$tourId;
 
-        $redisKey = self::CACHE_REDIS_KEY_GET_TOUR_PROMOTIONS . "{$this->maid}|{$tourId}|{$this->channelId}";
+        $redisKey = self::CACHE_REDIS_KEY_GET_TOUR_PROMOTIONS."{$this->maid}|{$tourId}|{$this->channelId}";
 
-        if (true === $cached) {
+        if ($cached === true) {
             $cachedGetTourPromotions = $this->cache->get($redisKey);
 
-            if (!empty($cachedGetTourPromotions)) {
+            if (! empty($cachedGetTourPromotions)) {
                 return simplexml_load_string($cachedGetTourPromotions);
             }
         }
@@ -329,12 +367,14 @@ class TourCMSService
                 $children[] = $child;
             }
         }
+
         return $children;
     }
 
     public function setTourCMS(TourCMS $tourCMS): self
     {
         $this->tourCMS = $tourCMS;
+
         return $this;
     }
 
@@ -343,11 +383,11 @@ class TourCMSService
         $addNoteResponse = $this->tourCMS->add_note_to_booking($booking_id, $channelId, htmlspecialchars($note), self::NOTE_TYPE_AUDIT);
 
         if (empty($addNoteResponse)) {
-            JSONLog::info(self::AUDIT_NOTE_ORIGINAL_CUSTOMER_DATA_ERROR_LOG_PREFIX . 'Empty response.');
+            JSONLog::info(self::AUDIT_NOTE_ORIGINAL_CUSTOMER_DATA_ERROR_LOG_PREFIX.'Empty response.');
         }
 
         if ($addNoteResponse->error != self::ERROR_OK) {
-            JSONLog::info(self::AUDIT_NOTE_ORIGINAL_CUSTOMER_DATA_ERROR_LOG_PREFIX . 'Error while creating note.');
+            JSONLog::info(self::AUDIT_NOTE_ORIGINAL_CUSTOMER_DATA_ERROR_LOG_PREFIX.'Error while creating note.');
         }
     }
 
@@ -360,25 +400,27 @@ class TourCMSService
 
     /**
      * Handle response
+     *
      * @throws FailSignatureException
      * @throws APICallNotOKException
-     * @return SimpleXMLElement
      */
     protected function handleResponse(mixed $response): SimpleXMLElement
     {
-        if (!$response) throw new NoAPIResponseException();
+        if (! $response) {
+            throw new NoAPIResponseException;
+        }
 
         $responseXML = $response;
-        if (!($response instanceof SimpleXMLElement)) {
+        if (! ($response instanceof SimpleXMLElement)) {
             $responseXML = simplexml_load_string($response);
         }
 
-        if (false === $responseXML) {
-            $this->jsonLogService->error(["message" => "Response is not valid XML", "API response" => $response]);
-            throw new APICallNotOKException();
+        if ($responseXML === false) {
+            $this->jsonLogService->error(['message' => 'Response is not valid XML', 'API response' => $response]);
+            throw new APICallNotOKException;
         }
 
-        switch ((string)$responseXML->error) {
+        switch ((string) $responseXML->error) {
             case self::ERROR_OK:
             case self::ERROR_PREVIOUSLY_CANCELLED:
             case self::ERROR_BOOKING_ALREADY_COMMITED:
@@ -386,17 +428,17 @@ class TourCMSService
                 return $responseXML;
             case self::ERROR_FAIL_SIG:
             case self::ERROR_FAIL_KEYNOTFOUND:
-                throw new FailSignatureException();
+                throw new FailSignatureException;
             case self::ERROR_BOOKING_ALREADY_REDEEMED:
-                throw new BookingAlreadyRedeemedException();
+                throw new BookingAlreadyRedeemedException;
             case self::NO_MATCHING_DATA:
-                throw new NoMatchingDataException();
+                throw new NoMatchingDataException;
             case self::ERROR_PERM:
-                throw new FailPermissionException();
+                throw new FailPermissionException;
             case self::ERROR_SUPPLIER_SUBSYSTEM_ERROR:
                 throw new SupplierSubsystemError((string) ($responseXML->supplier_subsystem_error ?? ''));
             case self::ERROR_API_THROTTLE:
-                throw new APIThrottleError();
+                throw new APIThrottleError;
             case self::ERROR_INVALID_PROMOTION:
                 throw new InvalidRateIdException(0);
             default:
@@ -411,8 +453,8 @@ class TourCMSService
                 );
                 $rawResponseOneLine = trim($rawResponseOneLine);
 
-                $this->jsonLogService->error(["message" => "API Call error", "response" => json_encode($rawResponseOneLine)]);
-                throw new APICallNotOKException();
+                $this->jsonLogService->error(['message' => 'API Call error', 'response' => json_encode($rawResponseOneLine)]);
+                throw new APICallNotOKException;
         }
     }
 }

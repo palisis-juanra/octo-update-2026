@@ -6,7 +6,6 @@ use App\Exceptions\APICallNotOKException;
 use App\Exceptions\FailSignatureException;
 use App\Models\Media;
 use App\Models\Supplier;
-use App\Services\TourCMSService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\SupplierTransformer;
 use SimpleXMLElement;
@@ -14,6 +13,7 @@ use SimpleXMLElement;
 class SupplierService
 {
     public TourCMSService $tourCMSService;
+
     public SupplierTransformer $supplierTransformer;
 
     public function __construct(TourCMSService $tourCMSService)
@@ -24,16 +24,16 @@ class SupplierService
 
     /**
      * Get the supplier data for a certain channel ID
-     * @param string $channelId
+     *
      * @throws FailSignatureException
      * @throws APICallNotOKException
-     * @return array
      */
     public function getSupplierData(string $channelId): array
     {
         $showChannelResponse = $this->tourCMSService->showChannel($channelId);
         $channelData = $showChannelResponse->channel;
         $supplier = $this->createSupplierFromChannelData($channelData);
+
         return $this->supplierTransformer->transform($supplier);
     }
 
@@ -44,7 +44,7 @@ class SupplierService
         $media = new Media(
             $src,
             $fileType,
-            !empty($src) ? Media::REL_LOGO : null
+            ! empty($src) ? Media::REL_LOGO : null
         );
         $shortDesc = empty($channelData->short_desc) ? null : (string) $channelData->short_desc;
 
@@ -70,5 +70,4 @@ class SupplierService
     {
         return env('OCTO_BASE_URL', 'https://octo.tourcms.com/');
     }
-
 }

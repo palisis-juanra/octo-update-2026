@@ -14,18 +14,22 @@ use Tests\UnitTestCase;
 class BookingUpdateServiceTest extends UnitTestCase
 {
     const OLD_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
+
     const NEW_UUID = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+
     const OLD_TCMS_BOOKING_ID = 4093;
+
     const NEW_TCMS_BOOKING_ID = 3889;
+
     const CHANNEL_ID = 142;
 
-    public function test_whenOldBookingIsNotCancellable_thenThrowsBookingNotCancellableException(): void
+    public function test_when_old_booking_is_not_cancellable_then_throws_booking_not_cancellable_exception(): void
     {
-        $oldBookingByUuid = new Booking();
+        $oldBookingByUuid = new Booking;
         $oldBookingByUuid->setUuid(self::OLD_BOOKING_UUID);
         $oldBookingByUuid->setBookingId(self::OLD_TCMS_BOOKING_ID);
 
-        $oldBooking = new Booking();
+        $oldBooking = new Booking;
         $oldBooking->setUuid(self::OLD_BOOKING_UUID);
         $oldBooking->setBookingId(self::OLD_TCMS_BOOKING_ID);
         $oldBooking->setCancellable(false);
@@ -55,7 +59,7 @@ class BookingUpdateServiceTest extends UnitTestCase
         $bookingUpdateService->update(self::OLD_BOOKING_UUID, []);
     }
 
-    public function test_whenOldBookingUuidDoesNotExist_thenThrowsInvalidBookingUuidException(): void
+    public function test_when_old_booking_uuid_does_not_exist_then_throws_invalid_booking_uuid_exception(): void
     {
         $bookingCancellationServiceMock = $this->getMockBuilder(BookingCancellationService::class)
             ->disableOriginalConstructor()
@@ -78,9 +82,9 @@ class BookingUpdateServiceTest extends UnitTestCase
         $bookingUpdateService->update('unknown-uuid', []);
     }
 
-    public function test_whenReassigningBookingUuid_thenCallsUpdateBookingWithBookingIdAndNewUuid(): void
+    public function test_when_reassigning_booking_uuid_then_calls_update_booking_with_booking_id_and_new_uuid(): void
     {
-        $booking = new Booking();
+        $booking = new Booking;
         $booking->setBookingId(self::OLD_TCMS_BOOKING_ID);
 
         $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
@@ -107,13 +111,13 @@ class BookingUpdateServiceTest extends UnitTestCase
         $method->invoke($bookingUpdateService, $booking, self::NEW_UUID);
     }
 
-    public function test_whenCreatingBookingReplacedAuditNote_thenNoteMentionsNewBookingTourCMSId(): void
+    public function test_when_creating_booking_replaced_audit_note_then_note_mentions_new_booking_tour_cms_id(): void
     {
-        $oldBooking = new Booking();
+        $oldBooking = new Booking;
         $oldBooking->setBookingId(self::OLD_TCMS_BOOKING_ID);
         $oldBooking->setChannelId(self::CHANNEL_ID);
 
-        $newBooking = new Booking();
+        $newBooking = new Booking;
         $newBooking->setBookingId(self::NEW_TCMS_BOOKING_ID);
 
         $tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
@@ -140,12 +144,12 @@ class BookingUpdateServiceTest extends UnitTestCase
         $method->invoke($bookingUpdateService, $oldBooking, $newBooking);
     }
 
-    public function test_whenCreatingBookingRebookAuditNote_thenNoteMentionsOldBookingTourCMSIdAndUuid(): void
+    public function test_when_creating_booking_rebook_audit_note_then_note_mentions_old_booking_tour_cms_id_and_uuid(): void
     {
-        $oldBooking = new Booking();
+        $oldBooking = new Booking;
         $oldBooking->setBookingId(self::OLD_TCMS_BOOKING_ID);
 
-        $newBooking = new Booking();
+        $newBooking = new Booking;
         $newBooking->setBookingId(self::NEW_TCMS_BOOKING_ID);
         $newBooking->setChannelId(self::CHANNEL_ID);
 

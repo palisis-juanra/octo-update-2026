@@ -7,11 +7,17 @@ use League\Fractal\Resource\Collection;
 class BookingTransformer extends BaseTransformer
 {
     protected ProductTransformer $productTransformer;
+
     protected OptionTransformer $optionTransformer;
+
     protected AvailabilityTransformer $availabilityTransformer;
+
     protected ContactTransformer $contactTransformer;
+
     protected UnitItemTransformer $unitItemTransformer;
+
     protected VoucherTransformer $voucherTransformer;
+
     protected BookingCancellationTransformer $bookingCancellationTransformer;
 
     public function __construct(string $mode)
@@ -23,7 +29,7 @@ class BookingTransformer extends BaseTransformer
         $this->contactTransformer = new ContactTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->unitItemTransformer = new UnitItemTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->voucherTransformer = new VoucherTransformer(BaseTransformer::FULL_TRANSFORM);
-        $this->bookingCancellationTransformer = new BookingCancellationTransformer();
+        $this->bookingCancellationTransformer = new BookingCancellationTransformer;
     }
 
     protected function basicTransform($booking): array
@@ -63,14 +69,14 @@ class BookingTransformer extends BaseTransformer
             'optionId' => $optionId,
             'option' => $option,
             'cancellable' => $booking->getCancellable(),
-            'cancellation' => null !== $booking->getCancellation() ? $this->bookingCancellationTransformer->transform($booking->getCancellation()) : null,
+            'cancellation' => $booking->getCancellation() !== null ? $this->bookingCancellationTransformer->transform($booking->getCancellation()) : null,
             'freesale' => $product->getAllowFreesale(),
             'availabilityId' => $availability->getId(),
             'availability' => $this->availabilityTransformer->transform($availability),
             'contact' => $this->contactTransformer->transform($booking->getContact()),
             'notes' => $booking->getNotes(),
             'deliveryMethods' => $product->getDeliveryMethods(),
-            'voucher' => (null !== $booking->getVoucher()) ? $this->voucherTransformer->transform($booking->getVoucher()) : null,
+            'voucher' => ($booking->getVoucher() !== null) ? $this->voucherTransformer->transform($booking->getVoucher()) : null,
             'unitItems' => $unitItemsTransformed,
         ];
     }

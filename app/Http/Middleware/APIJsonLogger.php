@@ -6,9 +6,9 @@ use App\Http\Requests\OctoRequest;
 use App\Http\Responses\OctoResponse;
 use App\Models\APIJsonLog;
 use App\Services\TourCMSService;
+use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Closure;
 use Throwable;
 
 /**
@@ -27,6 +27,7 @@ class APIJsonLogger
 
     /**
      * This method fills APIJsonLog data before and after the request is processed
+     *
      * @return void
      */
     public function handle(Request $request, Closure $next): JsonResponse
@@ -37,7 +38,7 @@ class APIJsonLogger
 
         $this->tourCMSService = app(TourCMSService::class);
 
-        $apiJsonLog = new APIJsonLog();
+        $apiJsonLog = new APIJsonLog;
 
         // Before the request is processed
         $this->fillBeforeRequestIsProcessed($request, $apiJsonLog);
@@ -50,10 +51,12 @@ class APIJsonLogger
             $response = $next($request);
             $this->fillAfterRequestIsProcessed($apiJsonLog, $response);
             $this->writeLog($apiJsonLog);
+
             return $response;
         } catch (Throwable $e) {
             $this->fillAfterException($apiJsonLog, $e);
             $this->writeLog($apiJsonLog);
+
             return $next($request);
         }
     }
@@ -62,18 +65,18 @@ class APIJsonLogger
     protected function fillBeforeRequestIsProcessed(Request $request, APIJsonLog $log): APIJsonLog
     {
         $log->timestamp = round(microtime(true) * 1000);
-        $log->message          = '';
-        $log->xRequestId       = $request->headers->get(OctoAuthentication::FIELD_X_REQUEST_ID);
-        $log->xCorrelationId   = $request->headers->get(OctoAuthentication::FIELD_X_CORRELATION_ID);
-        $log->userAgent        = $request->userAgent() ?? '';
-        $log->ipAddress        = $request->ip() ?? '';
-        $log->url              = $request->path();
-        $log->verb             = $request->method();
-        $log->requestHeaders   = $this->maskSensitiveHeaders($request->headers->all());
-        $log->requestBody      = $this->getRequestBody($request);
-        $log->queryString      = $request->getQueryString() ?? '';
-        $log->action           = $request->route()->getName();
-        $log->maid             = $request->input(OctoAuthentication::FIELD_MAID);
+        $log->message = '';
+        $log->xRequestId = $request->headers->get(OctoAuthentication::FIELD_X_REQUEST_ID);
+        $log->xCorrelationId = $request->headers->get(OctoAuthentication::FIELD_X_CORRELATION_ID);
+        $log->userAgent = $request->userAgent() ?? '';
+        $log->ipAddress = $request->ip() ?? '';
+        $log->url = $request->path();
+        $log->verb = $request->method();
+        $log->requestHeaders = $this->maskSensitiveHeaders($request->headers->all());
+        $log->requestBody = $this->getRequestBody($request);
+        $log->queryString = $request->getQueryString() ?? '';
+        $log->action = $request->route()->getName();
+        $log->maid = $request->input(OctoAuthentication::FIELD_MAID);
 
         $this->setSpecificData($log, $request);
         $this->setTourCMSData($log, $request);
@@ -85,12 +88,12 @@ class APIJsonLogger
     {
         $executionTimeMs = (int) round(microtime(true) * 1000) - $apiJsonLog->timestamp;
 
-        $apiJsonLog->executionTime   = $executionTimeMs;
-        $apiJsonLog->responseBody    = $this->getResponseBody($response);
+        $apiJsonLog->executionTime = $executionTimeMs;
+        $apiJsonLog->responseBody = $this->getResponseBody($response);
         $apiJsonLog->responseHeaders = $this->maskSensitiveHeaders($response->headers->all());
-        $apiJsonLog->success         = $response->isSuccessful() ? '1' : '0';
+        $apiJsonLog->success = $response->isSuccessful() ? '1' : '0';
         $responseData = json_decode($response->getContent(), true);
-        $apiJsonLog->error           = $response->isSuccessful() ? 'OK' : $responseData['error'] ?? OctoResponse::ERROR_CODE_INTERNAL_SERVER_ERROR;
+        $apiJsonLog->error = $response->isSuccessful() ? 'OK' : $responseData['error'] ?? OctoResponse::ERROR_CODE_INTERNAL_SERVER_ERROR;
     }
 
     protected function fillAfterException(APIJsonLog $apiJsonLog, Throwable $e): void
@@ -98,15 +101,15 @@ class APIJsonLogger
         $executionTimeMs = (int) round(microtime(true) * 1000) - $apiJsonLog->timestamp;
 
         $apiJsonLog->executionTime = $executionTimeMs;
-        $apiJsonLog->success       = 0;
-        $apiJsonLog->error         = OctoResponse::ERROR_CODE_INTERNAL_SERVER_ERROR;
-        $apiJsonLog->exception     = (object) [
+        $apiJsonLog->success = 0;
+        $apiJsonLog->error = OctoResponse::ERROR_CODE_INTERNAL_SERVER_ERROR;
+        $apiJsonLog->exception = (object) [
             'message' => $e->getMessage(),
-            'code'    => $e->getCode(),
-            'file'    => $e->getFile(),
-            'line'    => $e->getLine(),
+            'code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
         ];
-        $apiJsonLog->timestamp     = time();
+        $apiJsonLog->timestamp = time();
     }
 
     protected function writeLog(APIJsonLog $APIJsonLog): void
@@ -126,6 +129,7 @@ class APIJsonLogger
             }
 
             $json = json_decode($content, true);
+
             return $json !== null ? $json : $content;
         }
 
@@ -141,14 +145,12 @@ class APIJsonLogger
         }
 
         $json = json_decode($content, true);
+
         return $json !== null ? $json : $content;
     }
 
     /**
      * Set TourCMS data: account ID and channel ID
-     * @param APIJsonLog $log
-     * @param Request $request
-     * @return APIJsonLog
      */
     private function setTourCMSData(APIJsonLog $log, Request $request): APIJsonLog
     {
@@ -158,13 +160,13 @@ class APIJsonLogger
         try {
             $channelId = (int) $request->input(OctoAuthentication::FIELD_CHANNEL_ID);
             $showChannel = $this->tourCMSService->showChannel($channelId);
-            $accountId = !empty($showChannel->channel->account_id) ? (int) $showChannel->channel->account_id : 0;
-            
+            $accountId = ! empty($showChannel->channel->account_id) ? (int) $showChannel->channel->account_id : 0;
+
             $productId = $request->input('productId');
-            if (!empty($productId)) {
+            if (! empty($productId)) {
                 $productIdExploded = explode('|', $productId)[0];
                 $distributionIdentifierSplitted = explode('_', $productIdExploded);
-                $tourId = !empty($distributionIdentifierSplitted[2]) ? (int)$distributionIdentifierSplitted[2] : "";
+                $tourId = ! empty($distributionIdentifierSplitted[2]) ? (int) $distributionIdentifierSplitted[2] : '';
             }
         } catch (Throwable) {
             $channelId = $accountId = $tourId = null;
@@ -172,7 +174,7 @@ class APIJsonLogger
 
         $log->accountIds = [$accountId];
         $log->channelIds = [$channelId];
-        if (!empty($tourId)) {
+        if (! empty($tourId)) {
             $log->tourIds = [$tourId];
         }
 
@@ -189,7 +191,7 @@ class APIJsonLogger
                     'product_id' => $request->input(OctoRequest::PRODUCT_ID),
                     'option_id' => $request->input(OctoRequest::OPTION_ID),
                     'availability_id' => $request->input(OctoRequest::AVAILABILITY_ID),
-                    'unit_items' => $request->input(OctoRequest::UNITS)
+                    'unit_items' => $request->input(OctoRequest::UNITS),
                 ];
                 break;
             case OctoRequest::ENDPOINT_BOOKINGS_RESERVATION:
@@ -202,17 +204,17 @@ class APIJsonLogger
                 break;
             case OctoRequest::ENDPOINT_BOOKINGS_CONFIRMATION:
                 $specificData = [
-                    'booking_uuid' => $request->route(OctoRequest::UUID)
+                    'booking_uuid' => $request->route(OctoRequest::UUID),
                 ];
                 break;
             case OctoRequest::ENDPOINT_BOOKINGS_CANCELLATION:
                 $specificData = [
-                    'booking_uuid' => $request->route(OctoRequest::UUID)
+                    'booking_uuid' => $request->route(OctoRequest::UUID),
                 ];
                 break;
             case OctoRequest::ENDPOINT_BOOKINGS_UPDATE:
                 $specificData = [
-                    'booking_uuid' => $request->route(OctoRequest::UUID)
+                    'booking_uuid' => $request->route(OctoRequest::UUID),
                 ];
                 break;
             default:
@@ -220,8 +222,8 @@ class APIJsonLogger
         }
 
         $log->addApiSpecificData([
-            ... $specificData,
-            'capabilities' => $request->headers->get('Octo-Capabilities', "")
+            ...$specificData,
+            'capabilities' => $request->headers->get('Octo-Capabilities', ''),
         ]);
 
         return $log;
@@ -249,10 +251,10 @@ class APIJsonLogger
         // Authorization: Basic xxx / Bearer yyy
         if ($lower === 'authorization') {
             if (preg_match('/^(Basic|Bearer)\s+(.+)$/i', $value, $m)) {
-                $scheme      = $m[1]; // Basic / Bearer
+                $scheme = $m[1]; // Basic / Bearer
                 $credentials = $m[2];
 
-                return $scheme . ' ' . $this->maskStringKeepLast4($credentials);
+                return $scheme.' '.$this->maskStringKeepLast4($credentials);
             }
 
             return $this->maskStringKeepLast4($value);
@@ -274,8 +276,8 @@ class APIJsonLogger
         }
 
         $visible = substr($value, -4);
-        $masked  = str_repeat('*', $len - 4);
+        $masked = str_repeat('*', $len - 4);
 
-        return $masked . $visible;
+        return $masked.$visible;
     }
 }

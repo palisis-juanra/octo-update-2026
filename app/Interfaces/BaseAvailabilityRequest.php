@@ -7,31 +7,42 @@ use App\Services\TourCMSService;
 abstract class BaseAvailabilityRequest
 {
     const OCTO_STATUS_AVAILABLE = 'AVAILABLE';
+
     const OCTO_STATUS_FREESALE = 'FREESALE';
+
     const OCTO_STATUS_SOLD_OUT = 'SOLD_OUT';
+
     const OCTO_STATUS_LIMITED = 'LIMITED';
+
     const OCTO_STATUS_CLOSED = 'CLOSED';
 
     const TCMS_STATUS_OPEN = 'OPEN';
+
     const TCMS_STATUS_ASKFIRST = 'ASKFIRST';
+
     const TCMS_STATUS_CLOSED = 'CLOSED';
 
     protected int $maxUnits;
+
     protected array $cutoff;
+
     protected array $availabilityIds;
+
     protected bool $contentEnabled = false;
+
     protected ?string $tourName = null;
+
     protected bool $allDay = false;
 
     /**
      * Get all the availabilities
+     *
      * @return array of App\Models\Availability
      */
     abstract public function getAvailabilities(TourCMSService $tourCMSService): array;
 
     /**
      * Map between TourCMS departure status and Octo availability status
-     * @return string
      */
     abstract public function getOctoStatus(string $tourCMSStatus, bool $available): string;
 
@@ -47,7 +58,7 @@ abstract class BaseAvailabilityRequest
 
     /**
      * Get the value of availabilityIds
-     */ 
+     */
     public function getAvailabilityIds(): array
     {
         return $this->availabilityIds;
@@ -55,9 +66,7 @@ abstract class BaseAvailabilityRequest
 
     /**
      * Set the value of availabilityIds
-     *
-     * @return  self
-     */ 
+     */
     public function setAvailabilityIds($availabilityIds): self
     {
         $this->availabilityIds = $availabilityIds;
@@ -79,7 +88,7 @@ abstract class BaseAvailabilityRequest
 
     /**
      * Get the value of tourName
-     */ 
+     */
     public function getTourName(): ?string
     {
         return $this->tourName;
@@ -87,9 +96,7 @@ abstract class BaseAvailabilityRequest
 
     /**
      * Set the value of tourName
-     *
-     * @return  self
-     */ 
+     */
     public function setTourName(?string $tourName): self
     {
         $this->tourName = $tourName;

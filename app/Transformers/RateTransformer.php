@@ -4,7 +4,6 @@ namespace App\Transformers;
 
 use App\Models\Rate;
 
-
 class RateTransformer extends BaseTransformer
 {
     public function __construct(string $mode = BaseTransformer::BASIC)
@@ -13,15 +12,14 @@ class RateTransformer extends BaseTransformer
     }
 
     /**
-     * @param Rate $rate
-     * @return array
+     * @param  Rate  $rate
      */
     public function basicTransform($rate): array
     {
         return [
             'id' => $rate->getId(),
             'retail' => $rate->getRetailPrice(),
-            'net' => $rate->getNetPrice()
+            'net' => $rate->getNetPrice(),
         ];
     }
 

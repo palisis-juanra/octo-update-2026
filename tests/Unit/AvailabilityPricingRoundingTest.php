@@ -35,11 +35,14 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
      * report showed net matching while retail/original were off by one.
      */
     private const RATE_PRICE_R1 = '32.80';
+
     private const NET_PRICE_R1 = '24.60';
+
     private const EXPECTED_RETAIL_R1 = 3280;
+
     private const EXPECTED_NET_R1 = 2460;
 
-    public function test_getUnitPricingFromShowTourDeparture_multipleRates_roundsPriceInsteadOfTruncating(): void
+    public function test_get_unit_pricing_from_show_tour_departure_multiple_rates_rounds_price_instead_of_truncating(): void
     {
         $availabilityRequest = $this->makeAvailabilityRequest();
 
@@ -52,7 +55,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
         $this->assertSame(self::EXPECTED_NET_R1, $r1->getNetPrice());
     }
 
-    public function test_getUnitPricingFromShowTourDeparture_volumePricing_roundsPriceInsteadOfTruncating(): void
+    public function test_get_unit_pricing_from_show_tour_departure_volume_pricing_rounds_price_instead_of_truncating(): void
     {
         $units = [['id' => 'GL_1_1|5879|r1', 'quantity' => 1]];
         $availabilityRequest = $this->makeAvailabilityRequest($units, Product::PRICING_TYPE_VOLUME);
@@ -65,7 +68,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
         $this->assertSame(self::EXPECTED_NET_R1, $unitPricings[0]->getNetPrice());
     }
 
-    public function test_getPricingForShowTourDeparture_volumePricing_roundsPriceInsteadOfTruncating(): void
+    public function test_get_pricing_for_show_tour_departure_volume_pricing_rounds_price_instead_of_truncating(): void
     {
         $units = [['id' => 'GL_1_1|5879|r1', 'quantity' => 1]];
         $availabilityRequest = $this->makeAvailabilityRequest($units, Product::PRICING_TYPE_VOLUME);
@@ -81,7 +84,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
      * The reported symptom: for a single unit of r1 the top level pricing and
      * the matching unitPricing entry must agree.
      */
-    public function test_pricingAndUnitPricing_singleUnitOfR1_agreeOnEveryField(): void
+    public function test_pricing_and_unit_pricing_single_unit_of_r1_agree_on_every_field(): void
     {
         $units = [['id' => 'GL_1_1|5879|r1', 'quantity' => 1]];
         $availabilityRequest = $this->makeAvailabilityRequest($units);
@@ -104,7 +107,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
      * With no explicit selection we price the minimum booking size of r1, the
      * same default generateRatesParamsFromUnits() sends to check availability.
      */
-    public function test_getPricingForShowTourDeparture_multipleRatesWithoutUnits_pricesMinimumBookingSizeOfR1(): void
+    public function test_get_pricing_for_show_tour_departure_multiple_rates_without_units_prices_minimum_booking_size_of_r1(): void
     {
         $availabilityRequest = $this->makeAvailabilityRequest();
 
@@ -115,7 +118,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
         $this->assertSame(self::EXPECTED_NET_R1, $pricing->getNet());
     }
 
-    public function test_getPricingForShowTourDeparture_multipleRatesWithoutUnits_multipliesByMinimumBookingSize(): void
+    public function test_get_pricing_for_show_tour_departure_multiple_rates_without_units_multiplies_by_minimum_booking_size(): void
     {
         $availabilityRequest = $this->makeAvailabilityRequest();
         $availabilityRequest->getProduct()->setMinBookingSize(2);
@@ -130,7 +133,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
      * The reported live symptom: a date range request returned a zeroed pricing
      * block next to a correctly priced unitPricing entry.
      */
-    public function test_pricingAndUnitPricing_dateRangeWithoutUnits_agreeOnR1(): void
+    public function test_pricing_and_unit_pricing_date_range_without_units_agree_on_r1(): void
     {
         $availabilityRequest = $this->makeAvailabilityRequest();
         $departure = $this->makeDeparture();
@@ -145,7 +148,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
         $this->assertSame($r1->getNetPrice(), $pricing->getNet());
     }
 
-    public function test_isPromotionEnrichmentEnabled_plainAvailabilityRequest_isEnabled(): void
+    public function test_is_promotion_enrichment_enabled_plain_availability_request_is_enabled(): void
     {
         $availabilityRequest = $this->makeAvailabilityRequest();
 
@@ -159,7 +162,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
      * pricing block with check_tour_availability values, so the inherited
      * enrichment must stay off to avoid discounting unitPricing twice.
      */
-    public function test_isPromotionEnrichmentEnabled_pricingAvailabilityRequest_isDisabled(): void
+    public function test_is_promotion_enrichment_enabled_pricing_availability_request_is_disabled(): void
     {
         $pricingAvailabilityRequest = new PricingAvailabilityRequest(
             $this->makePromotionServiceMock(),
@@ -180,7 +183,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
      * mutates unitPricing in place, so a second enrichment pass compounds the
      * discount (3280 -> 2952 -> 2657) rather than being idempotent.
      */
-    public function test_enrichAvailabilityWithPromotions_appliedTwice_compoundsTheDiscount(): void
+    public function test_enrich_availability_with_promotions_applied_twice_compounds_the_discount(): void
     {
         $promotion = new Promotion('GENIUS1', 10.0, new DateTime('2026-01-01'), new DateTime('2026-12-31'));
         $product = $this->makeProduct();
@@ -200,14 +203,14 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
 
     private function makeAvailability(): Availability
     {
-        $unitPricing = (new AvailabilityUnitPricing())
+        $unitPricing = (new AvailabilityUnitPricing)
             ->setUnitId('GL_1_1|5879|r1')
             ->setOriginalPrice(self::EXPECTED_RETAIL_R1)
             ->setRetailPrice(self::EXPECTED_RETAIL_R1)
             ->setNetPrice(self::EXPECTED_NET_R1)
             ->setCurrency('EUR');
 
-        $availability = new Availability();
+        $availability = new Availability;
         $availability->setId('2026-10-08|1585169');
         $availability->setLocalDateTimeStart('2026-10-08T08:30:00+02:00');
         $availability->setPricing(new Pricing(self::EXPECTED_RETAIL_R1, self::EXPECTED_RETAIL_R1, self::EXPECTED_NET_R1, 'EUR'));
@@ -235,7 +238,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
 
     private function makeProduct(string $pricingType = Product::PRICING_TYPE_MULTIPLE_RATES): Product
     {
-        $product = new Product();
+        $product = new Product;
         $product->setTourId(5879);
         $product->setId('GL_1_1|5879');
         $product->setPricingType($pricingType);
@@ -288,7 +291,7 @@ class AvailabilityPricingRoundingTest extends UnitTestCase
     }
 
     /**
-     * @param AvailabilityUnitPricing[] $unitPricings
+     * @param  AvailabilityUnitPricing[]  $unitPricings
      */
     private function findUnitPricing(array $unitPricings, string $unitId): AvailabilityUnitPricing
     {

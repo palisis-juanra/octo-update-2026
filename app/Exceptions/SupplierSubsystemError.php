@@ -9,7 +9,7 @@ class SupplierSubsystemError extends Exception
 {
     protected ?string $errorMessage;
 
-    public function __construct(?string $errorMessage, string $message = "", int $code = 0, ?Throwable $previous = null)
+    public function __construct(?string $errorMessage, string $message = '', int $code = 0, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
 

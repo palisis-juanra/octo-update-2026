@@ -22,8 +22,7 @@ class BookingService
         public AvailabilityService $availabilityService,
         public BookingBuilder $bookingBuilder,
         public BookingChecker $checker
-    )
-    {}
+    ) {}
 
     public function getBookingByUuid(string $uuid): Booking
     {
@@ -31,20 +30,21 @@ class BookingService
         if (is_null($booking)) {
             throw new InvalidBookingUUIDException($uuid);
         }
+
         return $booking;
     }
 
     public function getBooking(Booking $booking, bool $fillableFromDB = false): Booking
     {
         $showBookingResponse = $this->tourCMSService->showBooking($booking->getBookingId());
-        $this->logger->info(["showBookingResponse" => $showBookingResponse]);
-        
+        $this->logger->info(['showBookingResponse' => $showBookingResponse]);
+
         // Deleted booking have no components, we must check that components exists
         $this->checkIfBookingHaveBeenDeleted($showBookingResponse, $booking->getUuid());
         $existingProduct = [];
-        if($fillableFromDB) {
+        if ($fillableFromDB) {
             $storeBookingUnitItemsArray = [];
-            if (!empty($booking->complete_booking_json)) {
+            if (! empty($booking->complete_booking_json)) {
                 $storeBooking = json_decode($booking->complete_booking_json, true);
                 $storeBookingUnitItemsArray = $storeBooking['unitItems'];
                 $existingProduct = $storeBooking['product'];
@@ -65,23 +65,23 @@ class BookingService
             }
         }
 
-        $availability = new Availability();
+        $availability = new Availability;
         $availability = $this->availabilityService->generateAvailabilityFromBookingXML($product, $showBookingResponse);
 
-        $booking =  BookingFactory::createFromShowBookingXML(
+        $booking = BookingFactory::createFromShowBookingXML(
             $booking->getUuid(),
-            $showBookingResponse, 
-            $product, 
+            $showBookingResponse,
+            $product,
             $availability,
             $booking->unit_items,
             $option
         );
+
         return $booking;
     }
 
     /**
      * @throws \App\Exceptions\InvalidBookingUUIDException
-     * @return bool
      */
     protected function checkIfBookingHaveBeenDeleted(SimpleXMLElement $showBooking, string $uuid): bool
     {

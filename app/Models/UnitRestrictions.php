@@ -5,25 +5,30 @@ namespace App\Models;
 class UnitRestrictions
 {
     const MIN_AGE_DEFAULT = 1;
+
     const MAX_AGE_DEFAULT = 99;
+
     const PAX_COUNT_DEFAULT = 1;
 
     protected int $minAge = self::MIN_AGE_DEFAULT;
+
     protected int $maxAge = self::MAX_AGE_DEFAULT;
+
     protected bool $idRequired = false;
+
     protected ?int $minQuantity = null;
+
     protected ?int $maxQuantity = null;
+
     protected int $paxCount = self::PAX_COUNT_DEFAULT;
+
     protected array $accompaniedBy = [];
 
-    public function __construct()
-    {
-
-    }
+    public function __construct() {}
 
     /**
      * Get the value of minAge
-     */ 
+     */
     public function getMinAge()
     {
         return $this->minAge;
@@ -32,8 +37,8 @@ class UnitRestrictions
     /**
      * Set the value of minAge
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setMinAge($minAge)
     {
         $this->minAge = $minAge;
@@ -43,7 +48,7 @@ class UnitRestrictions
 
     /**
      * Get the value of maxAge
-     */ 
+     */
     public function getMaxAge()
     {
         return $this->maxAge;
@@ -52,8 +57,8 @@ class UnitRestrictions
     /**
      * Set the value of maxAge
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setMaxAge($maxAge)
     {
         $this->maxAge = $maxAge;
@@ -63,7 +68,7 @@ class UnitRestrictions
 
     /**
      * Get the value of idRequired
-     */ 
+     */
     public function getIdRequired()
     {
         return $this->idRequired;
@@ -72,8 +77,8 @@ class UnitRestrictions
     /**
      * Set the value of idRequired
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setIdRequired($idRequired)
     {
         $this->idRequired = $idRequired;
@@ -83,7 +88,7 @@ class UnitRestrictions
 
     /**
      * Get the value of minQuantity
-     */ 
+     */
     public function getMinQuantity()
     {
         return $this->minQuantity;
@@ -92,8 +97,8 @@ class UnitRestrictions
     /**
      * Set the value of minQuantity
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setMinQuantity($minQuantity)
     {
         $this->minQuantity = $minQuantity;
@@ -103,7 +108,7 @@ class UnitRestrictions
 
     /**
      * Get the value of maxQuantity
-     */ 
+     */
     public function getMaxQuantity()
     {
         return $this->maxQuantity;
@@ -112,8 +117,8 @@ class UnitRestrictions
     /**
      * Set the value of maxQuantity
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setMaxQuantity($maxQuantity)
     {
         $this->maxQuantity = $maxQuantity;
@@ -123,7 +128,7 @@ class UnitRestrictions
 
     /**
      * Get the value of paxCount
-     */ 
+     */
     public function getPaxCount()
     {
         return $this->paxCount;
@@ -132,8 +137,8 @@ class UnitRestrictions
     /**
      * Set the value of paxCount
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setPaxCount($paxCount)
     {
         $this->paxCount = $paxCount;
@@ -143,7 +148,7 @@ class UnitRestrictions
 
     /**
      * Get the value of accompaniedBy
-     */ 
+     */
     public function getAccompaniedBy()
     {
         return $this->accompaniedBy;
@@ -152,8 +157,8 @@ class UnitRestrictions
     /**
      * Set the value of accompaniedBy
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setAccompaniedBy($accompaniedBy)
     {
         $this->accompaniedBy = $accompaniedBy;

@@ -19,8 +19,8 @@ use App\Services\LocaleService;
 use App\Services\OptionService;
 use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
-use App\Services\TourPromotionService;
 use App\Services\TourCMSService;
+use App\Services\TourPromotionService;
 use App\Services\UnitService;
 use App\Transformers\BaseTransformer;
 use App\Transformers\BookingTransformer;
@@ -35,30 +35,43 @@ class BookingUpdateTest extends FeatureTestCase
     use RefreshDatabase;
 
     const INVALID_BOOKING_UUID = 'invalidUuid';
+
     const CONFIRMED_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
+
     const ON_HOLD_BOOKING_UUID = 'fd99cf42-ff76-4152-a31d-1a6f7efb26f3';
+
     const NOT_CANCELLABLE_BOOKING_UUID = '3f3a7973-fcaa-44f4-a934-e4c252092436';
+
     const CANCEL_FAILS_BOOKING_UUID = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
     const CONFIRMED_TCMS_BOOKING_ID = 4093;
+
     const ON_HOLD_TCMS_BOOKING_ID = 3899;
+
     const NOT_CANCELLABLE_TCMS_BOOKING_ID = 4094;
+
     const CANCEL_FAILS_TCMS_BOOKING_ID = 4095;
 
     const VALID_PRODUCT_ID = 'TE_1_67|142';
+
     const VALID_AVAILABILITY_ID = '2024-12-05|32293';
+
     const VALID_OPTION_ID = 'START_TIME';
+
     const VALID_UNIT_ITEMS = [
-        ['unitId' => "TE_1_67|142|r1"],
-        ['unitId' => "TE_1_67|142|r2"],
+        ['unitId' => 'TE_1_67|142|r1'],
+        ['unitId' => 'TE_1_67|142|r2'],
     ];
 
     public MockObject $tourCMSServiceMock;
+
     public MockObject $bookingCancellationServiceMock;
+
     public ProductService $productService;
+
     public BookingUpdateService $bookingUpdateService;
 
-    public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
+    public function test_when_booking_uuid_is_invalid_then_expects_invalid_booking_uuid_error(): void
     {
         $this->mockServices();
 
@@ -70,7 +83,7 @@ class BookingUpdateTest extends FeatureTestCase
         $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_BOOKING_UUID);
     }
 
-    public function test_whenBookingIsNotCancellable_thenExpectsBookingNotCancellableError(): void
+    public function test_when_booking_is_not_cancellable_then_expects_booking_not_cancellable_error(): void
     {
         $this->mockServices();
 
@@ -81,7 +94,7 @@ class BookingUpdateTest extends FeatureTestCase
         $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_UNPROCESSABLE_ENTITY);
     }
 
-    public function test_whenOldBookingIsOnHold_thenNewBookingKeepsSameUuidAndStaysOnHold(): void
+    public function test_when_old_booking_is_on_hold_then_new_booking_keeps_same_uuid_and_stays_on_hold(): void
     {
         $this->mockServices();
 
@@ -101,7 +114,7 @@ class BookingUpdateTest extends FeatureTestCase
         ]);
     }
 
-    public function test_whenOldBookingIsConfirmed_thenNewBookingKeepsSameUuidAndIsConfirmed(): void
+    public function test_when_old_booking_is_confirmed_then_new_booking_keeps_same_uuid_and_is_confirmed(): void
     {
         $this->mockServices();
 
@@ -121,7 +134,7 @@ class BookingUpdateTest extends FeatureTestCase
         ]);
     }
 
-    public function test_whenOldBookingCancellationFails_thenSendsNotificationEmailAndStillReturnsNewBooking(): void
+    public function test_when_old_booking_cancellation_fails_then_sends_notification_email_and_still_returns_new_booking(): void
     {
         Mail::fake();
         $this->mockServices(cancelFails: true);
@@ -181,6 +194,7 @@ class BookingUpdateTest extends FeatureTestCase
             ->willReturnCallback(function (SimpleXMLElement $bookingData) use ($startNewBookingXML) {
                 $response = simplexml_load_string($startNewBookingXML->asXML());
                 $response->booking->booking_uuid = (string) $bookingData->booking_uuid;
+
                 return $response;
             });
 
@@ -188,7 +202,7 @@ class BookingUpdateTest extends FeatureTestCase
         $this->tourCMSServiceMock->method('commitBooking')->willReturn($commitBookingXML);
         $this->tourCMSServiceMock->method('deleteBooking')->willReturn($deleteBookingXML);
         $this->tourCMSServiceMock->method('updateBooking')->willReturn($updateBookingOkXML);
-        $this->tourCMSServiceMock->method('updateCustomer')->willReturnCallback(fn($customer) => $customer);
+        $this->tourCMSServiceMock->method('updateCustomer')->willReturnCallback(fn ($customer) => $customer);
 
         $this->tourCMSServiceMock
             ->method('cancelBooking')
@@ -213,14 +227,14 @@ class BookingUpdateTest extends FeatureTestCase
         $product = $this->productService->find(self::VALID_PRODUCT_ID);
         $option = $product->getOptionById(self::VALID_OPTION_ID);
 
-        $availability = new Availability();
+        $availability = new Availability;
         $availability->setId(self::VALID_AVAILABILITY_ID);
         $availability->setLocalDateTimeStart('2024-12-05');
         $availability->setLocalDateTimeEnd('2024-12-05');
         $availability->setDepartureId(32293);
         $availability->setAllDay(false);
-        $availability->setOpeningHoursFrom("00:00");
-        $availability->setOpeningHoursTo("23:00");
+        $availability->setOpeningHoursFrom('00:00');
+        $availability->setOpeningHoursTo('23:00');
 
         $bookingReservationService = new BookingReservationService($this->tourCMSServiceMock, $this->productService, $availabilityService, $this->getLoggerMock());
 
@@ -232,9 +246,9 @@ class BookingUpdateTest extends FeatureTestCase
         $bookingConfirmationService->logger = $this->getLoggerMock();
         $bookingConfirmationService->productService = $this->productService;
         $bookingConfirmationService->availabilityService = $availabilityService;
-        $bookingConfirmationService->contactService = new ContactService();
+        $bookingConfirmationService->contactService = new ContactService;
 
-        $bookingContactService = new BookingContactService(new ContactService(), $bookingConfirmationService);
+        $bookingContactService = new BookingContactService(new ContactService, $bookingConfirmationService);
 
         // uuid => [tcmsBookingId, status, cancellable]
         $stubs = [
@@ -264,13 +278,13 @@ class BookingUpdateTest extends FeatureTestCase
         $this->bookingCancellationServiceMock
             ->method('getBookingByUuid')
             ->willReturnCallback(function (string $uuid) use ($stubs, $completeBookingJson): Booking {
-                if (!array_key_exists($uuid, $stubs)) {
+                if (! array_key_exists($uuid, $stubs)) {
                     throw new InvalidBookingUUIDException($uuid);
                 }
 
                 [$bookingId] = $stubs[$uuid];
 
-                $booking = new Booking();
+                $booking = new Booking;
                 $booking->setUuid($uuid);
                 $booking->setBookingId($bookingId);
                 $booking->setAccountId(1);
@@ -290,7 +304,7 @@ class BookingUpdateTest extends FeatureTestCase
                 $uuid = $bookingByUuid->getUuid();
                 [, $status, $cancellable] = $stubs[$uuid];
 
-                $booking = new Booking();
+                $booking = new Booking;
                 $booking->setUuid($uuid);
                 $booking->setBookingId($bookingByUuid->getBookingId());
                 $booking->setAccountId(1);
@@ -300,7 +314,7 @@ class BookingUpdateTest extends FeatureTestCase
                 $booking->setProduct($product);
                 $booking->setOption($option);
                 $booking->setAvailability($availability);
-                $booking->setContact(new Contact());
+                $booking->setContact(new Contact);
                 $booking->setUnits([]);
                 $booking->setUtcExpiresAt(null);
 
@@ -319,9 +333,9 @@ class BookingUpdateTest extends FeatureTestCase
         $this->bookingUpdateService->bookingConfirmationService = $bookingConfirmationService;
         $this->bookingUpdateService->bookingContactService = $bookingContactService;
         $this->bookingUpdateService->productService = $this->productService;
-        $this->bookingUpdateService->optionService = new OptionService();
+        $this->bookingUpdateService->optionService = new OptionService;
         $this->bookingUpdateService->availabilityService = $availabilityService;
-        $this->bookingUpdateService->unitService = new UnitService();
+        $this->bookingUpdateService->unitService = new UnitService;
         $this->bookingUpdateService->logger = $this->getLoggerMock();
         $this->bookingUpdateService->transformer = new BookingTransformer(BaseTransformer::FULL_TRANSFORM);
 

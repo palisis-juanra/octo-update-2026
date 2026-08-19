@@ -13,8 +13,8 @@ use App\Services\ContactService;
 use App\Services\LocaleService;
 use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
-use App\Services\TourPromotionService;
 use App\Services\TourCMSService;
+use App\Services\TourPromotionService;
 use App\Services\UnitService;
 use PHPUnit\Framework\MockObject\MockObject;
 use SimpleXMLElement;
@@ -23,110 +23,124 @@ use Tests\FeatureTestCase;
 class BookingConfirmationTest extends FeatureTestCase
 {
     const INVALID_BOOKING_UUID = 'invalidUuid';
+
     const VALID_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
+
     const TCMS_BOOKING_ID = 4093;
+
     const VALID_PRODUCT_ID = 'TE_1_67|142';
+
     const VALID_AVAILABILITY_ID = '2024-12-22|32310';
+
     const VALID_OPTION_ID = 'START_TIME';
+
     const VALID_UNIT_ITEMS = [
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r1"
+            UnitService::UNIT_ID_FIELD => 'TE_1_67|142|r1',
         ],
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r2"
-        ]
+            UnitService::UNIT_ID_FIELD => 'TE_1_67|142|r2',
+        ],
     ];
 
     const VALID_UNIT_ITEMS_MULTIPLE_UNITS_WITH_SAME_RATE = [
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r1"
+            UnitService::UNIT_ID_FIELD => 'TE_1_67|142|r1',
         ],
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r2"
+            UnitService::UNIT_ID_FIELD => 'TE_1_67|142|r2',
         ],
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r2"
-        ]
+            UnitService::UNIT_ID_FIELD => 'TE_1_67|142|r2',
+        ],
     ];
 
     const LEAD_MISSING_DATA = 0;
+
     const LEAD_NO_MISSING_DATA = 1;
+
     const LEAD_INFO_MATCHES_OTHER_PASSENGER = 2;
 
-
     public SimpleXMLElement $showChannelXML;
+
     public SimpleXMLElement $showTourXML;
+
     public SimpleXMLElement $commitBookingXML;
+
     public SimpleXMLElement $showBookingXML;
+
     public MockObject $tourCMSServiceMock;
+
     public MockObject $availabilityServiceMock;
+
     public MockObject $bookingConfirmationServiceMock;
+
     public ProductService $productService;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
     }
 
-    public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
+    public function test_when_booking_uuid_is_invalid_then_expects_invalid_booking_uuid_error(): void
     {
         $this->mockServices('tests/TourCMSResponses/showBooking.xml');
-        $response = $this->post("/bookings/" . self::INVALID_BOOKING_UUID . "/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response = $this->post('/bookings/'.self::INVALID_BOOKING_UUID.'/confirm', [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
         $response->assertBadRequest();
         $responseData = $response->decodeResponseJson();
         $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_INVALID_BOOKING_UUID);
         $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_BOOKING_UUID);
     }
 
-    public function test_whenBookingUuidIsCorrect_thenWeCanConfirmTheBooking(): void
+    public function test_when_booking_uuid_is_correct_then_we_can_confirm_the_booking(): void
     {
         $this->mockServices('tests/TourCMSResponses/showBooking.xml');
-        $response = $this->post("/bookings/" . self::VALID_BOOKING_UUID . "/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response = $this->post('/bookings/'.self::VALID_BOOKING_UUID.'/confirm', [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
         $response->assertOk();
 
         $responseData = $response->decodeResponseJson();
         $responseData->assertFragment([
-            "id" => "1|142|4093",
-            "uuid" => self::VALID_BOOKING_UUID,
-            "status" => Booking::STATUS_CONFIRMED,
-            "productId" => self::VALID_PRODUCT_ID,
-            "availabilityId" => self::VALID_AVAILABILITY_ID,
-            "optionId" => self::VALID_OPTION_ID
+            'id' => '1|142|4093',
+            'uuid' => self::VALID_BOOKING_UUID,
+            'status' => Booking::STATUS_CONFIRMED,
+            'productId' => self::VALID_PRODUCT_ID,
+            'availabilityId' => self::VALID_AVAILABILITY_ID,
+            'optionId' => self::VALID_OPTION_ID,
         ]);
     }
 
-    public function test_whenBookingHasTickets_thenWeGetItOnResponse()
+    public function test_when_booking_has_tickets_then_we_get_it_on_response()
     {
         $this->mockServices('tests/TourCMSResponses/showBookingWithTickets.xml');
-        $response = $this->post("/bookings/" . self::VALID_BOOKING_UUID . "/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response = $this->post('/bookings/'.self::VALID_BOOKING_UUID.'/confirm', [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
         $response->assertOk();
 
-        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryValue", "10246817");
-        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryFormat", "CODE128");
-        $response->assertJsonPath("unitItems.1.ticket.redemptionMethod", "DIGITAL");
-        $response->assertJsonPath("unitItems.1.ticket.utcRedeemedAt", null);
+        $response->assertJsonPath('unitItems.1.ticket.deliveryOptions.0.deliveryValue', '10246817');
+        $response->assertJsonPath('unitItems.1.ticket.deliveryOptions.0.deliveryFormat', 'CODE128');
+        $response->assertJsonPath('unitItems.1.ticket.redemptionMethod', 'DIGITAL');
+        $response->assertJsonPath('unitItems.1.ticket.utcRedeemedAt', null);
     }
 
-    public function test_whenTravellersInformationIsSent_thenWeGetItOnResponse(): void
+    public function test_when_travellers_information_is_sent_then_we_get_it_on_response(): void
     {
         $this->mockServices('tests/TourCMSResponses/showBookingWithAssociatedTravellers.xml');
-        $response = $this->post("/bookings/" . self::VALID_BOOKING_UUID . "/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response = $this->post('/bookings/'.self::VALID_BOOKING_UUID.'/confirm', [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
         $response->assertOk();
 
         $i = 0;
         foreach ($this->showBookingXML->booking->customers->customer as $customer) {
-            $response->assertJsonPath("unitItems." . $i . ".contact.firstName", (string) $customer->firstname);
-            $response->assertJsonPath("unitItems." . $i . ".contact.lastName", (string) $customer->surname);
-            $response->assertJsonPath("unitItems." . $i . ".contact.emailAddress", (string) $customer->customer_email);
-            $response->assertJsonPath("unitItems." . $i . ".contact.phoneNumber", (string) $customer->customer_tel_mobile);
-            $response->assertJsonPath("unitItems." . $i . ".contact.postalCode", (string) $customer->postcode);
-            $response->assertJsonPath("unitItems." . $i . ".contact.country", (string) $customer->country);
-            $response->assertJsonPath("unitItems." . $i . ".contact.notes", (string) $customer->customer_contact_note);
+            $response->assertJsonPath('unitItems.'.$i.'.contact.firstName', (string) $customer->firstname);
+            $response->assertJsonPath('unitItems.'.$i.'.contact.lastName', (string) $customer->surname);
+            $response->assertJsonPath('unitItems.'.$i.'.contact.emailAddress', (string) $customer->customer_email);
+            $response->assertJsonPath('unitItems.'.$i.'.contact.phoneNumber', (string) $customer->customer_tel_mobile);
+            $response->assertJsonPath('unitItems.'.$i.'.contact.postalCode', (string) $customer->postcode);
+            $response->assertJsonPath('unitItems.'.$i.'.contact.country', (string) $customer->country);
+            $response->assertJsonPath('unitItems.'.$i.'.contact.notes', (string) $customer->customer_contact_note);
             $i++;
         }
     }
 
-    public function test_whenAddContactToBookingAndAlreadyFulfilledNewLeadData_thenContactDetailsAreMissingInTheBooking(): void
+    public function test_when_add_contact_to_booking_and_already_fulfilled_new_lead_data_then_contact_details_are_missing_in_the_booking(): void
     {
         $this->mockServices(
             'tests/TourCMSResponses/showTemporaryBookingMultipleTravelers.xml',
@@ -244,7 +258,7 @@ class BookingConfirmationTest extends FeatureTestCase
             });
 
         $response = $this->post(
-            "/bookings/" . self::VALID_BOOKING_UUID . "/confirm",
+            '/bookings/'.self::VALID_BOOKING_UUID.'/confirm',
             $mockedCustomerData,
             [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
         );
@@ -252,7 +266,7 @@ class BookingConfirmationTest extends FeatureTestCase
         $response->assertOk();
     }
 
-    public function test_whenNewLeadPaxInfoMatchesOtherTraveler_thenWeGetBothInResponse(): void
+    public function test_when_new_lead_pax_info_matches_other_traveler_then_we_get_both_in_response(): void
     {
         $this->mockServices(
             'tests/TourCMSResponses/showTemporaryBookingMultipleTravelers.xml',
@@ -370,7 +384,7 @@ class BookingConfirmationTest extends FeatureTestCase
             });
 
         $response = $this->post(
-            "/bookings/" . self::VALID_BOOKING_UUID . "/confirm",
+            '/bookings/'.self::VALID_BOOKING_UUID.'/confirm',
             $mockedCustomerData,
             [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
         );
@@ -378,7 +392,7 @@ class BookingConfirmationTest extends FeatureTestCase
         $response->assertOk();
     }
 
-    public function test_whenNewLeadPaxIsMissingData_thenWeGetItOnResponseFromOriginalContact(): void
+    public function test_when_new_lead_pax_is_missing_data_then_we_get_it_on_response_from_original_contact(): void
     {
         $this->mockServices(
             'tests/TourCMSResponses/showTemporaryBookingMultipleTravelers.xml',
@@ -496,7 +510,7 @@ class BookingConfirmationTest extends FeatureTestCase
             });
 
         $response = $this->post(
-            "/bookings/" . self::VALID_BOOKING_UUID . "/confirm",
+            '/bookings/'.self::VALID_BOOKING_UUID.'/confirm',
             $mockedCustomerData,
             [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]
         );
@@ -504,14 +518,14 @@ class BookingConfirmationTest extends FeatureTestCase
         $response->assertOk();
     }
 
-    public function test_whenComponentDoesNotHaveTicketOrUrl_thenWeDefaultTourcmsBarcodeValue(): void
+    public function test_when_component_does_not_have_ticket_or_url_then_we_default_tourcms_barcode_value(): void
     {
         $this->mockServices('tests/TourCMSResponses/showBookingWithOneUrlPerComponent.xml');
-        $response = $this->post("/bookings/" . self::VALID_BOOKING_UUID . "/confirm", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response = $this->post('/bookings/'.self::VALID_BOOKING_UUID.'/confirm', [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
         $response->assertOk();
 
-        $response->assertJsonPath("unitItems.0.ticket.deliveryOptions.0.deliveryValue", (string) $this->showBookingXML->booking->barcode_data);
-        $response->assertJsonPath("unitItems.1.ticket.deliveryOptions.0.deliveryValue", (string) $this->showBookingXML->booking->barcode_data);
+        $response->assertJsonPath('unitItems.0.ticket.deliveryOptions.0.deliveryValue', (string) $this->showBookingXML->booking->barcode_data);
+        $response->assertJsonPath('unitItems.1.ticket.deliveryOptions.0.deliveryValue', (string) $this->showBookingXML->booking->barcode_data);
     }
 
     // PROTECTED METHODS
@@ -554,19 +568,19 @@ class BookingConfirmationTest extends FeatureTestCase
 
         $this->tourCMSServiceMock
             ->method('updateCustomer')
-            ->willReturnCallback(fn($customer) => $customer);
+            ->willReturnCallback(fn ($customer) => $customer);
 
         $this->instance(TourCMSService::class, $this->tourCMSServiceMock);
 
         // Mock Availability and AvailabilityService
-        $availability = new Availability();
+        $availability = new Availability;
         $availability->setId(self::VALID_AVAILABILITY_ID);
         $availability->setLocalDateTimeStart($date);
         $availability->setLocalDateTimeEnd($date);
         $availability->setDepartureId(32659);
         $availability->setAllDay(false);
-        $availability->setOpeningHoursFrom("00:00");
-        $availability->setOpeningHoursTo("23:00");
+        $availability->setOpeningHoursFrom('00:00');
+        $availability->setOpeningHoursTo('23:00');
 
         $this->availabilityServiceMock = $this->getMockBuilder(AvailabilityService::class)
             ->disableOriginalConstructor()
@@ -585,7 +599,6 @@ class BookingConfirmationTest extends FeatureTestCase
         $this->productService = new ProductService($this->tourCMSServiceMock, $this->getLoggerMock(), new LocaleService, new ProductMappingFactory, $tourPromotionServiceMock);
         $this->instance(ProductService::class, $this->productService);
 
-
         $this->bookingConfirmationServiceMock = $this->getMockBuilder(BookingConfirmationService::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getBookingByUuid', 'confirmBooking', 'updateTraveller'])
@@ -593,9 +606,9 @@ class BookingConfirmationTest extends FeatureTestCase
 
         $this->bookingConfirmationServiceMock
             ->method('confirmBooking')
-            ->willReturnCallback(fn($booking) => $booking);
+            ->willReturnCallback(fn ($booking) => $booking);
 
-        $booking = new Booking();
+        $booking = new Booking;
         $booking->setUuid(self::VALID_BOOKING_UUID);
         $booking->setBookingId(self::TCMS_BOOKING_ID);
         $booking->unit_items = json_encode(self::VALID_UNIT_ITEMS);
@@ -621,7 +634,7 @@ class BookingConfirmationTest extends FeatureTestCase
         $this->bookingConfirmationServiceMock->logger = $this->getLoggerMock();
         $this->bookingConfirmationServiceMock->productService = $this->productService;
         $this->bookingConfirmationServiceMock->availabilityService = $this->availabilityServiceMock;
-        $this->bookingConfirmationServiceMock->contactService = new ContactService();
+        $this->bookingConfirmationServiceMock->contactService = new ContactService;
 
         $this->instance(BookingConfirmationService::class, $this->bookingConfirmationServiceMock);
     }
@@ -629,80 +642,80 @@ class BookingConfirmationTest extends FeatureTestCase
     private function getMockedDataFromRequest(int $leadType, ?string $resellerReference = null): array
     {
         $contact = [
-            'firstName'     => "Mick",
-            'lastName'      => "Jackson",
-            'emailAddress'  => "mj@gmail.com",
-            'fullName'      => "Mick Jackson",
-            'notes'         => "Test note"
+            'firstName' => 'Mick',
+            'lastName' => 'Jackson',
+            'emailAddress' => 'mj@gmail.com',
+            'fullName' => 'Mick Jackson',
+            'notes' => 'Test note',
         ];
 
         $unitItem1 = [
-            "unitId" => "TE_1_67|142|r1",
-            "contact" => [
-                "firstName"     => "John",
-                "lastName"      => "",
-                "emailAddress"  =>  "",
-                "fullName"      => "John Doe",
-                "notes"         => "Test note1"
-            ]
+            'unitId' => 'TE_1_67|142|r1',
+            'contact' => [
+                'firstName' => 'John',
+                'lastName' => '',
+                'emailAddress' => '',
+                'fullName' => 'John Doe',
+                'notes' => 'Test note1',
+            ],
         ];
 
         $unitItem2 = [
-            "unitId" => "TE_1_67|142|r1",
-            "contact" => [
-                "firstName"     => "John",
-                "lastName"      => "Doe",
-                "emailAddress"  =>  "jd@gmail.com",
-                "fullName"      => "John Doe",
-                "notes"         => "Test note1"
-            ]
+            'unitId' => 'TE_1_67|142|r1',
+            'contact' => [
+                'firstName' => 'John',
+                'lastName' => 'Doe',
+                'emailAddress' => 'jd@gmail.com',
+                'fullName' => 'John Doe',
+                'notes' => 'Test note1',
+            ],
         ];
 
         $unitItem3 = [
-            "unitId" => "TE_1_67|142|r2",
-            "contact" => [
-                "firstName"     => "Rebecca",
-                "lastName"      => "Doe",
-                "emailAddress"  =>  "rd@gmail.com",
-                "fullName"      => "Rebecca Doe",
-                "notes"         => "Test note3"
-            ]
+            'unitId' => 'TE_1_67|142|r2',
+            'contact' => [
+                'firstName' => 'Rebecca',
+                'lastName' => 'Doe',
+                'emailAddress' => 'rd@gmail.com',
+                'fullName' => 'Rebecca Doe',
+                'notes' => 'Test note3',
+            ],
         ];
 
         $unitItem4 = [
-            "unitId" => "TE_1_67|142|r2",
-            "contact" => [
-                "firstName"     => "Monica",
-                "lastName"      => "Orange",
-                "emailAddress"  =>  "mo@gmail.com",
-                "fullName"      => "Monica Orange",
-                "notes"         => "Test note4"
-            ]
+            'unitId' => 'TE_1_67|142|r2',
+            'contact' => [
+                'firstName' => 'Monica',
+                'lastName' => 'Orange',
+                'emailAddress' => 'mo@gmail.com',
+                'fullName' => 'Monica Orange',
+                'notes' => 'Test note4',
+            ],
         ];
 
         $unitItem5 = [
-            "unitId" => "TE_1_67|142|r1",
-            "contact" => [
-                "firstName"     => "Rebecca",
-                "lastName"      => "Doe",
-                "emailAddress"  =>  "rd@gmail.com",
-                "fullName"      => "Rebecca Doe",
-                "notes"         => "Test note3"
-            ]
+            'unitId' => 'TE_1_67|142|r1',
+            'contact' => [
+                'firstName' => 'Rebecca',
+                'lastName' => 'Doe',
+                'emailAddress' => 'rd@gmail.com',
+                'fullName' => 'Rebecca Doe',
+                'notes' => 'Test note3',
+            ],
         ];
 
         $unitItems = [$unitItem1, $unitItem3, $unitItem4];
 
         if ($leadType === self::LEAD_NO_MISSING_DATA) {
             $unitItems = [$unitItem2, $unitItem3, $unitItem4];
-        } else if ($leadType === self::LEAD_INFO_MATCHES_OTHER_PASSENGER) {
+        } elseif ($leadType === self::LEAD_INFO_MATCHES_OTHER_PASSENGER) {
             $unitItems = [$unitItem5, $unitItem3, $unitItem4];
         }
 
         $fulfilledIncomingData = [
             'contact' => $contact,
             'resellerReference' => $resellerReference,
-            'unitItems' => $unitItems
+            'unitItems' => $unitItems,
         ];
 
         return $fulfilledIncomingData;

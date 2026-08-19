@@ -7,7 +7,7 @@ use League\Fractal\Resource\Collection;
 class ProductContentTransformer extends BaseTransformer
 {
     protected LocationTransformer $locationTransformer;
- 
+
     public function __construct(string $mode)
     {
         parent::__construct($mode);
@@ -30,7 +30,7 @@ class ProductContentTransformer extends BaseTransformer
             'categoryLabels' => $productContent->getCategoryLabels(),
             'durationMinutesFrom' => $productContent->getDurationMinutesFrom(),
             'durationMinutesTo' => $productContent->getDurationMinutesTo(),
-            'commentary' => $productContent->getCommentary()
+            'commentary' => $productContent->getCommentary(),
         ];
     }
 

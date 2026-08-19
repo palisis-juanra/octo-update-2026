@@ -24,9 +24,9 @@ class AvailabilityController extends Controller
     public const DEFAULT_MAX_UNITS = 10;
 
     public function __construct(
-        public AvailabilityRequestFactory $availabilityRequestFactory, 
-        public AvailabilityService $availabilityService, 
-        public ProductService $productService, 
+        public AvailabilityRequestFactory $availabilityRequestFactory,
+        public AvailabilityService $availabilityService,
+        public ProductService $productService,
         public JSONLogService $logger,
         public TourPromotionService $tourPromotionService) {}
 
@@ -53,7 +53,7 @@ class AvailabilityController extends Controller
 
             $availabilityRequest = $this->availabilityRequestFactory->get($product, $requestParams);
             $availabilityIds = $request->get(AvailabilityService::PARAM_AVAILABILITY_IDS) ?? [];
-            
+
             $availabilityRequest->setAvailabilityIds($availabilityIds);
             $availabilityRequest->setTourName($product->getInternalName());
 
@@ -69,7 +69,7 @@ class AvailabilityController extends Controller
 
         } catch (AvailabilityRequestMissingParamException $e) {
             return OctoResponse::BAD_REQUEST($e->getMessage());
-        } catch (AvailabilityRequestInvalidParamException $e){
+        } catch (AvailabilityRequestInvalidParamException $e) {
             return OctoResponse::BAD_REQUEST($e->getMessage());
         }
     }

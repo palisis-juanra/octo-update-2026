@@ -4,27 +4,27 @@ namespace App\Transformers;
 
 use App\Facades\OctoRequestFacade;
 use App\Http\Requests\OctoRequest;
-use App\Transformers\BaseTransformer;
 
 class AvailabilityTransformer extends BaseTransformer
 {
     public const MODE_BOOKING_AVAILABILITY = 'bookingAvailability';
 
     protected PricingTransformer $pricingTransformer;
+
     protected RateTransformer $rateTransformer;
 
     public function __construct(string $mode = BaseTransformer::BASIC)
     {
         parent::__construct($mode);
 
-        $this->pricingTransformer = new PricingTransformer();
-        $this->rateTransformer = new RateTransformer();
+        $this->pricingTransformer = new PricingTransformer;
+        $this->rateTransformer = new RateTransformer;
     }
 
     public function basicTransform($availability): array
     {
         return [
-            'id' => $availability->getId()
+            'id' => $availability->getId(),
         ];
     }
 
@@ -33,7 +33,7 @@ class AvailabilityTransformer extends BaseTransformer
 
         $data = [
             'id' => $availability->getId(),
-            'localDateTimeStart' => $availability->getLocalDateTimeStart(), 
+            'localDateTimeStart' => $availability->getLocalDateTimeStart(),
             'localDateTimeEnd' => $availability->getLocalDateTimeEnd(),
             'allDay' => $availability->getAllDay(),
             'available' => $availability->getAvailable(),
@@ -45,17 +45,17 @@ class AvailabilityTransformer extends BaseTransformer
             'openingHours' => [
                 [
                     'to' => $availability->getOpeningHoursTo(),
-                    'from' => $availability->getOpeningHoursFrom()
-                ]
-            ]
+                    'from' => $availability->getOpeningHoursFrom(),
+                ],
+            ],
         ];
-        
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
+
+        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT) === true) {
             $data['title'] = $availability->getTitle();
             $data['shortDescription'] = $availability->getShortDescription();
         }
 
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
+        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING) === true) {
             $pricing = $availability->getPricing();
             $data['pricing'] = $this->pricingTransformer->transform($pricing);
 
@@ -70,7 +70,7 @@ class AvailabilityTransformer extends BaseTransformer
                     'net' => $unitPricing->getNetPrice(),
                     'currency' => $availability->getCurrency(),
                     'currencyPrecision' => $unitPricing->getCurrencyPrecision(),
-                    'includedTaxes' => $unitPricing->getIncludedTaxes()
+                    'includedTaxes' => $unitPricing->getIncludedTaxes(),
                 ];
 
                 if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
@@ -83,11 +83,11 @@ class AvailabilityTransformer extends BaseTransformer
                 }
 
                 $data['unitPricing'][] = $unitPricingData;
-            }            
+            }
         }
 
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES)) {
-            $data['availableRates'] = $availability->getAvailableRates();   
+        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_BOOKINGCOM_RATES) === true) {
+            $data['availableRates'] = $availability->getAvailableRates();
         }
 
         return $data;
@@ -97,15 +97,15 @@ class AvailabilityTransformer extends BaseTransformer
     {
         return [
             'id' => $availability->getId(),
-            'localDateTimeStart' => $availability->getLocalDateTimeStart(), 
+            'localDateTimeStart' => $availability->getLocalDateTimeStart(),
             'localDateTimeEnd' => $availability->getLocalDateTimeEnd(),
             'allDay' => $availability->getAllDay(),
             'openingHours' => [
                 [
                     'from' => $availability->getOpeningHoursFrom(),
-                    'to' => $availability->getOpeningHoursTo()
-                ]
-            ]
+                    'to' => $availability->getOpeningHoursTo(),
+                ],
+            ],
         ];
     }
 }

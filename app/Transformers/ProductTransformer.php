@@ -12,7 +12,9 @@ class ProductTransformer extends BaseTransformer
     public const MODE_BOOKING_PRODUCT = 'bookingProduct';
 
     protected OptionTransformer $optionTransformer;
+
     protected ProductContentTransformer $productContentTransformer;
+
     protected PricingTransformer $pricingTransformer;
 
     public function __construct(string $mode)
@@ -20,7 +22,7 @@ class ProductTransformer extends BaseTransformer
         parent::__construct($mode);
         $this->optionTransformer = new OptionTransformer(BaseTransformer::FULL_TRANSFORM);
         $this->productContentTransformer = new ProductContentTransformer(BaseTransformer::FULL_TRANSFORM);
-        $this->pricingTransformer = new PricingTransformer();
+        $this->pricingTransformer = new PricingTransformer;
     }
 
     protected function basicTransform($product): array
@@ -37,29 +39,29 @@ class ProductTransformer extends BaseTransformer
         $optionsTransformed = $this->manager->createData($optionsResource)->toArray()['data'];
 
         $data = [
-            "id" => $product->getId(),
-            "internalName" => $product->getInternalName(),
-            "reference" => $product->getReference(),
-            "locale" => $product->getLocale(),
-            "timeZone" => $product->getTimeZone(),
-            "allowFreesale" => $product->getAllowFreesale(),
-            "instantConfirmation" => $product->getInstantConfirmation(),
-            "instantDelivery" => $product->getInstantDelivery(),
-            "availabilityRequired" => $product->getAvailabilityRequired(),
-            "availabilityType" => $product->getAvailabilityType(),
-            "deliveryFormats" => $product->getDeliveryFormats(),
-            "deliveryMethods" => $product->getDeliveryMethods(),
-            "redemptionMethod" => $product->getRedemptionMethod(),
-            "options" => $optionsTransformed
+            'id' => $product->getId(),
+            'internalName' => $product->getInternalName(),
+            'reference' => $product->getReference(),
+            'locale' => $product->getLocale(),
+            'timeZone' => $product->getTimeZone(),
+            'allowFreesale' => $product->getAllowFreesale(),
+            'instantConfirmation' => $product->getInstantConfirmation(),
+            'instantDelivery' => $product->getInstantDelivery(),
+            'availabilityRequired' => $product->getAvailabilityRequired(),
+            'availabilityType' => $product->getAvailabilityType(),
+            'deliveryFormats' => $product->getDeliveryFormats(),
+            'deliveryMethods' => $product->getDeliveryMethods(),
+            'redemptionMethod' => $product->getRedemptionMethod(),
+            'options' => $optionsTransformed,
         ];
 
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)){
+        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT) === true) {
             $contentData = $this->productContentTransformer->transform($product->getContent());
             $data = array_merge($data, $contentData);
         }
-    
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)){
-            
+
+        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING) === true) {
+
             $data['defaultCurrency'] = $product->getDefaultCurrency();
             $data['availableCurrencies'] = $product->getAvailableCurrencies();
             $data['pricingPer'] = $product->getPricingPer();

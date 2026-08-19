@@ -11,14 +11,14 @@ class ProductMappingFactoryTest extends UnitTestCase
 {
     public ProductMappingFactory $productMappingFactory;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->productMappingFactory = new ProductMappingFactory;
     }
 
-        public function test_whenTourIsMappedBySingleDeparturePerDayAndDontHaveStartTime_thenWeGetCorrectMappingWithDefaultStartTime(): void
-    {       
+    public function test_when_tour_is_mapped_by_single_departure_per_day_and_dont_have_start_time_then_we_get_correct_mapping_with_default_start_time(): void
+    {
         $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SINGLE.xml'));
         $tourData = $showTourResponseXML->tour;
         unset($tourData->tour_departure_structure->start_times);
@@ -26,54 +26,54 @@ class ProductMappingFactoryTest extends UnitTestCase
         $expectedProductOptions = [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SINGLE,
-                "",
-                "",
+                '',
+                '',
                 ['09:00']
-            )
+            ),
         ];
 
         $productMappings = $this->productMappingFactory->create($tourData);
         $this->assertEquals($expectedProductOptions, $productMappings);
     }
 
-    public function test_whenTourIsMappedBySingleDeparturePerDay_thenWeGetCorrectMapping(): void
-    {            
+    public function test_when_tour_is_mapped_by_single_departure_per_day_then_we_get_correct_mapping(): void
+    {
         $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SINGLE.xml'));
         $tourData = $showTourResponseXML->tour;
 
         $expectedProductOptions = [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SINGLE,
-                "",
-                "",
+                '',
+                '',
                 ['11:00', '13:00']
-            )
+            ),
         ];
 
         $productMappings = $this->productMappingFactory->create($tourData);
         $this->assertEquals($expectedProductOptions, $productMappings);
     }
 
-    public function test_whenTourIsMappedByStartTime_thenWeGetCorrectMappings(): void
-    {            
+    public function test_when_tour_is_mapped_by_start_time_then_we_get_correct_mappings(): void
+    {
         $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/START_TIME.xml'));
         $tourData = $showTourResponseXML->tour;
 
         $expectedProductOptions = [
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_START_TIME,
-                "",
-                "",
-                ["13:00", "15:00", "17:00"]
-            )
+                '',
+                '',
+                ['13:00', '15:00', '17:00']
+            ),
         ];
 
         $productMappings = $this->productMappingFactory->create($tourData);
         $this->assertEquals($expectedProductOptions, $productMappings);
     }
 
-    public function test_whenTourIsMappedBySupplierNote_thenWeGetCorrectMappings(): void
-    {            
+    public function test_when_tour_is_mapped_by_supplier_note_then_we_get_correct_mappings(): void
+    {
         $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE.xml'));
         $tourData = $showTourResponseXML->tour;
 
@@ -81,7 +81,7 @@ class ProductMappingFactoryTest extends UnitTestCase
             new ProductMapping(
                 ProductService::MAPPING_STRUCTURE_TYPE_SUPPLIER_NOTE,
                 '{"en":"","es":""}',
-                "",
+                '',
                 ['00:00']
             ),
             new ProductMapping(
@@ -102,7 +102,7 @@ class ProductMappingFactoryTest extends UnitTestCase
         $this->assertEquals($expectedProductOptions, $productMappings);
     }
 
-    public function test_whenTourIsMappedByDepartureCode_thenWeGetCorrectMappings(): void
+    public function test_when_tour_is_mapped_by_departure_code_then_we_get_correct_mappings(): void
     {
         $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/DEPARTURE_CODE.xml'));
         $tourData = $showTourResponseXML->tour;
@@ -132,8 +132,8 @@ class ProductMappingFactoryTest extends UnitTestCase
         $this->assertEquals($expectedProductOptions, $productMappings);
     }
 
-    public function test_whenTourIsMappedBySupplierNotePlusStartTime_thenWeGetOnlyNonPartialAndCorrectMappings(): void
-    {   
+    public function test_when_tour_is_mapped_by_supplier_note_plus_start_time_then_we_get_only_non_partial_and_correct_mappings(): void
+    {
         $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE_PLUS_START_TIME.xml'));
         $tourData = $showTourResponseXML->tour;
 
@@ -149,14 +149,14 @@ class ProductMappingFactoryTest extends UnitTestCase
                 '{"en":"","es":""}',
                 '[*]_ESP',
                 ['13:00', '17:00']
-            )
+            ),
         ];
 
         $productMappings = $this->productMappingFactory->create($tourData);
         $this->assertEquals($expectedProductOptions, $productMappings);
     }
 
-    public function test_whenPartialMappingHasCustomLabel_thenProductMappingCarriesIt(): void
+    public function test_when_partial_mapping_has_custom_label_then_product_mapping_carries_it(): void
     {
         $showTourResponseXML = simplexml_load_string(file_get_contents('./tests/TourCMSResponses/TourDepartureStructure/SUPPLIER_NOTE_PLUS_START_TIME_CUSTOM_LABEL.xml'));
         $tourData = $showTourResponseXML->tour;
@@ -175,7 +175,7 @@ class ProductMappingFactoryTest extends UnitTestCase
                 '{"en":"","es":""}',
                 '[*]_ESP',
                 ['13:00', '17:00']
-            )
+            ),
         ];
 
         $productMappings = $this->productMappingFactory->create($tourData);

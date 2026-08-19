@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\APICallNotOKException;
 use App\Exceptions\InvalidProductContentException;
 use App\Exceptions\NoMatchingDataException;
 use App\Http\Middleware\OctoAuthentication;
@@ -10,17 +9,21 @@ use App\Http\Responses\OctoResponse;
 use App\Services\JSONLogService;
 use App\Services\ProductService;
 use App\Services\TourCMSService;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use OpenApi\Attributes as OA;
 
 class ProductController extends Controller
 {
     public const ENDPOINT_NAME = 'products';
+
     public TourCMSService $tourCMSService;
+
     public ProductService $productService;
+
     public JSONLogService $logger;
+
     public function __construct(TourCMSService $tourCMSService, ProductService $productService, JSONLogService $logger)
     {
         $this->tourCMSService = $tourCMSService;
@@ -39,7 +42,7 @@ class ProductController extends Controller
                     mediaType: 'application/json',
                     schema: new OA\Schema(
                         type: 'array',
-                        items: new OA\Items (
+                        items: new OA\Items(
                             type: 'object',
                             properties: [
                                 new OA\Property(property: 'id', type: 'string', pattern: '^([A-Z]{2}_\d+_\d+\|\d+)$', description: 'Product ID.', example: 'TE_1_2|143'),
@@ -51,7 +54,7 @@ class ProductController extends Controller
                                 new OA\Property(property: 'instantConfirmation', type: 'boolean', description: 'Whether bookings will be immediatly confirmed when a sale is made.'),
                                 new OA\Property(property: 'instantDelivery', type: 'boolean', description: 'Whether the Reseller can expect immediate delivery of the customers tickets.'),
                                 new OA\Property(property: 'availabilityRequired', type: 'boolean', description: 'Whether an availabilityId is required when creating a booking.'),
-                                new OA\Property(property: 'availabilityType', type: 'string', enum: ['START_TIME', 'OPENING_HOURS'], description: 'What type of availability this product has, possible values are: "START_TIME", "OPENING_HOURS"',),
+                                new OA\Property(property: 'availabilityType', type: 'string', enum: ['START_TIME', 'OPENING_HOURS'], description: 'What type of availability this product has, possible values are: "START_TIME", "OPENING_HOURS"'),
                                 new OA\Property(
                                     property: 'deliveryFormats',
                                     type: 'array',
@@ -109,7 +112,7 @@ class ProductController extends Controller
                                                 description: 'An object containing a fixed list of restrictions for booking the option.',
                                                 properties: [
                                                     new OA\Property(property: 'minUnits', type: ['null', 'integer'], description: 'The minimum number of tickets that can be purchased in a single booking.'),
-                                                    new OA\Property(property: 'maxUnits', type: ['null', 'integer'], description: 'The maximum number of tickets that can be purchased in a single booking.')
+                                                    new OA\Property(property: 'maxUnits', type: ['null', 'integer'], description: 'The maximum number of tickets that can be purchased in a single booking.'),
                                                 ]
                                             ),
                                             new OA\Property(
@@ -152,10 +155,10 @@ class ProductController extends Controller
                                                                     )
                                                                 ),
                                                             ]
-                                                        )
+                                                        ),
                                                     ]
                                                 )
-                                            )
+                                            ),
                                         ],
                                     )
                                 ),
@@ -166,13 +169,14 @@ class ProductController extends Controller
             ),
             new OA\Response(response: 400, description: 'Invalid Product Id'),
             new OA\Response(response: 403, description: 'Forbidden'),
-            new OA\Response(response: 500, description: 'Internal Server Error')
+            new OA\Response(response: 500, description: 'Internal Server Error'),
         ]
     )]
     public function index(Request $request): JsonResponse
     {
         $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
         $productList = $this->productService->getProductList($channelId);
+
         return new JsonResponse($this->productService->transformList($productList), Response::HTTP_OK);
     }
 
@@ -190,7 +194,7 @@ class ProductController extends Controller
                     pattern: '^([A-Z]{2}_\d+_\d+\|\d+)$',
                     example: 'TE_1_2|143',
                 )
-            )
+            ),
         ],
         responses: [
             new OA\Response(
@@ -209,7 +213,7 @@ class ProductController extends Controller
                             new OA\Property(property: 'instantConfirmation', type: 'boolean', description: 'Whether bookings will be immediatly confirmed when a sale is made.'),
                             new OA\Property(property: 'instantDelivery', type: 'boolean', description: 'Whether the Reseller can expect immediate delivery of the customers tickets.'),
                             new OA\Property(property: 'availabilityRequired', type: 'boolean', description: 'Whether an availabilityId is required when creating a booking.'),
-                            new OA\Property(property: 'availabilityType', type: 'string', enum: ['START_TIME', 'OPENING_HOURS'], description: 'What type of availability this product has, possible values are: "START_TIME", "OPENING_HOURS"',),
+                            new OA\Property(property: 'availabilityType', type: 'string', enum: ['START_TIME', 'OPENING_HOURS'], description: 'What type of availability this product has, possible values are: "START_TIME", "OPENING_HOURS"'),
                             new OA\Property(
                                 property: 'deliveryFormats',
                                 type: 'array',
@@ -267,7 +271,7 @@ class ProductController extends Controller
                                             description: 'An object containing a fixed list of restrictions for booking the option.',
                                             properties: [
                                                 new OA\Property(property: 'minUnits', type: ['null', 'integer'], description: 'The minimum number of tickets that can be purchased in a single booking.'),
-                                                new OA\Property(property: 'maxUnits', type: ['null', 'integer'], description: 'The maximum number of tickets that can be purchased in a single booking.')
+                                                new OA\Property(property: 'maxUnits', type: ['null', 'integer'], description: 'The maximum number of tickets that can be purchased in a single booking.'),
                                             ]
                                         ),
                                         new OA\Property(
@@ -310,10 +314,10 @@ class ProductController extends Controller
                                                                 )
                                                             ),
                                                         ]
-                                                    )
+                                                    ),
                                                 ]
                                             )
-                                        )
+                                        ),
                                     ],
                                 )
                             ),
@@ -323,24 +327,28 @@ class ProductController extends Controller
             ),
             new OA\Response(response: 400, description: 'Invalid Product Id'),
             new OA\Response(response: 403, description: 'Forbidden'),
-            new OA\Response(response: 500, description: 'Internal Server Error')
+            new OA\Response(response: 500, description: 'Internal Server Error'),
         ]
     )]
     public function show(Request $request, string $productId): JsonResponse
     {
         try {
             $channelId = $request->get(OctoAuthentication::FIELD_CHANNEL_ID);
-            if (!$this->productService->validateProductId($productId, $channelId)) {
+            if (! $this->productService->validateProductId($productId, $channelId)) {
                 $this->logger->info("INVALID PRODUCT: {$productId}");
+
                 return OctoResponse::INVALID_PRODUCT_ID($productId);
             }
             $product = $this->productService->find($productId);
+
             return new JsonResponse($this->productService->transform($product), Response::HTTP_OK);
         } catch (InvalidProductContentException $e) {
             $this->logger->info("INVALID PRODUCT CONTENT: {$e->getFile()} ({$e->getLine()}");
+
             return OctoResponse::INVALID_PRODUCT_ID($productId, $e->getMessage());
         } catch (NoMatchingDataException $e) {
             $this->logger->info("NO MATCHING DATA: {$e->getFile()} ({$e->getLine()}");
+
             return OctoResponse::INVALID_PRODUCT_ID($productId);
         }
     }

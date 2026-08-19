@@ -2,10 +2,10 @@
 
 namespace App\Transformers;
 
-
 class LocationTransformer extends BaseTransformer
 {
     protected PlaceTransformer $placeTransformer;
+
     public function __construct(string $mode)
     {
         parent::__construct($mode);
@@ -20,7 +20,7 @@ class LocationTransformer extends BaseTransformer
             'types' => $location->getTypes(),
             'minutesTo' => $location->getMinutesTo(),
             'minutesAt' => $location->getMinutesAt(),
-            'place' => $this->placeTransformer->transform($location->getPlace())
+            'place' => $this->placeTransformer->transform($location->getPlace()),
         ];
     }
 

@@ -27,7 +27,7 @@ class ContactTransformer extends BaseTransformer
             'locales' => $contact->getLocales(),
             'postalCode' => $contact->getPostalCode(),
             'country' => $contact->getCountry(),
-            'notes' => $contact->getNotes()
+            'notes' => $contact->getNotes(),
         ];
     }
 }

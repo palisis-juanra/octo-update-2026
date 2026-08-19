@@ -13,26 +13,40 @@ use DateTime;
 class AvailabilityCalendarService
 {
     const PARAM_PRODUCT_ID = 'productId';
+
     const PARAM_OPTION_ID = 'optionId';
+
     const PARAM_LOCAL_DATE_START = 'localDateStart';
+
     const PARAM_LOCAL_DATE_END = 'localDateEnd';
+
     const PARAM_UNITS = 'units';
+
     const REQUIRED_PARAMS = [
         self::PARAM_PRODUCT_ID,
         self::PARAM_OPTION_ID,
         self::PARAM_LOCAL_DATE_START,
-        self::PARAM_LOCAL_DATE_END
+        self::PARAM_LOCAL_DATE_END,
     ];
+
     const DATE_FORMAT = 'Y-m-d';
+
     const ERROR_MESSAGE_LOCAL_DATE_START_INVALID = 'localDateStart must be a valid date in format YYYY-MM-DD';
+
     const ERROR_MESSAGE_LOCAL_DATE_END_INVALID = 'localDateEnd must be a valid date in format YYYY-MM-DD';
+
     const ERROR_MESSAGE_LOCAL_DATE_INVALID_ORDER = 'localDateEnd must not be earlier than localDateStart';
+
     const ERROR_MESSAGE_EMPTY_REQUIRED_PARAM = 'Empty required param';
+
     const ERROR_MESSAGE_MISSING_REQUIRED_PARAMS = 'Missing Required Params: ';
 
     public TourCMSService $tourCMSService;
+
     public ProductService $productService;
+
     public OptionService $optionService;
+
     public CalendarAvailabilityTransformer $transformer;
 
     public function __construct(TourCMSService $tourCMSService, ProductService $productService, OptionService $optionService, ?CalendarAvailabilityTransformer $transformer = null)
@@ -47,6 +61,7 @@ class AvailabilityCalendarService
     {
         $availabilityRequest = $this->getAvailabilityRequest($requestParams);
         $calendar = $availabilityRequest->getAvailabilities($this->tourCMSService);
+
         return $calendar;
     }
 
@@ -64,7 +79,7 @@ class AvailabilityCalendarService
     {
 
         $productId = $requestParams[self::PARAM_PRODUCT_ID] ?? '';
-        $tourId = !empty($productId) ? $this->productService->getTourIdFromProductId($productId) : '';
+        $tourId = ! empty($productId) ? $this->productService->getTourIdFromProductId($productId) : '';
         $optionId = $requestParams[self::PARAM_OPTION_ID] ?? '';
         $localDateStart = $requestParams[self::PARAM_LOCAL_DATE_START] ?? '';
         $localDateEnd = $requestParams[self::PARAM_LOCAL_DATE_END] ?? '';
@@ -77,16 +92,16 @@ class AvailabilityCalendarService
     {
         $missingParams = array_diff(self::REQUIRED_PARAMS, array_keys($requestParams));
 
-        if (!empty($missingParams)) {
-            throw new AvailabilityRequestMissingParamException(self::ERROR_MESSAGE_MISSING_REQUIRED_PARAMS . implode(', ', $missingParams));
+        if (! empty($missingParams)) {
+            throw new AvailabilityRequestMissingParamException(self::ERROR_MESSAGE_MISSING_REQUIRED_PARAMS.implode(', ', $missingParams));
         }
 
         foreach (self::REQUIRED_PARAMS as $param) {
             if (empty($requestParams[$param])) {
-                throw new AvailabilityRequestMissingParamException(self::ERROR_MESSAGE_EMPTY_REQUIRED_PARAM . ": {$param}");
+                throw new AvailabilityRequestMissingParamException(self::ERROR_MESSAGE_EMPTY_REQUIRED_PARAM.": {$param}");
             }
         }
-        
+
         $localDateStart = $requestParams[AvailabilityService::PARAM_LOCAL_DATE_START];
 
         if ($this->validateDate($localDateStart) === false) {
@@ -107,7 +122,7 @@ class AvailabilityCalendarService
 
         $productId = $requestParams[self::PARAM_PRODUCT_ID];
         $product = $this->productService->find($productId);
-        
+
         $optionId = $requestParams[self::PARAM_OPTION_ID];
         $this->optionService->validateOptionId($optionId);
         $option = $product->getOptionById($optionId);
@@ -119,5 +134,4 @@ class AvailabilityCalendarService
 
         return $dateTime && strtolower($dateTime->format($format)) === strtolower($date);
     }
-
 }

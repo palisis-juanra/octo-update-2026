@@ -9,8 +9,8 @@ class XMLService
     public static function getArrayFromXmlNode(SimpleXMLElement $parent, string $childName = ''): array
     {
         $children = [];
-        
-        if (!$parent->children()) {
+
+        if (! $parent->children()) {
             return $children;
         }
 
@@ -19,6 +19,7 @@ class XMLService
                 $children[] = $child;
             }
         }
+
         return $children;
     }
 }

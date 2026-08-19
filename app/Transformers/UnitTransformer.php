@@ -8,13 +8,14 @@ use App\Http\Requests\OctoRequest;
 class UnitTransformer extends BaseTransformer
 {
     protected UnitRestrictionsTransformer $unitRestrictionsTranformer;
+
     protected PricingTransformer $pricingTransformer;
 
     public function __construct(string $mode)
     {
         parent::__construct($mode);
         $this->unitRestrictionsTranformer = new UnitRestrictionsTransformer(BaseTransformer::FULL_TRANSFORM);
-        $this->pricingTransformer = new PricingTransformer();
+        $this->pricingTransformer = new PricingTransformer;
     }
 
     public function basicTransform($unit): array
@@ -25,22 +26,22 @@ class UnitTransformer extends BaseTransformer
             'reference' => $unit->getReference(),
             'type' => $unit->getType(),
             'requiredContactFields' => $unit->getRequiredContactFields(),
-            'restrictions' => $this->unitRestrictionsTranformer->transform($unit->getRestrictions())
+            'restrictions' => $this->unitRestrictionsTranformer->transform($unit->getRestrictions()),
         ];
 
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT)) {
+        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_CONTENT) === true) {
             $data['title'] = $unit->getTitle();
             $data['shortDescription'] = $unit->getShortDescription();
         }
 
-        if (true === OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING)) {
+        if (OctoRequestFacade::isCapabilityActive(OctoRequest::CAPABILITIES_PRICING) === true) {
 
-            if (!is_null($unit->getPricing())) {
+            if (! is_null($unit->getPricing())) {
                 $data['pricingFrom'] = [
-                    $this->pricingTransformer->transform($unit->getPricing())
+                    $this->pricingTransformer->transform($unit->getPricing()),
                 ];
             }
-            
+
         }
 
         return $data;

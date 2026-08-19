@@ -5,6 +5,7 @@ namespace App\Models;
 class DeliveryOptions
 {
     protected string $deliveryFormat;
+
     protected string $deliveryValue;
 
     public function getDeliveryFormat(): string
@@ -18,6 +19,7 @@ class DeliveryOptions
 
         return $this;
     }
+
     public function getDeliveryValue(): string
     {
         return $this->deliveryValue;
@@ -29,5 +31,4 @@ class DeliveryOptions
 
         return $this;
     }
-
 }

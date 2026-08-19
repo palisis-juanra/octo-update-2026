@@ -8,9 +8,13 @@ use SimpleXMLElement;
 class ContactService
 {
     private const MISSING_PHONE_NUMBER = 'MISSING_PHONE_NUMBER';
+
     private const MISSING_EMAIL_ADDRESS = 'MISSING_EMAIL_ADDRESS';
+
     private const MISSING_NOTES = 'MISSING_NOTES';
+
     private const MISSING_POSTAL_CODE = 'MISSING_POSTAL_CODE';
+
     private const MISSING_COUNTRY = 'MISSING_COUNTRY';
 
     public function getCustomerXMLFromContact(int $customerId, Contact $contact): SimpleXMLElement
@@ -18,10 +22,10 @@ class ContactService
         $customerXML = new SimpleXMLElement('<customer />');
         $customerXML->addChild('customer_id', $customerId);
 
-        if (!empty($contact->getFirstName()) && !empty($contact->getLastName())) {
+        if (! empty($contact->getFirstName()) && ! empty($contact->getLastName())) {
             $customerXML->addChild('firstname', $contact->getFirstName());
             $customerXML->addChild('surname', $contact->getLastName());
-        } else if (!empty($contact->getFullName())) {
+        } elseif (! empty($contact->getFullName())) {
             $customerXML->addChild('firstname', $contact->getFullName());
         }
 
@@ -44,11 +48,11 @@ class ContactService
 
         foreach ($missingDataArray as $missingData) {
             match ($missingData) {
-                self::MISSING_PHONE_NUMBER  => $newLeadContactData->setPhoneNumber($originalLeadContactData->getPhoneNumber()),
+                self::MISSING_PHONE_NUMBER => $newLeadContactData->setPhoneNumber($originalLeadContactData->getPhoneNumber()),
                 self::MISSING_EMAIL_ADDRESS => $newLeadContactData->setEmailAddress($originalLeadContactData->getEmailAddress()),
-                self::MISSING_NOTES         => $newLeadContactData->setNotes($originalLeadContactData->getNotes()),
-                self::MISSING_POSTAL_CODE   => $newLeadContactData->setPostalCode($originalLeadContactData->getPostalCode()),
-                self::MISSING_COUNTRY       => $newLeadContactData->setCountry($originalLeadContactData->getCountry())
+                self::MISSING_NOTES => $newLeadContactData->setNotes($originalLeadContactData->getNotes()),
+                self::MISSING_POSTAL_CODE => $newLeadContactData->setPostalCode($originalLeadContactData->getPostalCode()),
+                self::MISSING_COUNTRY => $newLeadContactData->setCountry($originalLeadContactData->getCountry())
             };
         }
 
@@ -59,11 +63,11 @@ class ContactService
     {
         $missingData = [];
 
-        $contact->getEmailAddress() ??  $missingData[] = self::MISSING_EMAIL_ADDRESS;
-        $contact->getCountry()      ??  $missingData[] = self::MISSING_COUNTRY;
-        $contact->getPhoneNumber()  ??  $missingData[] = self::MISSING_PHONE_NUMBER;
-        $contact->getPostalCode()   ??  $missingData[] = self::MISSING_POSTAL_CODE;
-        $contact->getNotes()        ??  $missingData[] = self::MISSING_NOTES;
+        $contact->getEmailAddress() ?? $missingData[] = self::MISSING_EMAIL_ADDRESS;
+        $contact->getCountry() ?? $missingData[] = self::MISSING_COUNTRY;
+        $contact->getPhoneNumber() ?? $missingData[] = self::MISSING_PHONE_NUMBER;
+        $contact->getPostalCode() ?? $missingData[] = self::MISSING_POSTAL_CODE;
+        $contact->getNotes() ?? $missingData[] = self::MISSING_NOTES;
 
         return $missingData;
     }

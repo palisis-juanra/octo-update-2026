@@ -6,7 +6,6 @@ use App\Exceptions\APICallNotOKException;
 use App\Exceptions\InvalidBookingUUIDException;
 use App\Exceptions\NoMatchingDataException;
 use App\Http\Responses\OctoResponse;
-use App\Models\Booking;
 use App\Services\BookingService;
 use App\Services\JSONLogService;
 use App\Transformers\BaseTransformer;
@@ -19,7 +18,9 @@ class BookingGetController extends Controller
     public const ENDPOINT_NAME = 'bookings';
 
     public BookingService $bookingService;
+
     public BookingTransformer $transformer;
+
     public JSONLogService $logger;
 
     public function __construct(BookingService $bookingService, JSONLogService $logger)
@@ -32,19 +33,20 @@ class BookingGetController extends Controller
     public function show(string $bookingUUID): JsonResponse
     {
         try {
-            $this->logger->info(["message" => "Starting to process get booking request", "uuid" => $bookingUUID]);
+            $this->logger->info(['message' => 'Starting to process get booking request', 'uuid' => $bookingUUID]);
             $bookingByUUID = $this->bookingService->getBookingByUuid($bookingUUID);
             $bookingXMLResponse = $this->bookingService->getBooking($bookingByUUID, true);
             $transformedBooking = $this->transformer->transform($bookingXMLResponse);
 
             $originalBookingJSON = json_decode($bookingByUUID->complete_booking_json, true);
 
-            if (is_array($originalBookingJSON) && !empty($originalBookingJSON['contact'])) {
+            if (is_array($originalBookingJSON) && ! empty($originalBookingJSON['contact'])) {
                 $transformedBooking['contact'] = $originalBookingJSON['contact'];
             }
 
             $bookingByUUID->update(['complete_booking_json' => json_encode($transformedBooking)]);
-            $this->logger->info(["message" => "Request processed, returning response", "response" => $transformedBooking]);
+            $this->logger->info(['message' => 'Request processed, returning response', 'response' => $transformedBooking]);
+
             return new JsonResponse($transformedBooking, Response::HTTP_OK);
         } catch (\App\Exceptions\FailSignatureException) {
             return OctoResponse::FORBIDDEN();

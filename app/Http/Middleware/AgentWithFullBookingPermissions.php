@@ -10,14 +10,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AgentWithFullBookingPermissions
 {
-    public const ERROR_MESSAGE_NOT_FULL_BOOKING_PERMISSIONS = "Your agent credentials does not allow you to create bookings";
+    public const ERROR_MESSAGE_NOT_FULL_BOOKING_PERMISSIONS = 'Your agent credentials does not allow you to create bookings';
 
     public function __construct(protected TourCMSService $tourCMSService) {}
 
     public function handle(Request $request, Closure $next): Response
     {
-    
-        if (!$this->agentHasElevatedPermissions()) {
+
+        if (! $this->agentHasElevatedPermissions()) {
             return OctoResponse::FORBIDDEN(self::ERROR_MESSAGE_NOT_FULL_BOOKING_PERMISSIONS);
         }
 
@@ -28,6 +28,6 @@ class AgentWithFullBookingPermissions
     {
         $showChannel = $this->tourCMSService->showChannel(cached: false);
 
-        return (int) $showChannel->channel->connection_permission >= 3; 
+        return (int) $showChannel->channel->connection_permission >= 3;
     }
 }

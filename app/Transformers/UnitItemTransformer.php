@@ -5,7 +5,9 @@ namespace App\Transformers;
 class UnitItemTransformer extends BaseTransformer
 {
     protected UnitTransformer $unitTransformer;
+
     protected TicketTransformer $ticketTransformer;
+
     protected ContactTransformer $contactTransformer;
 
     public function __construct(string $mode)
@@ -27,7 +29,7 @@ class UnitItemTransformer extends BaseTransformer
             'status' => $unitItem->getStatus(),
             'utcRedeemedAt' => $unitItem->getUtcRedeemedAt(),
             'contact' => $this->contactTransformer->transform($unitItem->getContact()),
-            'ticket' => ($unitItem->getTicket() !== null) ? $this->ticketTransformer->transform($unitItem->getTicket()) : null
+            'ticket' => ($unitItem->getTicket() !== null) ? $this->ticketTransformer->transform($unitItem->getTicket()) : null,
         ];
     }
 

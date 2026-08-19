@@ -10,7 +10,9 @@ use ReflectionMethod;
 abstract class UnitTestCase extends BaseTestCase
 {
     const AUTH_HEADER_NAME = 'Authorization';
+
     const OCTO_INVALID_PATTERN_CREDENTIALS = 'Bearer NOVALIDKEY';
+
     const OCTO_VALID_PATTERN_CREDENTIALS = 'Bearer 1|142|abc';
 
     public function getLoggerMock(): JSONLogService

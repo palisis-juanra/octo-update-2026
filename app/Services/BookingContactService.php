@@ -16,11 +16,10 @@ class BookingContactService
      * No matching rules are applied during this process. Only missing values are
      * copied, and the lead customer name remains unchanged.
      *
-     * @param string $unitUUID The unit identifier.
-     * @param string $firstBookingUnitArrayUUID The first booking unit identifier.
-     * @param Contact $unitContact The unit contact.
-     * @param Contact|null $leadContact The lead customer contact.
-     *
+     * @param  string  $unitUUID  The unit identifier.
+     * @param  string  $firstBookingUnitArrayUUID  The first booking unit identifier.
+     * @param  Contact  $unitContact  The unit contact.
+     * @param  Contact|null  $leadContact  The lead customer contact.
      * @return Contact|null The updated lead contact, or null if no lead contact is provided.
      */
     public function assignLeadContactDataToFirstUnit(
@@ -40,7 +39,7 @@ class BookingContactService
         return $this->contactService->completeLeaderPaxContactData($unitContact, $leadContact);
     }
 
-    public function createLeadTravellerContact(?array $leadTravellerContactData): Contact|null
+    public function createLeadTravellerContact(?array $leadTravellerContactData): ?Contact
     {
         if (empty($leadTravellerContactData)) {
             return null;
@@ -55,7 +54,7 @@ class BookingContactService
      * This method iterates through a list of unit items and extracts only those
      * that contain a valid, non-empty 'contact' sub-array.
      *
-     * @param array<int, array{contact?: array<string, mixed>, string: mixed}> $unitItems Raw array of unit items.
+     * @param  array<int, array{contact?: array<string, mixed>, string: mixed}>  $unitItems  Raw array of unit items.
      * @return array<int, array{contact: array<string, mixed>, string: mixed}> Filtered array containing only unit items with valid contact data.
      */
     public function createUnitContactsArray(array $unitItems): array
@@ -64,7 +63,7 @@ class BookingContactService
         foreach ($unitItems as $key => $unitItem) {
             if (
                 array_key_exists('contact', $unitItem) &&
-                !empty($unitItem['contact']) && is_array(
+                ! empty($unitItem['contact']) && is_array(
                     $unitItem['contact']
                 )
             ) {
@@ -83,16 +82,16 @@ class BookingContactService
      * the booking confirmation service, and determines/assigns the lead contact details
      * starting from the first booking unit.
      *
-     * @param array<int, array{unitId: mixed, contact: array<string, mixed>}> $unitContacts Array of contact data for units
-     * @param Booking $booking The booking entity containing the units to be updated.
-     * @param Contact|null $leadContact The existing lead contact, if any.
-     * * @return Contact|null The updated lead contact, or null if none is set.
+     * @param  array<int, array{unitId: mixed, contact: array<string, mixed>}>  $unitContacts  Array of contact data for units
+     * @param  Booking  $booking  The booking entity containing the units to be updated.
+     * @param  Contact|null  $leadContact  The existing lead contact, if any.
+     *                                     * @return Contact|null The updated lead contact, or null if none is set.
      */
     public function updateBookingTravelersWithContactInfo(
         array $unitContacts,
         Booking $booking,
         ?Contact $leadContact
-    ): Contact|null {
+    ): ?Contact {
         if (empty($unitContacts)) {
             return $leadContact;
         }

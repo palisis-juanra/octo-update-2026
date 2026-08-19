@@ -9,22 +9,22 @@ class DateTimeService
 {
     public const string FORMAT_ISO8601 = 'Y-m-d\TH:i:s\Z';
 
-    public static function getISODateTimeString(string $day = 'now', string $hour = '00', string $minutes = '00', string $timezone = ""): string
+    public static function getISODateTimeString(string $day = 'now', string $hour = '00', string $minutes = '00', string $timezone = ''): string
     {
         $dateTimeZone = new DateTimeZone('UTC');
-        if (!empty($timezone)) {
+        if (! empty($timezone)) {
             $dateTimeZone = new DateTimeZone($timezone);
         }
 
         $dateTime = new DateTime($day, $dateTimeZone);
         $dateTime->setTime($hour, $minutes);
-    
+
         return $dateTime->format(DateTime::ATOM);
     }
 
     public static function getISODateTimeStringFromTimestamp(string $timestamp): string
     {
-        $dateTime = new DateTime();
+        $dateTime = new DateTime;
         $dateTime->setTimestamp($timestamp);
 
         return $dateTime->format(DateTime::ATOM);

@@ -9,17 +9,16 @@ use DateTimeZone;
 class Ticket
 {
     protected string $redemptionMethod;
+
     protected ?string $utcRedeemedAt = null;
-    protected array $deliveryOptions = []; 
 
-    public function __construct()
-    {
+    protected array $deliveryOptions = [];
 
-    }
+    public function __construct() {}
 
     /**
      * Get the value of redemptionMethod
-     */ 
+     */
     public function getRedemptionMethod(): string
     {
         return $this->redemptionMethod;
@@ -27,9 +26,7 @@ class Ticket
 
     /**
      * Set the value of redemptionMethod
-     *
-     * @return  self
-     */ 
+     */
     public function setRedemptionMethod($redemptionMethod): self
     {
         $this->redemptionMethod = $redemptionMethod;
@@ -39,21 +36,20 @@ class Ticket
 
     /**
      * Get the value of utcRedeemedAt
-     */ 
-    public function getUtcRedeemedAt(): string|null
+     */
+    public function getUtcRedeemedAt(): ?string
     {
         return $this->utcRedeemedAt;
     }
 
     /**
      * Set the value of utcRedeemedAt
-     *
-     * @return  self
-     */ 
+     */
     public function setUtcRedeemedAt($timestamp): self
     {
         if (is_null($timestamp)) {
             $this->utcRedeemedAt = null;
+
             return $this;
         }
 
@@ -66,7 +62,7 @@ class Ticket
 
     /**
      * Get the value of deliveryOptions
-     */ 
+     */
     public function getDeliveryOptions(): array
     {
         return $this->deliveryOptions;
@@ -74,9 +70,7 @@ class Ticket
 
     /**
      * Set the value of deliveryOptions
-     *
-     * @return  self
-     */ 
+     */
     public function setDeliveryOptions(array $deliveryOptions): self
     {
         $this->deliveryOptions = $deliveryOptions;

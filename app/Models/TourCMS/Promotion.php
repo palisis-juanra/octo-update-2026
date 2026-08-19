@@ -11,11 +11,14 @@ use SimpleXMLElement;
  */
 class Promotion
 {
-    public const string OPEN_PROMOTION_NAME = "OPEN";
+    public const string OPEN_PROMOTION_NAME = 'OPEN';
 
     protected string $name;
+
     protected float $discount;
+
     protected DateTime $startDate;
+
     protected DateTime $endDate;
 
     public function __construct(string $name, float $discount, DateTime $startDate, DateTime $endDate)
@@ -26,20 +29,16 @@ class Promotion
         $this->endDate = $endDate;
     }
 
-
     /**
      * Creates a Promotion object from XML node coming from
      * https://www.tourcms.com/support/api/mp/get_tour_promotions.php
-     * 
-     * @param SimpleXMLElement $promotionXML
-     * @return Promotion
      */
     public static function fromXML(SimpleXMLElement $promotionXML): self
     {
         $startDate = DateTime::createFromFormat('Y-m-d', (string) $promotionXML->start_date);
         $endDate = DateTime::createFromFormat('Y-m-d', (string) $promotionXML->end_date);
 
-        $startDate->setTime(0,0,0,0);
+        $startDate->setTime(0, 0, 0, 0);
         $endDate->setTime(23, 59, 59, 0);
 
         return new Promotion(
@@ -53,10 +52,10 @@ class Promotion
     public static function createOpenPromotion()
     {
         return new Promotion(
-            self::OPEN_PROMOTION_NAME, 
-            0, 
-            (new DateTime())->sub(DateInterval::createFromDateString("10 year")), 
-            (new DateTime())->add(DateInterval::createFromDateString("10 year"))
+            self::OPEN_PROMOTION_NAME,
+            0,
+            (new DateTime)->sub(DateInterval::createFromDateString('10 year')),
+            (new DateTime)->add(DateInterval::createFromDateString('10 year'))
         );
     }
 

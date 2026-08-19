@@ -2,10 +2,10 @@
 
 namespace App\Transformers;
 
-
 class PlaceTransformer extends BaseTransformer
 {
     protected PostalAddressTransformer $postalAddressTransformer;
+
     public function __construct(string $mode)
     {
         parent::__construct($mode);
@@ -19,7 +19,7 @@ class PlaceTransformer extends BaseTransformer
             'longitude' => $place->getLongitude(),
             'postalAddress' => $this->postalAddressTransformer->transform($place->getPostalAddress()),
             'identifiers' => $place->getIdentifiers(),
-            'sameAs' => $place->getSameAs()
+            'sameAs' => $place->getSameAs(),
         ];
     }
 

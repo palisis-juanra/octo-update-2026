@@ -9,15 +9,25 @@ use DateTimeZone;
 class UnitItem
 {
     public string $uuid;
+
     public string $id;
+
     public ?string $resellerReference;
+
     public ?string $supplierReference;
+
     public string $status;
+
     public string $unitId;
+
     public Unit $unit;
+
     public ?string $utcRedeemedAt;
+
     public ?Ticket $ticket = null;
+
     public ?Contact $contact;
+
     public ?int $customerId = null;
 
     public function __construct() {}
@@ -110,12 +120,13 @@ class UnitItem
     {
         return $this->utcRedeemedAt;
     }
- 
+
     public function setUtcRedeemedAt(?string $timestamp): self
     {
 
         if (is_null($timestamp)) {
             $this->utcRedeemedAt = null;
+
             return $this;
         }
 
@@ -126,7 +137,7 @@ class UnitItem
         return $this;
     }
 
-    public function getTicket(): Ticket|null
+    public function getTicket(): ?Ticket
     {
         return $this->ticket;
     }
@@ -138,7 +149,7 @@ class UnitItem
         return $this;
     }
 
-    public function getContact(): Contact|null
+    public function getContact(): ?Contact
     {
         return $this->contact;
     }

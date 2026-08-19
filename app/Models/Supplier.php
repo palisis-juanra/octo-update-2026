@@ -10,21 +10,34 @@ class Supplier extends Model
     use HasFactory;
 
     protected string $id;
+
     protected string $name;
+
     protected string $endpoint;
+
     protected string $website;
+
     protected string $email;
+
     protected string $telephone;
+
     protected string $address_1;
+
     protected string $address_2;
+
     protected string $address_city;
+
     protected string $address_state;
+
     protected string $address_postcode;
+
     protected string $address_country;
+
     protected string $shortDescription;
+
     protected array $media;
 
-    public function __construct(string $id, string $name, string $endpoint, string $website, string $email, string $telephone, string $address_1, string $address_2, string $address_city, string $address_state, string $address_postcode, string $address_country, string|null $shortDescription, array $media)
+    public function __construct(string $id, string $name, string $endpoint, string $website, string $email, string $telephone, string $address_1, string $address_2, string $address_city, string $address_state, string $address_postcode, string $address_country, ?string $shortDescription, array $media)
     {
         $this->id = $id;
         $this->name = $name;
@@ -52,8 +65,6 @@ class Supplier extends Model
 
     /**
      * Set the value of id
-     *
-     * @return  self
      */
     public function setId($id): self
     {
@@ -72,8 +83,6 @@ class Supplier extends Model
 
     /**
      * Set the value of name
-     *
-     * @return  self
      */
     public function setName($name): self
     {
@@ -92,8 +101,6 @@ class Supplier extends Model
 
     /**
      * Set the value of endpoint
-     *
-     * @return  self
      */
     public function setEndpoint($endpoint): self
     {
@@ -112,8 +119,6 @@ class Supplier extends Model
 
     /**
      * Set the value of website
-     *
-     * @return  self
      */
     public function setWebsite($website): self
     {
@@ -132,8 +137,6 @@ class Supplier extends Model
 
     /**
      * Set the value of email
-     *
-     * @return  self
      */
     public function setEmail($email): self
     {
@@ -152,8 +155,6 @@ class Supplier extends Model
 
     /**
      * Set the value of telephone
-     *
-     * @return  self
      */
     public function setTelephone($telephone): self
     {
@@ -168,58 +169,69 @@ class Supplier extends Model
     public function getFullAddress(): string
     {
         $address = $this->address_1;
-        $address .= empty($this->address_2)? '' : ' '.$this->address_2;
-        $address .= empty($this->address_postcode)? '' : ', '.$this->address_postcode;
-        $address .= empty($this->address_city)? '' : ', '.$this->address_city; 
-        $address .= empty($this->address_country)? '' : ' ('.$this->address_country.')';
+        $address .= empty($this->address_2) ? '' : ' '.$this->address_2;
+        $address .= empty($this->address_postcode) ? '' : ', '.$this->address_postcode;
+        $address .= empty($this->address_city) ? '' : ', '.$this->address_city;
+        $address .= empty($this->address_country) ? '' : ' ('.$this->address_country.')';
+
         return $address;
     }
 
     /**
      * Set the value of address
-     *
-     * @return  self
      */
     public function setAddress($address): self
     {
         $this->address_1 = $address;
+
         return $this;
     }
+
     public function setShortDescription($shortDescription): self
     {
         $this->shortDescription = $shortDescription;
+
         return $this;
     }
+
     public function setMedia($media): self
     {
         $this->media = $media;
+
         return $this;
     }
-    protected function getAddress1(): string 
+
+    protected function getAddress1(): string
     {
         return $this->address_1;
     }
-    protected function getAddress2(): string 
+
+    protected function getAddress2(): string
     {
         return $this->address_2;
     }
-    protected function getPostCode(): string 
+
+    protected function getPostCode(): string
     {
         return $this->address_postcode;
     }
-    protected function getCity(): string 
+
+    protected function getCity(): string
     {
         return $this->address_city;
     }
-    protected function getCountry(): string 
+
+    protected function getCountry(): string
     {
-        return $this->address_country ;
+        return $this->address_country;
     }
-    public function getShortDescription(): string 
+
+    public function getShortDescription(): string
     {
         return $this->shortDescription;
     }
-    public function getMedia(): array 
+
+    public function getMedia(): array
     {
         return $this->media;
     }

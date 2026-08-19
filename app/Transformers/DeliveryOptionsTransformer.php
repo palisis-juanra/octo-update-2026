@@ -7,8 +7,8 @@ class DeliveryOptionsTransformer extends BaseTransformer
     public function basicTransform($deliveryOptions): array
     {
         return [
-            "deliveryFormat" => $deliveryOptions->getDeliveryFormat(),
-            "deliveryValue" => $deliveryOptions->getDeliveryValue()
+            'deliveryFormat' => $deliveryOptions->getDeliveryFormat(),
+            'deliveryValue' => $deliveryOptions->getDeliveryValue(),
         ];
     }
 

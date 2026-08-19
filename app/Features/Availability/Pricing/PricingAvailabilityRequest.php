@@ -18,6 +18,7 @@ use App\Services\UnitService;
 class PricingAvailabilityRequest extends AvailabilityRequest
 {
     protected string $currency;
+
     protected array $units;
 
     public function __construct(AvailabilityPromotionService $availabilityPromotionService, Product $product, string $optionId, string $localDateStart, array $units, string $currency, ?Promotion $promotion = null)
@@ -29,7 +30,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
 
     /**
      * Get the value of localDateStart
-     */ 
+     */
     public function getLocalDateStart(): string
     {
         return $this->localDateStart;
@@ -38,8 +39,8 @@ class PricingAvailabilityRequest extends AvailabilityRequest
     /**
      * Set the value of localDateStart
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setLocalDateStart($localDateStart)
     {
         $this->localDateStart = $localDateStart;
@@ -88,10 +89,10 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         }
 
         foreach ($units as $rateData) {
-            if (!empty($params)) {
-                $params .= "&";
+            if (! empty($params)) {
+                $params .= '&';
             }
-            
+
             $tourCMSRate = UnitService::getTourCMSRateId($rateData['id']);
             $params .= "{$tourCMSRate}={$rateData['quantity']}";
         }
@@ -105,28 +106,29 @@ class PricingAvailabilityRequest extends AvailabilityRequest
         foreach ($checkAvailcomponents as $checkAvailcomponent) {
             $checkAvailcomponentsIndexed[$this->generateAvailabilityIdFromDepartureOrComponentObject($checkAvailcomponent)] = $checkAvailcomponent;
         }
+
         return $checkAvailcomponentsIndexed;
     }
 
     /**
      * Update availability pricing with prices coming from check avail endpoint
-     * @param Availability[] $availabilities
-     * @param array $checkAvailcomponents
-     * @return void
+     *
+     * @param  Availability[]  $availabilities
      */
     protected function updateAvailabilitiesWithCheckAvailComponents(array $availabilities, array $checkAvailcomponents): void
     {
         $checkAvailComponentsIndexed = $this->indexCheckAvailComponents($checkAvailcomponents);
         foreach ($availabilities as $availability) {
 
-            if (!isset($checkAvailComponentsIndexed[$availability->getId()])) {
+            if (! isset($checkAvailComponentsIndexed[$availability->getId()])) {
                 $availability->setAvailable(false);
+
                 continue;
             }
 
             $totalPricing = (int) round((float) $checkAvailComponentsIndexed[$availability->getId()]->total_price * 100);
             $netPrice = (int) round((float) $checkAvailComponentsIndexed[$availability->getId()]->net_price * 100);
-            
+
             $pricing = new Pricing(
                 $totalPricing,
                 $totalPricing,
@@ -134,7 +136,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
                 $this->currency
             );
             $availability->setPricing($pricing);
-            
+
         }
     }
 
@@ -149,6 +151,7 @@ class PricingAvailabilityRequest extends AvailabilityRequest
             return [];
         }
         $availableComponents = $tourCMSService->getArrayFromXmlNode($response->available_components, 'component');
+
         return $availableComponents;
     }
-} 
+}

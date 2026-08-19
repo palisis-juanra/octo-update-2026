@@ -24,8 +24,7 @@ class UnitItemFactory
         Unit $unit,
         int $number,
         ?string $uuid = null
-    ): UnitItem
-    {
+    ): UnitItem {
         $product = $booking->getProduct();
         $contact = $booking->getContact();
         $bookingData = $booking->getBookingData();
@@ -37,7 +36,7 @@ class UnitItemFactory
             $component = null;
         }
 
-        $unitItem = new UnitItem();
+        $unitItem = new UnitItem;
         $unitItem
             ->setUuid($uuid ?? Uuid::uuid4())
             ->setResellerReference(null)
@@ -46,13 +45,13 @@ class UnitItemFactory
             ->setId($unit->getId())
             ->setUnit($unit)
             ->setStatus($booking->getStatus())
-            ->setUtcRedeemedAt(!empty($component->redeemed_at_utc_seconds) ? (int) $component->redeemed_at_utc_seconds : null)
+            ->setUtcRedeemedAt(! empty($component->redeemed_at_utc_seconds) ? (int) $component->redeemed_at_utc_seconds : null)
             ->setContact($contact);
 
-        if (!is_null($component)) {
+        if (! is_null($component)) {
             $customerId = self::getCustomerIdForUnitItem($component, $number);
             $unitItem->setCustomerId((int) $customerId)
-                     ->setSupplierReference($component->operator_reference ?? null);
+                ->setSupplierReference($component->operator_reference ?? null);
 
             $customer = null;
             $customers = XMLService::getArrayFromXmlNode($bookingData->customers, 'customer');
@@ -72,16 +71,16 @@ class UnitItemFactory
         // We only have to create ticket if the TICKET is present in product's delivery methods
         if (in_array(ProductService::DELIVERY_METHOD_TICKET, $product->getDeliveryMethods())) {
 
-            $ticket = new Ticket();
+            $ticket = new Ticket;
             $ticket->setRedemptionMethod(redemptionMethod: $product->getRedemptionMethod());
 
-            $ticketFormatAndValue = self::getTicketFormatAndValueForUnitItem($component,$number, $product->getDeliveryFormats());
-            if (!empty($ticketFormatAndValue)) {
+            $ticketFormatAndValue = self::getTicketFormatAndValueForUnitItem($component, $number, $product->getDeliveryFormats());
+            if (! empty($ticketFormatAndValue)) {
                 $ticket->setRedemptionMethod($booking->getProduct()->getRedemptionMethod());
-                $ticket->setUtcRedeemedAt(!empty($component->redeemed_at_utc_seconds) ? (int) $component->redeemed_at_utc_seconds : null);
+                $ticket->setUtcRedeemedAt(! empty($component->redeemed_at_utc_seconds) ? (int) $component->redeemed_at_utc_seconds : null);
                 $ticket->setDeliveryOptions([
-                    "deliveryFormat" => $ticketFormatAndValue->format,
-                    "deliveryValue" => $ticketFormatAndValue->value ?? (string) $bookingData->barcode_data
+                    'deliveryFormat' => $ticketFormatAndValue->format,
+                    'deliveryValue' => $ticketFormatAndValue->value ?? (string) $bookingData->barcode_data,
                 ]);
             }
             $unitItem->setTicket($ticket);
@@ -90,32 +89,29 @@ class UnitItemFactory
         return $unitItem;
     }
 
-    /**
-     * @return object
-     */
     protected static function getTicketFormatAndValueForUnitItem(?SimpleXMLElement $component, int $number, array $deliveryFormats): object
     {
-        $ticket = new stdClass();
+        $ticket = new stdClass;
         $ticket->format = ProductService::DELIVERY_FORMAT_QRCODE;
         $ticket->value = null;
-    
 
         if (empty($component)) {
             return $ticket;
         }
-    
+
         $tickets = $component->tickets;
         $urls = $component->urls;
 
-        if (empty($tickets) && !isset($urls->url)) { 
-            return $ticket; 
+        if (empty($tickets) && ! isset($urls->url)) {
+            return $ticket;
         }
-    
-        if (!empty($tickets)) {
+
+        if (! empty($tickets)) {
             $tickets = XMLService::getArrayFromXmlNode($tickets, 'ticket');
-            $value = !empty($tickets[$number-1]) ? (string) $tickets[$number-1]->value : null;
+            $value = ! empty($tickets[$number - 1]) ? (string) $tickets[$number - 1]->value : null;
             $ticket->format = ProductService::DELIVERY_FORMATS[(string) $component->barcode_symbology];
             $ticket->value = $value;
+
             return $ticket;
         }
 
@@ -123,7 +119,7 @@ class UnitItemFactory
             $urls = XMLService::getArrayFromXmlNode($urls, 'url');
 
             // Try to set the url for the person $number
-            $url = $urls[$number-1] ?? null;
+            $url = $urls[$number - 1] ?? null;
 
             // If not, try to use the same url for every person in component
             if (empty($url)) {
@@ -135,6 +131,7 @@ class UnitItemFactory
             }
             $ticket->format = ProductService::DELIVERY_FORMAT_PDF_URL;
             $ticket->value = (string) $url->link;
+
             return $ticket;
         }
 
@@ -144,14 +141,15 @@ class UnitItemFactory
     protected static function getComponentByRateId(array $tourCMSComponents, string $unitId, string $number): ?SimpleXMLElement
     {
         $tcmsRateId = UnitService::getTourCMSRateId($unitId);
-        $rates = array_filter($tourCMSComponents, 
-        function(SimpleXMLElement $component) use ($tcmsRateId): bool {
-            $rateId = explode('|', (string) $component->rate_breakdown)[0];
-            return ($rateId == $tcmsRateId) && ((string) $component->date_type === 'departure'); 
-        });
+        $rates = array_filter($tourCMSComponents,
+            function (SimpleXMLElement $component) use ($tcmsRateId): bool {
+                $rateId = explode('|', (string) $component->rate_breakdown)[0];
+
+                return ($rateId == $tcmsRateId) && ((string) $component->date_type === 'departure');
+            });
 
         if (count($rates) !== 1) {
-            throw new ComponentNotFoundException("Component not found for unit $unitId, number $number"); 
+            throw new ComponentNotFoundException("Component not found for unit $unitId, number $number");
         }
 
         // reset array keys
@@ -162,7 +160,7 @@ class UnitItemFactory
 
     protected static function getCustomerIdForUnitItem(SimpleXMLElement $component, int $number): ?int
     {
-        if (empty($component) || !isset($component->customers)) {
+        if (empty($component) || ! isset($component->customers)) {
             return null;
         }
 
@@ -171,11 +169,10 @@ class UnitItemFactory
             return null;
         }
 
-        if (!array_key_exists($number-1, $customers)) {
+        if (! array_key_exists($number - 1, $customers)) {
             return null;
         }
 
-        return (int) $customers[$number-1]->customer_id ?? null;
+        return (int) $customers[$number - 1]->customer_id ?? null;
     }
-
 }

@@ -18,22 +18,30 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
     use RefreshDatabase;
 
     public const AUTH_HEADER_NAME = 'Authorization';
+
     public const OCTO_VALID_PATTERN_CREDENTIALS = 'Bearer 1|142|abc';
 
     public const VALID_PRODUCT_ID = 'TE_1_67|142';
+
     public const VALID_OPTION_ID = 'START_TIME';
+
     public const VALID_LOCAL_DATE = '2024-11-30';
 
     public const CAPABILITIES_HEADER_NAME = 'OCapabilities';
+
     public const CAPABILITY_BOOKINGCOM_RATES = 'bookingcom/rates';
 
     public SimpleXMLElement $showChannelXML;
+
     public SimpleXMLElement $showTourXML;
+
     public SimpleXMLElement $showTourDeparturesOneDayXML;
+
     public SimpleXMLElement $checkAvailXML;
+
     public SimpleXMLElement $tourPromotionsXML;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -57,11 +65,12 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
             $jsonLogServiceMock->shouldReceive('info')->zeroOrMoreTimes()->andReturnNull();
             $jsonLogServiceMock->shouldReceive('error')->zeroOrMoreTimes()->andReturnNull();
             $jsonLogServiceMock->shouldReceive('getLogId')->zeroOrMoreTimes()->andReturn('');
+
             return $jsonLogServiceMock;
         });
     }
 
-    public function test_whenBookingComRatesCapabilityAndRateIdIsInvalid_thenReturnAnInvalidRateIdException(): void
+    public function test_when_booking_com_rates_capability_and_rate_id_is_invalid_then_return_an_invalid_rate_id_exception(): void
     {
         $this->bindTourCMSService();
 
@@ -81,12 +90,12 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
 
         $response->assertBadRequest();
         $data = $response->json();
-        
-        $this->assertEquals(OctoResponse::ERROR_CODE_INVALID_RATE_ID, $data['error'], "Error code must be " . OctoResponse::ERROR_CODE_INVALID_RATE_ID);
-        $this->assertEquals(OctoResponse::ERROR_MESSAGE_INVALID_RATE_ID, $data['errorMessage'], "Error message must be " . OctoResponse::ERROR_CODE_INVALID_RATE_ID);
+
+        $this->assertEquals(OctoResponse::ERROR_CODE_INVALID_RATE_ID, $data['error'], 'Error code must be '.OctoResponse::ERROR_CODE_INVALID_RATE_ID);
+        $this->assertEquals(OctoResponse::ERROR_MESSAGE_INVALID_RATE_ID, $data['errorMessage'], 'Error message must be '.OctoResponse::ERROR_CODE_INVALID_RATE_ID);
     }
 
-    public function test_whenRateIdIsSent_thenPricingAppliesDiscountFromThatPromotion(): void
+    public function test_when_rate_id_is_sent_then_pricing_applies_discount_from_that_promotion(): void
     {
         $this->bindTourCMSService();
 
@@ -100,7 +109,7 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
             ],
             [
                 self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING . "," . OctoRequest::CAPABILITIES_BOOKINGCOM_RATES,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING.','.OctoRequest::CAPABILITIES_BOOKINGCOM_RATES,
             ]
         );
 
@@ -123,7 +132,6 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
          * Then:
          * retail = 5000 -> 4500
          * net = 3975 -> 3578
-         *
          */
         $this->assertEquals(4500, $pricing['retail']);
         $this->assertEquals(3578, $pricing['net']);
@@ -148,10 +156,10 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
         ));
 
         $this->assertNotEmpty($unitMatchingRates);
-        
+
     }
 
-    public function test_whenBookingComRatesCapabilityIsSent_thenResponseContainsRateIdAndRates(): void
+    public function test_when_booking_com_rates_capability_is_sent_then_response_contains_rate_id_and_rates(): void
     {
         $this->bindTourCMSService();
 
@@ -164,7 +172,7 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
             ],
             [
                 self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING . "," . OctoRequest::CAPABILITIES_BOOKINGCOM_RATES,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING.','.OctoRequest::CAPABILITIES_BOOKINGCOM_RATES,
             ]
         );
 
@@ -197,50 +205,50 @@ class AvailabilityBookingComRatesTest extends FeatureTestCase
         $this->assertArrayHasKey('rates', $firstUnitPricing);
         $this->assertSame(Promotion::OPEN_PROMOTION_NAME, $firstUnitPricing['rateId']);
         $this->assertIsArray($firstUnitPricing['rates']);
-        
+
     }
 
-    public function test_whenNoRateIdIsSent_thenPricingKeepsNormalPrice(): void
-{
-    $this->bindTourCMSService();
+    public function test_when_no_rate_id_is_sent_then_pricing_keeps_normal_price(): void
+    {
+        $this->bindTourCMSService();
 
-    $response = $this->post(
-        '/availability',
-        [
-            'productId' => self::VALID_PRODUCT_ID,
-            'optionId' => self::VALID_OPTION_ID,
-            'localDate' => self::VALID_LOCAL_DATE,
-        ],
-        [
-            self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-            OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING . "," . OctoRequest::CAPABILITIES_BOOKINGCOM_RATES,
-        ]
-    );
+        $response = $this->post(
+            '/availability',
+            [
+                'productId' => self::VALID_PRODUCT_ID,
+                'optionId' => self::VALID_OPTION_ID,
+                'localDate' => self::VALID_LOCAL_DATE,
+            ],
+            [
+                self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING.','.OctoRequest::CAPABILITIES_BOOKINGCOM_RATES,
+            ]
+        );
 
-    $response->assertOk();
+        $response->assertOk();
 
-    $responseData = $response->json();
-    $availabilities = $responseData['availabilities'] ?? $responseData;
-    $firstAvailability = $availabilities[0];
-    $pricing = $firstAvailability['pricing'];
+        $responseData = $response->json();
+        $availabilities = $responseData['availabilities'] ?? $responseData;
+        $firstAvailability = $availabilities[0];
+        $pricing = $firstAvailability['pricing'];
 
-    /**
-     * Base values from fixture:
-     * retail = 5000
-     * net = 3975
-     *
-     * Without rateId, main pricing must remain unchanged.
-     */
-    $this->assertEquals(Promotion::OPEN_PROMOTION_NAME, $pricing['rateId']);
-    $this->assertEquals(5000, $pricing['retail']);
-    $this->assertEquals(3975, $pricing['net']);
+        /**
+         * Base values from fixture:
+         * retail = 5000
+         * net = 3975
+         *
+         * Without rateId, main pricing must remain unchanged.
+         */
+        $this->assertEquals(Promotion::OPEN_PROMOTION_NAME, $pricing['rateId']);
+        $this->assertEquals(5000, $pricing['retail']);
+        $this->assertEquals(3975, $pricing['net']);
 
-    /**
-     * Rates list is still present, but main pricing should not be discounted.
-     */
-    $this->assertIsArray($pricing['rates']);
-    $this->assertNotEmpty($pricing['rates']);
-}
+        /**
+         * Rates list is still present, but main pricing should not be discounted.
+         */
+        $this->assertIsArray($pricing['rates']);
+        $this->assertNotEmpty($pricing['rates']);
+    }
 
     /* PROTECTED / PRIVATE METHODS */
     private function bindTourCMSService(): void

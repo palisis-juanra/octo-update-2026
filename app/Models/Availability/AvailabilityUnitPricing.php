@@ -7,16 +7,24 @@ use App\Models\Rate;
 class AvailabilityUnitPricing
 {
     public string $unitId;
+
     public int $originalPrice;
+
     public int $retailPrice;
+
     public int $netPrice;
+
     public string $currency;
+
     public int $currencyPrecision = 2;
+
     public array $includedTaxes = [];
+
     public ?string $rateId = null;
+
     /**
-    * @var Rate[] 
-    **/
+     * @var Rate[]
+     **/
     public array $rates = [];
 
     public function getUnitId(): string
@@ -106,6 +114,7 @@ class AvailabilityUnitPricing
     public function setRateId(?string $rateId): static
     {
         $this->rateId = $rateId;
+
         return $this;
     }
 
@@ -115,12 +124,13 @@ class AvailabilityUnitPricing
     }
 
     /**
-     * @param Rate[] $rates
+     * @param  Rate[]  $rates
      * @return AvailabilityUnitPricing
      */
     public function setRates(array $rates): static
     {
         $this->rates = $rates;
+
         return $this;
     }
 

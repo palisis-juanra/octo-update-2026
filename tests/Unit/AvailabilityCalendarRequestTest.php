@@ -11,12 +11,16 @@ use Tests\UnitTestCase;
 class AvailabilityCalendarRequestTest extends UnitTestCase
 {
     const DATES_AND_DEALS_XML_COUNT = 6;
+
     public string $datesAndDealsString;
+
     public string $datesAndDealsNoDatesString;
+
     public SimpleXMLElement $datesAndDealsXML;
+
     public SimpleXMLElement $datesAndDealsNoDatesXML;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->datesAndDealsString = file_get_contents('./tests/TourCMSResponses/datesAndDeals.xml');
@@ -25,7 +29,7 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->datesAndDealsNoDatesXML = simplexml_load_string($this->datesAndDealsNoDatesString);
     }
 
-    public function test_getAvailabilities_whenCallWithValidData_thenWeGetValidAvailabilitiesArray()
+    public function test_get_availabilities_when_call_with_valid_data_then_we_get_valid_availabilities_array()
     {
         // Given
         $datesAndDealsData = [];
@@ -49,24 +53,24 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->assertCount(self::DATES_AND_DEALS_XML_COUNT, $availabilities);
     }
 
-    public function test_fetchDatesAndDealsFromAPI_whenCallWithValidData_thenWeGetValidDatesAndDealsArray()
+    public function test_fetch_dates_and_deals_from_ap_i_when_call_with_valid_data_then_we_get_valid_dates_and_deals_array()
     {
         // Given
         $availabilityCalendarRequestMock = $this->getMockBuilder(AvailabilityCalendarRequest::class)
             ->onlyMethods([])
             ->disableOriginalConstructor()
             ->getMock();
-        
+
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
             ->onlyMethods(['showTourDatesAndDeals'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTourDatesAndDeals')->willReturn($this->datesAndDealsXML);
 
-        $availabilityCalendarRequestMock->tourId = "143";
-        $availabilityCalendarRequestMock->optionId = "SINGLE";
-        $availabilityCalendarRequestMock->localDateStart = "2024-11-21";
-        $availabilityCalendarRequestMock->localDateEnd = "2024-11-28";
+        $availabilityCalendarRequestMock->tourId = '143';
+        $availabilityCalendarRequestMock->optionId = 'SINGLE';
+        $availabilityCalendarRequestMock->localDateStart = '2024-11-21';
+        $availabilityCalendarRequestMock->localDateEnd = '2024-11-28';
 
         // When
         $datesAndDeals = $availabilityCalendarRequestMock->fetchDatesAndDealsFromAPI($tourCMSService);
@@ -80,24 +84,24 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->assertCount(self::DATES_AND_DEALS_XML_COUNT, $datesAndDeals);
     }
 
-    public function test_fetchDatesAndDealsFromAPI_whenAPIReturnsNoDates_thenWeGetEmptyArray()
+    public function test_fetch_dates_and_deals_from_ap_i_when_api_returns_no_dates_then_we_get_empty_array()
     {
         // Given
         $availabilityCalendarRequestMock = $this->getMockBuilder(AvailabilityCalendarRequest::class)
             ->onlyMethods([])
             ->disableOriginalConstructor()
             ->getMock();
-        
+
         $tourCMSService = $this->getMockBuilder(TourCMSService::class)
             ->onlyMethods(['showTourDatesAndDeals'])
             ->disableOriginalConstructor()
             ->getMock();
         $tourCMSService->method('showTourDatesAndDeals')->willReturn($this->datesAndDealsNoDatesXML);
 
-        $availabilityCalendarRequestMock->tourId = "143";
-        $availabilityCalendarRequestMock->optionId = "SINGLE";
-        $availabilityCalendarRequestMock->localDateStart = "2024-11-21";
-        $availabilityCalendarRequestMock->localDateEnd = "2024-11-28";
+        $availabilityCalendarRequestMock->tourId = '143';
+        $availabilityCalendarRequestMock->optionId = 'SINGLE';
+        $availabilityCalendarRequestMock->localDateStart = '2024-11-21';
+        $availabilityCalendarRequestMock->localDateEnd = '2024-11-28';
 
         // When
         $datesAndDeals = $availabilityCalendarRequestMock->fetchDatesAndDealsFromAPI($tourCMSService);
@@ -107,7 +111,7 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->assertEmpty($datesAndDeals);
     }
 
-    public function test_getAvailabilitiesFromDatesAndDeals_whenCallWithValidData_thenWeGetValidAvailabilitiesArray()
+    public function test_get_availabilities_from_dates_and_deals_when_call_with_valid_data_then_we_get_valid_availabilities_array()
     {
         // Given
         $datesAndDealsData = [];
@@ -130,11 +134,11 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
         $this->assertCount(self::DATES_AND_DEALS_XML_COUNT, $availabilities);
     }
 
-    public function test_checkSpacesRemaining_whenCallWithExceedingUnitQuantity_thenShouldReturnFalse()
+    public function test_check_spaces_remaining_when_call_with_exceeding_unit_quantity_then_should_return_false()
     {
         // Given
         $units = [
-            ['id' => 'TE_1_184|r1', 'quantity' => 27], ['id' => 'TE_1_184|r2', 'quantity' => 5]
+            ['id' => 'TE_1_184|r1', 'quantity' => 27], ['id' => 'TE_1_184|r2', 'quantity' => 5],
         ];
 
         $availabilityCalendarRequestMock = $this->getMockBuilder(AvailabilityCalendarRequest::class)
@@ -156,7 +160,7 @@ class AvailabilityCalendarRequestTest extends UnitTestCase
             ->onlyMethods([])
             ->disableOriginalConstructor()
             ->getMock();
+
         return $tourCMSService;
     }
-
 }

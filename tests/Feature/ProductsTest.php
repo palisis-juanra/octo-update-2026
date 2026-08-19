@@ -17,15 +17,21 @@ use Tests\FeatureTestCase;
 
 class ProductsTest extends FeatureTestCase
 {
-    protected const GROUP_PRICING_PRODUCT_ID = "TE_1_270|142";
-    protected const HOTEL_PRODUCT_ID = "TE_1_270|64";
-    protected const FREESALE_PRODUCT_ID = "TE_1_270|184";
+    protected const GROUP_PRICING_PRODUCT_ID = 'TE_1_270|142';
+
+    protected const HOTEL_PRODUCT_ID = 'TE_1_270|64';
+
+    protected const FREESALE_PRODUCT_ID = 'TE_1_270|184';
+
     protected SimpleXMLElement $showChannelXML;
+
     protected SimpleXMLElement $listToursXML;
+
     protected $loggerMock;
+
     protected $tourCMSServiceMock;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -38,96 +44,92 @@ class ProductsTest extends FeatureTestCase
             ->getMock();
         App::instance(JSONLogService::class, $this->loggerMock);
 
-        
         $this->tourCMSServiceMock = $this->getMockBuilder(TourCMSService::class)
-        ->disableOriginalConstructor()
-        ->getMock();
+            ->disableOriginalConstructor()
+            ->getMock();
     }
 
-    public function test_ProductsWithGroupPricingShouldBeSkipped(): void
+    public function test_products_with_group_pricing_should_be_skipped(): void
     {
-    
+
         $this->tourCMSServiceMock->method('showChannel')->willReturn($this->showChannelXML);
         $this->tourCMSServiceMock->method('listTours')->willReturn($this->listToursXML);
-        
+
         App::instance(TourCMSService::class, $this->tourCMSServiceMock);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $this->tourCMSServiceMock]);
         App::instance(ProductService::class, $productServiceMock);
 
-
         $response = $this->get(
-            "/products",
+            '/products',
             [
                 self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING,
             ]
         );
 
         $response->assertStatus(200);
         $response->assertJsonMissing([
-            OctoResponse::FIELD_ID => self::GROUP_PRICING_PRODUCT_ID, 
+            OctoResponse::FIELD_ID => self::GROUP_PRICING_PRODUCT_ID,
         ]);
     }
 
-    public function test_hotelsShouldBeSkipped(): void
+    public function test_hotels_should_be_skipped(): void
     {
-    
+
         $this->tourCMSServiceMock->method('showChannel')->willReturn($this->showChannelXML);
         $this->tourCMSServiceMock->method('listTours')->willReturn($this->listToursXML);
-        
+
         App::instance(TourCMSService::class, $this->tourCMSServiceMock);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $this->tourCMSServiceMock]);
         App::instance(ProductService::class, $productServiceMock);
 
-
         $response = $this->get(
-            "/products",
+            '/products',
             [
                 self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING,
             ]
         );
 
         $response->assertStatus(200);
         $response->assertJsonMissing([
-            OctoResponse::FIELD_ID => self::HOTEL_PRODUCT_ID 
+            OctoResponse::FIELD_ID => self::HOTEL_PRODUCT_ID,
         ]);
     }
 
-    public function test_FreesalesShouldBeSkipped(): void
+    public function test_freesales_should_be_skipped(): void
     {
-    
+
         $this->tourCMSServiceMock->method('showChannel')->willReturn($this->showChannelXML);
         $this->tourCMSServiceMock->method('listTours')->willReturn($this->listToursXML);
-        
+
         App::instance(TourCMSService::class, $this->tourCMSServiceMock);
 
         $productServiceMock = $this->getProductServiceMock(['tourCMSService' => $this->tourCMSServiceMock]);
         App::instance(ProductService::class, $productServiceMock);
 
-
         $response = $this->get(
-            "/products",
+            '/products',
             [
                 self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS,
-                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING
+                OctoRequest::CAPABILITIES_HEADER => OctoRequest::CAPABILITIES_PRICING,
             ]
         );
 
         $response->assertStatus(200);
         $response->assertJsonMissing([
-            OctoResponse::FIELD_ID => self::FREESALE_PRODUCT_ID, 
+            OctoResponse::FIELD_ID => self::FREESALE_PRODUCT_ID,
         ]);
     }
 
     protected function getProductServiceMock(array $properties = [])
     {
         $productServiceMock = $this->getMockBuilder(ProductService::class)
-        ->onlyMethods([])
-        ->disableOriginalConstructor()
-        ->getMock();
+            ->onlyMethods([])
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $productServiceMock->logger = $properties['logger'] ?? $this->loggerMock;
         $productServiceMock->tourCMSService = $properties['tourCMSService'] ?? $this->tourCMSServiceMock;

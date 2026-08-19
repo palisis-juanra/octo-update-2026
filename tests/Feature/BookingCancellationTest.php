@@ -12,8 +12,8 @@ use App\Services\BookingCancellationService;
 use App\Services\LocaleService;
 use App\Services\ProductMappingFactory;
 use App\Services\ProductService;
-use App\Services\TourPromotionService;
 use App\Services\TourCMSService;
+use App\Services\TourPromotionService;
 use App\Services\UnitService;
 use PHPUnit\Framework\MockObject\MockObject;
 use SimpleXMLElement;
@@ -22,34 +22,51 @@ use Tests\FeatureTestCase;
 class BookingCancellationTest extends FeatureTestCase
 {
     public const string INVALID_BOOKING_UUID = '0j9wdajdwa-09ad-9wdf-0j0k-0jhdw28hd';
+
     public const string VALID_BOOKING_UUID = '41cb84e7-b4d9-4cb4-809e-cac7a5e5493a';
+
     protected const string NOT_CANCELLABLE_BOOKING_UUID = '3f3a7973-fcaa-44f4-a934-e4c252092436';
+
     public const int VALID_BOOKING_ID = 4093;
+
     public const string VALID_BOOKING_OBJECT_ID = '1|143|3899';
+
     public const string VALID_PRODUCT_ID = 'TE_1_67|142';
+
     public const string VALID_AVAILABILITY_ID = '2024-12-30|32433';
+
     public const string VALID_OPTION_ID = 'START_TIME';
+
     public const array VALID_UNIT_ITEMS = [
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r1"
+            UnitService::UNIT_ID_FIELD => 'TE_1_67|142|r1',
         ],
         [
-            UnitService::UNIT_ID_FIELD => "TE_1_67|142|r2" 
-        ]
+            UnitService::UNIT_ID_FIELD => 'TE_1_67|142|r2',
+        ],
     ];
 
     public SimpleXMLElement $showChannelXML;
+
     public SimpleXMLElement $showTourXML;
+
     public SimpleXMLElement $cancelBookingXML;
+
     public SimpleXMLElement $showBookingXML;
+
     public SimpleXMLElement $showBookingCancelledXML;
+
     public SimpleXMLElement $deleteBookingXML;
+
     public MockObject $tourCMSService;
+
     public MockObject $availabilityService;
+
     public MockObject $bookingCancellationService;
+
     public ProductService $productService;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -59,7 +76,7 @@ class BookingCancellationTest extends FeatureTestCase
         $this->showBookingXML = simplexml_load_file('tests/TourCMSResponses/showBooking.xml');
         $this->showBookingCancelledXML = simplexml_load_file('tests/TourCMSResponses/showBookingCancelled.xml');
         $this->deleteBookingXML = simplexml_load_file('tests/TourCMSResponses/deleteBooking.xml');
-        
+
         $date = '2024-12-05';
 
         $expectedTourId = '67';
@@ -69,41 +86,40 @@ class BookingCancellationTest extends FeatureTestCase
             ->onlyMethods(['showChannel', 'showTour', 'cancelBooking', 'showBooking', 'deleteBooking'])
             ->disableOriginalConstructor()
             ->getMock();
-        
+
         $this->tourCMSService
             ->method('showChannel')
             ->willReturn($this->showChannelXML);
-            
+
         $this->tourCMSService
             ->method('showTour')
             ->with($expectedTourId, $expectedChannelId)
             ->willReturn($this->showTourXML);
-        
+
         $this->tourCMSService
             ->method('cancelBooking')
             ->willReturn($this->cancelBookingXML);
-        
+
         $this->tourCMSService
             ->method('showBooking')
             ->with()
             ->willReturn($this->showBookingCancelledXML);
-    
+
         $this->tourCMSService
             ->method('deleteBooking')
             ->with()
             ->willReturn($this->deleteBookingXML);
-        
 
         $this->instance(TourCMSService::class, $this->tourCMSService);
 
-        $availability = new Availability();
+        $availability = new Availability;
         $availability->setId(self::VALID_AVAILABILITY_ID);
         $availability->setLocalDateTimeStart($date);
         $availability->setLocalDateTimeEnd($date);
         $availability->setDepartureId(32659);
         $availability->setAllDay(false);
-        $availability->setOpeningHoursFrom("00:00");
-        $availability->setOpeningHoursTo("23:00");
+        $availability->setOpeningHoursFrom('00:00');
+        $availability->setOpeningHoursTo('23:00');
 
         $this->availabilityService = $this->getMockBuilder(AvailabilityService::class)
             ->disableOriginalConstructor()
@@ -111,7 +127,7 @@ class BookingCancellationTest extends FeatureTestCase
             ->getMock();
 
         $this->availabilityService->tourCMSService = $this->tourCMSService;
-        
+
         $this->instance(AvailabilityService::class, $this->availabilityService);
 
         $tourPromotionServiceMock = $this->getMockBuilder(TourPromotionService::class)
@@ -121,76 +137,75 @@ class BookingCancellationTest extends FeatureTestCase
         $this->productService = new ProductService($this->tourCMSService, $this->getLoggerMock(), new LocaleService, new ProductMappingFactory, $tourPromotionServiceMock);
         $this->instance(ProductService::class, $this->productService);
 
-
         $this->bookingCancellationService = $this->getMockBuilder(BookingCancellationService::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getBookingByUuid'])
             ->getMock();
-        
-        $booking = new Booking();
+
+        $booking = new Booking;
         $booking->setUuid(self::VALID_BOOKING_UUID);
         $booking->setBookingId(self::VALID_BOOKING_ID);
         $booking->unit_items = json_encode(self::VALID_UNIT_ITEMS);
         $booking->product_id = self::VALID_PRODUCT_ID;
         $booking->option_id = self::VALID_OPTION_ID;
         $booking->availability_id = self::VALID_AVAILABILITY_ID;
-        
+
         $this->bookingCancellationService
             ->method('getBookingByUuid')
-            ->willReturnCallback(function(string $uuid) use ($booking): Booking {
+            ->willReturnCallback(function (string $uuid) use ($booking): Booking {
                 if ($uuid == self::VALID_BOOKING_UUID) {
                     return $booking;
                 }
                 if ($uuid == self::NOT_CANCELLABLE_BOOKING_UUID) {
                     $this->showBookingCancelledXML->booking->cancellable = '0';
+
                     return $booking;
                 }
                 throw new InvalidBookingUUIDException($uuid);
             });
 
-
         $this->bookingCancellationService->tourCMSService = $this->tourCMSService;
         $this->bookingCancellationService->logger = $this->getLoggerMock();
         $this->bookingCancellationService->productService = $this->productService;
         $this->bookingCancellationService->availabilityService = $this->availabilityService;
-    
+
         $this->instance(BookingCancellationService::class, $this->bookingCancellationService);
     }
 
-    public function test_whenBookingUuidIsInvalid_thenExpectsInvalidBookingUuidError(): void
+    public function test_when_booking_uuid_is_invalid_then_expects_invalid_booking_uuid_error(): void
     {
-        $response = $this->post("/bookings/". self::INVALID_BOOKING_UUID ."/cancel", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
-        
+        $response = $this->post('/bookings/'.self::INVALID_BOOKING_UUID.'/cancel', [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+
         $response->assertBadRequest();
-        
+
         $responseData = $response->decodeResponseJson();
         $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_INVALID_BOOKING_UUID);
         $this->assertEquals($responseData['errorMessage'], OctoResponse::ERROR_MESSAGE_INVALID_BOOKING_UUID);
     }
 
-    public function test_whenBookingUuidIsCorrect_thenWeCanCancelTheBooking(): void
+    public function test_when_booking_uuid_is_correct_then_we_can_cancel_the_booking(): void
     {
-        $response = $this->post("/bookings/". self::VALID_BOOKING_UUID ."/cancel", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+        $response = $this->post('/bookings/'.self::VALID_BOOKING_UUID.'/cancel', [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
 
         $response->assertOk();
 
         $responseData = $response->decodeResponseJson();
         $responseData->assertFragment([
-            "id" => self::VALID_BOOKING_OBJECT_ID,
-            "uuid" => self::VALID_BOOKING_UUID,
-            "status" => Booking::STATUS_CANCELLED,
-            "productId" => self::VALID_PRODUCT_ID,
-            "availabilityId" => self::VALID_AVAILABILITY_ID,
-            "optionId" => self::VALID_OPTION_ID
+            'id' => self::VALID_BOOKING_OBJECT_ID,
+            'uuid' => self::VALID_BOOKING_UUID,
+            'status' => Booking::STATUS_CANCELLED,
+            'productId' => self::VALID_PRODUCT_ID,
+            'availabilityId' => self::VALID_AVAILABILITY_ID,
+            'optionId' => self::VALID_OPTION_ID,
         ]);
     }
 
-    public function test_whenBookingIsNotCancellable_thenExpectsBookingNotCancellableError(): void
+    public function test_when_booking_is_not_cancellable_then_expects_booking_not_cancellable_error(): void
     {
-        $response = $this->post("/bookings/". self::NOT_CANCELLABLE_BOOKING_UUID ."/cancel", [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
-        
+        $response = $this->post('/bookings/'.self::NOT_CANCELLABLE_BOOKING_UUID.'/cancel', [], [self::AUTH_HEADER_NAME => self::OCTO_VALID_PATTERN_CREDENTIALS]);
+
         $response->assertBadRequest();
-        
+
         $responseData = $response->decodeResponseJson();
         $this->assertEquals($responseData['error'], OctoResponse::ERROR_CODE_UNPROCESSABLE_ENTITY);
         $this->assertEquals($responseData['errorMessage'], BookingNotCancellableException::ERROR_MESSAGE);
